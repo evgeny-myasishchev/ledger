@@ -8,9 +8,12 @@ describe HomeController do
   end
 
   describe "GET 'index'" do
-    it "returns http success" do
-      get 'index'
-      response.should be_success
+    describe "not authenticated" do
+      it "redirects to new session url" do
+        get 'index'
+        response.should be_redirect
+        response.should redirect_to(new_user_session_url)
+      end
     end
   end
 end
