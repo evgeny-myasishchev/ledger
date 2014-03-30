@@ -50,5 +50,5 @@ gem 'devise'
 group :development, :test do
   gem 'rspec-rails'
   gem 'puma'
-  gem 'spork-rails', :github => 'sporkrb/spork-rails' 
+  gem 'spork-rails'
 end
