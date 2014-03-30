@@ -3,6 +3,9 @@ require 'spork'
 #uncomment the following line to use spork with the debugger
 #require 'spork/ext/ruby-debug'
 
+# If you face formatter error issue when running from textmate and with spork then you may need to set
+# TM_RSPEC_FORMATTER=RSpec::Core::Formatters::TextMateFormatter env
+
 Spork.prefork do
   # Loading more in this block will cause your tests to run faster. However,
   # if you change any configuration or code from libraries loaded here, you'll
