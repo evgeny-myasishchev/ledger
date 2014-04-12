@@ -19,4 +19,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def add_tag transaction_id, tag
   end
+  
+  def remove_tag transaction_id, tag
+  end
 end
