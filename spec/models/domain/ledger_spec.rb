@@ -18,4 +18,16 @@ describe Domain::Ledger do
     
     it "should raise account AccountAddedToLedger event"
   end
+  
+  describe "create_tag" do
+    it "should raise TagCreatedEvent"
+  end
+  
+  describe "rename_tag" do
+    it "should raise TagRenamedEvent"
+  end
+  
+  describe "remove_tag" do
+    it "should raise TagRemovedEvent"
+  end
 end

@@ -10,4 +10,13 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   def add_account name, currency
   end
+  
+  def create_tag name
+  end
+  
+  def rename_tag tag_id, name
+  end
+  
+  def remove_tag tag_id
+  end
 end
