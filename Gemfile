@@ -47,6 +47,9 @@ gem 'devise'
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+gem 'event-store', github: 'evgeny-myasishchev/event-store'
+gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'puma'

@@ -1,3 +1,17 @@
+GIT
+  remote: git://github.com/evgeny-myasishchev/common-domain.git
+  revision: cfafabf79a11f893f3225a2cc8e934b98fbcbeda
+  specs:
+    common-domain (0.0.3a)
+      event-store (>= 0.0.4a)
+
+GIT
+  remote: git://github.com/evgeny-myasishchev/event-store.git
+  revision: e12a85019ff4097ebe2221ac1c8c259000f6c73d
+  specs:
+    event-store (0.0.4a)
+      sequel
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -83,6 +97,7 @@ GEM
       rspec-core (~> 2.14.0)
       rspec-expectations (~> 2.14.0)
       rspec-mocks (~> 2.14.0)
+    sequel (4.8.0)
     spork (1.0.0rc4)
     spork-rails (4.0.0)
       rails (>= 3.0.0, < 5)
@@ -115,7 +130,9 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  common-domain!
   devise
+  event-store!
   jquery-rails
   puma
   rails (= 4.0.4)
