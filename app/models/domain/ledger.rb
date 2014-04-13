@@ -15,7 +15,19 @@ class Domain::Ledger < CommonDomain::Aggregate
     raise_event LedgerShared.new aggregate_id, user_id
   end
   
-  def add_account name, currency
+  def create_new_account name, currency
+    account = Domain::Account.new
+    account.create aggregate_id, name, currency
+    raise_event AccountAddedToLedger.new aggregate_id, account.aggregate_id
+    account
+  end
+  
+  def close_account account
+    raise "Account '#{account.aggregate_id}' is not from ledger '#{@name}'." unless @all_accounts.include?(account.aggregate_id)
+    if @open_accounts.include?(account.aggregate_id)
+      account.close
+      raise_event LedgerAccountClosed.new aggregate_id, account.aggregate_id
+    end
   end
   
   def create_tag name
@@ -31,6 +43,8 @@ class Domain::Ledger < CommonDomain::Aggregate
     @aggregate_id = event.aggregate_id
     @name = event.name
     @shared_with = Set.new
+    @all_accounts = Set.new
+    @open_accounts = Set.new
   end
   
   on LedgerRenamed do |event|
@@ -39,5 +53,14 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   on LedgerShared do |event|
     @shared_with << event.user_id
+  end
+  
+  on AccountAddedToLedger do |event|
+    @all_accounts << event.account_id
+    @open_accounts << event.account_id
+  end
+  
+  on LedgerAccountClosed do |event|
+    @open_accounts.delete event.account_id
   end
 end

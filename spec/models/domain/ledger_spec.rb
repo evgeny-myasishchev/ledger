@@ -50,10 +50,45 @@ describe Domain::Ledger do
     end
   end
   
-  describe "add_account" do
-    it "should create new account and return it"
+  describe "create_new_account" do
+    before(:each) do
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+    end
     
-    it "should raise account AccountAddedToLedger event"
+    it "should create new account and return it raising AccountAddedToLedger event" do
+      account = double(:account, aggregate_id: 'account-100')
+      Domain::Account.should_receive(:new).and_return account
+      currency = Currency.new name: 'UAH'
+      account.should_receive(:create).with('ledger-1', 'Account 100', currency)
+      subject.create_new_account('Account 100', currency).should be account
+      subject.should have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
+    end
+  end
+  
+  describe "close_account" do
+    let(:account) { double(:account, aggregate_id: 'account-100') }
+    before(:each) do
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
+    end
+    
+    it "should raise error if account is from different ledger" do
+      different_account = double(:account, aggregate_id: 'account-110')
+      lambda { subject.close_account(different_account) }.should raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
+    end
+    
+    it "should do nothing if already closed" do
+      subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
+      subject.close_account account
+      subject.should_not have_uncommitted_events
+      account.should_not_receive(:close)
+    end
+    
+    it "should close the account and raise LedgerAccountClosed event" do
+      account.should_receive(:close)
+      subject.close_account account
+      subject.should have_one_uncommitted_event I::LedgerAccountClosed, account_id: 'account-100'
+    end
   end
   
   describe "create_tag" do
