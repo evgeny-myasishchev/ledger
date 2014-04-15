@@ -50,6 +50,10 @@ gem 'devise'
 gem 'event-store', github: 'evgeny-myasishchev/event-store'
 gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
+# TW Bootstrap related stuff
+gem 'sass-rails', '>= 3.2'
+gem 'bootstrap-sass', '~> 3.1.1'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'puma'
