@@ -37,6 +37,22 @@
 					<li><a href="#about">About</a></li>
 					<li><a href="#contact">Contact</a></li>
 				</ul>
+				<ul class="nav navbar-nav navbar-right">
+					<% if signed_in? %>
+					<li class="dropdown">
+						<a data-toggle="dropdown" class="dropdown-toggle" href="#"><%= current_user.email %> <b class="caret"></b></a>
+						<ul role="menu" class="dropdown-menu">
+							<li><a href="#">Profile</a></li>
+							<li class="divider"></li>
+							<li>
+								<a rel="nofollow" data-method="delete" href="<%= destroy_user_session_path %>">
+									<i class='glyphicon glyphicon-log-out'></i> Sign Out
+								</a>
+							</li>
+						</ul>
+					</li>
+					<% end %>
+				</ul>
 			</div><!--/.nav-collapse -->
 		</div>
 	</div>
