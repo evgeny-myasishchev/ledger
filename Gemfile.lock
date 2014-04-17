@@ -1,4 +1,10 @@
 GIT
+  remote: git://github.com/colbygk/log4r.git
+  revision: 4e041411c289963d997ee1ebd06fd9875eb40de5
+  specs:
+    log4r (1.1.11)
+
+GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
   revision: cfafabf79a11f893f3225a2cc8e934b98fbcbeda
   specs:
@@ -143,6 +149,7 @@ DEPENDENCIES
   devise
   event-store!
   jquery-rails
+  log4r!
   puma
   rails (= 4.0.4)
   rspec-rails

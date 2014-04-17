@@ -54,6 +54,9 @@ gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 gem 'sass-rails', '>= 3.2'
 gem 'bootstrap-sass', '~> 3.1.1'
 
+# Log with log4r
+gem 'log4r', github: 'colbygk/log4r'
+
 group :development, :test do
   gem 'rspec-rails'
   gem 'puma'
