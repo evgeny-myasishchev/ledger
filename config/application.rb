@@ -34,5 +34,18 @@ module Ledger
       config.logger = LogFactory.logger "ledger"
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
     end
+    
+    attr_reader :domain_context
+    initializer :initialize_services do |app|
+      @domain_context = DomainContext.new do |c|
+        c.with_database_configs app.config.database_configuration, Rails.env
+        c.with_read_models
+        c.with_event_store
+        c.with_read_models_initialization
+        c.with_services
+        c.with_command_handlers
+        c.with_dispatch_undispatched_commits
+      end
+    end unless Rails.env.test?
   end
 end
