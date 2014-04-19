@@ -23,3 +23,10 @@ production:
   database: db/production.sqlite3
   pool: 5
   timeout: 5000
+  
+# Using independent event store database to avoid schema polution in dev env
+event-store:
+    adapter: sqlite
+    database: db/event-store.sqlite3
+    pool: 5
+    timeout: 5000
