@@ -12,14 +12,14 @@
 	<outputter type="FileOutputter" maxsize="1048576" name="log_file" filename="#{log_file_path}">
 		<formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
 	</outputter>
-	<outputter type="StdoutOutputter" name="console" level='INFO'>
+	<outputter type="StdoutOutputter" name="console" level='DEBUG'>
 		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
 	</outputter>
-	<outputter type="StderrOutputter" name="console" level='INFO'>
+	<outputter type="StderrOutputter" name="console" level='DEBUG'>
 		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
 	</outputter>
 	
 	<logger name="ledger" outputters="log_file, console"/>
-	<logger name="event-store" outputters="log_file" level='INFO'/>
-	<logger name="common-domain" outputters="log_file" level='INFO'/>
+	<logger name="event-store" outputters="log_file, console" level='DEBUG'/>
+	<logger name="common-domain" outputters="log_file, console" level='DEBUG'/>
 </log4r_config> 
