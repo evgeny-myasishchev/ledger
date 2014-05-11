@@ -23,8 +23,8 @@ class DomainContext < CommonDomain::DomainContext
     
   end
   
-  def with_read_models
-    bootstrap_read_models do |read_models|
+  def with_projections
+    bootstrap_projections do |projections|
       # read_models.register :accounts, Sample::ReadModels::AccountsReadModel.new
     end
   end

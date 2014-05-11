@@ -39,9 +39,9 @@ module Ledger
     initializer :initialize_services do |app|
       @domain_context = DomainContext.new do |c|
         c.with_database_configs app.config.database_configuration, Rails.env
-        c.with_read_models
+        c.with_projections
         c.with_event_store
-        c.with_read_models_initialization
+        c.with_projections_initialization
         c.with_services
         c.with_command_handlers
         c.with_dispatch_undispatched_commits
