@@ -19,7 +19,10 @@ ActiveRecord::Schema.define(version: 20140512195256) do
   end
 
   create_table "currencies", force: true do |t|
-    t.string "name", null: false
+    t.string  "english_country_name", null: false
+    t.string  "english_name",         null: false
+    t.string  "alpha_code",           null: false
+    t.integer "numeric_code",         null: false
   end
 
   create_table "users", force: true do |t|

@@ -1,7 +1,4 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+Rails.logger.info 'Seeding the database...'
+
+require File.expand_path(File.join('..', 'currencies-loader.rb'), __FILE__)
+CurrenciesLoader.load logger: Rails.logger
