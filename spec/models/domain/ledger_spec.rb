@@ -16,6 +16,10 @@ describe Domain::Ledger do
       subject.should have_one_uncommitted_event I::LedgerCreated, user_id: 100, name: 'Ledger 1'
     end
     
+    it "should return self" do
+      subject.create(100, 'Ledger 1').should be subject
+    end
+    
     it "should assign the id on LedgerCreated" do
       subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
       subject.aggregate_id.should eql 'ledger-1'
@@ -58,7 +62,7 @@ describe Domain::Ledger do
     it "should create new account and return it raising AccountAddedToLedger event" do
       account = double(:account, aggregate_id: 'account-100')
       Domain::Account.should_receive(:new).and_return account
-      currency = Currency.new name: 'UAH'
+      currency = Currency.new alpha_code: 'UAH'
       account.should_receive(:create).with('ledger-1', 'Account 100', currency)
       subject.create_new_account('Account 100', currency).should be account
       subject.should have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
