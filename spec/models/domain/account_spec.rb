@@ -12,6 +12,11 @@ describe Domain::Account do
       subject.create 'ledger-100', 'Account 100', currency
       subject.should have_one_uncommitted_event I::AccountCreated, ledger_id: 'ledger-100', name: 'Account 100', currency_id: 3232
     end
+    
+    it "should assign the aggregate_id on created event" do
+      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 'Account 332', 332
+      subject.aggregate_id.should eql 'account-332'
+    end
   end
   
   describe "rename" do

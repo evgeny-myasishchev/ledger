@@ -34,6 +34,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on AccountCreated do |event|
+    @aggregate_id = event.aggregate_id
     @is_open = true
   end
   
