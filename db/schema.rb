@@ -11,19 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140512195256) do
-
-  create_table "categories", force: true do |t|
-    t.integer "user_id", null: false
-    t.string  "name",    null: false
-  end
-
-  create_table "currencies", force: true do |t|
-    t.string  "english_country_name", null: false
-    t.string  "english_name",         null: false
-    t.string  "alpha_code",           null: false
-    t.integer "numeric_code",         null: false
-  end
+ActiveRecord::Schema.define(version: 20140319063744) do
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
