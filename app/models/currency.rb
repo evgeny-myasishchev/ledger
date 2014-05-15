@@ -1,16 +1,14 @@
-class Currency < ActiveRecord::Base
-  attr_reader :english_country_name, :english_name, :alpha_code, :numeric_code
+class Currency
+  attr_reader :english_name, :alpha_code, :numeric_code
   
   def initialize(attribs)
-    @english_country_name = get_required_attrib attribs, :english_country_name
     @english_name = get_required_attrib attribs, :english_name
     @alpha_code = get_required_attrib attribs, :alpha_code
     @numeric_code = get_required_attrib attribs, :numeric_code
   end
   
   def ==(other)
-    return english_country_name == other.english_country_name && 
-      english_name == other.english_name && 
+    return english_name == other.english_name && 
       alpha_code == other.alpha_code && 
       numeric_code == other.numeric_code
   end
