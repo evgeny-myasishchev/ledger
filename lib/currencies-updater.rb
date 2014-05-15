@@ -1,7 +1,7 @@
 require 'net/http'
 require 'rexml/document'
 
-class CurrenciesLoader
+class CurrenciesUpdater
   def initialize(options)
     @options = {
       logger: nil,
@@ -13,7 +13,7 @@ class CurrenciesLoader
     end
   end
   
-  def load
+  def update
     log.info 'Loading currencies...'
     currencies_xml = get_currencies_xml URI.parse(@options[:data_uri])
     currencies = parse_currencies_xml currencies_xml
@@ -67,7 +67,7 @@ class CurrenciesLoader
     end
     
   class << self
-    def load(options = {})
+    def update(options = {})
       new(options).load
     end
   end
