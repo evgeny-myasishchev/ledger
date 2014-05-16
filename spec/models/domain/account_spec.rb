@@ -10,7 +10,7 @@ describe Domain::Account do
       CommonDomain::Infrastructure::AggregateId.should_receive(:new_id).and_return('account-100')
       currency = Currency['UAH']
       subject.create 'ledger-100', 'Account 100', currency
-      subject.should have_one_uncommitted_event I::AccountCreated, ledger_id: 'ledger-100', name: 'Account 100', currency_id: currency.numeric_code
+      subject.should have_one_uncommitted_event I::AccountCreated, ledger_id: 'ledger-100', name: 'Account 100', currency_id: currency.id
     end
     
     it "should assign the aggregate_id on created event" do

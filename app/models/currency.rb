@@ -1,16 +1,23 @@
 class Currency
-  attr_reader :english_name, :alpha_code, :numeric_code
+  # Numeric code of the currency
+  attr_reader :id
+  
+  # Alpha code of the currency
+  attr_reader :code
+  
+  # English name of the currency
+  attr_reader :english_name
   
   def initialize(attribs)
     @english_name = get_required_attrib attribs, :english_name
-    @alpha_code = get_required_attrib attribs, :alpha_code
-    @numeric_code = get_required_attrib attribs, :numeric_code
+    @code = get_required_attrib attribs, :code
+    @id = get_required_attrib attribs, :id
   end
   
   def ==(other)
     return english_name == other.english_name && 
-      alpha_code == other.alpha_code && 
-      numeric_code == other.numeric_code
+      code == other.code && 
+      id == other.id
   end
   
   def eql?(other)
@@ -24,29 +31,29 @@ class Currency
     end
   
   class << self
-    def known?(alpha_code)
-      currencies_by_code.key?(alpha_code)
+    def known?(code)
+      currencies_by_code.key?(code)
     end
     
     def known
       currencies_by_code.values.dup
     end
     
-    def [](alpha_code)
-      get_by_code alpha_code
+    def [](code)
+      get_by_code code
     end
     
     # Get the currency instance by alpha code
-    def get_by_code(alpha_code)
-      raise ArgumentError.new "#{alpha_code} is unknown currency." unless known?(alpha_code)
-      currencies_by_code[alpha_code]
+    def get_by_code(code)
+      raise ArgumentError.new "#{code} is unknown currency." unless known?(code)
+      currencies_by_code[code]
     end
     
     # Register the currency with specified attributes
     def register(attribs)
       currency = Currency.new(attribs)
-      raise ArgumentError.new "currency #{currency.alpha_code} already registered." if known?(currency.alpha_code)
-      currencies_by_code[currency.alpha_code] = currency
+      raise ArgumentError.new "currency #{currency.code} already registered." if known?(currency.code)
+      currencies_by_code[currency.code] = currency
     end
     
     def clear!

@@ -17,7 +17,7 @@ ledger = context.repository.begin_work do |work|
   work.add_new Domain::Ledger.new.create user.id, 'Family'
 end
 
-uah = Currency.find_by alpha_code: 'UAH'
+uah = Currency.find_by code: 'UAH'
 
 cache = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
