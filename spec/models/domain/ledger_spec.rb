@@ -62,7 +62,7 @@ describe Domain::Ledger do
     it "should create new account and return it raising AccountAddedToLedger event" do
       account = double(:account, aggregate_id: 'account-100')
       Domain::Account.should_receive(:new).and_return account
-      currency = Currency.new alpha_code: 'UAH'
+      currency = Currency['UAH']
       account.should_receive(:create).with('ledger-1', 'Account 100', currency)
       subject.create_new_account('Account 100', currency).should be account
       subject.should have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
