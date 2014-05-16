@@ -28,6 +28,10 @@ class Currency
       currencies_by_code.key?(alpha_code)
     end
     
+    def known
+      currencies_by_code.values.dup
+    end
+    
     def [](alpha_code)
       get_by_code alpha_code
     end
@@ -49,15 +53,22 @@ class Currency
       currencies_by_code.clear
     end
     
-    def save
+    def save(backup_id)
+      backups_by_id[backup_id] = currencies_by_code.dup
     end
     
-    def restore
+    def restore(backup_id)
+      raise ArgumentError.new "there is no such backup #{backup_id}" unless backups_by_id.key?(backup_id)
+      @currencies_by_code = backups_by_id[backup_id]
     end
     
     private
       def currencies_by_code
         @currencies_by_code ||= {}
+      end
+      
+      def backups_by_id
+        @backups_by_id ||= {}
       end
   end
 end

@@ -1,6 +1,14 @@
 require 'spec_helper'
 
 describe Currency do
+  before(:all) do
+    Currency.save('initial-currencies')
+  end
+  
+  after(:all) do
+    Currency.restore('initial-currencies')
+  end
+  
   before(:each) do
     described_class.clear!
   end
@@ -58,6 +66,13 @@ describe Currency do
       Currency.should_not be_known('XX1')
       Currency.should_not be_known('XX2')
     end
+    
+    it "is possible to get all known currencies as an array" do
+      known = Currency.known
+      known.should have(2).items
+      known.detect { |c| c.alpha_code == 'UAH' }.should be Currency['UAH']
+      known.detect { |c| c.alpha_code == 'EUR' }.should be Currency['EUR']
+    end
   end
   
   describe "equality" do
@@ -80,9 +95,26 @@ describe Currency do
     end
     
     it "should remember currencies and restore them if cleared or changed" do
-      described_class.save
+      described_class.save('point-1')
       described_class.clear!
+
+      described_class.register english_name: 'Gold', alpha_code: 'XAU', numeric_code: 959
+      described_class.register english_name: 'Palladium', alpha_code: 'XPD', numeric_code: 964
+      described_class.save('point-2')
+
+      described_class.restore('point-1')
+      Currency.known.should have(2).items
+      Currency.should be_known('UAH')
+      Currency.should be_known('EUR')
       
+      described_class.restore('point-2')
+      Currency.known.should have(2).items
+      Currency.should be_known('XAU')
+      Currency.should be_known('XPD')
+    end
+    
+    it "should fail to restore if no such backup" do
+      lambda { described_class.restore('unknown-1') }.should raise_error(ArgumentError, 'there is no such backup unknown-1')
     end
   end
 end
