@@ -51,6 +51,13 @@ describe Currency do
       lambda { described_class.register english_name: 'Euro', alpha_code: 'EUR', numeric_code: 978 }
         .should raise_error(ArgumentError, "currency EUR already registered.")
     end
+    
+    it "is possible to get if the currency is known" do
+      Currency.should be_known('UAH')
+      Currency.should be_known('EUR')
+      Currency.should_not be_known('XX1')
+      Currency.should_not be_known('XX2')
+    end
   end
   
   describe "equality" do
@@ -63,6 +70,19 @@ describe Currency do
       uah1.should eql uah2
       uah1.should_not == eur
       uah1.should_not eql eur
+    end
+  end
+  
+  describe "save/restore" do
+    before(:each) do
+      described_class.register english_name: 'Hryvnia', alpha_code: 'UAH', numeric_code: 980
+      described_class.register english_name: 'Euro', alpha_code: 'EUR', numeric_code: 978
+    end
+    
+    it "should remember currencies and restore them if cleared or changed" do
+      described_class.save
+      described_class.clear!
+      
     end
   end
 end

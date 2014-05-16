@@ -24,25 +24,35 @@ class Currency
     end
   
   class << self
+    def known?(alpha_code)
+      currencies_by_code.key?(alpha_code)
+    end
+    
     def [](alpha_code)
       get_by_code alpha_code
     end
     
     # Get the currency instance by alpha code
     def get_by_code(alpha_code)
-      raise ArgumentError.new "#{alpha_code} is unknown currency." unless currencies_by_code.key?(alpha_code)
+      raise ArgumentError.new "#{alpha_code} is unknown currency." unless known?(alpha_code)
       currencies_by_code[alpha_code]
     end
     
     # Register the currency with specified attributes
     def register(attribs)
       currency = Currency.new(attribs)
-      raise ArgumentError.new "currency #{currency.alpha_code} already registered." if currencies_by_code.key?(currency.alpha_code)
+      raise ArgumentError.new "currency #{currency.alpha_code} already registered." if known?(currency.alpha_code)
       currencies_by_code[currency.alpha_code] = currency
     end
     
     def clear!
       currencies_by_code.clear
+    end
+    
+    def save
+    end
+    
+    def restore
     end
     
     private
