@@ -1,6 +1,5 @@
 class Money
   class MoneyParseError < StandardError
-    
   end
   
   attr_reader :integer_ammount, :currency
