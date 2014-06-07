@@ -7,7 +7,22 @@ class Money
     @integer_ammount, @currency = integer_ammount, currency
   end
   
+  def to_s
+    "[Money integer-ammount: #{@integer_ammount} currency: #{@currency.code}]"
+  end
+  
+  def encode_with(coder)
+    coder.add(:integer_ammount, integer_ammount)
+    coder.add(:currency, currency.code)
+  end
+  
+  def init_with(coder)
+    @integer_ammount = coder[:integer_ammount]
+    @currency = Currency[coder[:currency]]
+  end
+  
   class << self
+    
     # Parse the ammount and constructs the Money class
     # Following values are accepted:
     # - floating point numbers like: 10.02

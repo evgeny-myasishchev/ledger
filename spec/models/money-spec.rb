@@ -14,6 +14,28 @@ describe Money do
   end
   after(:all) { I18n.locale = @original_locale }
   
+  describe "yaml serialization" do
+    it "should serialize to yaml storing currency as a numeric code" do
+      subject = Money.new 10050, uah
+      data = YAML.dump subject
+      doc = YAML.parse data
+      nodes = doc.root.to_a
+      nodes[0].to_ruby.should eql :integer_ammount
+      nodes[1].to_ruby.should eql subject.integer_ammount
+      nodes[2].to_ruby.should eql :currency
+      nodes[3].to_ruby.should eql uah.code
+    end
+    
+    it "should deserialize correctly" do
+      subject = Money.new 10050, uah
+      data = YAML.dump subject
+      actual = YAML.load data
+      actual.should be_instance_of(Money)
+      actual.integer_ammount.should equal(subject.integer_ammount)
+      actual.currency.should be uah
+    end
+  end
+  
   describe "self.parse" do
     describe "from string using current locale" do
       it "should parse integer" do
