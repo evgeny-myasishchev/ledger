@@ -9,7 +9,8 @@ module Domain::Events
   event :LedgerAccountClosed, :account_id 
   
   #Account events
-  event :AccountCreated, :ledger_id, :name, :currency_id
+  event :AccountCreated, :ledger_id, :name, :currency_code
   event :AccountRenamed, :name
   event :AccountClosed
+  event :TransactionReported, :type_id, :ammount, :tag_ids, :comment
 end

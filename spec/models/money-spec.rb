@@ -36,6 +36,19 @@ describe Money do
     end
   end
   
+  describe "equality" do
+    specify "== and eql? should check attributes equality" do
+      money1 = Money.parse('100.41', Currency['UAH'])
+      money2 = Money.parse('100.41', Currency['EUR'])
+      money3 = Money.parse('100.41', Currency['EUR'])
+      
+      money1.should_not eql money2
+      money1.should_not == money2
+      money2.should eql money3
+      money2.should == money3
+    end
+  end
+  
   describe "self.parse" do
     describe "from string using current locale" do
       it "should parse integer" do

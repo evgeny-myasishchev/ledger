@@ -1,9 +1,10 @@
 class Domain::Account < CommonDomain::Aggregate
   include CommonDomain::Infrastructure
+  include Domain
   include Domain::Events
   
   def create ledger_id, name, currency
-    raise_event AccountCreated.new AggregateId.new_id, ledger_id, name, currency.id
+    raise_event AccountCreated.new AggregateId.new_id, ledger_id, name, currency.code
   end
   
   def rename new_name
@@ -15,10 +16,14 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountClosed.new aggregate_id
   end
   
-  def report_income ammount, tags, comment
+  def report_income ammount, tag_ids = nil, comment = nil
+    ammount = Money.parse(ammount, @currency)
+    raise_event TransactionReported.new aggregate_id, Transaction::IncomeTypeId, ammount, tag_ids, comment
   end
   
-  def report_expence ammount, tags, comment
+  def report_expence ammount, tag_ids = nil, comment = nil
+    ammount = Money.parse(ammount, @currency)
+    raise_event TransactionReported.new aggregate_id, Transaction::ExpenceTypeId, ammount, tag_ids, comment
   end
   
   def adjust_ammount transaction_id, ammount
@@ -36,6 +41,7 @@ class Domain::Account < CommonDomain::Aggregate
   on AccountCreated do |event|
     @aggregate_id = event.aggregate_id
     @is_open = true
+    @currency = Currency[event.currency_code]
   end
   
   on AccountRenamed do |event|
@@ -44,5 +50,9 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountClosed do |event|
     @is_open = false
+  end
+  
+  on TransactionReported do |event|
+    
   end
 end

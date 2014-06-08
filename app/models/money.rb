@@ -21,6 +21,14 @@ class Money
     @currency = Currency[coder[:currency]]
   end
   
+  def ==(other)
+    return @integer_ammount == other.integer_ammount && @currency == other.currency
+  end
+  
+  def eql?(other)
+    self == other
+  end
+  
   class << self
     
     # Parse the ammount and constructs the Money class
