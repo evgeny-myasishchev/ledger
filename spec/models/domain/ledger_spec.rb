@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe Domain::Ledger do
+  using LedgerHelpers
   module I
     include Domain::Events
   end
@@ -96,14 +97,26 @@ describe Domain::Ledger do
   end
   
   describe "create_tag" do
-    it "should raise TagCreatedEvent"
+    it "should raise TagCreatedEvent" do
+      subject.make_created
+      tag_id = subject.create_tag 'Food'
+      expect(subject).to have_one_uncommitted_event I::TagCreated, tag_id: tag_id, name: 'Food'
+    end
   end
   
   describe "rename_tag" do
-    it "should raise TagRenamedEvent"
+    it "should raise TagRenamedEvent" do
+      subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
+      subject.rename_tag 10001, 'Food-1'
+      expect(subject).to have_one_uncommitted_event I::TagRenamed, tag_id: 10001, name: 'Food-1'
+    end
   end
   
   describe "remove_tag" do
-    it "should raise TagRemovedEvent"
+    it "should raise TagRemovedEvent" do
+      subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
+      subject.remove_tag 10001
+      expect(subject).to have_one_uncommitted_event I::TagRemoved, tag_id: 10001
+    end
   end
 end

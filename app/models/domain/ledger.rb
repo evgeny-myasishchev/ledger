@@ -31,12 +31,17 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def create_tag name
+    tag_id = AggregateId.new_id
+    raise_event TagCreated.new aggregate_id, tag_id, name
+    tag_id
   end
   
   def rename_tag tag_id, name
+    raise_event TagRenamed.new aggregate_id, tag_id, name
   end
   
   def remove_tag tag_id
+    raise_event TagRemoved.new aggregate_id, tag_id
   end
   
   on LedgerCreated do |event|
@@ -62,5 +67,17 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   on LedgerAccountClosed do |event|
     @open_accounts.delete event.account_id
+  end
+  
+  on TagCreated do |event|
+    
+  end
+  
+  on TagRenamed do |event|
+    
+  end
+  
+  on TagRemoved do |event|
+    
   end
 end
