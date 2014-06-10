@@ -115,10 +115,9 @@ GEM
       sprockets (~> 2.8, <= 2.11.0)
       sprockets-rails (~> 2.0)
     sequel (4.11.0)
-    spork (1.0.0rc4)
-    spork-rails (4.0.0)
-      rails (>= 3.0.0, < 5)
-      spork (>= 1.0rc0)
+    spring (1.1.3)
+    spring-commands-rspec (1.0.2)
+      spring (>= 0.9.1)
     sprockets (2.11.0)
       hike (~> 1.2)
       multi_json (~> 1.0)
@@ -157,6 +156,7 @@ DEPENDENCIES
   rspec-core (~> 3.0)
   rspec-rails (~> 3.0)
   sass-rails (>= 3.2)
-  spork-rails
+  spring
+  spring-commands-rspec
   sqlite3
   uglifier (>= 1.3.0)

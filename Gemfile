@@ -61,5 +61,6 @@ group :development, :test do
   gem 'rspec-core', '~> 3.0'
   gem 'rspec-rails', '~> 3.0'
   gem 'puma'
-  gem 'spork-rails'
+  gem "spring"
+  gem "spring-commands-rspec"
 end
