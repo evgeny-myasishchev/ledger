@@ -6,16 +6,16 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: f850e7f94868044d41cfcec44d945c8c4a8b25aa
+  revision: 9bd8c2a365210b107f5bbefc11506d8afc195290
   specs:
-    common-domain (0.1.1.a)
-      event-store (>= 0.0.4a)
+    common-domain (1.0.1.a)
+      event-store (~> 1.0)
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 714797893948bea038ff3509940710fca46c0810
+  revision: c8be2dc5fea2a8eefe5761cb52fb51ed30aac6e5
   specs:
-    event-store (0.1.1.a)
+    event-store (1.0.1.a)
       sequel
 
 GEM
@@ -58,7 +58,7 @@ GEM
       warden (~> 1.2.3)
     diff-lcs (1.2.5)
     erubis (2.7.0)
-    execjs (2.1.0)
+    execjs (2.2.0)
     hike (1.2.3)
     i18n (0.6.9)
     jquery-rails (3.1.0)
@@ -92,18 +92,22 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.3.2)
-    rspec-core (2.14.8)
-    rspec-expectations (2.14.5)
-      diff-lcs (>= 1.1.3, < 2.0)
-    rspec-mocks (2.14.6)
-    rspec-rails (2.14.2)
+    rspec-core (3.0.0)
+      rspec-support (~> 3.0.0)
+    rspec-expectations (3.0.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.0.0)
+    rspec-mocks (3.0.1)
+      rspec-support (~> 3.0.0)
+    rspec-rails (3.0.1)
       actionpack (>= 3.0)
-      activemodel (>= 3.0)
       activesupport (>= 3.0)
       railties (>= 3.0)
-      rspec-core (~> 2.14.0)
-      rspec-expectations (~> 2.14.0)
-      rspec-mocks (~> 2.14.0)
+      rspec-core (~> 3.0.0)
+      rspec-expectations (~> 3.0.0)
+      rspec-mocks (~> 3.0.0)
+      rspec-support (~> 3.0.0)
+    rspec-support (3.0.0)
     sass (3.2.19)
     sass-rails (4.0.3)
       railties (>= 4.0.0, < 5.0)
@@ -150,8 +154,8 @@ DEPENDENCIES
   log4r!
   puma
   rails (= 4.0.4)
-  rspec-core (< 2.99)
-  rspec-rails
+  rspec-core (~> 3.0)
+  rspec-rails (~> 3.0)
   sass-rails (>= 3.2)
   spork-rails
   sqlite3

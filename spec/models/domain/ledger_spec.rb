@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Domain::Ledger do
   module I
@@ -6,23 +6,23 @@ describe Domain::Ledger do
   end
   
   it "should be an aggregate" do
-    subject.should be_an_aggregate
+    expect(subject).to be_an_aggregate
   end
   
   describe "create" do
     it "should raise LedgerCreated event" do
-      CommonDomain::Infrastructure::AggregateId.should_receive(:new_id).and_return('ledger-1')
+      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('ledger-1')
       subject.create 100, 'Ledger 1'
-      subject.should have_one_uncommitted_event I::LedgerCreated, user_id: 100, name: 'Ledger 1'
+      expect(subject).to have_one_uncommitted_event I::LedgerCreated, user_id: 100, name: 'Ledger 1'
     end
     
     it "should return self" do
-      subject.create(100, 'Ledger 1').should be subject
+      expect(subject.create(100, 'Ledger 1')).to be subject
     end
     
     it "should assign the id on LedgerCreated" do
       subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
-      subject.aggregate_id.should eql 'ledger-1'
+      expect(subject.aggregate_id).to eql 'ledger-1'
     end
   end
   
@@ -33,7 +33,7 @@ describe Domain::Ledger do
     
     it "should raise LedgerRenamed event" do
       subject.rename 'New Ledger 20'
-      subject.should have_one_uncommitted_event I::LedgerRenamed, name: 'New Ledger 20'
+      expect(subject).to have_one_uncommitted_event I::LedgerRenamed, name: 'New Ledger 20'
     end
   end
   
@@ -44,13 +44,13 @@ describe Domain::Ledger do
     
     it "should share LedgerShared event" do
       subject.share 200
-      subject.should have_one_uncommitted_event I::LedgerShared, user_id: 200
+      expect(subject).to have_one_uncommitted_event I::LedgerShared, user_id: 200
     end
         
     it "should not share if already shared" do
       subject.apply_event I::LedgerShared.new 'ledger-1', 200
       subject.share 200
-      subject.should_not have_uncommitted_events
+      expect(subject).not_to have_uncommitted_events
     end
   end
   
@@ -61,11 +61,11 @@ describe Domain::Ledger do
     
     it "should create new account and return it raising AccountAddedToLedger event" do
       account = double(:account, aggregate_id: 'account-100')
-      Domain::Account.should_receive(:new).and_return account
+      expect(Domain::Account).to receive(:new).and_return account
       currency = Currency['UAH']
-      account.should_receive(:create).with('ledger-1', 'Account 100', currency)
-      subject.create_new_account('Account 100', currency).should be account
-      subject.should have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
+      expect(account).to receive(:create).with('ledger-1', 'Account 100', currency)
+      expect(subject.create_new_account('Account 100', currency)).to be account
+      expect(subject).to have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
     end
   end
   
@@ -78,20 +78,20 @@ describe Domain::Ledger do
     
     it "should raise error if account is from different ledger" do
       different_account = double(:account, aggregate_id: 'account-110')
-      lambda { subject.close_account(different_account) }.should raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
+      expect(lambda { subject.close_account(different_account) }).to raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
     end
     
     it "should do nothing if already closed" do
       subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
       subject.close_account account
-      subject.should_not have_uncommitted_events
-      account.should_not_receive(:close)
+      expect(subject).not_to have_uncommitted_events
+      expect(account).not_to receive(:close)
     end
     
     it "should close the account and raise LedgerAccountClosed event" do
-      account.should_receive(:close)
+      expect(account).to receive(:close)
       subject.close_account account
-      subject.should have_one_uncommitted_event I::LedgerAccountClosed, account_id: 'account-100'
+      expect(subject).to have_one_uncommitted_event I::LedgerAccountClosed, account_id: 'account-100'
     end
   end
   

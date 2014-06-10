@@ -58,8 +58,8 @@ gem 'bootstrap-sass', '~> 3.1.1'
 gem 'log4r', github: 'colbygk/log4r'
 
 group :development, :test do
-  gem 'rspec-core', '< 2.99'
-  gem 'rspec-rails'
+  gem 'rspec-core', '~> 3.0'
+  gem 'rspec-rails', '~> 3.0'
   gem 'puma'
   gem 'spork-rails'
 end
