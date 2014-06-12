@@ -39,6 +39,12 @@ describe Currency do
       described_class.register english_name: 'Euro', code: 'EUR', id: 978
     end
     
+    it "should be in the Rails.application.currencies_store" do
+      expect(Rails.application.currencies_store[:currencies_by_code]).not_to be_nil
+      expect(Rails.application.currencies_store[:currencies_by_code]['UAH']).not_to be_nil
+      expect(Rails.application.currencies_store[:currencies_by_code]['EUR']).not_to be_nil
+    end
+    
     specify "registered currency is possible to get by code" do
       expect(Currency.get_by_code('UAH').code).to eql 'UAH'
       expect(Currency['UAH'].code).to eql 'UAH'
@@ -86,6 +92,14 @@ describe Currency do
     before(:each) do
       described_class.register english_name: 'Hryvnia', code: 'UAH', id: 980
       described_class.register english_name: 'Euro', code: 'EUR', id: 978
+    end
+    
+    it "should be in the Rails.application.currencies_store" do
+      described_class.save('point-1')
+      described_class.save('point-2')
+      expect(Rails.application.currencies_store[:backups_by_id]).not_to be_nil
+      expect(Rails.application.currencies_store[:backups_by_id]['point-1']).not_to be_nil
+      expect(Rails.application.currencies_store[:backups_by_id]['point-1']).not_to be_nil
     end
     
     it "should remember currencies and restore them if cleared or changed" do

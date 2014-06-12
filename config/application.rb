@@ -48,5 +48,8 @@ module Ledger
         c.with_dispatch_undispatched_commits
       end
     end unless Rails.env.test?
+    
+    attr_accessor :currencies_store
+    config.before_initialize { |app| app.currencies_store = {} }
   end
 end

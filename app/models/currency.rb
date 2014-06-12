@@ -31,6 +31,10 @@ class Currency
     end
   
   class << self
+    def store
+      Rails.application.currencies_store
+    end
+    
     def known?(code)
       currencies_by_code.key?(code)
     end
@@ -66,16 +70,16 @@ class Currency
     
     def restore(backup_id)
       raise ArgumentError.new "there is no such backup #{backup_id}" unless backups_by_id.key?(backup_id)
-      @currencies_by_code = backups_by_id[backup_id]
+      store[:currencies_by_code] = backups_by_id[backup_id]
     end
     
     private
       def currencies_by_code
-        @currencies_by_code ||= {}
+        store[:currencies_by_code] ||= {}
       end
       
       def backups_by_id
-        @backups_by_id ||= {}
+        store[:backups_by_id] ||= {}
       end
   end
 end
