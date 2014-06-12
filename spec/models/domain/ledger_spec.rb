@@ -97,10 +97,23 @@ describe Domain::Ledger do
   end
   
   describe "create_tag" do
-    it "should raise TagCreatedEvent" do
+    before(:each) do
       subject.make_created
+    end
+    
+    it "should raise TagCreatedEvent" do
       tag_id = subject.create_tag 'Food'
       expect(subject).to have_one_uncommitted_event I::TagCreated, tag_id: tag_id, name: 'Food'
+    end
+    
+    it "should increment tag_ids sequentally" do
+      tag_id = subject.create_tag 'Food'
+      expect(tag_id).to eql 1
+      tag_id = subject.create_tag 'Lunch'
+      expect(tag_id).to eql 2
+      subject.apply_event I::TagCreated.new subject.aggregate_id, 5, 'Gas'
+      tag_id = subject.create_tag 'Lunch'
+      expect(tag_id).to eql 6
     end
   end
   

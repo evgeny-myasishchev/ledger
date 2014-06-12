@@ -31,7 +31,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def create_tag name
-    tag_id = AggregateId.new_id
+    tag_id = @last_tag_id + 1
     raise_event TagCreated.new aggregate_id, tag_id, name
     tag_id
   end
@@ -45,6 +45,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   on LedgerCreated do |event|
+    @last_tag_id = 0
     @aggregate_id = event.aggregate_id
     @name = event.name
     @shared_with = Set.new
@@ -70,7 +71,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   on TagCreated do |event|
-    
+    @last_tag_id = event.tag_id if event.tag_id > @last_tag_id
   end
   
   on TagRenamed do |event|
