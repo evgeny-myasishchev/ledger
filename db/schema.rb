@@ -11,12 +11,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140512195256) do
+ActiveRecord::Schema.define(version: 20140613055436) do
 
   create_table "categories", force: true do |t|
     t.integer "user_id", null: false
     t.string  "name",    null: false
   end
+
+  create_table "projections_ledgers", force: true do |t|
+    t.string   "aggregage_id"
+    t.integer  "owner_user_id"
+    t.string   "name"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "projections_ledgers", ["aggregage_id"], name: "index_projections_ledgers_on_aggregage_id", unique: true
+  add_index "projections_ledgers", ["owner_user_id"], name: "index_projections_ledgers_on_owner_user_id"
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
