@@ -45,14 +45,14 @@ describe Domain::Account do
   describe "report_income" do
     it "should raise TransactionReported event" do
       subject.make_created.report_income '10.40', ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::IncomeTypeId, ammount: Money.parse('10.40', Currency['UAH'])
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::IncomeTypeId, ammount: 1040
     end
   end
     
   describe "report_expence" do
     it "should raise TransactionReported event" do
-      subject.make_created.report_expence '10.40', ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::ExpenceTypeId, ammount: Money.parse('10.40', Currency['UAH'])
+      subject.make_created.report_expence 2023, ['t-1', 't-2'], 'Monthly income'
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::ExpenceTypeId, ammount: 2023
     end
   end
   

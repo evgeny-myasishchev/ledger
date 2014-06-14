@@ -18,12 +18,12 @@ class Domain::Account < CommonDomain::Aggregate
   
   def report_income ammount, tag_ids = nil, comment = nil
     ammount = Money.parse(ammount, @currency)
-    raise_event TransactionReported.new aggregate_id, Transaction::IncomeTypeId, ammount, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, Transaction::IncomeTypeId, ammount.integer_ammount, tag_ids, comment
   end
   
   def report_expence ammount, tag_ids = nil, comment = nil
     ammount = Money.parse(ammount, @currency)
-    raise_event TransactionReported.new aggregate_id, Transaction::ExpenceTypeId, ammount, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, Transaction::ExpenceTypeId, ammount.integer_ammount, tag_ids, comment
   end
   
   def adjust_ammount transaction_id, ammount
