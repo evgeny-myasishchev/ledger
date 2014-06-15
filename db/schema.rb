@@ -11,11 +11,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140613055934) do
+ActiveRecord::Schema.define(version: 20140615081854) do
 
   create_table "categories", force: true do |t|
     t.integer "user_id", null: false
     t.string  "name",    null: false
+  end
+
+  create_table "projections_accounts", force: true do |t|
+    t.string   "ledger_id"
+    t.string   "shared_with_user_ids"
+    t.string   "account_id"
+    t.integer  "currency_id"
+    t.string   "name"
+    t.integer  "balance"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "projections_ledgers", force: true do |t|
@@ -36,6 +47,19 @@ ActiveRecord::Schema.define(version: 20140613055934) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "projections_transactions", force: true do |t|
+    t.string   "transaction_id"
+    t.string   "account_id"
+    t.integer  "currency_id"
+    t.string   "name"
+    t.integer  "balance"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
+  add_index "projections_transactions", ["transaction_id"], name: "index_projections_transactions_on_transaction_id"
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
