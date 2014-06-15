@@ -44,15 +44,17 @@ describe Domain::Account do
   
   describe "report_income" do
     it "should raise TransactionReported event" do
+      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       subject.make_created.report_income '10.40', ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::IncomeTypeId, ammount: 1040
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, transaction_id: 'transaction-100', type_id: Domain::Transaction::IncomeTypeId, ammount: 1040
     end
   end
     
   describe "report_expence" do
     it "should raise TransactionReported event" do
+      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       subject.make_created.report_expence 2023, ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, type_id: Domain::Transaction::ExpenceTypeId, ammount: 2023
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, transaction_id: 'transaction-100', type_id: Domain::Transaction::ExpenceTypeId, ammount: 2023
     end
   end
   
