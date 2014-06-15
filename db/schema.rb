@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140615081854) do
+ActiveRecord::Schema.define(version: 20140615083229) do
 
   create_table "categories", force: true do |t|
     t.integer "user_id", null: false
@@ -20,8 +20,7 @@ ActiveRecord::Schema.define(version: 20140615081854) do
 
   create_table "projections_accounts", force: true do |t|
     t.string   "ledger_id"
-    t.string   "shared_with_user_ids"
-    t.string   "account_id"
+    t.string   "aggregate_id"
     t.integer  "currency_id"
     t.string   "name"
     t.integer  "balance"
@@ -29,16 +28,19 @@ ActiveRecord::Schema.define(version: 20140615081854) do
     t.datetime "updated_at"
   end
 
+  add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id"
+  add_index "projections_accounts", ["ledger_id"], name: "index_projections_accounts_on_ledger_id"
+
   create_table "projections_ledgers", force: true do |t|
-    t.string   "aggregage_id"
+    t.string   "aggregate_id"
     t.integer  "owner_user_id"
+    t.string   "shared_with_user_ids"
     t.string   "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "projections_ledgers", ["aggregage_id"], name: "index_projections_ledgers_on_aggregage_id", unique: true
-  add_index "projections_ledgers", ["owner_user_id"], name: "index_projections_ledgers_on_owner_user_id"
+  add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id"
 
   create_table "projections_tags", force: true do |t|
     t.string   "ledger_id"
@@ -51,9 +53,11 @@ ActiveRecord::Schema.define(version: 20140615081854) do
   create_table "projections_transactions", force: true do |t|
     t.string   "transaction_id"
     t.string   "account_id"
-    t.integer  "currency_id"
-    t.string   "name"
+    t.integer  "type_id"
+    t.integer  "ammount"
     t.integer  "balance"
+    t.string   "tag_ids"
+    t.text     "comment"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
