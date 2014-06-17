@@ -10,7 +10,7 @@ RSpec.describe Projections::Ledger, :type => :model do
   
   let(:ledger_1) { ledger = described_class.find_by_aggregate_id 'ledger-1' }
   
-  describe "LedgerCreated" do
+  describe "on LedgerCreated" do
     it "should create corresponding ledger record" do
       ledger_1 = described_class.find_by aggregate_id: 'ledger-1'
       expect(ledger_1.name).to eql 'Ledger 1'
@@ -22,13 +22,13 @@ RSpec.describe Projections::Ledger, :type => :model do
     end
   end
   
-  describe "LedgerRenamed" do
+  describe "on LedgerRenamed" do
     it "should rename the ledger" do
       subject.handle_message e::LedgerRenamed.new 'ledger-1', 'Ledger 110'
     end
   end
   
-  describe "LedgerShared" do
+  describe "on LedgerShared" do
     before(:each) do
       subject.handle_message e::LedgerShared.new 'ledger-1', 120
       subject.handle_message e::LedgerShared.new 'ledger-1', 130
