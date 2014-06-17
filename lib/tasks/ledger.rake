@@ -10,4 +10,9 @@ namespace :ledger do
     require 'currencies-updater'
     CurrenciesUpdater.update
   end
+  
+  desc "Update"
+  task :update => :environment do
+    Rails.application.domain_context.with_projections_initialization
+  end
 end

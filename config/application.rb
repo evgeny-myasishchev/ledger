@@ -42,7 +42,6 @@ module Ledger
         c.with_event_bus
         c.with_projections
         c.with_event_store
-        c.with_projections_initialization
         c.with_services
         c.with_command_handlers
         c.with_dispatch_undispatched_commits
