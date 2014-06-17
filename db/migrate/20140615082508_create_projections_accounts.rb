@@ -6,6 +6,7 @@ class CreateProjectionsAccounts < ActiveRecord::Migration
       t.string :currency_code, null: false
       t.string :name, null: false
       t.integer :balance, null: false
+      t.boolean :is_closed, null: false
     end
     add_index :projections_accounts, :ledger_id
     add_index :projections_accounts, :aggregate_id
