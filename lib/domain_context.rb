@@ -25,6 +25,7 @@ class DomainContext < CommonDomain::DomainContext
   
   def with_projections
     bootstrap_projections do |projections|
+      projections.register :ledgers, ::Projections::Ledger.create_projection
       # read_models.register :accounts, Sample::ReadModels::AccountsReadModel.new
     end
   end
