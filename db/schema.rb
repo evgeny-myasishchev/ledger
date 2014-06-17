@@ -19,43 +19,44 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   end
 
   create_table "projections_accounts", force: true do |t|
-    t.string   "ledger_id"
-    t.string   "aggregate_id"
-    t.integer  "currency_id"
-    t.string   "name"
-    t.integer  "balance"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string  "ledger_id",     null: false
+    t.string  "aggregate_id",  null: false
+    t.string  "currency_code", null: false
+    t.string  "name",          null: false
+    t.integer "balance",       null: false
   end
 
   add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id"
   add_index "projections_accounts", ["ledger_id"], name: "index_projections_accounts_on_ledger_id"
 
   create_table "projections_ledgers", force: true do |t|
-    t.string   "aggregate_id"
-    t.integer  "owner_user_id"
+    t.string   "aggregate_id",         null: false
+    t.integer  "owner_user_id",        null: false
     t.string   "shared_with_user_ids"
-    t.string   "name"
+    t.string   "name",                 null: false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id"
 
+  create_table "projections_meta", force: true do |t|
+    t.string  "projection_id", null: false
+    t.integer "version",       null: false
+  end
+
   create_table "projections_tags", force: true do |t|
-    t.string   "ledger_id"
-    t.integer  "tag_id"
-    t.string   "name"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string  "ledger_id", null: false
+    t.integer "tag_id",    null: false
+    t.string  "name",      null: false
   end
 
   create_table "projections_transactions", force: true do |t|
-    t.string   "transaction_id"
-    t.string   "account_id"
-    t.integer  "type_id"
-    t.integer  "ammount"
-    t.integer  "balance"
+    t.string   "transaction_id", null: false
+    t.string   "account_id",     null: false
+    t.integer  "type_id",        null: false
+    t.integer  "ammount",        null: false
+    t.integer  "balance",        null: false
     t.string   "tag_ids"
     t.text     "comment"
     t.datetime "created_at"

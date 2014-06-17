@@ -1,11 +1,11 @@
 class CreateProjectionsTransactions < ActiveRecord::Migration
   def change
     create_table :projections_transactions do |t|
-      t.string :transaction_id
-      t.string :account_id
-      t.integer :type_id
-      t.integer :ammount
-      t.integer :balance
+      t.string :transaction_id, null: false
+      t.string :account_id, null: false
+      t.integer :type_id, null: false
+      t.integer :ammount, null: false
+      t.integer :balance, null: false
       t.string :tag_ids
       t.text :comment
 

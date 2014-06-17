@@ -1,10 +1,10 @@
 class CreateProjectionsLedgers < ActiveRecord::Migration
   def change
     create_table :projections_ledgers do |t|
-      t.string :aggregate_id
-      t.integer :owner_user_id
+      t.string :aggregate_id, null: false
+      t.integer :owner_user_id, null: false
       t.string :shared_with_user_ids
-      t.string :name
+      t.string :name, null: false
 
       t.timestamps
     end
