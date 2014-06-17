@@ -31,12 +31,10 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   add_index "projections_accounts", ["ledger_id"], name: "index_projections_accounts_on_ledger_id"
 
   create_table "projections_ledgers", force: true do |t|
-    t.string   "aggregate_id",         null: false
-    t.integer  "owner_user_id",        null: false
-    t.string   "shared_with_user_ids"
-    t.string   "name",                 null: false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.string  "aggregate_id",         null: false
+    t.integer "owner_user_id",        null: false
+    t.string  "shared_with_user_ids"
+    t.string  "name",                 null: false
   end
 
   add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id"
@@ -60,8 +58,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
     t.integer  "balance",        null: false
     t.string   "tag_ids"
     t.text     "comment"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "date"
   end
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"

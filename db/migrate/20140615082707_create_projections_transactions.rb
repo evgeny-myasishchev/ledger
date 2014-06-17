@@ -8,8 +8,7 @@ class CreateProjectionsTransactions < ActiveRecord::Migration
       t.integer :balance, null: false
       t.string :tag_ids
       t.text :comment
-
-      t.timestamps
+      t.datetime :date
     end
     add_index :projections_transactions, :transaction_id
     add_index :projections_transactions, :account_id
