@@ -21,22 +21,4 @@ class Projections::Ledger < ActiveRecord::Base
       ledger.save!
     end
   end
-  
-  
-  #   projection do
-  #     on Events::EmployeeCreated do |event|
-  #       Employee.create! employee_id: event.aggregate_id, name: event.name
-  #     end
-  #   
-  #     on Events::EmployeeRenamed do |event|
-  #       rec = Employee.find_by(employee_id: event.aggregate_id)
-  #       rec.name = event.name
-  #       rec.save!
-  #     end
-  #   
-  #     on Events::EmployeeRemoved do |event|
-  #       Employee.where(employee_id: event.aggregate_id).delete_all
-  #     end
-  #   end
-  
 end
