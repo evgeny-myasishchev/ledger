@@ -15,5 +15,5 @@ module Domain::Events
   event :AccountCreated, :ledger_id, :name, :currency_code
   event :AccountRenamed, :name
   event :AccountClosed
-  event :TransactionReported, :transaction_id, :type_id, :ammount, :tag_ids, :comment
+  event :TransactionReported, :transaction_id, :type_id, :ammount, :date, :tag_ids, :comment
 end

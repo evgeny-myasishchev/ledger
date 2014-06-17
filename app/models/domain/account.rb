@@ -16,14 +16,14 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountClosed.new aggregate_id
   end
   
-  def report_income ammount, tag_ids = nil, comment = nil
+  def report_income ammount, date, tag_ids = nil, comment = nil
     ammount = Money.parse(ammount, @currency)
-    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::IncomeTypeId, ammount.integer_ammount, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
   end
   
-  def report_expence ammount, tag_ids = nil, comment = nil
+  def report_expence ammount, date, tag_ids = nil, comment = nil
     ammount = Money.parse(ammount, @currency)
-    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::ExpenceTypeId, ammount.integer_ammount, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
   end
   
   def adjust_ammount transaction_id, ammount
