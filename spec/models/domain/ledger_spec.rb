@@ -14,7 +14,7 @@ describe Domain::Ledger do
     it "should raise LedgerCreated event" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('ledger-1')
       subject.create 100, 'Ledger 1'
-      expect(subject).to have_one_uncommitted_event I::LedgerCreated, user_id: 100, name: 'Ledger 1'
+      expect(subject).to have_one_uncommitted_event I::LedgerCreated, aggregate_id: 'ledger-1', user_id: 100, name: 'Ledger 1'
     end
     
     it "should return self" do
@@ -34,7 +34,7 @@ describe Domain::Ledger do
     
     it "should raise LedgerRenamed event" do
       subject.rename 'New Ledger 20'
-      expect(subject).to have_one_uncommitted_event I::LedgerRenamed, name: 'New Ledger 20'
+      expect(subject).to have_one_uncommitted_event I::LedgerRenamed, aggregate_id: 'ledger-1', name: 'New Ledger 20'
     end
   end
   
@@ -45,7 +45,7 @@ describe Domain::Ledger do
     
     it "should share LedgerShared event" do
       subject.share 200
-      expect(subject).to have_one_uncommitted_event I::LedgerShared, user_id: 200
+      expect(subject).to have_one_uncommitted_event I::LedgerShared, aggregate_id: subject.aggregate_id, user_id: 200
     end
         
     it "should not share if already shared" do
@@ -66,7 +66,7 @@ describe Domain::Ledger do
       currency = Currency['UAH']
       expect(account).to receive(:create).with('ledger-1', 'Account 100', currency)
       expect(subject.create_new_account('Account 100', currency)).to be account
-      expect(subject).to have_one_uncommitted_event I::AccountAddedToLedger, account_id: 'account-100'
+      expect(subject).to have_one_uncommitted_event I::AccountAddedToLedger, aggregate_id: 'ledger-1', account_id: 'account-100'
     end
   end
   
@@ -92,7 +92,7 @@ describe Domain::Ledger do
     it "should close the account and raise LedgerAccountClosed event" do
       expect(account).to receive(:close)
       subject.close_account account
-      expect(subject).to have_one_uncommitted_event I::LedgerAccountClosed, account_id: 'account-100'
+      expect(subject).to have_one_uncommitted_event I::LedgerAccountClosed, aggregate_id: 'ledger-1', account_id: 'account-100'
     end
   end
   
@@ -103,7 +103,7 @@ describe Domain::Ledger do
     
     it "should raise TagCreatedEvent" do
       tag_id = subject.create_tag 'Food'
-      expect(subject).to have_one_uncommitted_event I::TagCreated, tag_id: tag_id, name: 'Food'
+      expect(subject).to have_one_uncommitted_event I::TagCreated, aggregate_id: subject.aggregate_id, tag_id: tag_id, name: 'Food'
     end
     
     it "should increment tag_ids sequentally" do
@@ -121,7 +121,7 @@ describe Domain::Ledger do
     it "should raise TagRenamedEvent" do
       subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
       subject.rename_tag 10001, 'Food-1'
-      expect(subject).to have_one_uncommitted_event I::TagRenamed, tag_id: 10001, name: 'Food-1'
+      expect(subject).to have_one_uncommitted_event I::TagRenamed, aggregate_id: subject.aggregate_id, tag_id: 10001, name: 'Food-1'
     end
   end
   
@@ -129,7 +129,7 @@ describe Domain::Ledger do
     it "should raise TagRemovedEvent" do
       subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
       subject.remove_tag 10001
-      expect(subject).to have_one_uncommitted_event I::TagRemoved, tag_id: 10001
+      expect(subject).to have_one_uncommitted_event I::TagRemoved, aggregate_id: subject.aggregate_id, tag_id: 10001
     end
   end
 end
