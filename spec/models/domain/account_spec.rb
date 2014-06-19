@@ -71,6 +71,11 @@ describe Domain::Account do
       subject.report_income '1.00', date, [], nil
       expect(subject.get_uncommitted_events[0].balance).to eql (22233 + 100)
     end
+    
+    it "should accept tags as a single arg" do
+      subject.make_created.report_income '10.00', DateTime.now, 't-1', nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
+    end
   end
     
   describe "report_expence" do
@@ -88,6 +93,11 @@ describe Domain::Account do
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Monthly income'
+    end
+    
+    it "should accept tags as a single arg" do
+      subject.make_created.report_expence '10.00', DateTime.now, 't-1', nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
   end
   

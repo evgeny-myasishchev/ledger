@@ -27,7 +27,7 @@ class DomainContext < CommonDomain::DomainContext
     bootstrap_projections do |projections|
       projections.register :ledgers, ::Projections::Ledger.create_projection
       projections.register :accounts, ::Projections::Account.create_projection
-      projections.register :transactions, ::Projections::Transactions.create_projection
+      projections.register :transactions, ::Projections::Transaction.create_projection
     end
   end
 end
