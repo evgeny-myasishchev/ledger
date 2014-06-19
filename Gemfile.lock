@@ -6,9 +6,9 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: 9bd8c2a365210b107f5bbefc11506d8afc195290
+  revision: 0fdce0217fa7127e8affc7ec64510c56e89fab78
   specs:
-    common-domain (1.0.1.a)
+    common-domain (1.0.2.a)
       event-store (~> 1.0)
 
 GIT
@@ -92,9 +92,9 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.3.2)
-    rspec-core (3.0.0)
+    rspec-core (3.0.1)
       rspec-support (~> 3.0.0)
-    rspec-expectations (3.0.0)
+    rspec-expectations (3.0.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.0.0)
     rspec-mocks (3.0.1)
@@ -135,7 +135,7 @@ GEM
       polyglot
       polyglot (>= 0.3.1)
     tzinfo (0.3.39)
-    uglifier (2.5.0)
+    uglifier (2.5.1)
       execjs (>= 0.3.0)
       json (>= 1.8.0)
     warden (1.2.3)
