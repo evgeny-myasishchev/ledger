@@ -1,0 +1,1 @@
+var ledgerApp = angular.module('ledgerApp', []);

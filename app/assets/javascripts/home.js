@@ -1,2 +1,7 @@
-// Place all the behaviors and hooks related to the matching controller here.
-// All this logic will automatically be available in application.js.
+ledgerApp.controller('HomeController', function ($scope) {
+	$scope.accounts = [
+		{'name': 'Cache UAH', 'balance': '100 UAH'},
+		{'name': 'PC Credit J', 'balance': '200 UAH'},
+		{'name': 'VAB Visa', 'balance': '4432 UAH'}
+	];
+});
