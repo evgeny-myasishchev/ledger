@@ -3,6 +3,8 @@ class CreateProjectionsAccounts < ActiveRecord::Migration
     create_table :projections_accounts do |t|
       t.string :ledger_id, null: false
       t.string :aggregate_id, null: false
+      t.integer :owner_user_id, null: false
+      t.string :authorized_user_ids, null: false
       t.string :currency_code, null: false
       t.string :name, null: false
       t.integer :balance, null: false
