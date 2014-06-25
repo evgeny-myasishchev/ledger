@@ -3,6 +3,10 @@ class Projections::Account < ActiveRecord::Base
   include Domain::Events
   include Projections
   
+  def self.get_user_accounts(user)
+    
+  end
+  
   projection do
     on AccountCreated do |event|
       Account.create!(aggregate_id: event.aggregate_id, 

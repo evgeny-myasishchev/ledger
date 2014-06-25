@@ -15,5 +15,17 @@ describe HomeController do
         expect(response).to redirect_to(new_user_session_url)
       end
     end
+    
+    describe "authenticated" do
+      include AuthenticationHelper
+      authenticate_user
+      it "should load accounts for given user" do
+        accounts = double(:accounts)
+        expect(Projections::Account).to receive(:get_user_accounts).with(user).and_return(accounts)
+        get 'index'
+        expect(response.status).to eql 200
+        expect(assigns(:accounts)).to be accounts
+      end
+    end
   end
 end
