@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
     t.boolean "is_closed",           null: false
   end
 
-  add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id"
+  add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id", unique: true
   add_index "projections_accounts", ["ledger_id"], name: "index_projections_accounts_on_ledger_id"
 
   create_table "projections_ledgers", force: true do |t|
@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
     t.string  "name",                 null: false
   end
 
-  add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id"
+  add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id", unique: true
 
   create_table "projections_meta", force: true do |t|
     t.string  "projection_id", null: false
@@ -64,7 +64,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   end
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
-  add_index "projections_transactions", ["transaction_id"], name: "index_projections_transactions_on_transaction_id"
+  add_index "projections_transactions", ["transaction_id"], name: "index_projections_transactions_on_transaction_id", unique: true
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false

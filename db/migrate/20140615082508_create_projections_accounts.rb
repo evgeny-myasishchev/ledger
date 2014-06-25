@@ -11,6 +11,6 @@ class CreateProjectionsAccounts < ActiveRecord::Migration
       t.boolean :is_closed, null: false
     end
     add_index :projections_accounts, :ledger_id
-    add_index :projections_accounts, :aggregate_id
+    add_index :projections_accounts, :aggregate_id, unique: true
   end
 end

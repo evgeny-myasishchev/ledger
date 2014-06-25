@@ -10,7 +10,7 @@ class CreateProjectionsTransactions < ActiveRecord::Migration
       t.text :comment
       t.datetime :date
     end
-    add_index :projections_transactions, :transaction_id
+    add_index :projections_transactions, :transaction_id, unique: true
     add_index :projections_transactions, :account_id
   end
 end
