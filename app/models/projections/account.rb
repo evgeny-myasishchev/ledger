@@ -4,7 +4,7 @@ class Projections::Account < ActiveRecord::Base
   include Projections
   
   def self.get_user_accounts(user)
-    
+    Account.where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   
   def authorize_user(user_id)

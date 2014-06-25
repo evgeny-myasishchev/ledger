@@ -20,6 +20,24 @@ RSpec.describe Projections::Account, :type => :model do
     end
   end
   
+  describe "get_user_accounts" do
+    it "should return authorized accounts for specified user" do
+      user = User.new
+      user.id = 100
+      
+      a1 = create_account! 'a1', 'l1', authorized_user_ids: '{100},{110}'
+      a2 = create_account! 'a2', 'l1', authorized_user_ids: '{110},{100},{130}'
+      a3 = create_account! 'a3', 'l1', authorized_user_ids: '{110},{130},{100}'
+      a4 = create_account! 'a4', 'l1', authorized_user_ids: '{110},{120},{130}'
+      
+      user_accounts = p::Account.get_user_accounts user
+      expect(user_accounts.length).to eql 3
+      expect(user_accounts).to include(a1)
+      expect(user_accounts).to include(a2)
+      expect(user_accounts).to include(a3)
+    end
+  end
+  
   describe "projection" do
     subject { described_class.create_projection }
     let(:e) { Domain::Events }
