@@ -1,4 +1,7 @@
 <div class='container-fluid' ng-controller="HomeController">
+	<script type="text/javascript">
+	ledgerApp.constant('accounts', <%= raw @accounts.to_json %>);
+	</script>
 	<div class='row'>
 		<div class='col-sm-5 col-md-4'>
 			<table class='table table-bordered'>
