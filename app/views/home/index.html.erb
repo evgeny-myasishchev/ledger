@@ -4,15 +4,19 @@
 	</script>
 	<div class='row'>
 		<div class='col-sm-5 col-md-4'>
-			<table class='table table-bordered'>
-				<tr><th colspan="2">Accounts</th></tr>
-				<tr ng-repeat="account in accounts">
-					<td>
-						<div class='pull-left'>{{account.name}}</div>
-						<div class='pull-right'>{{account.balance}}</div>
-					</td>
-				</tr>
-			</table>
+			<div class='panel panel-default'>
+				<div class='panel-heading'>
+					<strong>Accounts</strong>
+				</div>
+				<ul class='list-group'>
+					<a 	href='#' class='list-group-item'
+						ng-repeat="account in accounts" ng-class="{active: isActive(account)}"
+						ng-click="selectAccount(account)">
+						{{account.name}}
+						<span class='pull-right'>{{account.balance}}</span>
+					</a>
+				</ul>
+			</div>
 		</div>
 	</div>
 </div>
