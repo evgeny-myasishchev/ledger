@@ -36,6 +36,8 @@ RSpec.describe Projections::Account, :type => :model do
       expect(user_accounts).to include(a2)
       expect(user_accounts).to include(a3)
     end
+    
+    it "should skip system fields that can lead to information flow"
   end
   
   describe "projection" do
