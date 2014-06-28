@@ -3,5 +3,3 @@ angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 		console.error(exception);
 	};
 });
-
-var ledgerApp = angular.module('ledgerApp', ['ErrorLogger']);

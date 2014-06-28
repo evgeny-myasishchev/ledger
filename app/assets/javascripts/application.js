@@ -14,5 +14,6 @@
 //= require jquery_ujs
 //= require bootstrap
 //= require angular
+//= require angular-route
 //= require ledger
 //= require_tree .

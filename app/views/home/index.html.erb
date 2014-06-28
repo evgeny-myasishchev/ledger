@@ -1,22 +1,10 @@
-<div class='container-fluid' ng-controller="HomeController">
-	<script type="text/javascript">
-	ledgerApp.constant('accounts', <%= raw @accounts.to_json %>);
+<div class='container-fluid' ng-app="homeApp">
+	<script type="text/ng-template" id='accounts.html'>
+	<%= render partial: 'accounts.html' %>
 	</script>
-	<div class='row'>
-		<div class='col-sm-5 col-md-4'>
-			<div class='panel panel-default'>
-				<div class='panel-heading'>
-					<strong>Accounts</strong>
-				</div>
-				<ul class='list-group'>
-					<a 	href='#' class='list-group-item'
-						ng-repeat="account in accounts" ng-class="{active: isActive(account)}"
-						ng-click="selectAccount(account)">
-						{{account.name}}
-						<span class='pull-right'>{{account.balance}}</span>
-					</a>
-				</ul>
-			</div>
-		</div>
+	<script type="text/javascript">
+		homeApp.constant('accounts', <%= raw @accounts.to_json %>);
+	</script>
+	<div ng-view class='row'>
 	</div>
 </div>

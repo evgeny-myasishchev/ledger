@@ -1,0 +1,15 @@
+<div class='col-sm-5 col-md-4'>
+	<div class='panel panel-default'>
+		<div class='panel-heading'>
+			<strong>Accounts</strong>
+		</div>
+		<ul class='list-group'>
+			<a 	href='#/accounts/{{account.id}}' class='list-group-item'
+			ng-repeat="account in accounts" ng-class="{active: activeAccount == account}">
+			{{account.name}}
+			<span class='pull-right'>{{account.balance}}</span>
+		</a>
+	</div>
+</div>
+<div class='col-sm-7 col-md-8'>
+</div>
