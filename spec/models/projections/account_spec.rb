@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Projections::Account, :type => :model do
+  include AccountHelpers::P
   let(:p) { Projections }
   let(:ledger) {
     p::Ledger.create!(aggregate_id: 'ledger-1', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
@@ -8,13 +9,13 @@ RSpec.describe Projections::Account, :type => :model do
   
   describe "authorize_user" do
     it "should add user id to a list of ids" do
-      a = create_account! 'a-2233', ledger.aggregate_id, authorized_user_ids: '{22},{33}'
+      a = create_account_projection! 'a-2233', ledger.aggregate_id, authorized_user_ids: '{22},{33}'
       a.authorize_user 44
       a.authorize_user 45
       expect(a.authorized_user_ids).to eql "{22},{33},{44},{45}"
       expect(a.authorized_user_ids_changed?).to be_truthy
       
-      a = create_account! 'a-1', ledger.aggregate_id, authorized_user_ids: ''
+      a = create_account_projection! 'a-1', ledger.aggregate_id, authorized_user_ids: ''
       a.authorize_user 10
       expect(a.authorized_user_ids).to eql "{10}"
     end
@@ -25,10 +26,10 @@ RSpec.describe Projections::Account, :type => :model do
       user = User.new
       user.id = 100
       
-      a1 = create_account! 'a1', 'l1', authorized_user_ids: '{100},{110}'
-      a2 = create_account! 'a2', 'l1', authorized_user_ids: '{110},{100},{130}'
-      a3 = create_account! 'a3', 'l1', authorized_user_ids: '{110},{130},{100}'
-      a4 = create_account! 'a4', 'l1', authorized_user_ids: '{110},{120},{130}'
+      a1 = create_account_projection! 'a1', 'l1', authorized_user_ids: '{100},{110}'
+      a2 = create_account_projection! 'a2', 'l1', authorized_user_ids: '{110},{100},{130}'
+      a3 = create_account_projection! 'a3', 'l1', authorized_user_ids: '{110},{130},{100}'
+      a4 = create_account_projection! 'a4', 'l1', authorized_user_ids: '{110},{120},{130}'
       
       user_accounts = p::Account.get_user_accounts user
       expect(user_accounts.length).to eql 3
@@ -68,8 +69,8 @@ RSpec.describe Projections::Account, :type => :model do
     
     describe "on LedgerShared" do
       it "should add user id to a list of users for all accounts" do
-        a1 = create_account! 'a-1', ledger.aggregate_id
-        a2 = create_account! 'a-2', ledger.aggregate_id
+        a1 = create_account_projection! 'a-1', ledger.aggregate_id
+        a2 = create_account_projection! 'a-2', ledger.aggregate_id
         subject.handle_message e::LedgerShared.new ledger.aggregate_id, 110
         subject.handle_message e::LedgerShared.new ledger.aggregate_id, 120
         a1.reload
@@ -92,16 +93,5 @@ RSpec.describe Projections::Account, :type => :model do
         expect(account_223.is_closed).to be_truthy
       end
     end
-  end
-  
-  def create_account! aggregate_id, ledger_id, owner_user_id = 100, authorized_user_ids: "{100}"
-    p::Account.create! aggregate_id: aggregate_id,
-      ledger_id: ledger_id,
-      owner_user_id: 100,
-      authorized_user_ids: authorized_user_ids,
-      currency_code: 'UAH',
-      name: 'A 1',
-      balance: 0,
-      is_closed: false
   end
 end
