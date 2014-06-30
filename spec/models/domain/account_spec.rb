@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe Domain::Account do
-  using AccountHelpers
+  using AccountHelpers::D
   module I
     include Domain::Events
   end
