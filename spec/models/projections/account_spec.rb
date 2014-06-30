@@ -21,6 +21,27 @@ RSpec.describe Projections::Account, :type => :model do
     end
   end
   
+  describe "ensure_authorized!" do
+    subject { create_account_projection! 'a-100', authorized_user_ids: '{22},{23},{213}' }
+    
+    it "should do nothing if the user is authorized on the account" do
+      subject.ensure_authorized! User.new id: 23
+    end
+    
+    it "should raise AuthorizationFailedError if the user is not authorized" do
+      expect {
+        subject.ensure_authorized! User.new id: 13
+      }.to raise_error Errors::AuthorizationFailedError
+    end
+    
+    it "should find and delegate to instance if calling on class" do
+      user = User.new id: 123
+      expect(described_class).to receive(:find).with(334411) { subject }
+      expect(subject).to receive(:ensure_authorized!).with(user)
+      described_class.ensure_authorized! 334411, user
+    end
+  end
+  
   describe "get_user_accounts" do
     it "should return authorized accounts for specified user" do
       user = User.new

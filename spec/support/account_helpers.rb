@@ -12,7 +12,7 @@ module AccountHelpers
   end
   
   module P
-    def create_account_projection! aggregate_id, ledger_id, owner_user_id = 100, authorized_user_ids: "{100}"
+    def create_account_projection! aggregate_id, ledger_id = 'ledger-1', owner_user_id = 100, authorized_user_ids: "{100}"
       Projections::Account.create! aggregate_id: aggregate_id,
         ledger_id: ledger_id,
         owner_user_id: 100,

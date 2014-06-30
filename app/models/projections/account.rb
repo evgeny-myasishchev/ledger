@@ -7,6 +7,16 @@ class Projections::Account < ActiveRecord::Base
     Account.where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   
+  def ensure_authorized!(user)
+    unless authorized_user_ids.include?("{#{user.id}}")
+      raise Errors::AuthorizationFailedError.new "The user(id=#{user.id}) is not authorized on account(aggregate_id=#{aggregate_id})."
+    end
+  end
+  
+  def self.ensure_authorized!(account_id, user)
+    Account.find(account_id).ensure_authorized! user
+  end
+  
   def authorize_user(user_id)
     authorized_user_ids_will_change!
     authorized_user_ids << ',' unless authorized_user_ids.empty?
