@@ -1,6 +1,6 @@
 Ledger::Application.routes.draw do
   root 'home#index'
-  
+  get 'accounts/:account_id/transactions' => 'transactions#index', as: :account_transactions
   
   devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
