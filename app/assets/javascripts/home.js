@@ -1,8 +1,15 @@
 var homeApp = (function() {
 	var homeApp = angular.module('homeApp', ['ErrorLogger', 'ngRoute']);
 
-	homeApp.controller('AccountsController', function ($scope, $routeParams, accounts) {
+	homeApp.controller('AccountsController', function ($scope, $http, $routeParams, accounts) {
 		$scope.accounts = accounts;
+		$scope.activeAccount = null;
+		$scope.$watch('activeAccount', function (oldVal, newVal) {
+			$http.get('accounts/' + newVal.id + '/transactions.json').success(function(data) {
+				$scope.transactions = data;
+			});
+		});
+		
 		if($routeParams.accountId) {
 			$scope.activeAccount = jQuery.grep(accounts, function(a) { return a.id == $routeParams.accountId;})[0];
 		} else {

@@ -12,13 +12,17 @@ describe("homeApp", function() {
 	});
 	
 	describe('AccountsController', function() {
-		var routeParams;
+		var routeParams, $httpBackend;
 		beforeEach(function() {
+			inject(function(_$httpBackend_) {
+				$httpBackend = _$httpBackend_;
+			});
 			routeParams = {};
 		});
 		
 		function initController() {
-			inject(function($controller) {
+			inject(function($rootScope, $controller) {
+				scope = $rootScope.$new();
 				controller = $controller('AccountsController', {$scope: scope, $routeParams: routeParams});
 			});
 		}
@@ -37,6 +41,18 @@ describe("homeApp", function() {
 		it("should set first account as active if no accountId in params", function() {
 			initController();
 			expect(scope.activeAccount).toEqual(account1);
+		});
+		
+		it("should get the transactions for active account from the server", function() {
+			var transactions = [
+				{transaction1: true},
+				{transaction2: true}
+			];
+			$httpBackend.expectGET('accounts/1/transactions.json').respond(transactions);
+			initController();
+		    expect(scope.transactions).toBeUndefined();
+			$httpBackend.flush();
+			expect(scope.transactions).toEqual(transactions);
 		});
 	});
 });
