@@ -18,9 +18,14 @@ var homeApp = (function() {
 	});
 
 	homeApp.config(['$routeProvider', function($routeProvider) {
-			$routeProvider.when('/accounts/:accountId', {
+			$routeProvider.when('/accounts', {
 				templateUrl: "accounts.html",
 				controller: 'AccountsController'
+			}).when('/accounts/:accountId', {
+				templateUrl: "accounts.html",
+				controller: 'AccountsController'
+			}).otherwise({
+				redirectTo: '/accounts'
 			});
 		}
 	]);
