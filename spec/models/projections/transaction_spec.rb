@@ -15,21 +15,21 @@ RSpec.describe Projections::Transaction, :type => :model do
       u
     }
     let(:date) { DateTime.now }
+    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
     before(:each) do
-      create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, 22003, date - 100, ['t-1', 't-2'], 'Comment 101'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expence_id, 2000, 20003, date - 110, ['t-4'], 'Comment 102'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-3', expence_id, 2000, 18003, date - 120, ['t-4'], 'Comment 103'
-      allow(p::Account).to receive(:ensure_authorized!)
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, 22003, date - 100, ['t-1', 't-2'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, 20003, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, 18003, date - 120, ['t-4'], 'Comment 103'
+      allow(p::Account).to receive(:ensure_authorized!) { account }
     end
     
     it "should check if the user is authorized" do
-      described_class.get_account_transactions user, 'account-1'
-      expect(p::Account).to have_received(:ensure_authorized!).with('account-1', user)
+      described_class.get_account_transactions user, account.id
+      expect(p::Account).to have_received(:ensure_authorized!).with(account.id, user)
     end
     
     it "should get all transactions of the user" do
-      transactions = described_class.get_account_transactions user, 'account-1'
+      transactions = described_class.get_account_transactions user, account.id
       expect(transactions.length).to eql 3
       t1 = transactions.detect { |t| t.transaction_id == 't-1' }
       expect(t1.attributes).to eql('id' => t1.id,

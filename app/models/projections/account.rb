@@ -11,6 +11,7 @@ class Projections::Account < ActiveRecord::Base
     unless authorized_user_ids.include?("{#{user.id}}")
       raise Errors::AuthorizationFailedError.new "The user(id=#{user.id}) is not authorized on account(aggregate_id=#{aggregate_id})."
     end
+    self
   end
   
   def self.ensure_authorized!(account_id, user)

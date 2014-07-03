@@ -15,9 +15,9 @@ class Projections::Transaction < ActiveRecord::Base
   end
   
   def self.get_account_transactions(user, account_id)
-    Account.ensure_authorized! account_id, user
+    account = Account.ensure_authorized! account_id, user
     Transaction.
-      where('account_id = :account_id', account_id: account_id).
+      where('account_id = :account_id', account_id: account.aggregate_id).
       select(:id, :transaction_id, :type_id, :ammount, :balance, :tag_ids, :comment, :date)
   end
   
