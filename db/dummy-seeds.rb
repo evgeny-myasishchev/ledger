@@ -32,7 +32,7 @@ end
 
 context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  date = DateTime.new
+  date = DateTime.now
   account = work.add_new l.create_new_account('PB Credit Card', uah)
   account.report_income '23448.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
   account.report_expence '223.40', date - 50, tag_ids_by_name['food'], 'Food for a week'
