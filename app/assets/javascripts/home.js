@@ -10,8 +10,8 @@ var homeApp = (function() {
 			});
 		});
 		
-		if($routeParams.accountId) {
-			$scope.activeAccount = jQuery.grep(accounts, function(a) { return a.id == $routeParams.accountId;})[0];
+		if($routeParams.accountSequentialNumber) {
+			$scope.activeAccount = jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0];
 		} else {
 			$scope.activeAccount = accounts[0];
 		}
@@ -21,7 +21,7 @@ var homeApp = (function() {
 			$routeProvider.when('/accounts', {
 				templateUrl: "accounts.html",
 				controller: 'AccountsController'
-			}).when('/accounts/:accountId', {
+			}).when('/accounts/:accountSequentialNumber', {
 				templateUrl: "accounts.html",
 				controller: 'AccountsController'
 			}).otherwise({

@@ -4,7 +4,7 @@
 			<strong>Accounts</strong>
 		</div>
 		<ul class='list-group'>
-			<a 	href='#/accounts/{{account.id}}' class='list-group-item'
+			<a 	href='#/accounts/{{account.sequential_number}}' class='list-group-item'
 			ng-repeat="account in accounts" ng-class="{active: activeAccount == account}">
 			{{account.name}}
 			<span class='pull-right'>{{account.balance}}</span>

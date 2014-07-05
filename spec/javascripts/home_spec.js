@@ -5,9 +5,9 @@ describe("homeApp", function() {
 		module('homeApp');
 		scope = {};
 		homeApp.constant('accounts',  [
-			account1 = {id: 1, 'name': 'Cache UAH', 'balance': '100 UAH'},
-			account2 = {id: 2, 'name': 'PC Credit J', 'balance': '200 UAH'},
-			account3 = {id: 3, 'name': 'VAB Visa', 'balance': '4432 UAH'}
+			account1 = {id: 1, sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'},
+			account2 = {id: 2, sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
+			account3 = {id: 3, sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
 		]);
 	});
 	
@@ -33,7 +33,7 @@ describe("homeApp", function() {
 		});
 		
 		it("should set active account from route params", function() {
-			routeParams.accountId = account2.id;
+			routeParams.accountSequentialNumber = account2.sequential_number;
 			initController();
 			expect(scope.activeAccount).toEqual(account2);
 		});
