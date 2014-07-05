@@ -5,7 +5,6 @@ class CreateProjectionsTransactions < ActiveRecord::Migration
       t.string :account_id, null: false
       t.integer :type_id, null: false
       t.integer :ammount, null: false
-      t.integer :balance, null: false
       t.string :tag_ids
       t.text :comment
       t.datetime :date

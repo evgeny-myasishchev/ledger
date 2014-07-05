@@ -17,9 +17,10 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:date) { DateTime.now }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
     before(:each) do
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, 22003, date - 100, ['t-1', 't-2'], 'Comment 101'
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, 20003, date - 110, ['t-4'], 'Comment 102'
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, 18003, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      
       allow(p::Account).to receive(:ensure_authorized!) { account }
     end
     
@@ -36,12 +37,18 @@ RSpec.describe Projections::Transaction, :type => :model do
         'transaction_id' => 't-1',
         'type_id' => income_id,
         'ammount' => 10523,
-        'balance' => 22003,
         'tag_ids' => '{t-1},{t-2}',
         'comment' => 'Comment 101',
         'date' => (date - 100).to_time)
       expect(transactions.detect { |t| t.transaction_id == 't-2' }).not_to be_nil
       expect(transactions.detect { |t| t.transaction_id == 't-3' }).not_to be_nil
+    end
+    
+    it "orders transactions by date descending" do
+      transactions = described_class.get_account_transactions user, account.id
+      expect(transactions[0].transaction_id).to eql 't-1'
+      expect(transactions[1].transaction_id).to eql 't-2'
+      expect(transactions[2].transaction_id).to eql 't-3'
     end
   end
   
@@ -73,14 +80,13 @@ RSpec.describe Projections::Transaction, :type => :model do
     it "should record the transaction" do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, 22003, date1, ['t-1', 't-2'], 'Comment 100'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expence_id, 2000, 20003, date2, ['t-3', 't-4'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, date1, ['t-1', 't-2'], 'Comment 100'
+      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expence_id, 2000, date2, ['t-3', 't-4'], 'Comment 101'
       
       t1 = described_class.find_by_transaction_id 't-1'
       expect(t1.account_id).to eql('account-1')
       expect(t1.type_id).to eql(income_id)
       expect(t1.ammount).to eql(10523)
-      expect(t1.balance).to eql(22003)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
       expect(t1.comment).to eql 'Comment 100'
       expect(t1.date.to_datetime).to eql date1.utc
@@ -89,7 +95,6 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.account_id).to eql('account-1')
       expect(t2.type_id).to eql(expence_id)
       expect(t2.ammount).to eql(2000)
-      expect(t2.balance).to eql(20003)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
       expect(t2.comment).to eql 'Comment 101'
       expect(t2.date.to_datetime).to eql date2.utc

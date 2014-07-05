@@ -18,7 +18,8 @@ class Projections::Transaction < ActiveRecord::Base
     account = Account.ensure_authorized! account_id, user
     Transaction.
       where('account_id = :account_id', account_id: account.aggregate_id).
-      select(:id, :transaction_id, :type_id, :ammount, :balance, :tag_ids, :comment, :date)
+      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date).
+      order(date: :desc)
   end
   
   projection do
@@ -27,7 +28,6 @@ class Projections::Transaction < ActiveRecord::Base
         transaction_id: event.transaction_id,
         type_id: event.type_id,
         ammount: event.ammount,
-        balance: event.balance,
         comment: event.comment,
         date: event.date
       event.tag_ids.each { |tag_id| t.add_tag tag_id }
