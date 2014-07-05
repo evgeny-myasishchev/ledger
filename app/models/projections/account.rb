@@ -40,6 +40,7 @@ class Projections::Account < ActiveRecord::Base
       authorized_user_ids.add ledger.owner_user_id
       Account.create!(aggregate_id: event.aggregate_id, 
         ledger_id: event.ledger_id, 
+        sequential_number: event.sequential_number,
         owner_user_id: ledger.owner_user_id,
         authorized_user_ids: authorized_user_ids.map { |id| "{#{id}}" }.join(','),
         name: event.name, 

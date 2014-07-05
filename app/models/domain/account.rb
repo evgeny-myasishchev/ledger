@@ -3,8 +3,8 @@ class Domain::Account < CommonDomain::Aggregate
   include Domain
   include Domain::Events
   
-  def create ledger_id, name, currency
-    raise_event AccountCreated.new AggregateId.new_id, ledger_id, name, currency.code
+  def create ledger_id, sequential_number, name, currency
+    raise_event AccountCreated.new AggregateId.new_id, ledger_id, sequential_number, name, currency.code
   end
   
   def rename new_name

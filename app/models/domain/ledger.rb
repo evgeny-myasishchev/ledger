@@ -17,7 +17,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   def create_new_account name, currency
     account = Domain::Account.new
-    account.create aggregate_id, name, currency
+    account.create aggregate_id, @account_sequential_number, name, currency
     raise_event AccountAddedToLedger.new aggregate_id, account.aggregate_id
     account
   end
@@ -51,6 +51,7 @@ class Domain::Ledger < CommonDomain::Aggregate
     @shared_with = Set.new
     @all_accounts = Set.new
     @open_accounts = Set.new
+    @account_sequential_number = 1
   end
   
   on LedgerRenamed do |event|
@@ -64,6 +65,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   on AccountAddedToLedger do |event|
     @all_accounts << event.account_id
     @open_accounts << event.account_id
+    @account_sequential_number += 1
   end
   
   on LedgerAccountClosed do |event|

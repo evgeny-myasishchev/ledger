@@ -71,7 +71,7 @@ RSpec.describe Projections::Account, :type => :model do
     let(:e) { Domain::Events }
   
     before(:each) do
-      subject.handle_message e::AccountCreated.new 'account-223', ledger.aggregate_id, 'Account 223', 'UAH'
+      subject.handle_message e::AccountCreated.new 'account-223', ledger.aggregate_id, 1, 'Account 223', 'UAH'
     end
     let(:account_223) { described_class.find_by_aggregate_id 'account-223' }
     
@@ -88,7 +88,7 @@ RSpec.describe Projections::Account, :type => :model do
       end
     
       it "should be idempotent" do
-        expect { subject.handle_message e::AccountCreated.new 'account-223', 'ledger-1', 'Account 223', 'UAH' }.not_to change { described_class.count }
+        expect { subject.handle_message e::AccountCreated.new 'account-223', 'ledger-1', 1, 'Account 223', 'UAH' }.not_to change { described_class.count }
       end
     end
     
