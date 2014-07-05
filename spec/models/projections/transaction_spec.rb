@@ -25,12 +25,12 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should check if the user is authorized" do
-      described_class.get_account_transactions user, account.id
-      expect(p::Account).to have_received(:ensure_authorized!).with(account.id, user)
+      described_class.get_account_transactions user, account.aggregate_id
+      expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
     end
     
     it "should get all transactions of the user" do
-      transactions = described_class.get_account_transactions user, account.id
+      transactions = described_class.get_account_transactions user, account.aggregate_id
       expect(transactions.length).to eql 3
       t1 = transactions.detect { |t| t.transaction_id == 't-1' }
       expect(t1.attributes).to eql('id' => t1.id,
@@ -45,7 +45,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "orders transactions by date descending" do
-      transactions = described_class.get_account_transactions user, account.id
+      transactions = described_class.get_account_transactions user, account.aggregate_id
       expect(transactions[0].transaction_id).to eql 't-1'
       expect(transactions[1].transaction_id).to eql 't-2'
       expect(transactions[2].transaction_id).to eql 't-3'

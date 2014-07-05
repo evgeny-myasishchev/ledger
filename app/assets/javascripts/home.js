@@ -5,7 +5,7 @@ var homeApp = (function() {
 		$scope.accounts = accounts;
 		$scope.activeAccount = null;
 		$scope.$watch('activeAccount', function (oldVal, newVal) {
-			$http.get('accounts/' + newVal.id + '/transactions.json').success(function(data) {
+			$http.get('accounts/' + newVal.aggregate_id + '/transactions.json').success(function(data) {
 				$scope.transactions = data;
 			});
 		});

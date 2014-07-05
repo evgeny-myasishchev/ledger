@@ -15,7 +15,7 @@ class Projections::Account < ActiveRecord::Base
   end
   
   def self.ensure_authorized!(account_id, user)
-    Account.find(account_id).ensure_authorized! user
+    Account.find_by_aggregate_id(account_id).ensure_authorized! user
   end
   
   def authorize_user(user_id)

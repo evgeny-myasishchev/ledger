@@ -36,9 +36,9 @@ RSpec.describe Projections::Account, :type => :model do
     
     it "should find and delegate to instance if calling on class" do
       user = User.new id: 123
-      expect(described_class).to receive(:find).with(334411) { subject }
+      expect(described_class).to receive(:find_by_aggregate_id).with(subject.aggregate_id) { subject }
       expect(subject).to receive(:ensure_authorized!).with(user) { subject }
-      expect(described_class.ensure_authorized!(334411, user)).to be subject
+      expect(described_class.ensure_authorized!(subject.aggregate_id, user)).to be subject
     end
     
     it "should return self" do

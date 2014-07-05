@@ -5,9 +5,9 @@ describe("homeApp", function() {
 		module('homeApp');
 		scope = {};
 		homeApp.constant('accounts',  [
-			account1 = {id: 1, sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'},
-			account2 = {id: 2, sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
-			account3 = {id: 3, sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
+			account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'},
+			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
+			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
 		]);
 	});
 	
@@ -48,7 +48,7 @@ describe("homeApp", function() {
 				{transaction1: true},
 				{transaction2: true}
 			];
-			$httpBackend.expectGET('accounts/1/transactions.json').respond(transactions);
+			$httpBackend.expectGET('accounts/a-1/transactions.json').respond(transactions);
 			initController();
 		    expect(scope.transactions).toBeUndefined();
 			$httpBackend.flush();
