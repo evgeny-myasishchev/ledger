@@ -20,14 +20,18 @@ class Domain::Account < CommonDomain::Aggregate
     ammount = Money.parse(ammount, @currency)
     balance = @balance + ammount.integer_ammount
     tag_ids = normalize_tag_ids tag_ids
-    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
+    transaction_id = AggregateId.new_id
+    raise_event TransactionReported.new aggregate_id, transaction_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, balance
   end
   
   def report_expence ammount, date, tag_ids = nil, comment = nil
     ammount = Money.parse(ammount, @currency)
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - ammount.integer_ammount
-    raise_event TransactionReported.new aggregate_id, AggregateId.new_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
+    transaction_id = AggregateId.new_id
+    raise_event TransactionReported.new aggregate_id, transaction_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, balance
   end
   
   def adjust_ammount transaction_id, ammount
@@ -65,5 +69,9 @@ class Domain::Account < CommonDomain::Aggregate
   
   on TransactionReported do |event|
     
+  end  
+  
+  on AccountBalanceChanged do |event|
+    @balance = event.balance
   end
 end

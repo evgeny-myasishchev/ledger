@@ -118,5 +118,21 @@ RSpec.describe Projections::Account, :type => :model do
         expect(account_223.is_closed).to be_truthy
       end
     end
+    
+    describe "on AccountBalanceChanged" do
+      it "should update corresponding balance" do
+        a1 = create_account_projection! 'a-1', ledger.aggregate_id
+        a2 = create_account_projection! 'a-2', ledger.aggregate_id
+
+        subject.handle_message e::AccountBalanceChanged.new 'a-1', 't-1', 110011
+        subject.handle_message e::AccountBalanceChanged.new 'a-2', 't-1', 220022
+        
+        a1.reload
+        a2.reload
+        
+        expect(a1.balance).to eql 110011
+        expect(a2.balance).to eql 220022
+      end
+    end
   end
 end

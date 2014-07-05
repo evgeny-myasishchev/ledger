@@ -50,18 +50,30 @@ describe Domain::Account do
   end
   
   describe "report_income" do
-    it "should raise TransactionReported event" do
+    it "should raise TransactionReported and AccountBalanceChanged events" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       date = DateTime.now
-      subject.make_created.report_income '10.40', date, ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, 
-        aggregate_id: subject.aggregate_id, 
+      subject.make_created
+      subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 1060
+      subject.report_income '10.40', date, ['t-1', 't-2'], 'Monthly income'
+      expect(subject).to have_uncommitted_events exactly: 2
+      expect(subject).to have_one_uncommitted_event I::TransactionReported,
+      {
+        aggregate_id: subject.aggregate_id,
         transaction_id: 'transaction-100',
         type_id: income_id,
         ammount: 1040,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Monthly income'
+      }, at_index: 0
+      
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged,
+      {
+        aggregate_id: subject.aggregate_id,
+        transaction_id: 'transaction-100',
+        balance: 2100
+      }, at_index: 1
     end
     
     it "should accept tags as a single arg" do
@@ -74,16 +86,21 @@ describe Domain::Account do
     it "should raise TransactionReported event" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       date = DateTime.now
-      subject.make_created.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 102000, date, [], nil
+      subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073
       subject.report_expence '20.23', date, ['t-1', 't-2'], 'Monthly income'
-      expect(subject).to have_one_uncommitted_event I::TransactionReported, 
+      expect(subject).to have_uncommitted_events exactly: 2
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, {
         aggregate_id: subject.aggregate_id, 
         transaction_id: 'transaction-100',
         type_id: Domain::Transaction::ExpenceTypeId,
         ammount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
-        comment: 'Monthly income'
+        comment: 'Monthly income'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-100',
+        balance: 3050}, at_index: 1
     end
     
     it "should accept tags as a single arg" do

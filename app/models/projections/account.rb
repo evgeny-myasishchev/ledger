@@ -55,5 +55,9 @@ class Projections::Account < ActiveRecord::Base
     on AccountClosed do |event|
       Account.where(aggregate_id: event.aggregate_id).update_all is_closed: true
     end
+    
+    on AccountBalanceChanged do |event|
+      Account.where(aggregate_id: event.aggregate_id).update_all balance: event.balance
+    end
   end
 end
