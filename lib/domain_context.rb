@@ -15,7 +15,7 @@ class DomainContext < CommonDomain::DomainContext
   
   def with_command_handlers
     @command_dispatcher = CommandDispatcher.new do |dispatcher|
-      # dispatcher.register Sample::CommandHandlers::AccountHandlers.new(@repository)
+      dispatcher.register Application::AccountsService.new(@repository)
     end
   end
   

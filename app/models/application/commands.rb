@@ -1,4 +1,4 @@
-module App::Commands
+module Application::Commands
   include CommonDomain::Command::DSL
   
   commands_group :AccountCommands do
