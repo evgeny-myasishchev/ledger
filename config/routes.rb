@@ -1,4 +1,4 @@
-Ledger::Application.routes.draw do
+Rails.application.routes.draw do
   root 'home#index'
   get 'accounts/:account_id/transactions' => 'transactions#index', as: :account_transactions
   
