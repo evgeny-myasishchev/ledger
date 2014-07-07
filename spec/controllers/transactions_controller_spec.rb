@@ -6,6 +6,14 @@ describe TransactionsController do
       expect({get: 'accounts/22331/transactions'}).to route_to controller: 'transactions', action: 'index', account_id: '22331'
       expect(account_transactions_path('22331')).to eql '/accounts/22331/transactions'
     end
+    
+    it "routes POST 'report-income'" do
+      expect({post: 'accounts/22331/transactions/report-income'}).to route_to controller: 'transactions', action: 'report_income', account_id: '22331'
+    end
+    
+    it "routes POST 'report-expence'" do
+      expect({post: 'accounts/22331/transactions/report-expence'}).to route_to controller: 'transactions', action: 'report_expence', account_id: '22331'
+    end
   end
   
   describe "GET 'index'" do

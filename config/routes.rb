@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   root 'home#index'
   get 'accounts/:account_id/transactions' => 'transactions#index', as: :account_transactions
+  post 'accounts/:account_id/transactions/report-income' => 'transactions#report_income'#, as: :account_transactions_report_income
+  post 'accounts/:account_id/transactions/report-expence' => 'transactions#report_expence'#, as: :account_transactions_report_income
   
   devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
