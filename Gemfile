@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '4.0.4'
+gem 'rails', '~> 4'
 
 # Use sqlite3 as the database for Active Record
 gem 'sqlite3'
@@ -10,7 +10,7 @@ gem 'sqlite3'
 # gem 'sass-rails', '~> 4.0.2'
 
 # Use Uglifier as compressor for JavaScript assets
-gem 'uglifier', '>= 1.3.0'
+gem 'uglifier'
 
 # Use CoffeeScript for .js.coffee assets and views
 # gem 'coffee-rails', '~> 4.0.0'
@@ -54,14 +54,14 @@ gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
 # TW Bootstrap related stuff
 gem 'sass-rails', '>= 3.2'
-gem 'bootstrap-sass', '~> 3.1.1'
+gem 'bootstrap-sass', '>= 3.1.1'
 
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
 
 group :development, :test do
-  gem 'rspec-core', '~> 3.0'
-  gem 'rspec-rails', '~> 3.0'
+  gem 'rspec-core', '>= 3.0'
+  gem 'rspec-rails', '>= 3.0'
   gem 'puma'
   gem "spring"
   gem "spring-commands-rspec"
