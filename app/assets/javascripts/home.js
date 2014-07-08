@@ -1,24 +1,34 @@
 var homeApp = (function() {
 	var homeApp = angular.module('homeApp', ['ErrorLogger', 'ngRoute']);
 
-	homeApp.controller('AccountsController', function ($scope, $http, $routeParams, accounts) {
-		$scope.accounts = accounts;
-		$scope.activeAccount = null;
-		$scope.$watch('activeAccount', function (oldVal, newVal) {
-			$http.get('accounts/' + newVal.aggregate_id + '/transactions.json').success(function(data) {
-				$scope.transactions = data;
-			});
-		});
-		
+	homeApp.factory('activeAccountAccessor', function(accounts, $routeParams) {
+		var activeAccount = null;
+
+		var getActiveAccountFromRoute = function() {
+			return jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0]
+		};
+
 		if($routeParams.accountSequentialNumber) {
-			$scope.activeAccount = jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0];
+			activeAccount = getActiveAccountFromRoute();
 		} else {
-			$scope.activeAccount = accounts[0];
+			activeAccount = accounts[0];
+		}
+		return {
+			get: function() { return activeAccount; },
+			set: function(value) { activeAccount = value; }
 		}
 	});
 
-	homeApp.controller('ReportTransactionsController', function ($scope, $http, $routeParams, accounts) {
-		$scope.reportData = "Hello from report controller";
+	homeApp.controller('AccountsController', function ($scope, $http, $routeParams, accounts, activeAccountAccessor) {
+		$scope.accounts = accounts;
+		var activeAccount = $scope.activeAccount = activeAccountAccessor.get();
+		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
+			$scope.transactions = data;
+		});
+	});
+
+	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountAccessor) {
+		$scope.account = activeAccountAccessor.get();
 	});
 
 	homeApp.config(['$routeProvider', function($routeProvider) {
