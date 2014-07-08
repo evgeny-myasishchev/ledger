@@ -1,7 +1,8 @@
 class DomainContext < CommonDomain::DomainContext
   include CommonDomain
+  include CommonDomain::DispatchCommand
   
-  attr_reader :command_dispatcher
+  attr_reader :dispatch_middleware
   
   def initialize(&block)
     yield(self)
@@ -14,13 +15,19 @@ class DomainContext < CommonDomain::DomainContext
   end
   
   def with_command_handlers
-    @command_dispatcher = CommandDispatcher.new do |dispatcher|
+    bootstrap_command_handlers do |dispatcher|
       dispatcher.register Application::AccountsService.new(@repository)
     end
   end
   
   def with_services
     
+  end
+  
+  def with_dispatch_middleware
+    @dispatch_middleware = Middleware::Stack.new Middleware::Dispatch.new(command_dispatcher)
+    @dispatch_middleware.with Middleware::TrackUser
+    self
   end
   
   def with_projections
