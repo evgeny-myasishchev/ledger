@@ -17,6 +17,10 @@ var homeApp = (function() {
 		}
 	});
 
+	homeApp.controller('ReportTransactionsController', function ($scope, $http, $routeParams, accounts) {
+		$scope.reportData = "Hello from report controller";
+	});
+
 	homeApp.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/accounts', {
 				templateUrl: "accounts.html",
@@ -24,6 +28,9 @@ var homeApp = (function() {
 			}).when('/accounts/:accountSequentialNumber', {
 				templateUrl: "accounts.html",
 				controller: 'AccountsController'
+			}).when('/accounts/:accountSequentialNumber/report', {
+				templateUrl: "report.html",
+				controller: 'ReportTransactionsController'
 			}).otherwise({
 				redirectTo: '/accounts'
 			});

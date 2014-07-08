@@ -1,6 +1,9 @@
 <div class='container-fluid' ng-app="homeApp">
 	<script type="text/ng-template" id='accounts.html'>
-	<%= render partial: 'accounts.html' %>
+	<%= render partial: 'accounts' %>
+	</script>
+	<script type="text/ng-template" id='report.html'>
+	<%= render partial: 'report' %>
 	</script>
 	<script type="text/javascript">
 		homeApp.constant('accounts', <%= raw @accounts.to_json %>);
