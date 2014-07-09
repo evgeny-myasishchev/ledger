@@ -14,6 +14,11 @@ module CommonDomain::DispatchCommand
     end
     
     class Stack < Base
+      def initialize(the_next, &block)
+        super(the_next)
+        yield(self) if block_given?
+      end
+      
       #Append a middleware to the top of the middleware stack. Last added middleware called first.
       #Each middleware is a class reference. The class should have an initializer method with at least one argument.
       #The argument is a next middleware instance. It should be explicitly called in "call" method. 

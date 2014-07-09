@@ -25,6 +25,16 @@ end
 RSpec.describe CommonDomain::DispatchCommand::Middleware::Stack do
   include_context 'dispatch command middleware shared stuff'
   
+  describe "initialize" do
+    it "should yield the block if provided with self" do
+      the_s = nil
+      subject = described_class.new(the_next) do |s|
+        the_s = s
+      end
+      expect(the_s).to be subject
+    end
+  end
+  
   describe "with" do
     it "should instantiate a new middleware with the original next and args and replace the next with it" do
       new_next = double(:new_next)
