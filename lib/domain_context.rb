@@ -26,7 +26,7 @@ class DomainContext < CommonDomain::DomainContext
   
   def with_dispatch_middleware
     @dispatch_middleware = Middleware::Stack.new Middleware::Dispatch.new(command_dispatcher)
-    @dispatch_middleware.with Middleware::TrackUser
+    @dispatch_middleware.with Middleware::TrackUser, user_id: lambda { |context| context.controller.current_user.id }
     self
   end
   

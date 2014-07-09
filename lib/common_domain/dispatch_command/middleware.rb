@@ -3,6 +3,7 @@ module CommonDomain::DispatchCommand
     
     # The base class for all middlewares
     class Base
+      attr_reader :next
       def initialize(the_next)
         @next = the_next
       end
