@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe TransactionsController do
+  let(:cmd) { Application::Commands::AccountCommands }
   describe "routes", :type => :routing do
     it "routes nested index route" do
       expect({get: 'accounts/22331/transactions'}).to route_to controller: 'transactions', action: 'index', account_id: '22331'
@@ -35,6 +36,38 @@ describe TransactionsController do
         expect(response.status).to eql 200
         expect(assigns(:transactions)).to be transactions
       end
+    end
+  end
+  
+  describe "POST 'report_income'" do
+    include AuthenticationHelper
+    authenticate_user
+
+    it "should build the ReportIncome command from params and dispatch it" do
+      command = double(:command)
+      expect(cmd::ReportIncome).to receive(:build_from_params) do |params|
+        expect(params).to be controller.params
+        command
+      end
+      expect(controller).to receive(:dispatch_command).with(command)
+      post 'report_income', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+      expect(response.status).to eql 200
+    end
+  end
+  
+  describe "POST 'report_expence'" do
+    include AuthenticationHelper
+    authenticate_user
+
+    it "should build the ReportExpence command from params and dispatch it" do
+      command = double(:command)
+      expect(cmd::ReportExpence).to receive(:build_from_params) do |params|
+        expect(params).to be controller.params
+        command
+      end
+      expect(controller).to receive(:dispatch_command).with(command)
+      post 'report_expence', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+      expect(response.status).to eql 200
     end
   end
 end

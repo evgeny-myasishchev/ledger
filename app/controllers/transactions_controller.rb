@@ -1,4 +1,6 @@
 class TransactionsController < ApplicationController
+  include Application::Commands::AccountCommands
+  
   def index
     @transactions = Projections::Transaction.get_account_transactions current_user, params[:account_id]
     respond_to do |format|
@@ -7,10 +9,12 @@ class TransactionsController < ApplicationController
   end
   
   def report_income
-    raise 'Not implemented'
+    dispatch_command ReportIncome.build_from_params params
+    render nothing: true
   end
   
   def report_expence
-    raise 'Not implemented'
+    dispatch_command ReportExpence.build_from_params params
+    render nothing: true
   end
 end
