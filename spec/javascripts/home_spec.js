@@ -11,47 +11,48 @@ describe("homeApp", function() {
 		]);
 	});
 
-	describe('activeAccountAccessor', function() {
-		var routeParams, accessor;
+	describe('activeAccountResolver', function() {
+		var routeParams, resolver;
 		beforeEach(function() {
 			inject(function($routeParams) {
 				routeParams = $routeParams;
 			});
 		});
 		
-		function initAccessor() {
+		function initResolver() {
 			inject(function($injector) {
-				accessor = $injector.get('activeAccountAccessor');
+				resolver = $injector.get('activeAccountResolver');
 			});
 		}
 
 		it("should set active account from route params", function() {
 			routeParams.accountSequentialNumber = account2.sequential_number;
-			initAccessor();
-			expect(accessor.get()).toEqual(account2);
+			initResolver();
+			expect(resolver.resolve()).toEqual(account2);
 		});
 
 		it("should change active account if route params changed", function() {
 			routeParams.accountSequentialNumber = account1.sequential_number;
-			initAccessor();
+			initResolver();
 			routeParams.accountSequentialNumber = account2.sequential_number;
-			expect(accessor.get()).toEqual(account2);
+			expect(resolver.resolve()).toEqual(account2);
 		});
 		
 		it("should set first account as active if no accountId in params", function() {
-			initAccessor();
-			expect(accessor.get()).toEqual(account1);
+			initResolver();
+			expect(resolver.resolve()).toEqual(account1);
 		});
 	});
 	
 	describe('AccountsController', function() {
-		var routeParams, $httpBackend;
+		var routeParams, $httpBackend, activeAccount;
 		beforeEach(function() {
-			inject(function(activeAccountAccessor) {
-				activeAccountAccessor.set(account1);
-			});
+			activeAccount = account1;
 			inject(function(_$httpBackend_) {
 				$httpBackend = _$httpBackend_;
+			});
+			homeApp.service('activeAccountResolver', function() {
+				this.resolve = function() { return activeAccount; }
 			});
 			routeParams = {};
 		});
@@ -69,9 +70,7 @@ describe("homeApp", function() {
 		});
 		
 		it("should set active account from accessor", function() {
-			inject(function(activeAccountAccessor) {
-				activeAccountAccessor.set(account2);
-			});
+			activeAccount = account2;
 			initController();
 			expect(scope.activeAccount).toEqual(account2);
 		});
@@ -93,9 +92,6 @@ describe("homeApp", function() {
 		var activeAccount, scope;
 		beforeEach(function() {
 			activeAccount = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'};
-			inject(function(activeAccountAccessor) {
-				activeAccountAccessor.set(activeAccount);
-			});
 			routeParams = {};
 		});
 		
