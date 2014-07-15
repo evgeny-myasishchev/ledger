@@ -1,5 +1,9 @@
 var homeApp = (function() {
 	var homeApp = angular.module('homeApp', ['ErrorLogger', 'ngRoute']);
+	
+	homeApp.config(["$httpProvider", function($httpProvider) {
+	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
+	}]);
 
 	homeApp.factory('activeAccountResolver', function(accounts, $routeParams) {
 		return {
@@ -39,7 +43,7 @@ var homeApp = (function() {
 		
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
-				ammount: null,
+				ammount: '10.5',
 				tags: null,
 				type: 'expence',
 				date: new Date().toLocaleDateString(),
