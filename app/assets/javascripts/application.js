@@ -16,4 +16,5 @@
 //= require angular
 //= require angular-route
 //= require ledger
+//= require bootstrap-datepicker
 //= require_tree .
