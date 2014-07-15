@@ -30,7 +30,37 @@ var homeApp = (function() {
 	});
 
 	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver) {
-		$scope.account = activeAccountResolver.resolve();
+		var activeAccount = $scope.account = activeAccountResolver.resolve();
+		$scope.reportedTransactions = [];
+		
+		var addReportedTransaction = function(transaction) {
+			$scope.reportedTransactions.push(transaction);
+		};
+		
+		var resetNewTransaction = function() {
+			$scope.newTransaction = {
+				ammount: null,
+				tags: null,
+				type: 'expence',
+				date: new Date().toLocaleDateString(),
+				comment: null
+			};
+		};
+		resetNewTransaction();
+		
+		$scope.report = function() {
+			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
+				command: {
+					ammount: $scope.newTransaction.ammount,
+					tags: $scope.newTransaction.tags,
+					date: $scope.newTransaction.date,
+					comment: $scope.newTransaction.comment
+				}
+			}).success(function() {
+				addReportedTransaction($scope.newTransaction);
+				resetNewTransaction();
+			});
+		}
 	});
 
 	homeApp.config(['$routeProvider', function($routeProvider) {

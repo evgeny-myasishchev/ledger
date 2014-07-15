@@ -5,27 +5,27 @@
 <div class="panel panel-default">
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
-		<form role="form" class='form-inline'>
+		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
 			<div class="form-group">
-				<input type="number" class="form-control" id="ammount" placeholder="Ammount">
+				<input autofocus type="text" class="form-control" name="ammount" placeholder="Ammount" ng-model='newTransaction.ammount' required>
 			</div>
 			<div class="form-group">
 				<input type="text" class='form-control' id='tags' placeholder="Tags" disabled>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="type">Type</label>
-				<select name="type" id="type" class='form-control'>
+				<select name="type" id="type" class='form-control' ng-model='newTransaction.type'>
 					<option value="income">Income</option>
 					<option value="expence">Expence</option>
 				</select>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="date">Date</label>
-				<input type="text" class="form-control" id="date" placeholder="Date">
+				<input type="text" class="form-control" placeholder="Date" ng-model="newTransaction.date">
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<label for="comment">Comment</label>
-				<input type="text" id="comment" class="form-control" placeholder="Comment" style='width: 100%'>
+				<input type="text" id="comment" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>

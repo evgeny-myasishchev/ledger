@@ -1,6 +1,6 @@
 describe("homeApp", function() {
 	var account1, account2, account3;
-	var controller, scope;
+	var controller, scope,  $httpBackend;
 	beforeEach(function() {
 		module('homeApp');
 		scope = {};
@@ -9,6 +9,9 @@ describe("homeApp", function() {
 			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
 			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
 		]);
+		inject(function(_$httpBackend_) {
+			$httpBackend = _$httpBackend_;
+		});
 	});
 
 	describe('activeAccountResolver', function() {
@@ -45,12 +48,9 @@ describe("homeApp", function() {
 	});
 	
 	describe('AccountsController', function() {
-		var routeParams, $httpBackend, activeAccount;
+		var routeParams, activeAccount;
 		beforeEach(function() {
 			activeAccount = account1;
-			inject(function(_$httpBackend_) {
-				$httpBackend = _$httpBackend_;
-			});
 			homeApp.service('activeAccountResolver', function() {
 				this.resolve = function() { return activeAccount; }
 			});
@@ -105,6 +105,68 @@ describe("homeApp", function() {
 		it("should assign active account from the accessor", function() {
 			initController();
 			expect(scope.account).toEqual(activeAccount);
+		});
+		
+		it("initializes initial scope", function() {
+			initController();
+			expect(scope.newTransaction).toEqual({
+				ammount: null, tags: null, type: 'expence', date: new Date().toLocaleDateString(), comment: null
+			});
+		});
+		
+		describe("report", function() {
+			var date;
+			beforeEach(function() {
+				date = new Date().toLocaleDateString();
+				initController();
+				scope.newTransaction.ammount = '10.5';
+				scope.newTransaction.tags = null;
+				scope.newTransaction.date = date;
+				scope.newTransaction.comment = 'New transaction 10.5';
+			});
+			
+			it("should submit the new income transaction", function() {
+				scope.newTransaction.type = 'income';
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-income', {
+					command: {
+						ammount: '10.5', tags: null, date: date, comment: 'New transaction 10.5'
+					}
+				}).respond();
+				scope.report();
+				$httpBackend.flush();
+			});
+			
+			it("should submit the new expence transaction", function() {
+				scope.newTransaction.type = 'expence';
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-expence', {
+					command: {
+						ammount: '10.5', tags: null, date: date, comment: 'New transaction 10.5'
+					}
+				}).respond();
+				scope.report();
+				$httpBackend.flush();
+			});
+			
+			describe('on success', function() {
+				beforeEach(function() {
+					$httpBackend.expectPOST('accounts/a-1/transactions/report-expence').respond();
+					scope.report();
+					$httpBackend.flush();
+				});
+				
+				it("should insert the transaction into reported transaction", function() {
+					expect(scope.reportedTransactions.length).toEqual(1);
+					expect(scope.reportedTransactions[0]).toEqual({
+						ammount: '10.5', tags: null, type: 'expence', date: date, comment: 'New transaction 10.5'
+					});
+				});
+				
+				it('should reset the newTransaction model', function() {
+					expect(scope.newTransaction).toEqual({
+						ammount: null, tags: null, type: 'expence', date: new Date().toLocaleDateString(), comment: null
+					});
+				});
+			});
 		});
 	});
 });
