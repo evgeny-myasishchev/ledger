@@ -1,8 +1,8 @@
-<div class="page-header">
-	<h1>{{account.name}}</h1>
+<div class="page-header" style='margin-top: 0;'>
+	<h1 style='margin-top: 0;'>{{account.name}}</h1>
 </div>
 
-<fieldset>
+<fieldset ng-show="reportedTransactions.length">
 	<legend>Reported transactions</fieldset>
 	<ul class="list-group">
 		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
