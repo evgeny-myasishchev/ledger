@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe CommonDomain::DispatchCommand, type: :model do
   let(:dispatch_middleware) { double(:dispatch_middleware) }
-  let(:domain_context) { double(:domain_context, dispatch_middleware: dispatch_middleware) }
+  let(:domain_context) { double(:domain_context, command_dispatch_middleware: dispatch_middleware) }
   let(:dispatch_context) { double(:dispatch_context) }
   let(:command) { double(:command) }
   

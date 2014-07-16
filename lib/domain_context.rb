@@ -1,8 +1,7 @@
 class DomainContext < CommonDomain::DomainContext
   include CommonDomain
-  include CommonDomain::DispatchCommand
   
-  attr_reader :dispatch_middleware
+  attr_reader :command_dispatch_middleware
   
   def initialize(&block)
     yield(self)
@@ -24,9 +23,10 @@ class DomainContext < CommonDomain::DomainContext
     
   end
   
-  def with_dispatch_middleware
-    @dispatch_middleware = Middleware::Stack.new Middleware::Dispatch.new(command_dispatcher) do |stack|
-      stack.with Middleware::TrackUser, user_id: lambda { |context| context.controller.current_user.id }
+  def with_command_dispatch_middleware
+    dispatch = CommonDomain::DispatchCommand::Middleware::Dispatch.new(command_dispatcher)
+    @command_dispatch_middleware = CommonDomain::DispatchCommand::Middleware::Stack.new(dispatch) do |stack|
+      stack.with CommonDomain::DispatchCommand::Middleware::TrackUser, user_id: lambda { |context| context.controller.current_user.id }
     end
     self
   end
