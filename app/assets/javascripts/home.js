@@ -53,6 +53,15 @@ var homeApp = (function() {
 		var activeAccount = $scope.account = activeAccountResolver.resolve();
 		$scope.reportedTransactions = [];
 		
+		//For testing purposes
+		// $scope.reportedTransactions = [
+		// 	{"type":"income","ammount":90,"tags":['food'],"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
+		// 	{"type":"expence","ammount":2010,"tags":['lunch'],"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
+		// 	{"type":"expence","ammount":1050,"tags":['lunch', 'food'],"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"expence","ammount":1050,"tags":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
+		// 	{"type":"expence","ammount":1050,"tags":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
+		// ];
+		
 		var addReportedTransaction = function(transaction) {
 			$scope.reportedTransactions.push(transaction);
 		};
@@ -79,7 +88,21 @@ var homeApp = (function() {
 				addReportedTransaction($scope.newTransaction);
 				resetNewTransaction();
 			});
-		}
+		};
+		
+		$scope.formatTagNames = function(tags) {
+			if(tags && tags.length) {
+				return '{' + tags.join(',') + '}, ';
+			};
+			return '';
+		};
+		
+		$scope.formatDate = function(date) {
+			if(tags && tags.length) {
+				return tags.join(',') + ', ';
+			};
+			return '';
+		};
 	});
 
 	homeApp.config(['$routeProvider', function($routeProvider) {

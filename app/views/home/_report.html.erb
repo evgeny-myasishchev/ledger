@@ -2,6 +2,18 @@
 	<h1>{{account.name}}</h1>
 </div>
 
+<fieldset>
+	<legend>Reported transactions</fieldset>
+	<ul class="list-group">
+		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
+			<strong>{{transaction.ammount}} ({{transaction.type}})</strong> 
+			{{formatTagNames(transaction.tags)}}
+			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
+			{{transaction.comment}}
+		</li>
+	</ul>
+</fieldset>
+
 <div class="panel panel-default">
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
