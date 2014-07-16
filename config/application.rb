@@ -31,7 +31,7 @@ module Ledger
     end
     
     attr_reader :domain_context
-    initializer :initialize_services do |app|
+    initializer :initialize_domain_context do |app|
       @domain_context = DomainContext.new do |c|
         c.with_database_configs app.config.database_configuration, Rails.env
         c.with_event_bus
@@ -42,7 +42,7 @@ module Ledger
         c.with_command_dispatch_middleware
         c.with_dispatch_undispatched_commits
       end
-    end unless Rails.env.test?
+    end unless Rails.env.test? || ENV.key?('SKIP_DOMAIN_CONTEXT_INIT')
     
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }
