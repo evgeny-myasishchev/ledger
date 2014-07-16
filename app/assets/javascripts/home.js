@@ -62,18 +62,17 @@ var homeApp = (function() {
 				ammount: null,
 				tags: null,
 				type: 'expence',
-				date: Date.today(),
+				date: new Date(),
 				comment: null
 			};
 		};
 		resetNewTransaction();
-		
 		$scope.report = function() {
 			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
 				command: {
 					ammount: $scope.newTransaction.ammount,
 					tags: $scope.newTransaction.tags,
-					date: $scope.newTransaction.date,
+					date: $scope.newTransaction.date.toJSON(),
 					comment: $scope.newTransaction.comment
 				}
 			}).success(function() {

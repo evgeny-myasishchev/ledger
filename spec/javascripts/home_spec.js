@@ -110,15 +110,14 @@ describe("homeApp", function() {
 		it("initializes initial scope", function() {
 			initController();
 			expect(scope.newTransaction).toEqual({
-				ammount: null, tags: null, type: 'expence', date: Date.today(), comment: null
+				ammount: null, tags: null, type: 'expence', date: new Date(), comment: null
 			});
 		});
 		
 		describe("report", function() {
 			var date;
 			beforeEach(function() {
-				var now = new Date();
-				date = new Date(now.getYear(), now.getMonth(), now.getDay());
+				date = new Date();
 				initController();
 				scope.newTransaction.ammount = '10.5';
 				scope.newTransaction.tags = null;
@@ -130,7 +129,7 @@ describe("homeApp", function() {
 				scope.newTransaction.type = 'income';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-income', {
 					command: {
-						ammount: '10.5', tags: null, date: date, comment: 'New transaction 10.5'
+						ammount: '10.5', tags: null, date: date.toJSON(), comment: 'New transaction 10.5'
 					}
 				}).respond();
 				scope.report();
@@ -141,7 +140,7 @@ describe("homeApp", function() {
 				scope.newTransaction.type = 'expence';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-expence', {
 					command: {
-						ammount: '10.5', tags: null, date: date, comment: 'New transaction 10.5'
+						ammount: '10.5', tags: null, date: date.toJSON(), comment: 'New transaction 10.5'
 					}
 				}).respond();
 				scope.report();
@@ -163,9 +162,9 @@ describe("homeApp", function() {
 				});
 				
 				it('should reset the newTransaction model', function() {
-					expect(scope.newTransaction).toEqual({
-						ammount: null, tags: null, type: 'expence', date: new Date().toLocaleDateString(), comment: null
-					});
+					expect(scope.newTransaction.ammount).toBeNull();
+					expect(scope.newTransaction.tags).toBeNull();
+					expect(scope.newTransaction.comment).toBeNull();
 				});
 			});
 		});
