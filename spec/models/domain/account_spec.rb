@@ -81,6 +81,11 @@ describe Domain::Account do
       subject.make_created.report_income '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
+    
+    it "should treat null tags as empty" do
+      subject.make_created.report_income '10.00', DateTime.now, nil, nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
   end
     
   describe "report_expence" do
@@ -107,6 +112,11 @@ describe Domain::Account do
     it "should accept tags as a single arg" do
       subject.make_created.report_expence '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
+    end
+    
+    it "should treat null tags as empty" do
+      subject.make_created.report_expence '10.00', DateTime.now, nil, nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
   end
   

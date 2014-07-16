@@ -47,7 +47,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   private def normalize_tag_ids tag_ids
-    return nil if tag_ids.nil?
+    return [] if tag_ids.nil?
     return tag_ids if tag_ids.is_a? Enumerable
     return [tag_ids]
   end
