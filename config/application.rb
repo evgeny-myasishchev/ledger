@@ -30,6 +30,7 @@ module Ledger
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
     end
     
+    attr_accessor :skip_domain_context
     attr_reader :domain_context
     initializer :initialize_domain_context do |app|
       @domain_context = DomainContext.new do |c|
@@ -41,8 +42,8 @@ module Ledger
         c.with_command_handlers
         c.with_command_dispatch_middleware
         c.with_dispatch_undispatched_commits
-      end
-    end unless Rails.env.test? || ENV.key?('SKIP_DOMAIN_CONTEXT_INIT')
+      end unless skip_domain_context
+    end unless Rails.env.test?
     
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }

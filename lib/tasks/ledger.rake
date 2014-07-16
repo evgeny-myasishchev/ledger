@@ -16,11 +16,9 @@ namespace :ledger do
     Rails.application.domain_context.with_projections_initialization
   end
   
-  desc "Dispatch undispatched commits" do
+  desc "Dispatch undispatched commits"
   task :dispatch_undispatched_commits do
-    ENV['SKIP_DOMAIN_CONTEXT_INIT'] = true
-    app = Rails.application
-    app.initialize!
+    app = init_app_skiping_domain_context
     DomainContext.new do |c|
       c.with_database_configs app.config.database_configuration, Rails.env
       c.with_event_bus
@@ -28,5 +26,27 @@ namespace :ledger do
       c.with_event_store
       c.with_dispatch_undispatched_commits
     end
+  end
+  
+  desc "Purge events and projections"
+  task :purge_events_and_projections do
+    app = init_app_skiping_domain_context
+    context = DomainContext.new do |c|
+      c.with_database_configs app.config.database_configuration, Rails.env
+      c.with_event_bus
+      c.with_projections
+      c.with_event_store
+    end
+    context.event_store.purge
+    context.projections.for_each do |p|
+      p.cleanup!
+    end
+  end
+  
+  def init_app_skiping_domain_context
+    app = Rails.application
+    app.skip_domain_context = true
+    app.initialize!
+    app
   end
 end
