@@ -18,3 +18,9 @@
 //= require ledger
 //= require bootstrap-datepicker
 //= require_tree .
+//= require_self
+
+Date.today = function() {
+	var now = new Date();
+	return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}

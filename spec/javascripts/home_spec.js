@@ -110,14 +110,15 @@ describe("homeApp", function() {
 		it("initializes initial scope", function() {
 			initController();
 			expect(scope.newTransaction).toEqual({
-				ammount: null, tags: null, type: 'expence', date: new Date().toLocaleDateString(), comment: null
+				ammount: null, tags: null, type: 'expence', date: Date.today(), comment: null
 			});
 		});
 		
 		describe("report", function() {
 			var date;
 			beforeEach(function() {
-				date = new Date().toLocaleDateString();
+				var now = new Date();
+				date = new Date(now.getYear(), now.getMonth(), now.getDay());
 				initController();
 				scope.newTransaction.ammount = '10.5';
 				scope.newTransaction.tags = null;

@@ -4,6 +4,22 @@ var homeApp = (function() {
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
+	
+	homeApp.directive('bsDatepicker', function() {
+		return {
+			require: '?ngModel',
+			link: function(scope, element, attrs, ngModel) {
+				var datePicker;
+				ngModel.$render = function() {
+					datePicker = element.datepicker().data('datepicker');
+					datePicker.setDate(ngModel.$viewValue);
+				};
+				element.on('change', function() {
+					ngModel.$setViewValue(datePicker.getDate());
+				});
+			}
+		}
+	});
 
 	homeApp.factory('activeAccountResolver', function(accounts, $routeParams) {
 		return {
@@ -43,10 +59,10 @@ var homeApp = (function() {
 		
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
-				ammount: '10.5',
+				ammount: null,
 				tags: null,
 				type: 'expence',
-				date: new Date().toLocaleDateString(),
+				date: Date.today(),
 				comment: null
 			};
 		};
