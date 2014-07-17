@@ -36,6 +36,7 @@ class DomainContext < CommonDomain::DomainContext
       projections.register :ledgers, ::Projections::Ledger.create_projection
       projections.register :accounts, ::Projections::Account.create_projection
       projections.register :transactions, ::Projections::Transaction.create_projection
+      projections.register :tags, ::Projections::Tag.create_projection
     end
   end
 end
