@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.describe Projections::Ledger, :type => :model do
   subject { described_class.create_projection }
   let(:e) { Domain::Events }
-  
+  let(:p) { Projections }
+
   before(:each) do
     subject.handle_message e::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
   end
@@ -41,6 +42,13 @@ RSpec.describe Projections::Ledger, :type => :model do
     it "should be idempotent" do
       subject.handle_message e::LedgerShared.new 'ledger-1', 120
       expect(ledger_1.shared_with_user_ids).to eql Set.new([120, 130])
+    end
+  end
+
+  describe "authorized_user_ids" do
+    it "should return an array of all users that are authorized to access the ledger" do
+      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
+      expect(ledger.authorized_user_ids).to eql([22332, 22333, 22331])
     end
   end
 end

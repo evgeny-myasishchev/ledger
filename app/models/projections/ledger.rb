@@ -4,6 +4,14 @@ class Projections::Ledger < ActiveRecord::Base
   include Projections
   
   serialize :shared_with_user_ids, Set
+
+  def authorized_user_ids
+    @authorized_user_ids ||= begin
+      authorized_user_ids = shared_with_user_ids.to_a
+      authorized_user_ids << owner_user_id
+      authorized_user_ids
+    end    
+  end
   
   projection do
     on LedgerCreated do |event|
