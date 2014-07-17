@@ -49,10 +49,13 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   end
 
   create_table "projections_tags", force: true do |t|
-    t.string  "ledger_id", null: false
-    t.integer "tag_id",    null: false
-    t.string  "name",      null: false
+    t.string  "ledger_id",           null: false
+    t.integer "tag_id",              null: false
+    t.string  "name",                null: false
+    t.string  "authorized_user_ids", null: false
   end
+
+  add_index "projections_tags", ["ledger_id", "tag_id"], name: "index_projections_tags_on_ledger_id_and_tag_id", unique: true
 
   create_table "projections_transactions", force: true do |t|
     t.string   "transaction_id", null: false
