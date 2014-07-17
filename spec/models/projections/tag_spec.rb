@@ -35,6 +35,10 @@ RSpec.describe Projections::Tag, :type => :model do
       tag_21 = described_class.find_by ledger_id: 'ledger-2', tag_id: 1
       expect(tag_21.authorized_user_ids).to eql('{23332},{23333},{23331}')
     end
+
+    it "should be idempotent" do
+      expect { subject.handle_message e::TagCreated.new 'ledger-1', 1, 'tag-1' }.not_to change { described_class.count }
+    end
   end
 
   describe "on TagRenamed" do

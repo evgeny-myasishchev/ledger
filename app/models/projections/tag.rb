@@ -6,10 +6,12 @@ class Projections::Tag < ActiveRecord::Base
   
   projection do
     on TagCreated do |event|
-      ledger = Ledger.find_by_aggregate_id event.aggregate_id
-      tag = Tag.new ledger_id: event.aggregate_id, tag_id: event.tag_id, name: event.name
-      tag.set_authorized_users ledger.authorized_user_ids
-      tag.save!
+      unless Tag.exists? ledger_id: event.aggregate_id, tag_id: event.tag_id
+        ledger = Ledger.find_by_aggregate_id event.aggregate_id
+        tag = Tag.new ledger_id: event.aggregate_id, tag_id: event.tag_id, name: event.name
+        tag.set_authorized_users ledger.authorized_user_ids
+        tag.save!
+      end
     end
     
     on TagRenamed do |event|
