@@ -17,6 +17,7 @@ ledger = context.repository.begin_work do |work|
   l = work.add_new Domain::Ledger.new.create user.id, 'Family'
   tag_ids_by_name['food'] = l.create_tag 'Food'
   tag_ids_by_name['lunch'] = l.create_tag 'Lunch'
+  tag_ids_by_name['car'] = l.create_tag 'Car'
   tag_ids_by_name['gas'] = l.create_tag 'Gas'
   tag_ids_by_name['active income'] = l.create_tag 'Active Income'
   tag_ids_by_name['passive income'] = l.create_tag 'Passive Income'
@@ -36,9 +37,10 @@ context.repository.begin_work do |work|
   account = work.add_new l.create_new_account('PB Credit Card', uah)
   account.report_income '23448.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
   account.report_expence '223.40', date - 50, tag_ids_by_name['food'], 'Food for a week'
-  account.report_expence '100.35', date - 30, tag_ids_by_name['food'], 'Food in class'
+  account.report_expence '100.35', date - 30, [tag_ids_by_name['food'], tag_ids_by_name['lunch']], 'Food in class and some pizza'
   account.report_expence '163.41', date - 20, tag_ids_by_name['food'], 'Food for roman'
   account.report_expence '23.11', date, tag_ids_by_name['food'], 'Some junk food'
+  account.report_expence '620.32', date, [tag_ids_by_name['car'], tag_ids_by_name['gas']], 'Gas'
 end
 
 pb_deposit = context.repository.begin_work do |work|

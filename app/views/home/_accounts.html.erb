@@ -27,7 +27,7 @@
 		<tbody>
 			<tr ng-repeat="transaction in transactions">
 				<td>{{transaction.date}}</td>
-				<td>{{transaction.tag_ids}}</td>
+				<td><ledger-tags ng-model="transaction.tag_ids" /></td>
 				<td>{{transaction.comment}}</td>
 				<td>{{transaction.ammount}}</td>
 			</tr>

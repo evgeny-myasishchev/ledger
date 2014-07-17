@@ -21,6 +21,28 @@ var homeApp = (function() {
 		}
 	});
 
+	homeApp.directive('ledgerTags', ['tags', function(tags) {
+		var tagsById = {};
+		jQuery.each(tags, function(index, tag) {
+			tagsById['{' + tag.tag_id + '}'] = tag.name;
+		});
+		return {
+			restrict: 'E',
+			require: '?ngModel',
+			link: function(scope, element, attrs, ngModel) {
+				ngModel.$render = function() {
+					var tagIds = ngModel.$viewValue.split(',');					
+					var result = [];
+					jQuery.each(tagIds, function(index, tagId) {
+						var tagName = tagsById[tagId];
+						if(tagName) result.push(tagName);
+					});
+					element.html(result.join(', '));
+				};
+			}
+		}
+	}]);
+
 	homeApp.factory('activeAccountResolver', function(accounts, $routeParams) {
 		return {
 			resolve: function() {
