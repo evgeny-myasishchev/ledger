@@ -5,6 +5,13 @@ class Projections::Tag < ActiveRecord::Base
   include UserAuthorizable
   
   projection do
+    on LedgerShared do |event|
+      Tag.where(ledger_id: event.aggregate_id).each { |a|
+        a.authorize_user event.user_id
+        a.save!
+      }
+    end
+
     on TagCreated do |event|
       unless Tag.exists? ledger_id: event.aggregate_id, tag_id: event.tag_id
         ledger = Ledger.find_by_aggregate_id event.aggregate_id
@@ -13,7 +20,7 @@ class Projections::Tag < ActiveRecord::Base
         tag.save!
       end
     end
-    
+
     on TagRenamed do |event|
       Tag.where(ledger_id: event.aggregate_id, tag_id: event.tag_id).update_all(name: event.name)
     end

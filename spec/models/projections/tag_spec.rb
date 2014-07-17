@@ -41,6 +41,20 @@ RSpec.describe Projections::Tag, :type => :model do
     end
   end
 
+  describe "on LedgerShared" do
+    it "should add user id to a list of users for all accounts" do
+      subject.handle_message e::LedgerShared.new 'ledger-1', 110
+      subject.handle_message e::LedgerShared.new 'ledger-1', 115
+      subject.handle_message e::LedgerShared.new 'ledger-2', 120
+      subject.handle_message e::LedgerShared.new 'ledger-2', 125
+
+      expect(described_class.find_by(ledger_id: 'ledger-1', tag_id: 1).authorized_user_ids).to eql('{22332},{22333},{22331},{110},{115}')
+      expect(described_class.find_by(ledger_id: 'ledger-1', tag_id: 2).authorized_user_ids).to eql('{22332},{22333},{22331},{110},{115}')
+      expect(described_class.find_by(ledger_id: 'ledger-2', tag_id: 1).authorized_user_ids).to eql('{23332},{23333},{23331},{120},{125}')
+      expect(described_class.find_by(ledger_id: 'ledger-2', tag_id: 2).authorized_user_ids).to eql('{23332},{23333},{23331},{120},{125}')
+    end
+  end
+
   describe "on TagRenamed" do
     it "should rename the tag" do
       subject.handle_message e::TagRenamed.new 'ledger-1', 1, 'tag-1-renamed'
