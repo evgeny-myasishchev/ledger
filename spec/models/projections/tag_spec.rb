@@ -16,6 +16,18 @@ RSpec.describe Projections::Tag, :type => :model do
     subject.handle_message e::TagCreated.new 'ledger-2', 2, 'tag-2'
   end
 
+  describe "get_user_tags" do
+    it "should return tags that this user is authorized to access" do
+      t1 = described_class.create! ledger_id: 'ledger-10', tag_id: 1, name: 'tag 1', authorized_user_ids: '{10}'
+      t2 = described_class.create! ledger_id: 'ledger-20', tag_id: 1, name: 'tag 2', authorized_user_ids: '{10},{20}'
+      t3 = described_class.create! ledger_id: 'ledger-30', tag_id: 1, name: 'tag 3', authorized_user_ids: '{10},{20},{30}'
+
+      expect(described_class.get_user_tags(User.new id: 10)).to match_array([t1, t2, t3])
+      expect(described_class.get_user_tags(User.new id: 20)).to match_array([t2, t3])
+      expect(described_class.get_user_tags(User.new id: 30)).to match_array([t3])
+    end
+  end
+
   describe "on TagCreated" do
     it "should insert a new tag" do
       expect(described_class.where(ledger_id: 'ledger-1').count).to eql 3

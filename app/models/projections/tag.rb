@@ -4,6 +4,10 @@ class Projections::Tag < ActiveRecord::Base
   include Projections
   include UserAuthorizable
   
+  def self.get_user_tags(user)
+    Tag.where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
+  end
+
   projection do
     on LedgerShared do |event|
       Tag.where(ledger_id: event.aggregate_id).each { |a|
