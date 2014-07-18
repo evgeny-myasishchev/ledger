@@ -14,15 +14,12 @@
 	</ul>
 </fieldset>
 
-<div class="panel panel-default">
+<div class="panel panel-default" id='report-new-transaction-container'>
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
 		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
 			<div class="form-group">
 				<input autofocus type="text" class="form-control" name="ammount" placeholder="Ammount" ng-model='newTransaction.ammount' required>
-			</div>
-			<div class="form-group">
-				<input type="text" class='form-control' id='tags' placeholder="Tags" disabled>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="type">Type</label>
@@ -36,8 +33,10 @@
 				<input type="text" class="form-control" placeholder="Date" ng-model='newTransaction.date' bs-datepicker>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<label for="comment">Comment</label>
-				<input type="text" id="comment" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
+				<input id='tags' name='tags' type="text" class='form-control' ng-model='newTransaction.tags' placeholder="Tags" bs-tagsinput>
+			</div>
+			<div class="form-group" style='display: block;'>
+				<input type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>

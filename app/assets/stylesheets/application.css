@@ -10,6 +10,30 @@
  *
  *= require "bootstrap"
  *= require bootstrap-datepicker
+ *= require bootstrap-tagsinput
  *= require_self
  *= require_tree .
  */
+
+.tt-dropdown-menu {
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    margin-top: 12px;
+    padding: 8px 0;
+    width: 422px;
+}
+
+.tt-suggestion {
+    font-size: 18px;
+    line-height: 24px;
+    padding: 3px 20px;
+}
+.tt-suggestion.tt-cursor {
+    background-color: #0097cf;
+    color: #fff;
+}
+.tt-suggestion p {
+    margin: 0;
+}

@@ -17,5 +17,7 @@
 //= require angular-route
 //= require ledger
 //= require bootstrap-datepicker
+//= require bootstrap-tagsinput
+//= require typeahead.bundle
 //= require_tree .
 //= require_self
