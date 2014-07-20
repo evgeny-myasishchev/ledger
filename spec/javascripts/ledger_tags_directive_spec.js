@@ -24,12 +24,18 @@ describe('ledgerTags', function() {
   it("should convert tag ids to tag names", function() {
     scope.tag_ids = '{100},{102}';
     var result = compile(scope);
-    expect(result[0].innerHTML).toEqual('Tag 100, Tag 102');
+    expect(result[0].innerHTML).toEqual('<div class="label label-info">Tag 100</div> <div class="label label-info">Tag 102</div>');
   });
 
   it("should ignore unknown tags", function() {
     scope.tag_ids = '{100},{111},{102}';
     var result = compile(scope);
-    expect(result[0].innerHTML).toEqual('Tag 100, Tag 102');
+    expect(result[0].innerHTML).toEqual('<div class="label label-info">Tag 100</div> <div class="label label-info">Tag 102</div>');
+  });
+  
+  it("should ignore null tags", function() {
+    scope.tag_ids = null;
+    var result = compile(scope);
+    expect(result[0].innerHTML).toEqual('');
   });
 });

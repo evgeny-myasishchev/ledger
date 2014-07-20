@@ -27,18 +27,20 @@ var homeApp = (function() {
 			tagsById['{' + tag.tag_id + '}'] = tag.name;
 		});
 		return {
+		    scope: {
+		      model: '=ngModel'
+		    },
 			restrict: 'E',
-			require: '?ngModel',
-			link: function(scope, element, attrs, ngModel) {
-				ngModel.$render = function() {
-					var tagIds = ngModel.$viewValue.split(',');
-					var result = [];
-					jQuery.each(tagIds, function(index, tagId) {
-						var tagName = tagsById[tagId];
-						if(tagName) result.push(tagName);
-					});
-					element.html(result.join(', '));
-				};
+			replace: false,
+			link: function(scope, element, attrs) {
+				if(scope.model == null) return;
+				var tagIds = scope.model.split(',');
+				var result = [];
+				jQuery.each(tagIds, function(index, tagId) {
+					var tagName = tagsById[tagId];
+					if(tagName) result.push('<div class="label label-info">' + tagName + '</div>');
+				});
+				element.html(result.join(' '));
 			}
 		}
 	}]);
@@ -113,9 +115,9 @@ var homeApp = (function() {
 		$scope.reportedTransactions = [];
 		//For testing purposes
 		// $scope.reportedTransactions = [
-		// 	{"type":"income","ammount":90,"tag_ids":[1, 2],"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
-		// 	{"type":"expence","ammount":2010,"tag_ids":[2],"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
-		// 	{"type":"expence","ammount":1050,"tag_ids":[2,3],"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"income","ammount":90,"tag_ids":'{1},{2}',"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
+		// 	{"type":"expence","ammount":2010,"tag_ids":'{2}',"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
+		// 	{"type":"expence","ammount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
 		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
 		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
