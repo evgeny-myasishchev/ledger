@@ -48,36 +48,53 @@ var homeApp = (function() {
 	homeApp.directive('bsTagsinput', ['tags', function(tags) {
 		var $ = jQuery;
 		var tagsByName = {};
+		var tagsById = {};
 		$.each(tags, function(index, tag) {
 			tagsByName[tag.name.toLowerCase()] = tag;
+			tagsById[tag.tag_id] = tag;
 		});
 		return {
 			restrict: 'E',
-			require: '?ngModel',
-			link: function(scope, element, attrs, ngModel) {
-				ngModel.$render = function() {
-					var input = $('<input type="text" class="form-control" placeholder="Tags" style="width: 100%">').appendTo(element);
-					input.tagsinput({
-						confirmKeys: [188],
-						tagClass: function(tag) {
-							return tagsByName[tag.toLowerCase()] ? 'label label-info' : 'label label-warning';
-						}
-					});
-					input.on('change', function() {
-						var selectedTagNames = input.tagsinput('items');
-						if(selectedTagNames.length) {
-							input.tagsinput('input').removeAttr('placeholder');
-						} else {
-							input.tagsinput('input').attr('placeholder', 'Tags');
-						}
-						var tagIds = [];
-						$.each(selectedTagNames, function(index, tagName) {
-							var tag = tagsByName[tagName.toLowerCase()];
-							if(tag) tagIds.push(tag.tag_id);
+		    scope: {
+		      model: '=ngModel'
+		    },
+			template: '<input type="text" class="form-control" placeholder="Tags" style="width: 100%">',
+			link: function(scope, element, attrs) {
+				var input = element.find('input');
+				input.tagsinput({
+					confirmKeys: [188],
+					tagClass: function(tag) {
+						return tagsByName[tag.toLowerCase()] ? 'label label-info' : 'label label-warning';
+					}
+				});
+				var handlingModelChanges = false;
+				scope.$watch('model', function(newTagIds) {
+					try {
+						handlingModelChanges = true;
+						input.tagsinput('removeAll');
+						$.each(newTagIds, function(index, newTagId) {
+							var tag = tagsById[newTagId];
+							if(tag) input.tagsinput('add', tag.name);
 						});
-						ngModel.$setViewValue(tagIds, 'change');
+					} finally {
+						handlingModelChanges = false;
+					}
+				});
+				input.on('change', function() {
+					var selectedTagNames = input.tagsinput('items');
+					if(selectedTagNames.length) {
+						input.tagsinput('input').removeAttr('placeholder');
+					} else {
+						input.tagsinput('input').attr('placeholder', 'Tags');
+					}
+					if(handlingModelChanges) return;
+					var tagIds = [];
+					$.each(selectedTagNames, function(index, tagName) {
+						var tag = tagsByName[tagName.toLowerCase()];
+						if(tag) tagIds.push(tag.tag_id);
 					});
-				};
+					scope.model = tagIds;
+				});
 			}
 		}
 	}]);
