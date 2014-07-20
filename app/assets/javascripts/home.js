@@ -44,102 +44,36 @@ var homeApp = (function() {
 	}]);
 
 	homeApp.directive('bsTagsinput', ['tags', function(tags) {
-		var createTagsMatcher = function(theTags) {
-			console.log('Creating the matcher...');
-			return function findMatches(q, cb) {
-				console.log('Finding matches...');
-				var matches = [], substrRegex = new RegExp(q, 'i');
-				$.each(theTags, function(i, tag) {
-					if (substrRegex.test(tag.name)) {
-						matches.push({ value: tag.name });
-					}
-				});
-				cb(matches);
-			};
-		};
-
-
+		var $ = jQuery;
+		var tagsByName = {};
+		$.each(tags, function(index, tag) {
+			tagsByName[tag.name.toLowerCase()] = tag;
+		});
 		return {
-			restrict: 'A',
+			restrict: 'E',
 			require: '?ngModel',
 			link: function(scope, element, attrs, ngModel) {
-				var element = jQuery(element);
 				ngModel.$render = function() {
-					element.tagsinput();
-					element.tagsinput('input').typeahead({
-						hint: true,
-						highlight: true,
-						minLength: 1
-					},
-					{
-						name: 'tags',
-						displayKey: 'value',
-						source: createTagsMatcher(tags)
-					}).on('typeahead:selected', function(e, s, ds) {
-						console.log(e);
-						console.log(s);
-						console.log(ds);
-					}).on('typeahead:autocompleted', function(e, s, ds) {
-						console.log(e);
-						console.log(s);
-						console.log(ds);
+					var input = $('<input type="text" class="form-control" placeholder="Tags" style="width: 100%">').appendTo(element);
+					input.tagsinput({
+						confirmKeys: [188],
+						tagClass: function(tag) {
+							return tagsByName[tag.toLowerCase()] ? 'label label-info' : 'label label-warning';
+						}
 					});
-				};
-			}
-		}
-	}]);
-	
-
-	homeApp.directive('bsTagsinput1', [function() {
-		var substringMatcher = function(strs) {
-			return function findMatches(q, cb) {
-				var matches, substrRegex;
- 
-				// an array that will be populated with substring matches
-				matches = [];
- 
-				// regex used to determine if a string contains the substring `q`
-				substrRegex = new RegExp(q, 'i');
- 
-				// iterate through the pool of strings and for any string that
-				// contains the substring `q`, add it to the `matches` array
-				$.each(strs, function(i, str) {
-					if (substrRegex.test(str)) {
-						// the typeahead jQuery plugin expects suggestions to a
-						// JavaScript object, refer to typeahead docs for more info
-						matches.push({ value: str });
-					}
-				});
- 
-				cb(matches);
-			};
-		};
- 
-		var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-		'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-		'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-		'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-		'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-		'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-		'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-		'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-		'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-		];
-		
-		return {
-			restrict: 'A',
-			require: '?ngModel',
-			link: function(scope, element, attrs, ngModel) {
-				ngModel.$render = function() {
-					element.typeahead({
-						hint: true,
-						highlight: true,
-						minLength: 1
-					},
-					{
-						name: 'states',
-						displayKey: 'value',
-						source: substringMatcher(states)
+					input.on('change', function() {
+						var selectedTagNames = input.tagsinput('items');
+						if(selectedTagNames.length) {
+							input.tagsinput('input').removeAttr('placeholder');
+						} else {
+							input.tagsinput('input').attr('placeholder', 'Tags');
+						}
+						var tagIds = [];
+						$.each(selectedTagNames, function(index, tagName) {
+							var tag = tagsByName[tagName.toLowerCase()];
+							if(tag) tagIds.push(tag.tag_id);
+						});
+						ngModel.$setViewValue(tagIds, 'change');
 					});
 				};
 			}
@@ -177,30 +111,26 @@ var homeApp = (function() {
 	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, tags) {
 		var activeAccount = $scope.account = activeAccountResolver.resolve();
 		$scope.reportedTransactions = [];
-		$scope.availableTags = jQuery.map(tags, function(tag) {
-			return {value: tag.tag_id, text: tag.name}
-		});
-		$scope.getTags = function() {
-			return $scope.tags;
-		};
-		
 		//For testing purposes
 		// $scope.reportedTransactions = [
-		// 	{"type":"income","ammount":90,"tags":['food'],"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
-		// 	{"type":"expence","ammount":2010,"tags":['lunch'],"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
-		// 	{"type":"expence","ammount":1050,"tags":['lunch', 'food'],"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
-		// 	{"type":"expence","ammount":1050,"tags":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
-		// 	{"type":"expence","ammount":1050,"tags":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
+		// 	{"type":"income","ammount":90,"tag_ids":[1, 2],"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
+		// 	{"type":"expence","ammount":2010,"tag_ids":[2],"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
+		// 	{"type":"expence","ammount":1050,"tag_ids":[2,3],"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
+		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 		
 		var addReportedTransaction = function(transaction) {
+			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
+				return '{' + tag_id + '}';
+			}).join(',');
 			$scope.reportedTransactions.push(transaction);
 		};
 		
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
 				ammount: null,
-				tags: [],
+				tag_ids: [],
 				type: 'expence',
 				date: new Date(),
 				comment: null
@@ -211,7 +141,7 @@ var homeApp = (function() {
 			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
 				command: {
 					ammount: $scope.newTransaction.ammount,
-					tags: $scope.newTransaction.tags,
+					tag_ids: $scope.newTransaction.tag_ids,
 					date: $scope.newTransaction.date.toJSON(),
 					comment: $scope.newTransaction.comment
 				}

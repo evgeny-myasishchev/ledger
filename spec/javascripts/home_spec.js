@@ -9,6 +9,7 @@ describe("homeApp", function() {
 			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
 			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
 		]);
+		homeApp.value('tags', []); //It has to be value so it could be redefined in other specs
 		inject(function(_$httpBackend_) {
 			$httpBackend = _$httpBackend_;
 		});
@@ -109,8 +110,10 @@ describe("homeApp", function() {
 		
 		it("initializes initial scope", function() {
 			initController();
+			expect(scope.newTransaction.date.toJSON()).toEqual(new Date().toJSON());
+			scope.newTransaction.date = null;
 			expect(scope.newTransaction).toEqual({
-				ammount: null, tags: null, type: 'expence', date: new Date(), comment: null
+				ammount: null, tag_ids: [], type: 'expence', date: null, comment: null
 			});
 		});
 		
@@ -120,17 +123,20 @@ describe("homeApp", function() {
 				date = new Date();
 				initController();
 				scope.newTransaction.ammount = '10.5';
-				scope.newTransaction.tags = null;
+				scope.newTransaction.tag_ids = [1, 2];
 				scope.newTransaction.date = date;
 				scope.newTransaction.comment = 'New transaction 10.5';
 			});
 			
 			it("should submit the new income transaction", function() {
 				scope.newTransaction.type = 'income';
-				$httpBackend.expectPOST('accounts/a-1/transactions/report-income', {
-					command: {
-						ammount: '10.5', tags: null, date: date.toJSON(), comment: 'New transaction 10.5'
-					}
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-income', function(data) {
+					var command = JSON.parse(data).command;
+					expect(command.ammount).toEqual('10.5');
+					expect(command.tag_ids).toEqual([1, 2]);
+					expect(command.date).toEqual(date.toJSON());
+					expect(command.comment).toEqual('New transaction 10.5');
+					return true;
 				}).respond();
 				scope.report();
 				$httpBackend.flush();
@@ -138,11 +144,15 @@ describe("homeApp", function() {
 			
 			it("should submit the new expence transaction", function() {
 				scope.newTransaction.type = 'expence';
-				$httpBackend.expectPOST('accounts/a-1/transactions/report-expence', {
-					command: {
-						ammount: '10.5', tags: null, date: date.toJSON(), comment: 'New transaction 10.5'
-					}
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-expence', function(data) {
+					var command = JSON.parse(data).command;
+					expect(command.ammount).toEqual('10.5');
+					expect(command.tag_ids).toEqual([1, 2]);
+					expect(command.date).toEqual(date.toJSON());
+					expect(command.comment).toEqual('New transaction 10.5');
+					return true;
 				}).respond();
+
 				scope.report();
 				$httpBackend.flush();
 			});
@@ -157,13 +167,13 @@ describe("homeApp", function() {
 				it("should insert the transaction into reported transaction", function() {
 					expect(scope.reportedTransactions.length).toEqual(1);
 					expect(scope.reportedTransactions[0]).toEqual({
-						ammount: '10.5', tags: null, type: 'expence', date: date, comment: 'New transaction 10.5'
+						ammount: '10.5', tag_ids: '{1},{2}', type: 'expence', date: date, comment: 'New transaction 10.5'
 					});
 				});
 				
 				it('should reset the newTransaction model', function() {
 					expect(scope.newTransaction.ammount).toBeNull();
-					expect(scope.newTransaction.tags).toBeNull();
+					expect(scope.newTransaction.tag_ids).toEqual([]);
 					expect(scope.newTransaction.comment).toBeNull();
 				});
 			});

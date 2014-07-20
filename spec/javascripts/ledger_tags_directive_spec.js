@@ -6,7 +6,7 @@ describe('ledgerTags', function() {
       {tag_id: 100, name: 'Tag 100'},
       {tag_id: 101, name: 'Tag 101'},
       {tag_id: 102, name: 'Tag 102'}
-    ]);    
+    ]);
     inject(function($rootScope) {
       scope = $rootScope.$new();
     });
@@ -18,7 +18,6 @@ describe('ledgerTags', function() {
       result = $compile('<ledger-tags ng-model="tag_ids" />')(scope);
     });
     scope.$digest();
-    console.log(result);
     return result;
   };
 

@@ -7,7 +7,7 @@
 	<ul class="list-group">
 		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
 			<strong>{{transaction.ammount}} ({{transaction.type}})</strong> 
-			{{formatTagNames(transaction.tags)}}
+			<ledger-tags ng-model='transaction.tag_ids' wrap-ids='true' />
 			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
 			{{transaction.comment}}
 		</li>
@@ -33,9 +33,9 @@
 				<input type="text" class="form-control" placeholder="Date" ng-model='newTransaction.date' bs-datepicker>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<input id='tags' name='tags' type="text" class='form-control' ng-model='newTransaction.tags' placeholder="Tags" bs-tagsinput>
+				<bs-tagsinput ng-model='newTransaction.tag_ids' />
 			</div>
-			<div class="form-group" style='display: block;'>
+			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<input type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
