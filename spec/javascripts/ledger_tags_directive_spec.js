@@ -1,8 +1,8 @@
 describe('ledgerTags', function() {
   var scope;
   beforeEach(function() {
-    module('homeApp');
-    homeApp.constant('tags', [
+    module('ledgerDirectives');
+	ledgerDirectives.constant('tags', [
       {tag_id: 100, name: 'Tag 100'},
       {tag_id: 101, name: 'Tag 101'},
       {tag_id: 102, name: 'Tag 102'}
