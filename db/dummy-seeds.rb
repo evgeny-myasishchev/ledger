@@ -60,6 +60,6 @@ context.command_dispatcher.dispatch AccountCommands::ReportRefund.new cache_uah_
 context.command_dispatcher.dispatch AccountCommands::ReportRefund.new pb_credit_account_id,
   ammount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
   
-context.command_dispatcher.dispatch AccountCommands::ReportTransfer.new pb_deposit_id, receiving_account_id: pb_deposit_id,
+context.command_dispatcher.dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
   ammount_sent: '5000.00', ammount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
