@@ -12,7 +12,8 @@ class Application::AccountsService < CommonDomain::CommandHandler
   end
 
   on AccountCommands::ReportRefund, begin_work: true do |work, command|
-    raise "Not implemented"
+    account = work.get_by_id Domain::Account, command.aggregate_id
+    account.report_refund command.ammount, command.date, command.tag_ids, command.comment
   end
 
   on AccountCommands::ReportTransfer, begin_work: true do |work, command|
