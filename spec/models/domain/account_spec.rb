@@ -119,6 +119,38 @@ describe Domain::Account do
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
   end
+
+  describe "report_refund" do
+    it "should raise TransactionReported event" do
+      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
+      date = DateTime.now
+      subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073
+      subject.report_refund '20.23', date, ['t-1', 't-2'], 'Coworker gave back'
+      expect(subject).to have_uncommitted_events exactly: 2
+      expect(subject).to have_one_uncommitted_event I::TransactionReported, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-100',
+        type_id: Domain::Transaction::RefundTypeId,
+        ammount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Coworker gave back'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-100',
+        balance: 7096}, at_index: 1
+    end
+    
+    it "should accept tags as a single arg" do
+      subject.make_created.report_refund '10.00', DateTime.now, 't-1', nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
+    end
+    
+    it "should treat null tags as empty" do
+      subject.make_created.report_refund '10.00', DateTime.now, nil, nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
+  end
   
   describe "adjust_ammount" do
     it "should raise TransactionAmmountAdjusted"

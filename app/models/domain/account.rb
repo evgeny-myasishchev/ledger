@@ -21,17 +21,34 @@ class Domain::Account < CommonDomain::Aggregate
     balance = @balance + ammount.integer_ammount
     tag_ids = normalize_tag_ids tag_ids
     transaction_id = AggregateId.new_id
-    raise_event TransactionReported.new aggregate_id, transaction_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
-    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, balance
+    raise_transaction_reported transaction_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_balance_changed transaction_id, balance
   end
   
-  def report_expence ammount, date, tag_ids = nil, comment = nil
+  def report_expence ammount, date, tag_ids = [], comment = nil
     ammount = Money.parse(ammount, @currency)
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - ammount.integer_ammount
     transaction_id = AggregateId.new_id
-    raise_event TransactionReported.new aggregate_id, transaction_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
-    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, balance
+    raise_transaction_reported transaction_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_balance_changed transaction_id, balance
+  end
+
+  def report_refund ammount, date, tag_ids = [], comment = nil
+    ammount = Money.parse(ammount, @currency)
+    tag_ids = normalize_tag_ids tag_ids
+    balance = @balance + ammount.integer_ammount
+    transaction_id = AggregateId.new_id
+    raise_transaction_reported transaction_id, Transaction::RefundTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_balance_changed transaction_id, balance
+  end
+
+  def send_transfer(receiver_account_id, ammount, date, tag_ids = [], comment = nil)
+    raise "Not implemented" 
+  end
+
+  def receive_transfer(sender_account_id, ammount, date, tag_ids = [], comment = nil)    
+    raise "Not implemented"
   end
   
   def adjust_ammount transaction_id, ammount
@@ -44,6 +61,14 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def remove_tag transaction_id, tag
+  end
+
+  private def raise_transaction_reported transaction_id, type_id, integer_ammount, date, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_ammount, date, tag_ids, comment
+  end
+
+  private def raise_balance_changed transaction_id, balance
+    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, balance
   end
   
   private def normalize_tag_ids tag_ids
