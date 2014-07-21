@@ -53,7 +53,7 @@ class Domain::Account < CommonDomain::Aggregate
     transaction_id
   end
 
-  def receive_transer(sending_account_id, sending_transaction_id, ammount, date, tag_ids = [], comment = nil)
+  def receive_transfer(sending_account_id, sending_transaction_id, ammount, date, tag_ids = [], comment = nil)
     ammount = Money.parse(ammount, @currency)
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + ammount.integer_ammount

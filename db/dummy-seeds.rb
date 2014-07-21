@@ -21,17 +21,19 @@ ledger = context.repository.begin_work do |work|
   tag_ids_by_name['gas'] = l.create_tag 'Gas'
   tag_ids_by_name['active income'] = l.create_tag 'Active Income'
   tag_ids_by_name['passive income'] = l.create_tag 'Passive Income'
+  tag_ids_by_name['deposits'] = l.create_tag 'Deposits'
   l
 end
 
 uah = Currency['UAH']
 
-context.repository.begin_work do |work|
+cache_uah_account_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  work.add_new l.create_new_account('Cache', uah)
+  account = work.add_new l.create_new_account('Cache', uah)
+  account.aggregate_id
 end
 
-context.repository.begin_work do |work|
+pb_credit_account_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
   date = DateTime.now
   account = work.add_new l.create_new_account('PB Credit Card', uah)
@@ -41,9 +43,23 @@ context.repository.begin_work do |work|
   account.report_expence '163.41', date - 20, tag_ids_by_name['food'], 'Food for roman'
   account.report_expence '23.11', date, tag_ids_by_name['food'], 'Some junk food'
   account.report_expence '620.32', date, [tag_ids_by_name['car'], tag_ids_by_name['gas']], 'Gas'
+  account.aggregate_id
 end
 
-pb_deposit = context.repository.begin_work do |work|
+pb_deposit_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  work.add_new l.create_new_account('PB Deposit', uah)
+  account = work.add_new l.create_new_account('PB Deposit', uah)
+  account.aggregate_id
 end
+
+include Application::Commands
+
+context.command_dispatcher.dispatch AccountCommands::ReportRefund.new cache_uah_account_id,
+  ammount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
+
+context.command_dispatcher.dispatch AccountCommands::ReportRefund.new pb_credit_account_id,
+  ammount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
+  
+context.command_dispatcher.dispatch AccountCommands::ReportTransfer.new pb_deposit_id, receiving_account_id: pb_deposit_id,
+  ammount_sent: '5000.00', ammount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
+
