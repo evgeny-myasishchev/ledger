@@ -151,6 +151,77 @@ describe Domain::Account do
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
   end
+
+  describe "send_transfer" do
+    before(:each) { subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073 }
+    before(:each) { allow(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
+
+    it "should raise TransferSent and AccountBalanceChanged events" do      
+      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110')
+      date = DateTime.now
+      subject.send_transfer 'receiver-account-332', '20.23', date, ['t-1', 't-2'], 'Getting cache'
+      expect(subject).to have_uncommitted_events exactly: 2
+      expect(subject).to have_one_uncommitted_event I::TransferSent, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-110',
+        receiving_account_id: 'receiver-account-332',
+        ammount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Getting cache'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-110',
+        balance: 3050}, at_index: 1
+    end
+
+    it "should return transaction_id" do
+      expect(subject.send_transfer('receiver-account-332', '20.23', DateTime.now, ['t-1', 't-2'], 'Getting cache')).to eql 'transaction-110'
+    end
+
+    it "should accept tags as a single arg" do
+      subject.send_transfer('receiver-account-332', '20.23', DateTime.now, 't-1')
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
+    end
+    it "should treat null tags as empty" do
+      subject.send_transfer('receiver-account-332', '20.23', DateTime.now, nil)
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
+  end
+
+  describe "receive_transer" do
+    before(:each) { subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073 }
+    before(:each) { expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
+    let(:date) { DateTime.now }
+    it "should raise TransferReceived and AccountBalanceChanged events" do
+      
+      subject.receive_transer 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1', 't-2'], 'Getting cache'
+      expect(subject).to have_uncommitted_events exactly: 2
+      expect(subject).to have_one_uncommitted_event I::TransferReceived, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-110',
+        sending_account_id: 'sending-account-332',
+        sending_transaction_id: 'sending-transaction-221',
+        ammount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Getting cache'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, 
+        transaction_id: 'transaction-110',
+        balance: 7096}, at_index: 1
+    end
+
+    it "should accept tags as a single arg" do
+      subject.receive_transer 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1']
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
+    end
+
+    it "should treat null tags as empty" do
+      subject.receive_transer 'sending-account-332', 'sending-transaction-221', '20.23', date, nil
+      expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
+  end
   
   describe "adjust_ammount" do
     it "should raise TransactionAmmountAdjusted"

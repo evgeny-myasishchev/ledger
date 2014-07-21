@@ -17,4 +17,6 @@ module Domain::Events
   event :AccountClosed
   event :AccountBalanceChanged, :transaction_id, :balance
   event :TransactionReported, :transaction_id, :type_id, :ammount, :date, :tag_ids, :comment
+  event :TransferSent, :transaction_id, :receiving_account_id, :ammount, :date, :tag_ids, :comment
+  event :TransferReceived, :transaction_id, :sending_account_id, :sending_transaction_id, :ammount, :date, :tag_ids, :comment
 end

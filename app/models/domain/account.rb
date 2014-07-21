@@ -43,12 +43,23 @@ class Domain::Account < CommonDomain::Aggregate
     raise_balance_changed transaction_id, balance
   end
 
-  def send_transfer(receiver_account_id, ammount, date, tag_ids = [], comment = nil)
-    raise "Not implemented" 
+  def send_transfer(receiving_account_id, ammount, date, tag_ids = [], comment = nil)
+    ammount = Money.parse(ammount, @currency)
+    tag_ids = normalize_tag_ids tag_ids
+    balance = @balance - ammount.integer_ammount
+    transaction_id = AggregateId.new_id
+    raise_event TransferSent.new aggregate_id, transaction_id, receiving_account_id, ammount.integer_ammount, date, tag_ids, comment
+    raise_balance_changed transaction_id, balance
+    transaction_id
   end
 
-  def receive_transfer(sender_account_id, ammount, date, tag_ids = [], comment = nil)    
-    raise "Not implemented"
+  def receive_transer(sending_account_id, sending_transaction_id, ammount, date, tag_ids = [], comment = nil)
+    ammount = Money.parse(ammount, @currency)
+    tag_ids = normalize_tag_ids tag_ids
+    balance = @balance + ammount.integer_ammount
+    transaction_id = AggregateId.new_id
+    raise_event TransferReceived.new aggregate_id, transaction_id, sending_account_id, sending_transaction_id, ammount.integer_ammount, date, tag_ids, comment
+    raise_balance_changed transaction_id, balance
   end
   
   def adjust_ammount transaction_id, ammount
@@ -94,7 +105,15 @@ class Domain::Account < CommonDomain::Aggregate
   
   on TransactionReported do |event|
     
-  end  
+  end
+
+  on TransferSent do |event|
+    
+  end
+
+  on TransferReceived do |event|
+    
+  end
   
   on AccountBalanceChanged do |event|
     @balance = event.balance
