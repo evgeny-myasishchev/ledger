@@ -13,6 +13,14 @@ module Application::Commands
       end
     end
   end
+  module TransferCommandFactory
+    extend ActiveSupport::Concern
+    module ClassMethods
+      def build_from_params params
+        raise "Not implemented"
+      end
+    end
+  end
   
   include CommonDomain::Command::DSL
   commands_group :AccountCommands do
@@ -20,6 +28,12 @@ module Application::Commands
       include IncomeExpenceCommandFactory
     end
     command :ReportExpence, :ammount, :date, :tag_ids, :comment do
+      include IncomeExpenceCommandFactory
+    end
+    command :ReportRefund, :ammount, :date, :tag_ids, :comment do
+      include IncomeExpenceCommandFactory
+    end
+    command :ReportTransfer, :receiver_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
   end
