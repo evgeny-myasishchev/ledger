@@ -24,14 +24,42 @@ class Projections::Transaction < ActiveRecord::Base
   
   projection do
     on TransactionReported do |event|
+      t = build_transaction(event)
+      t.type_id = event.type_id
+      t.save!
+    end
+    
+    on TransferSent do |event|
+      t = build_transaction(event)
+      t.type_id = Domain::Transaction::ExpenceTypeId
+      t.sending_account_id = event.aggregate_id
+      t.sending_transaction_id = event.transaction_id
+      t.receiving_account_id = event.receiving_account_id
+      t.save!
+    end
+        
+    on TransferReceived do |event|
+      t = build_transaction(event)
+      t.type_id = Domain::Transaction::IncomeTypeId
+      t.receiving_account_id = event.aggregate_id
+      t.receiving_transaction_id = event.transaction_id
+      t.sending_transaction_id = event.sending_transaction_id
+      t.sending_account_id = event.sending_account_id
+      t.save!
+    end
+    
+    private def build_transaction event
       t = Transaction.new account_id: event.aggregate_id,
         transaction_id: event.transaction_id,
-        type_id: event.type_id,
         ammount: event.ammount,
         comment: event.comment,
         date: event.date
-      event.tag_ids.each { |tag_id| t.add_tag tag_id }
-      t.save!
+      assign_tags event, t
+      t
+    end
+    
+    private def assign_tags event, transaction
+      event.tag_ids.each { |tag_id| transaction.add_tag tag_id }
     end
   end
 end

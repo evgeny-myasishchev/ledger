@@ -100,4 +100,51 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.date.to_datetime).to eql date2.utc
     end
   end
+  
+  describe "transfer" do
+    let(:date) { DateTime.now - 100 }
+    let(:t1) { described_class.find_by_transaction_id 't-1' }
+    let(:t2) { described_class.find_by_transaction_id 't-2' }
+    before(:each) do
+      subject.handle_message e::TransferSent.new 'account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'
+      subject.handle_message e::TransferReceived.new 'account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'
+    end
+
+    describe "on TransferSent" do
+      it "should record the transaction as expence" do
+        expect(t1.account_id).to eql('account-1')
+        expect(t1.transaction_id).to eql('t-1')
+        expect(t1.type_id).to eql(expence_id)
+        expect(t1.ammount).to eql(10523)
+        expect(t1.tag_ids).to eql '{t-1},{t-2}'
+        expect(t1.comment).to eql 'Comment 100'
+        expect(t1.date.to_datetime).to eql date.utc
+      end
+    
+      it "should record transfer related attributes" do
+        expect(t1.sending_account_id).to eql('account-1')
+        expect(t1.sending_transaction_id).to eql('t-1')
+        expect(t1.receiving_account_id).to eql('account-2')
+      end
+    end
+    
+    describe "on TransferReceived" do
+      it "should record the transaction as income" do
+        expect(t2.account_id).to eql('account-2')
+        expect(t2.transaction_id).to eql('t-2')
+        expect(t2.type_id).to eql(income_id)
+        expect(t2.ammount).to eql(10523)
+        expect(t2.tag_ids).to eql '{t-1},{t-2}'
+        expect(t2.comment).to eql 'Comment 100'
+        expect(t2.date.to_datetime).to eql date.utc
+      end
+    
+      it "should record transfer related attributes" do
+        expect(t2.sending_account_id).to eql('account-1')
+        expect(t2.sending_transaction_id).to eql('t-1')
+        expect(t2.receiving_account_id).to eql('account-2')
+        expect(t2.receiving_transaction_id).to eql('t-2')
+      end
+    end
+  end
 end
