@@ -33,7 +33,7 @@ module Application::Commands
     command :ReportRefund, :ammount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportTransfer, :receiver_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment do
+    command :ReportTransfer, :receiving_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
   end
