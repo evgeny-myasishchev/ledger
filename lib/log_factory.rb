@@ -15,7 +15,6 @@ class LogFactory
   end
   
   def self.configure(options = {})
-    puts "== configuring =="
     #It might be used even if there is no Rails.root
     options = {
       root_logger: 'ledger',
