@@ -20,6 +20,7 @@
 	</outputter>
 	
 	<logger name="ledger" outputters="log_file, console"/>
-	<logger name="event-store" outputters="log_file, console" level='DEBUG'/>
-	<logger name="common-domain" outputters="log_file, console" level='DEBUG'/>
+	<logger name="event-store" outputters="log_file" level='DEBUG'/>
+	<logger name="common-domain" outputters="log_file" level='DEBUG'/>
+	<logger name="common-domain::persistence" outputters="log_file" level='DEBUG'/>
 </log4r_config> 
