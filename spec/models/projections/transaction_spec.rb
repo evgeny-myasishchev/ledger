@@ -39,7 +39,12 @@ RSpec.describe Projections::Transaction, :type => :model do
         'ammount' => 10523,
         'tag_ids' => '{t-1},{t-2}',
         'comment' => 'Comment 101',
-        'date' => (date - 100).to_time)
+        'date' => (date - 100).to_time,
+        'is_transfer' => false,
+        'sending_account_id' => nil,
+        'sending_transaction_id' => nil,
+        'receiving_account_id' => nil,
+        'receiving_transaction_id' => nil)
       expect(transactions.detect { |t| t.transaction_id == 't-2' }).not_to be_nil
       expect(transactions.detect { |t| t.transaction_id == 't-3' }).not_to be_nil
     end
@@ -49,6 +54,24 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(transactions[0].transaction_id).to eql 't-1'
       expect(transactions[1].transaction_id).to eql 't-2'
       expect(transactions[2].transaction_id).to eql 't-3'
+    end
+    
+    it "should include transfer related attributes" do
+      t1 = p::Transaction.find_by_transaction_id 't-1'
+      t1.is_transfer = true
+      t1.sending_account_id = 'sa-1'
+      t1.sending_transaction_id = 'st-1'
+      t1.receiving_account_id = 'ra-2'
+      t1.receiving_transaction_id = 'rt-2'
+      t1.save!
+      
+      transactions = described_class.get_account_transactions user, account.aggregate_id
+      t1_rec = transactions.detect { |t| t.transaction_id == 't-1' }
+      expect(t1_rec['is_transfer']).to be_truthy
+      expect(t1_rec['sending_account_id']).to eql('sa-1')
+      expect(t1_rec['sending_transaction_id']).to eql('st-1')
+      expect(t1_rec['receiving_account_id']).to eql('ra-2')
+      expect(t1_rec['receiving_transaction_id']).to eql('rt-2')
     end
   end
   
@@ -122,6 +145,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       end
     
       it "should record transfer related attributes" do
+        expect(t1.is_transfer).to be_truthy
         expect(t1.sending_account_id).to eql('account-1')
         expect(t1.sending_transaction_id).to eql('t-1')
         expect(t1.receiving_account_id).to eql('account-2')
@@ -140,6 +164,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       end
     
       it "should record transfer related attributes" do
+        expect(t2.is_transfer).to be_truthy
         expect(t2.sending_account_id).to eql('account-1')
         expect(t2.sending_transaction_id).to eql('t-1')
         expect(t2.receiving_account_id).to eql('account-2')

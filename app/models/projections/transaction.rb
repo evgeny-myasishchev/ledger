@@ -18,7 +18,9 @@ class Projections::Transaction < ActiveRecord::Base
     account = Account.ensure_authorized! account_id, user
     Transaction.
       where('account_id = :account_id', account_id: account.aggregate_id).
-      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date).
+      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
+        :is_transfer, :sending_account_id, :sending_transaction_id, 
+        :receiving_account_id, :receiving_transaction_id).
       order(date: :desc)
   end
   
@@ -31,6 +33,7 @@ class Projections::Transaction < ActiveRecord::Base
     
     on TransferSent do |event|
       t = build_transaction(event)
+      t.is_transfer = true
       t.type_id = Domain::Transaction::ExpenceTypeId
       t.sending_account_id = event.aggregate_id
       t.sending_transaction_id = event.transaction_id
@@ -40,6 +43,7 @@ class Projections::Transaction < ActiveRecord::Base
         
     on TransferReceived do |event|
       t = build_transaction(event)
+      t.is_transfer = true
       t.type_id = Domain::Transaction::IncomeTypeId
       t.receiving_account_id = event.aggregate_id
       t.receiving_transaction_id = event.transaction_id
