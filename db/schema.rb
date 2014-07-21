@@ -58,13 +58,18 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   add_index "projections_tags", ["ledger_id", "tag_id"], name: "index_projections_tags_on_ledger_id_and_tag_id", unique: true
 
   create_table "projections_transactions", force: true do |t|
-    t.string   "transaction_id", null: false
-    t.string   "account_id",     null: false
-    t.integer  "type_id",        null: false
-    t.integer  "ammount",        null: false
+    t.string   "transaction_id",                           null: false
+    t.string   "account_id",                               null: false
+    t.integer  "type_id",                                  null: false
+    t.integer  "ammount",                                  null: false
     t.string   "tag_ids"
     t.text     "comment"
     t.datetime "date"
+    t.boolean  "is_transfer",              default: false, null: false
+    t.string   "sending_account_id"
+    t.string   "sending_transaction_id"
+    t.string   "receiving_account_id"
+    t.string   "receiving_transaction_id"
   end
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
