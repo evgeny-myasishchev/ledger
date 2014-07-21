@@ -1,9 +1,11 @@
 class Domain::Account < CommonDomain::Aggregate
+  include Loggable
   include CommonDomain::Infrastructure
   include Domain
   include Domain::Events
   
   def create ledger_id, sequential_number, name, currency
+    log.debug "Creating new account '#{name}' for ledger_id='#{ledger_id}'"
     raise_event AccountCreated.new AggregateId.new_id, ledger_id, sequential_number, name, currency.code
   end
   
@@ -17,6 +19,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def report_income ammount, date, tag_ids = nil, comment = nil
+    log.debug "Reporting #{ammount} of income for account aggregate_id='#{aggregate_id}'"
     ammount = Money.parse(ammount, @currency)
     balance = @balance + ammount.integer_ammount
     tag_ids = normalize_tag_ids tag_ids
@@ -27,6 +30,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def report_expence ammount, date, tag_ids = [], comment = nil
     ammount = Money.parse(ammount, @currency)
+    log.debug "Reporting #{ammount} of expence for account aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - ammount.integer_ammount
     transaction_id = AggregateId.new_id
@@ -36,6 +40,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def report_refund ammount, date, tag_ids = [], comment = nil
     ammount = Money.parse(ammount, @currency)
+    log.debug "Reporting #{ammount} of refund for account aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + ammount.integer_ammount
     transaction_id = AggregateId.new_id
@@ -45,6 +50,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def send_transfer(receiving_account_id, ammount, date, tag_ids = [], comment = nil)
     ammount = Money.parse(ammount, @currency)
+    log.debug "Sending #{ammount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - ammount.integer_ammount
     transaction_id = AggregateId.new_id
@@ -55,6 +61,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def receive_transfer(sending_account_id, sending_transaction_id, ammount, date, tag_ids = [], comment = nil)
     ammount = Money.parse(ammount, @currency)
+    log.debug "Receiving #{ammount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + ammount.integer_ammount
     transaction_id = AggregateId.new_id

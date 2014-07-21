@@ -24,6 +24,10 @@ class Currency
     self == other
   end
   
+  def to_s
+    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}"
+  end
+  
   private
     def get_required_attrib attribs, key
       raise ArgumentError.new("#{key} attribute is missing.") if !attribs.key?(key) || attribs[key].blank?

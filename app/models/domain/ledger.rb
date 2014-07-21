@@ -1,21 +1,26 @@
 class Domain::Ledger < CommonDomain::Aggregate
+  include Loggable
   include CommonDomain::Infrastructure
   include Domain::Events
   
   def create owner_user_id, name
+    log.debug "Creating account: #{name}"
     raise_event LedgerCreated.new AggregateId.new_id, owner_user_id, name
   end
   
   def rename name
+    log.debug "Renaming account '#{aggregate_id}'. New name: #{name}"
     raise_event LedgerRenamed.new aggregate_id, name
   end
   
   def share user_id
     return if @shared_with.include?(user_id)
+    log.debug "Sharing account '#{aggregate_id}' with user id=#{user_id}"
     raise_event LedgerShared.new aggregate_id, user_id
   end
   
   def create_new_account name, currency
+    log.debug "Creating new account '#{name}' currency='#{currency}'"
     account = Domain::Account.new
     account.create aggregate_id, @account_sequential_number, name, currency
     raise_event AccountAddedToLedger.new aggregate_id, account.aggregate_id
@@ -23,6 +28,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def close_account account
+    log.debug "Closing account id='#{account.aggregate_id}'"
     raise "Account '#{account.aggregate_id}' is not from ledger '#{@name}'." unless @all_accounts.include?(account.aggregate_id)
     if @open_accounts.include?(account.aggregate_id)
       account.close
@@ -32,15 +38,18 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   def create_tag name
     tag_id = @last_tag_id + 1
+    log.debug "Creating tag '#{name}' tag_id='#{tag_id}'"
     raise_event TagCreated.new aggregate_id, tag_id, name
     tag_id
   end
   
   def rename_tag tag_id, name
+    log.debug "Renaming the tag with tag_id='#{tag_id}' to '#{name}"
     raise_event TagRenamed.new aggregate_id, tag_id, name
   end
   
   def remove_tag tag_id
+    log.debug "Renaming the tag with tag_id='#{tag_id}'"
     raise_event TagRemoved.new aggregate_id, tag_id
   end
   
