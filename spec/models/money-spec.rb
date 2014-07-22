@@ -51,9 +51,9 @@ describe Money do
   
   describe "self.parse" do
     describe "from string using current locale" do
-      it "should parse integer" do
+      it "should parse integer string" do
         money = Money.parse('9932', uah)
-        expect(money.integer_ammount).to eql 9932
+        expect(money.integer_ammount).to eql 993200
         expect(money.currency).to be uah
       end
       
