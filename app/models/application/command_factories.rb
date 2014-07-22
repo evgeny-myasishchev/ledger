@@ -20,7 +20,7 @@ module Application::CommandFactories
     module ClassMethods
       def build_from_params params
         account_id = params[:account_id]
-        receiving_account_id = params[:receiving_account_id]
+        receiving_account_id = params[:command][:receiving_account_id]
         ammount_sent = params[:command][:ammount_sent]
         ammount_received = params[:command][:ammount_received]
         date = params[:command][:date]

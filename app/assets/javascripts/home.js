@@ -48,8 +48,9 @@ var homeApp = (function() {
 		};
 	});
 
-	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, tags) {
+	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, accounts, tags) {
 		var activeAccount = $scope.account = activeAccountResolver.resolve();
+		$scope.accounts = accounts;
 		$scope.reportedTransactions = [];
 		//For testing purposes
 		// $scope.reportedTransactions = [
@@ -78,13 +79,20 @@ var homeApp = (function() {
 		};
 		resetNewTransaction();
 		$scope.report = function() {
+			var command = {
+				tag_ids: $scope.newTransaction.tag_ids,
+				date: $scope.newTransaction.date.toJSON(),
+				comment: $scope.newTransaction.comment
+			};
+			if($scope.newTransaction.type == 'transfer') {
+				command.receiving_account_id = $scope.newTransaction.receivingAccount.aggregate_id;
+				command.ammount_sent = $scope.newTransaction.ammount;
+				command.ammount_received = $scope.newTransaction.ammountReceived;
+			} else {
+				command.ammount = $scope.newTransaction.ammount;
+			}
 			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
-				command: {
-					ammount: $scope.newTransaction.ammount,
-					tag_ids: $scope.newTransaction.tag_ids,
-					date: $scope.newTransaction.date.toJSON(),
-					comment: $scope.newTransaction.comment
-				}
+				command: command
 			}).success(function() {
 				addReportedTransaction($scope.newTransaction);
 				resetNewTransaction();

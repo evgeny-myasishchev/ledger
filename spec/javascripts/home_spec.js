@@ -205,6 +205,40 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 			});
 			
+			it("should submit the new refund transaction", function() {
+				scope.newTransaction.type = 'refund';
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-refund', function(data) {
+					var command = JSON.parse(data).command;
+					expect(command.ammount).toEqual('10.5');
+					expect(command.tag_ids).toEqual([1, 2]);
+					expect(command.date).toEqual(date.toJSON());
+					expect(command.comment).toEqual('New transaction 10.5');
+					return true;
+				}).respond();
+
+				scope.report();
+				$httpBackend.flush();
+			});
+			
+			it("should submit the new transfer transaction", function() {
+				scope.newTransaction.type = 'transfer';
+				scope.newTransaction.receivingAccount = {aggregate_id: 'a-2'};
+				scope.newTransaction.ammountReceived = '100.22';
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-transfer', function(data) {
+					var command = JSON.parse(data).command;
+					expect(command.receiving_account_id).toEqual('a-2');
+					expect(command.ammount_sent).toEqual('10.5');
+					expect(command.ammount_received).toEqual('100.22');
+					expect(command.tag_ids).toEqual([1, 2]);
+					expect(command.date).toEqual(date.toJSON());
+					expect(command.comment).toEqual('New transaction 10.5');
+					return true;
+				}).respond();
+
+				scope.report();
+				$httpBackend.flush();
+			});
+			
 			describe('on success', function() {
 				beforeEach(function() {
 					$httpBackend.expectPOST('accounts/a-1/transactions/report-expence').respond();

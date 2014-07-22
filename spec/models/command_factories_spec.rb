@@ -77,8 +77,8 @@ describe Application::Commands do
       }
       before(:each) do
         params[:account_id] = 'sending-993'
-        params[:receiving_account_id] = 'receiving-2291'
         params[:command] = {
+          receiving_account_id: 'receiving-2291',
           ammount_sent: '22110',
           ammount_received: '100110',
           date: date.iso8601
@@ -105,7 +105,7 @@ describe Application::Commands do
       end
       
       it "should fail if the receiving_account_id is not specified" do
-        params[:receiving_account_id] = nil
+        params[:command][:receiving_account_id] = nil
         expect{subject}.to raise_error ArgumentError, 'receiving_account_id is missing'
       end
     

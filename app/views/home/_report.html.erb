@@ -19,14 +19,25 @@
 	<div class="panel-body">
 		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
 			<div class="form-group">
-				<input autofocus type="text" class="form-control" name="ammount" placeholder="Ammount" ng-model='newTransaction.ammount' required>
+				<input autofocus type="text" class="form-control" placeholder="Ammount" ng-model='newTransaction.ammount' required>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="type">Type</label>
 				<select name="type" id="type" class='form-control' ng-model='newTransaction.type'>
 					<option value="income">Income</option>
 					<option value="expence">Expence</option>
+					<option value="refund">Refund</option>
+					<option value="transfer">Transfer</option>
 				</select>
+			</div>
+			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
+				<label class='control-label' for="type">Target account</label>
+				<select ng-options="account.name for account in accounts track by account.aggregate_id" class='form-control' ng-model='newTransaction.receivingAccount' required>
+					<option value="">--Chose account--</option>
+				</select>
+			</div>
+			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
+				<input type="text" class="form-control" placeholder="Target ammount" ng-model='newTransaction.ammountReceived' required>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="date">Date</label>
