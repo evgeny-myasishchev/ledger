@@ -31,6 +31,13 @@ var homeApp = (function() {
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
 			$scope.transactions = data;
 		});
+		
+		$scope.getTransactionTypeIcon = function(transaction) {
+			if(transaction.is_transfer) return 'glyphicon-transfer';
+			if(transaction.type_id == 1) return 'glyphicon-plus';
+			if(transaction.type_id == 2) return 'glyphicon-minus';
+			if(transaction.type_id == 3) return 'glyphicon-share-alt';
+		};
 	});
 
 	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, tags) {

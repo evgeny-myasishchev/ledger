@@ -87,6 +87,30 @@ describe("homeApp", function() {
 			$httpBackend.flush();
 			expect(scope.transactions).toEqual(transactions);
 		});
+		
+		describe('getTransactionTypeIcon', function() {
+			var transaction;
+			beforeEach(function() {
+				transaction = {type_id: -100, is_transfer: false};
+				initController();
+			});
+			it('should return transfer icon if transaction is transfer', function() {
+				transaction.is_transfer = true;
+				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-transfer');
+			});
+			it('should return income specific icon if transaction is income', function() {
+				transaction.type_id = 1;
+				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-plus');
+			});
+			it('should return expence specific icon if transaction is expence', function() {
+				transaction.type_id = 2;
+				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-minus');
+			});
+			it('should return refund specific icon if transaction is refund', function() {
+				transaction.type_id = 3;
+				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-plus');
+			});
+		});
 	});
 
 	describe('ReportTransactionsController', function() {
