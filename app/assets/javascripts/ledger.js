@@ -62,6 +62,14 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 					return tagsByName[tag.toLowerCase()] ? 'label label-info' : 'label label-warning';
 				}
 			});
+			var actualInput = input.tagsinput('input');
+			actualInput.keypress(function(e) {
+				//Forcing refresh on enter
+				if(e.keyCode == 13) {
+					input.data('tagsinput').add(actualInput.val());
+					actualInput.val('');
+				}
+			});
 			var handlingModelChanges = false;
 			scope.$watch('model', function(newTagIds) {
 				try {
@@ -78,9 +86,9 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 			input.on('change', function() {
 				var selectedTagNames = input.tagsinput('items');
 				if(selectedTagNames.length) {
-					input.tagsinput('input').removeAttr('placeholder');
+					actualInput.removeAttr('placeholder');
 				} else {
-					input.tagsinput('input').attr('placeholder', 'Tags');
+					actualInput.attr('placeholder', 'Tags');
 				}
 				if(handlingModelChanges) return;
 				var tagIds = [];
@@ -89,6 +97,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 					if(tag) tagIds.push(tag.tag_id);
 				});
 				scope.model = tagIds;
+				scope.$digest();
 			});
 		}
 	}

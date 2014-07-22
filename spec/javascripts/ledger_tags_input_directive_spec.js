@@ -37,4 +37,15 @@ describe('ledgerTagsInput', function() {
 		var items = input.tagsinput('items');
 		expect(items).toEqual(['Tag 101']);
 	});
+	
+	it('should update model when tags changed', function() {
+		scope.tag_ids = [];
+		var input = compile(scope).find('input:first');
+		input.tagsinput('input').val('Tag 101');
+		var e = jQuery.Event("keypress");
+		e.keyCode = 13;
+		input.tagsinput('input').trigger(e);
+		var items = input.tagsinput('items');
+		expect(items).toEqual(['Tag 101']);
+	});
 });
