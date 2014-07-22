@@ -108,7 +108,31 @@ describe("homeApp", function() {
 			});
 			it('should return refund specific icon if transaction is refund', function() {
 				transaction.type_id = 3;
-				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-plus');
+				expect(scope.getTransactionTypeIcon(transaction)).toEqual('glyphicon-share-alt');
+			});
+		});
+		
+		describe("getTransferAmmountSign", function() {
+			var transaction;
+			beforeEach(function() {
+				transaction = {type_id: -100, is_transfer: true};
+				initController();
+			});
+
+			it("should return + sign for transfer income", function() {
+				transaction.type_id = 1;
+				expect(scope.getTransferAmmountSign(transaction)).toEqual('+');
+			});
+
+			it("should return - sign for transfer expence", function() {
+				transaction.type_id = 2;
+				expect(scope.getTransferAmmountSign(transaction)).toEqual('-');
+			});
+			
+			it("should return empty for other transactions", function() {
+				transaction.type_id = 2;
+				transaction.is_transfer = false;
+				expect(scope.getTransferAmmountSign(transaction)).toBeNull();
 			});
 		});
 	});

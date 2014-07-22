@@ -28,7 +28,7 @@
 		<tbody>
 			<tr ng-repeat="transaction in transactions">
 				<td><i class='glyphicon {{getTransactionTypeIcon(transaction)}}'></i></td>
-				<td>{{transaction.ammount}}</td>
+				<td>{{getTransferAmmountSign(transaction)}}{{transaction.ammount}}</td>
 				<td><ledger-tags ng-model="transaction.tag_ids" /></td>
 				<td>{{transaction.date}}</td>
 				<td>{{transaction.comment}}</td>

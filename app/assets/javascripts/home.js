@@ -38,6 +38,14 @@ var homeApp = (function() {
 			if(transaction.type_id == 2) return 'glyphicon-minus';
 			if(transaction.type_id == 3) return 'glyphicon-share-alt';
 		};
+		
+		$scope.getTransferAmmountSign = function(transaction) {
+			if(transaction.is_transfer) {
+				return transaction.type_id == 2 ? '-' : '+';
+			} else {
+				return null;
+			}
+		};
 	});
 
 	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, tags) {
