@@ -15,6 +15,14 @@ describe TransactionsController do
     it "routes POST 'report-expence'" do
       expect({post: 'accounts/22331/transactions/report-expence'}).to route_to controller: 'transactions', action: 'report_expence', account_id: '22331'
     end
+    
+    it "routes POST 'report-refund'" do
+      expect({post: 'accounts/22331/transactions/report-refund'}).to route_to controller: 'transactions', action: 'report_refund', account_id: '22331'
+    end
+    
+    it "routes POST 'report-transfer'" do
+      expect({post: 'accounts/22331/transactions/report-transfer'}).to route_to controller: 'transactions', action: 'report_transfer', account_id: '22331'
+    end
   end
   
   describe "GET 'index'" do
@@ -39,35 +47,60 @@ describe TransactionsController do
     end
   end
   
-  describe "POST 'report_income'" do
+  describe "reporting actions" do
     include AuthenticationHelper
     authenticate_user
-
-    it "should build the ReportIncome command from params and dispatch it" do
-      command = double(:command)
-      expect(cmd::ReportIncome).to receive(:build_from_params) do |params|
-        expect(params).to be controller.params
-        command
+    
+    describe "POST 'report_income'" do
+      it "should build the ReportIncome command from params and dispatch it" do
+        command = double(:command)
+        expect(cmd::ReportIncome).to receive(:build_from_params) do |params|
+          expect(params).to be controller.params
+          command
+        end
+        expect(controller).to receive(:dispatch_command).with(command)
+        post 'report_income', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        expect(response.status).to eql 200
       end
-      expect(controller).to receive(:dispatch_command).with(command)
-      post 'report_income', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
-      expect(response.status).to eql 200
     end
-  end
   
-  describe "POST 'report_expence'" do
-    include AuthenticationHelper
-    authenticate_user
-
-    it "should build the ReportExpence command from params and dispatch it" do
-      command = double(:command)
-      expect(cmd::ReportExpence).to receive(:build_from_params) do |params|
-        expect(params).to be controller.params
-        command
+    describe "POST 'report_expence'" do
+      it "should build the ReportExpence command from params and dispatch it" do
+        command = double(:command)
+        expect(cmd::ReportExpence).to receive(:build_from_params) do |params|
+          expect(params).to be controller.params
+          command
+        end
+        expect(controller).to receive(:dispatch_command).with(command)
+        post 'report_expence', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        expect(response.status).to eql 200
       end
-      expect(controller).to receive(:dispatch_command).with(command)
-      post 'report_expence', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
-      expect(response.status).to eql 200
+    end 
+     
+    describe "POST 'report_refund'" do
+      it "should build the ReportRefund command from params and dispatch it" do
+        command = double(:command)
+        expect(cmd::ReportRefund).to receive(:build_from_params) do |params|
+          expect(params).to be controller.params
+          command
+        end
+        expect(controller).to receive(:dispatch_command).with(command)
+        post 'report_refund', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        expect(response.status).to eql 200
+      end
+    end
+         
+    describe "POST 'report_transfer'" do
+      it "should build the ReportTransfer command from params and dispatch it" do
+        command = double(:command)
+        expect(cmd::ReportTransfer).to receive(:build_from_params) do |params|
+          expect(params).to be controller.params
+          command
+        end
+        expect(controller).to receive(:dispatch_command).with(command)
+        post 'report_transfer', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        expect(response.status).to eql 200
+      end
     end
   end
 end
