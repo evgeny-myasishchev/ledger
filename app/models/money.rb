@@ -59,7 +59,7 @@ class Money
         raise MoneyParseError.new("Can not parse #{ammount}. Unexpected number of parts.") if parts.length > 2
         integer = parts[0]
         integer.delete! delimiter
-        fraction = parts.length == 2 ? parts[1] : nil
+        fraction = parts.length == 2 ? parts[1] : '00'
         return new(integer.to_i, currency) if fraction.nil?
         raise MoneyParseError.new("Can not parse #{ammount}. Fractional part is longer than two dights.") if fraction.length > 2
         return new((integer + fraction.ljust(2, '0')).to_i, currency)
