@@ -16,6 +16,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 			element.on('change', function() {
 				ngModel.$setViewValue(datePicker.getDate());
 			});
+			
+			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
 }).directive('ledgerTags', ['tags', function(tags) {
@@ -99,6 +101,45 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 				scope.model = tagIds;
 				scope.$digest();
 			});
+			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]);
+}]).directive('ldrBubbleEditor', function() {
+	return {
+		restrict: 'A',
+		scope: {
+			model: '=ngModel'
+		},
+		link: function(scope, element, attrs) {
+			element.html(scope.model);
+			var popover;
+			element.click(function() {
+				if(!popover) {
+					element.html('');
+					element.append(popover = $('<span>').html(scope.model));
+					popover.popover({
+							trigger: 'manual', 
+							html: true,
+							placement: 'auto top',
+							content: function() {
+								var form = $('<form>')
+									.append(input = $('<input class="form-control">').val(scope.model)
+										.on('focusout', function() {
+											popover.popover('hide');
+										})
+									).on('submit', function() {
+										
+									});
+								return form;
+							}
+						})
+						.on('shown.bs.popover', function() {
+							input.focus();
+						});
+				}
+				popover.popover('show');
+			});
+			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
+		}
+	}
+});

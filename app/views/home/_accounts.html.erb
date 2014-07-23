@@ -31,7 +31,7 @@
 				<td>{{getTransferAmmountSign(transaction)}}{{transaction.ammount}}</td>
 				<td><ledger-tags ng-model="transaction.tag_ids" /></td>
 				<td>{{transaction.date}}</td>
-				<td>{{transaction.comment}}</td>
+				<td ldr-bubble-editor='' update-with='adjustComment' key-arg='{{transaction}}' ng-model="transaction.comment"></td>
 			</tr>
 		</tbody>
 	</table>

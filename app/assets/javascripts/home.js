@@ -32,6 +32,12 @@ var homeApp = (function() {
 			$scope.transactions = data;
 		});
 		
+		$scope.adjustComment = function(transaction, comment) {
+			console.log('Adjusting comment...');
+			console.log(transaction);
+			console.log(comment);
+		};
+		
 		$scope.getTransactionTypeIcon = function(transaction) {
 			if(transaction.is_transfer) return 'glyphicon-transfer';
 			if(transaction.type_id == 1) return 'glyphicon-plus';
