@@ -75,6 +75,9 @@ class Domain::Account < CommonDomain::Aggregate
   def adjust_comment transaction_id, comment
   end
   
+  def adjust_date transaction_id, date
+  end
+  
   def add_tag transaction_id, tag
   end
   
