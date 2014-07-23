@@ -135,6 +135,72 @@ describe("homeApp", function() {
 				expect(scope.getTransferAmmountSign(transaction)).toBeNull();
 			});
 		});
+		
+		describe('adjust transaction', function() {
+			var transaction;
+			beforeEach(function() {
+				var date = new Date();
+				date.setHours(date.getHours() -  10);
+				transaction = {
+					transaction_id: 't-223', 
+					ammount: '100.23',
+					tag_ids: [20],
+					date: date.toJSON(),
+					comment: 'Original comment'
+				};
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond([transaction, {transaction_id: 't-1'}, , {transaction_id: 't-2'}]);
+				initController();
+			});
+			describe('adjustComment', function() {
+				it('should post adjust-comment for given transaction', function() {
+					$httpBackend.expectPOST('transactions/t-223/adjust-comment', function(data) {
+						var command = JSON.parse(data).command;
+						expect(command.comment).toEqual('New comment 223');
+						return true;
+					}).respond(200);
+					scope.adjustComment(transaction, 'New comment 223');
+					$httpBackend.flush();
+					expect(transaction.comment).toEqual('New comment 223');
+				});
+			});
+			describe('adjustAmmount', function() {
+				it('should post adjust-ammount for given transaction', function() {
+					$httpBackend.expectPOST('transactions/t-223/adjust-ammount', function(data) {
+						var command = JSON.parse(data).command;
+						expect(command.ammount).toEqual('200.43');
+						return true;
+					}).respond(200);
+					scope.adjustAmmount(transaction, '200.43');
+					$httpBackend.flush();
+					expect(transaction.ammount).toEqual('200.43');
+				});
+			});
+			describe('adjustTags', function() {
+				it('should post adjust-tags for given transaction', function() {
+					$httpBackend.expectPOST('transactions/t-223/adjust-tags', function(data) {
+						var command = JSON.parse(data).command;
+						expect(command.tag_ids).toEqual([10, 20, 40]);
+						return true;
+					}).respond(200);
+					scope.adjustTags(transaction, [10, 20, 40]);
+					$httpBackend.flush();
+					expect(transaction.tag_ids).toEqual([10, 20, 40]);
+				});
+			});
+			describe('adjustDate', function() {
+				it('should post adjust-date for given transaction', function() {
+					var newDate = new Date();
+					$httpBackend.expectPOST('transactions/t-223/adjust-date', function(data) {
+						var command = JSON.parse(data).command;
+						expect(command.date).toEqual(newDate.toJSON());
+						return true;
+					}).respond(200);
+					scope.adjustDate(transaction, newDate);
+					$httpBackend.flush();
+					expect(transaction.date).toEqual(newDate.toJSON());
+				});
+			});
+		});
 	});
 
 	describe('ReportTransactionsController', function() {

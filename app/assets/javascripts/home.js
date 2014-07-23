@@ -32,10 +32,37 @@ var homeApp = (function() {
 			$scope.transactions = data;
 		});
 		
+		$scope.adjustAmmount = function(transaction, ammount) {
+			$http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
+				command: {ammount: ammount}
+			}).success(function() {
+				transaction.ammount = ammount;
+			});
+		};
+		
+		$scope.adjustTags = function(transaction, tag_ids) {
+			$http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
+				command: {tag_ids: tag_ids}
+			}).success(function() {
+				transaction.tag_ids = tag_ids;
+			});
+		};
+		
+		$scope.adjustDate = function(transaction, date) {
+			var jsonDate = date.toJSON();
+			$http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
+				command: {date: date.toJSON()}
+			}).success(function() {
+				transaction.date = jsonDate;
+			});
+		};
+		
 		$scope.adjustComment = function(transaction, comment) {
-			console.log('Adjusting comment...');
-			console.log(transaction);
-			console.log(comment);
+			$http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
+				command: {comment: comment}
+			}).success(function() {
+				transaction.comment = comment;
+			});
 		};
 		
 		$scope.getTransactionTypeIcon = function(transaction) {
