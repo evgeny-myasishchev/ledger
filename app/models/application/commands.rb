@@ -14,5 +14,12 @@ module Application::Commands
     command :ReportTransfer, :receiving_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment do
       include TransferCommandFactory
     end
+    command :AdjustComment, :transaction_id, :comment do
+      include ActiveModel::Validations
+      validates :transaction_id, presence: true, strict: true
+      def initialize(params)
+        super(nil, {transaction_id: params[:transaction_id]}.merge!(params[:command]))
+      end
+    end
   end
 end

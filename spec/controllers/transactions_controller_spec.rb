@@ -23,6 +23,10 @@ describe TransactionsController do
     it "routes POST 'report-transfer'" do
       expect({post: 'accounts/22331/transactions/report-transfer'}).to route_to controller: 'transactions', action: 'report_transfer', account_id: '22331'
     end
+    
+    it "routes POST 'adjust-comment'" do
+      expect({post: 'transactions/t-100/adjust-comment'}).to route_to controller: 'transactions', action: 'adjust_comment', transaction_id: 't-100'
+    end
   end
   
   describe "GET 'index'" do
@@ -99,6 +103,25 @@ describe TransactionsController do
         end
         expect(controller).to receive(:dispatch_command).with(command)
         post 'report_transfer', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        expect(response.status).to eql 200
+      end
+    end
+  end
+  
+  describe "adjusting actions" do
+    include AuthenticationHelper
+    authenticate_user
+
+    describe "POST 'adjust_comment'" do
+      it "should build the AdjustComment command from params and dispatch it" do
+        command = double(:command)
+        expect(cmd::AdjustComment).to receive(:new) do |params|
+          expect(params).to be controller.params
+          command
+        end
+        expect(command).to receive(:valid?)
+        expect(controller).to receive(:dispatch_command).with(command)
+        post 'adjust_comment', transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
         expect(response.status).to eql 200
       end
     end

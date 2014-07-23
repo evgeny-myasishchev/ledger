@@ -149,4 +149,17 @@ describe Application::Commands do
       expect(subject).to be_a(Application::Commands::TransferCommandFactory)
     end
   end
+  
+  describe described_class::AccountCommands::AdjustComment do
+    it "should initialize the command from params" do
+      subject = described_class.new transaction_id: 't-100', command: {comment: 'New comment'}
+      expect(subject.transaction_id).to eql('t-100')
+      expect(subject.comment).to eql('New comment')
+    end
+    
+    it "should validate presentce of transaction_id" do
+      subject = described_class.new command: {}
+      expect { subject.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "Transaction can't be blank")
+    end
+  end
 end

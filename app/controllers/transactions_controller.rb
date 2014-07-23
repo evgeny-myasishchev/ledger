@@ -24,6 +24,13 @@ class TransactionsController < ApplicationController
     dispatch_transaction_command ReportTransfer
   end
   
+  def adjust_comment
+    command = AdjustComment.new params
+    command.valid?
+    dispatch_command command
+    render nothing: true
+  end
+  
   private def dispatch_transaction_command command_class
     dispatch_command command_class.build_from_params params
     render nothing: true

@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   post 'accounts/:account_id/transactions/report-expence' => 'transactions#report_expence'
   post 'accounts/:account_id/transactions/report-refund' => 'transactions#report_refund'
   post 'accounts/:account_id/transactions/report-transfer' => 'transactions#report_transfer'
+  post 'transactions/:transaction_id/adjust-comment' => 'transactions#adjust_comment'
   
   devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
