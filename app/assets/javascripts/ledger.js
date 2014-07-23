@@ -105,30 +105,36 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 		}
 	}
 }]).directive('ldrBubbleEditor', function() {
+	function getValue(scope, attrs) {
+		return scope.$eval(attrs.value);
+	};
+	
 	return {
 		restrict: 'A',
-		scope: {
-			model: '=ngModel'
-		},
 		link: function(scope, element, attrs) {
-			element.html(scope.model);
-			var popover;
 			element.click(function() {
+				var popover;
 				if(!popover) {
 					element.html('');
-					element.append(popover = $('<span>').html(scope.model));
+					//Wrapping in span will make the popover to be shown closer to the text in <td>
+					element.append(popover = $('<span>').html(getValue(scope, attrs)));
 					popover.popover({
 							trigger: 'manual', 
 							html: true,
 							placement: 'auto top',
 							content: function() {
 								var form = $('<form>')
-									.append(input = $('<input class="form-control">').val(scope.model)
+									.append(input = $('<input type="text" class="form-control">').val(getValue(scope, attrs))
 										.on('focusout', function() {
 											popover.popover('hide');
 										})
+										.keypress(function(e) {
+											if(e.keyCode == 27) popover.popover('hide');
+										})
 									).on('submit', function() {
-										
+										scope.$eval(attrs.submit, {newValue: input.val()});
+										scope.$digest();
+										popover.popover('hide');
 									});
 								return form;
 							}
@@ -136,10 +142,12 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 						.on('shown.bs.popover', function() {
 							input.focus();
 						});
+					element.on('$destroy', function() {
+						popover.popover('destroy');
+					});
 				}
 				popover.popover('show');
 			});
-			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
 });
