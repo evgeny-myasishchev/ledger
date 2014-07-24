@@ -3,18 +3,22 @@ require 'rails_helper'
 RSpec.describe Application::AccountsService, :type => :model do
   let(:repository) { double(:repository) }
   subject { described_class.new repository }
+  let(:p) { Projections }
   let(:c) { Module.new do
     include Application::Commands::AccountCommands
   end
   }
   let(:work) { @work }
   let(:account) { double(:account, report_income: nil, report_expence: nil)}
+  let(:sending_account) { double(:sending_account, aggregate_id: 'src-110') }
+  let(:receiving_account) { double(:receiving_account, aggregate_id: 'dst-210') }
+  
+  before(:each) do
+    @work = expect(repository).to begin_work
+  end
+  
   
   describe "ReportIncome" do
-    before(:each) do
-      @work = expect(repository).to begin_work
-    end
-    
     it "should use account to report the income" do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
@@ -25,10 +29,6 @@ RSpec.describe Application::AccountsService, :type => :model do
   end
   
   describe "ReportExpence" do
-    before(:each) do
-      @work = expect(repository).to begin_work
-    end
-    
     it "should use account to report the expence" do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
@@ -38,10 +38,6 @@ RSpec.describe Application::AccountsService, :type => :model do
   end
   
   describe "ReportRefund" do
-    before(:each) do
-      @work = expect(repository).to begin_work
-    end
-    
     it "should use account to report the expence" do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
@@ -51,11 +47,8 @@ RSpec.describe Application::AccountsService, :type => :model do
   end
     
   describe "ReportTransfer" do
-    let(:sending_account) { double(:sending_account, aggregate_id: 'src-110') }
-    let(:receiving_account) { double(:receiving_account, aggregate_id: 'dst-210') }
     let(:date) { DateTime.now }
     before(:each) do
-      @work = expect(repository).to begin_work
       expect(work).to get_and_return_aggregate Domain::Account, 'src-110', sending_account
       expect(work).to get_and_return_aggregate Domain::Account, 'dst-210', receiving_account
     end
@@ -71,6 +64,30 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(sending_account).to receive(:send_transfer).with('dst-210', '44322.10', date, ['t-1', 't-2'], 'Food') { 'st-221' }
       expect(receiving_account).to receive(:receive_transfer).with('src-110', 'st-221', '3693.50', date, ['t-1', 't-2'], 'Food')
       subject.handle_message command
+    end
+  end
+  
+  describe "AdjustComment" do
+    describe "regular transaction" do
+      it "should get the transaction and use the account to adjust the comment" do
+        expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
+        expect(work).to get_and_return_aggregate Domain::Account, 'a-1', account
+        expect(account).to receive(:adjust_comment).with('t-1', 'New comment')
+        subject.handle_message c::AdjustComment.new transaction_id: 't-1', command: {comment: 'New comment'}
+      end
+    end
+      
+    describe "transfer transaction" do
+      it "should get the transaction and use the account to adjust the comment" do
+        sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
+        expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
+        expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
+        expect(work).to get_and_return_aggregate Domain::Account, 'src-110', sending_account
+        expect(work).to get_and_return_aggregate Domain::Account, 'dst-210', receiving_account
+        expect(sending_account).to receive(:adjust_comment).with('t-1', 'New comment')
+        expect(receiving_account).to receive(:adjust_comment).with('t-2', 'New comment')
+        subject.handle_message c::AdjustComment.new transaction_id: 't-1', command: {comment: 'New comment'}
+      end
     end
   end
 end

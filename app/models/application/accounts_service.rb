@@ -30,4 +30,16 @@ class Application::AccountsService < CommonDomain::CommandHandler
       command.tag_ids,
       command.comment
   end
+  
+  on AccountCommands::AdjustComment, begin_work: true do |work, command|
+    transaction = Projections::Transaction.find_by_transaction_id command.transaction_id
+    account = work.get_by_id Domain::Account, transaction.account_id
+    account.adjust_comment command.transaction_id, command.comment
+    
+    if transaction.is_transfer
+      counterpart = transaction.get_transfer_counterpart
+      counterpart_account = work.get_by_id Domain::Account, counterpart.account_id
+      counterpart_account.adjust_comment counterpart.transaction_id, command.comment
+    end
+  end
 end
