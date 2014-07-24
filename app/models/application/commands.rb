@@ -2,6 +2,7 @@ module Application::Commands
   include Application::CommandFactories
   include CommonDomain::Command::DSL
   commands_group :AccountCommands do
+    # TODO: Rework other commands to use ActiveModel::Validations instead of custom factories
     command :ReportIncome, :ammount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
@@ -16,7 +17,7 @@ module Application::Commands
     end
     command :AdjustComment, :transaction_id, :comment do
       include ActiveModel::Validations
-      validates :transaction_id, presence: true, strict: true
+      validates :transaction_id, presence: true
       def initialize(params)
         super(nil, {transaction_id: params[:transaction_id]}.merge!(params[:command]))
       end

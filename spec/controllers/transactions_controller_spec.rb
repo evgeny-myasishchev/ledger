@@ -119,7 +119,6 @@ describe TransactionsController do
           expect(params).to be controller.params
           command
         end
-        expect(command).to receive(:valid?)
         expect(controller).to receive(:dispatch_command).with(command)
         post 'adjust_comment', transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
         expect(response.status).to eql 200
