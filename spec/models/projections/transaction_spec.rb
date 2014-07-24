@@ -8,6 +8,42 @@ RSpec.describe Projections::Transaction, :type => :model do
   let(:expence_id) { Domain::Transaction::ExpenceTypeId }
   include AccountHelpers::P
   
+  describe "get_transfer_counterpart" do
+    def new_transfer id, &block
+      t = p::Transaction.new transaction_id: id, account_id: 'a-10', type_id: 1, ammount: 10, is_transfer: true
+      yield(t)
+      t.save!
+      t
+    end
+    
+    let(:sending) { new_transfer 't-1' do |t|
+      t.sending_transaction_id = t.transaction_id
+    end}
+    let(:receiving) { new_transfer 't-2' do |t|
+      t.receiving_transaction_id = t.transaction_id
+      t.sending_transaction_id = 't-1'
+    end}
+    
+    before(:each) do
+      # Doing so to have them initialized
+      sending
+      receiving
+    end
+    
+    it "should fail if the transaction is not transfer" do
+      t = p::Transaction.create! transaction_id: 't-3', account_id: 'a-10', type_id: 1, ammount: 10
+      expect { t.get_transfer_counterpart }.to raise_error "Transaction 't-3' is not involved in transfer."
+    end
+    
+    it "should return receiving transaction if current is sending" do
+      expect(sending.get_transfer_counterpart).to eql receiving
+    end
+    
+    it "should return sending transaction if current is receiving" do
+      expect(receiving.get_transfer_counterpart).to eql sending
+    end
+  end
+  
   describe "self.get_account_transactions" do
     let(:user) { 
       u = User.new

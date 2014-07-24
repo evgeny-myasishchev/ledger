@@ -3,6 +3,17 @@ class Projections::Transaction < ActiveRecord::Base
   include Domain::Events
   include Projections
   
+  # Gets transfer counterpart. For sending transaction that would be the receiving and vice versa.
+  def get_transfer_counterpart
+    raise "Transaction '#{transaction_id}' is not involved in transfer." unless is_transfer
+    
+    # This ons is receving. Finding sending
+    return self.class.find_by transaction_id: sending_transaction_id unless transaction_id == sending_transaction_id
+    
+    # This one is sending. Finding receiving
+    return self.class.find_by 'sending_transaction_id = ? AND receiving_transaction_id = transaction_id', sending_transaction_id
+  end
+  
   def add_tag(the_id)
     wrapped_tag_id = "{#{the_id}}"
     if !self.tag_ids.nil? && self.tag_ids.include?(wrapped_tag_id)
