@@ -52,6 +52,18 @@ module CommonDomain::DispatchCommand
       end
     end
     
+    class ValidateCommands < Base
+      def call(command, context)
+        begin
+          unless command.valid?
+            details = command.respond_to?(:errors) ? command.errors.full_messages : command
+            raise CommonDomain::DispatchCommand::CommandValidationFailedError.new "Command validation failed: #{details}"
+          end
+        end if command.respond_to?(:valid?)
+        super(command, context)
+      end
+    end
+    
     # This middleware is used to assign user related info into the command headers.
     # Following headers assigned: 
     # * user_id - Id of the user that issues the command

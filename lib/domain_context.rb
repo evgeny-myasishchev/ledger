@@ -26,6 +26,7 @@ class DomainContext < CommonDomain::DomainContext
   def with_command_dispatch_middleware
     dispatch = CommonDomain::DispatchCommand::Middleware::Dispatch.new(command_dispatcher)
     @command_dispatch_middleware = CommonDomain::DispatchCommand::Middleware::Stack.new(dispatch) do |stack|
+      stack.with CommonDomain::DispatchCommand::Middleware::ValidateCommands
       stack.with CommonDomain::DispatchCommand::Middleware::TrackUser, user_id: lambda { |context| context.controller.current_user.id }
     end
     self

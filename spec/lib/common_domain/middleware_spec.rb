@@ -59,6 +59,33 @@ RSpec.describe CommonDomain::DispatchCommand::Middleware::Dispatch do
   end
 end
 
+RSpec.describe CommonDomain::DispatchCommand::Middleware::ValidateCommands do
+  include_context 'dispatch command middleware shared stuff'
+  describe "call" do
+    describe "validatable command" do
+      let(:command) { double(:command, valid?: true) }
+      
+      it "should call next if command is valid" do
+        expect(the_next).to receive(:call).with(command, context)
+        subject.call command, context
+      end
+      
+      it "should raise CommandInvalidError if the command is invalid" do
+        expect(command).to receive(:valid?) { false }
+        expect { subject.call command, context }.
+          to raise_error CommonDomain::DispatchCommand::CommandValidationFailedError, "Command validation failed: #{command}"
+      end
+      
+      it "should raise CommandInvalidError with full error messages if supported" do
+        expect(command).to receive(:valid?) { false }
+        expect(command).to receive(:errors) { double(:errors, full_messages: ['error1', 'error2']) }
+        expect { subject.call command, context }.
+          to raise_error CommonDomain::DispatchCommand::CommandValidationFailedError, "Command validation failed: #{['error1', 'error2']}"
+      end
+    end
+  end
+end
+
 RSpec.describe CommonDomain::DispatchCommand::Middleware::TrackUser do
   include_context 'dispatch command middleware shared stuff'
   let(:request) { double(:request, remote_ip: '11.22.33.44')}
