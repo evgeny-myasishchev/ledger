@@ -73,6 +73,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def adjust_comment transaction_id, comment
+    raise_event TransactionCommentAdjusted.new aggregate_id, transaction_id, comment
   end
   
   def adjust_date transaction_id, date
@@ -127,5 +128,8 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountBalanceChanged do |event|
     @balance = event.balance
+  end
+  
+  on TransactionCommentAdjusted do |event|
   end
 end

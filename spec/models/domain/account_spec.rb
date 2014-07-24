@@ -223,19 +223,31 @@ describe Domain::Account do
     end
   end
   
-  describe "adjust_ammount" do
-    it "should raise TransactionAmmountAdjusted"
-  end
+  describe "transaction adjustments" do
+    before(:each) do
+      subject.make_created
+    end
+    
+    describe "adjust_ammount" do
+      it "should raise TransactionAmmountAdjusted" do
+      end
+    end
   
-  describe "adjust_comment" do
-    it "should raise TransactionCommentAdjusted"
-  end
+    describe "adjust_comment" do
+      it "should raise TransactionCommentAdjusted" do
+        subject.adjust_comment 't-1', 'New comment for t1'
+        expect(subject).to have_one_uncommitted_event I::TransactionCommentAdjusted, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-1', comment: 'New comment for t1'
+        }
+      end
+    end
   
-  describe "add_tag" do
-    it "should raise TransactionTagAdded"
-  end
+    describe "add_tag" do
+      it "should raise TransactionTagAdded"
+    end
   
-  describe "remove_tag" do
-    it "should raise TransactionTagRemoved"
+    describe "remove_tag" do
+      it "should raise TransactionTagRemoved"
+    end
   end
 end

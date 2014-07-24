@@ -208,4 +208,17 @@ RSpec.describe Projections::Transaction, :type => :model do
       end
     end
   end
+  
+  describe "adjustments" do
+    let(:date) { DateTime.now - 100 }
+    let(:t1) { p::Transaction.find_by_transaction_id 't-1' }
+    before(:each) do
+      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, ['t-1'], 'Comment 1'
+    end
+    
+    it "should update comment on TransactionCommentAdjusted" do
+      subject.handle_message e::TransactionCommentAdjusted.new 'account-1', 't-1', 'New comment 1'
+      expect(t1.comment).to eql 'New comment 1'
+    end
+  end
 end

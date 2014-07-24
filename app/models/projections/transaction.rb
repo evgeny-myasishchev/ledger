@@ -63,6 +63,10 @@ class Projections::Transaction < ActiveRecord::Base
       t.save!
     end
     
+    on TransactionCommentAdjusted do |event|
+      Transaction.where(transaction_id: event.transaction_id).update_all comment: event.comment
+    end
+    
     private def build_transaction event
       t = Transaction.new account_id: event.aggregate_id,
         transaction_id: event.transaction_id,
