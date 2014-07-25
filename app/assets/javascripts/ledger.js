@@ -110,7 +110,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 	};
 	
 	return {
-		restrict: 'A',
+		restrict: 'EA',
 		link: function(scope, element, attrs) {
 			element.click(function() {
 				var popover;

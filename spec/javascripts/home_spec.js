@@ -76,16 +76,30 @@ describe("homeApp", function() {
 			expect(scope.activeAccount).toEqual(account2);
 		});
 		
-		it("should get the transactions for active account from the server", function() {
-			var transactions = [
-				{transaction1: true},
-				{transaction2: true}
-			];
-			$httpBackend.expectGET('accounts/a-1/transactions.json').respond(transactions);
-			initController();
-		    expect(scope.transactions).toBeUndefined();
-			$httpBackend.flush();
-			expect(scope.transactions).toEqual(transactions);
+		describe('transactions', function() {
+			var transactions, date;
+			beforeEach(function() {
+				date = new Date();
+				transactions = [
+					{transaction1: true, date: date.toJSON()},
+					{transaction2: true, date: date.toJSON()}
+				];
+				$httpBackend.expectGET('accounts/a-1/transactions.json').respond(transactions);
+				initController();
+			});
+			
+			it("should be loaded for current account", function() {
+			    expect(scope.transactions).toBeUndefined();
+				$httpBackend.flush();
+				expect(scope.transactions.length).toEqual(transactions.length);
+			});
+			
+			it("should have dates converted to date object", function() {
+				$httpBackend.flush();
+				jQuery.each(scope.transactions, function(i, t) {
+					expect(t.date).toEqual(date);
+				});
+			});
 		});
 		
 		describe('getTransactionTypeIcon', function() {
@@ -148,7 +162,7 @@ describe("homeApp", function() {
 					date: date.toJSON(),
 					comment: 'Original comment'
 				};
-				$httpBackend.whenGET('accounts/a-1/transactions.json').respond([transaction, {transaction_id: 't-1'}, , {transaction_id: 't-2'}]);
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond([transaction, {transaction_id: 't-1'}, {transaction_id: 't-2'}]);
 				initController();
 			});
 			describe('adjustComment', function() {

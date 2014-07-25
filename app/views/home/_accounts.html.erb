@@ -30,7 +30,7 @@
 				<td><i class='glyphicon {{getTransactionTypeIcon(transaction)}}'></i></td>
 				<td>{{getTransferAmmountSign(transaction)}}{{transaction.ammount}}</td>
 				<td><ledger-tags ng-model="transaction.tag_ids" /></td>
-				<td>{{transaction.date}}</td>
+				<td>{{transaction.date.toLocaleDateString()}}</td>
 				<td ldr-bubble-editor submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>
 			</tr>
 		</tbody>

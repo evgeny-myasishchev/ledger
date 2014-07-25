@@ -29,6 +29,9 @@ var homeApp = (function() {
 		$scope.accounts = accounts;
 		var activeAccount = $scope.activeAccount = activeAccountResolver.resolve();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
+			jQuery.each(data, function(i, t) {
+				t.date = new Date(t.date);
+			});
 			$scope.transactions = data;
 		});
 		
