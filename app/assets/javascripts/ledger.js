@@ -110,15 +110,13 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 	};
 	
 	return {
-		restrict: 'EA',
+		restrict: 'A',
 		link: function(scope, element, attrs) {
 			element.click(function() {
-				var popover;
-				if(!popover) {
-					element.html('');
-					//Wrapping in span will make the popover to be shown closer to the text in <td>
-					element.append(popover = $('<span>').html(getValue(scope, attrs)));
-					popover.popover({
+				var initialized;
+				if(!initialized) {
+					initialized = true;
+					element.popover({
 							trigger: 'manual', 
 							html: true,
 							placement: 'auto top',
@@ -126,16 +124,14 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 								var form = $('<form>')
 									.append(input = $('<input type="text" class="form-control">').val(getValue(scope, attrs))
 										.on('focusout', function() {
-											popover.popover('hide');
+											element.popover('hide');
 										})
 										.keypress(function(e) {
 											if(e.keyCode == 27) popover.popover('hide');
 										})
 									).on('submit', function() {
-										var val = input.val();
-										scope.$eval(attrs.submit, {newValue: val}).success(function() {
-											popover.html(val);
-											popover.popover('hide');
+										scope.$eval(attrs.submit, {newValue: input.val()}).success(function() {
+											element.popover('hide');
 										});
 									});
 								return form;
@@ -145,10 +141,10 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 							input.focus();
 						});
 					element.on('$destroy', function() {
-						popover.popover('destroy');
+						element.popover('destroy');
 					});
 				}
-				popover.popover('show');
+				element.popover('show');
 			});
 		}
 	}
