@@ -33,7 +33,7 @@ var homeApp = (function() {
 		});
 		
 		$scope.adjustAmmount = function(transaction, ammount) {
-			$http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
+			return $http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
 				command: {ammount: ammount}
 			}).success(function() {
 				transaction.ammount = ammount;
@@ -41,7 +41,7 @@ var homeApp = (function() {
 		};
 		
 		$scope.adjustTags = function(transaction, tag_ids) {
-			$http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
+			return $http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
 				command: {tag_ids: tag_ids}
 			}).success(function() {
 				transaction.tag_ids = tag_ids;
@@ -50,7 +50,7 @@ var homeApp = (function() {
 		
 		$scope.adjustDate = function(transaction, date) {
 			var jsonDate = date.toJSON();
-			$http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
+			return $http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
 				command: {date: date.toJSON()}
 			}).success(function() {
 				transaction.date = jsonDate;
@@ -58,7 +58,7 @@ var homeApp = (function() {
 		};
 		
 		$scope.adjustComment = function(transaction, comment) {
-			$http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
+			return $http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
 				command: {comment: comment}
 			}).success(function() {
 				transaction.comment = comment;

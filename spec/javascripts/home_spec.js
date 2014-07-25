@@ -158,9 +158,10 @@ describe("homeApp", function() {
 						expect(command.comment).toEqual('New comment 223');
 						return true;
 					}).respond(200);
-					scope.adjustComment(transaction, 'New comment 223');
+					var result = scope.adjustComment(transaction, 'New comment 223');
 					$httpBackend.flush();
 					expect(transaction.comment).toEqual('New comment 223');
+					expect(result.then).toBeDefined();
 				});
 			});
 			describe('adjustAmmount', function() {
@@ -170,9 +171,10 @@ describe("homeApp", function() {
 						expect(command.ammount).toEqual('200.43');
 						return true;
 					}).respond(200);
-					scope.adjustAmmount(transaction, '200.43');
+					var result = scope.adjustAmmount(transaction, '200.43');
 					$httpBackend.flush();
 					expect(transaction.ammount).toEqual('200.43');
+					expect(result.then).toBeDefined();
 				});
 			});
 			describe('adjustTags', function() {
@@ -182,9 +184,10 @@ describe("homeApp", function() {
 						expect(command.tag_ids).toEqual([10, 20, 40]);
 						return true;
 					}).respond(200);
-					scope.adjustTags(transaction, [10, 20, 40]);
+					var result = scope.adjustTags(transaction, [10, 20, 40]);
 					$httpBackend.flush();
 					expect(transaction.tag_ids).toEqual([10, 20, 40]);
+					expect(result.then).toBeDefined();
 				});
 			});
 			describe('adjustDate', function() {
@@ -195,9 +198,10 @@ describe("homeApp", function() {
 						expect(command.date).toEqual(newDate.toJSON());
 						return true;
 					}).respond(200);
-					scope.adjustDate(transaction, newDate);
+					var result = scope.adjustDate(transaction, newDate);
 					$httpBackend.flush();
 					expect(transaction.date).toEqual(newDate.toJSON());
+					expect(result.then).toBeDefined();
 				});
 			});
 		});

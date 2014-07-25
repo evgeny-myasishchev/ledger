@@ -132,9 +132,11 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatep
 											if(e.keyCode == 27) popover.popover('hide');
 										})
 									).on('submit', function() {
-										scope.$eval(attrs.submit, {newValue: input.val()});
-										scope.$digest();
-										popover.popover('hide');
+										var val = input.val();
+										scope.$eval(attrs.submit, {newValue: val}).success(function() {
+											popover.html(val);
+											popover.popover('hide');
+										});
 									});
 								return form;
 							}
