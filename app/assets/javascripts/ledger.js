@@ -4,20 +4,35 @@ angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 	};
 });
 
-var ledgerDirectives = angular.module('ledgerDirectives', []).directive('bsDatepicker', function() {
+var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDatepicker', function() {
 	return {
-		require: '?ngModel',
-		link: function(scope, element, attrs, ngModel) {
-			var datePicker;
-			ngModel.$render = function() {
-				datePicker = element.datepicker().data('datepicker');
-				datePicker.setDate(ngModel.$viewValue);
-			};
-			element.on('change', function() {
-				ngModel.$setViewValue(datePicker.getDate());
+		restrict: 'E',
+		scope: {
+			date: '=ngModel'
+		},
+		template: '<input type="text" class="form-control" placeholder="Date">',
+		link: function(scope, element, attrs) {
+			var input = element.find('input');
+			var datePicker = input.datetimepicker({
+				language: 'en-gb',
+				sideBySide: true
+			}).data('DateTimePicker');
+			var handlingChange = false;
+			scope.$watch('date', function(newValue) {
+				datePicker.setDate(newValue);
 			});
-			
-			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
+			input.on('dp.change', function(e) {
+				scope.date = datePicker.getDate().toDate();
+			})
+			input.keypress(function(e) {
+				if(e.keyCode == 13) {
+					datePicker.hide();
+				}
+			})
+			.on('$destroy', function() {
+				datePicker.destroy();
+			});
+			datePicker.setDate(scope.date);
 		}
 	}
 }).directive('ledgerTags', ['tags', function(tags) {

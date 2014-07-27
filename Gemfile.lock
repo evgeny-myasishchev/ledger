@@ -52,6 +52,8 @@ GEM
     bcrypt (3.1.7)
     bootstrap-sass (3.2.0.0)
       sass (~> 3.2)
+    bootstrap3-datetimepicker-rails (3.0.0.2)
+      momentjs-rails (~> 2.5.0)
     builder (3.2.2)
     devise (3.2.4)
       bcrypt (~> 3.0)
@@ -79,6 +81,8 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.25.1)
     minitest (5.3.5)
+    momentjs-rails (2.5.1)
+      railties (>= 3.1)
     multi_json (1.10.1)
     orm_adapter (0.5.0)
     phantomjs (1.9.7.1)
@@ -160,12 +164,14 @@ PLATFORMS
 DEPENDENCIES
   angularjs-rails
   bootstrap-sass (>= 3.1.1)
+  bootstrap3-datetimepicker-rails (~> 3.0.0)
   common-domain!
   devise
   event-store!
   jasmine-rails
   jquery-rails
   log4r!
+  momentjs-rails (~> 2.5.0)
   puma
   rails (~> 4)
   rspec-core (>= 3.0)

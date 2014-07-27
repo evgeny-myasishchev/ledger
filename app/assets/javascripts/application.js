@@ -16,7 +16,9 @@
 //= require angular
 //= require angular-route
 //= require ledger
-//= require bootstrap-datepicker
+//= require moment
+//= require bootstrap-datetimepicker
+//= require locales/bootstrap-datetimepicker.en-gb.js
 //= require bootstrap-tagsinput
 //= require typeahead.bundle
 //= require_tree .
