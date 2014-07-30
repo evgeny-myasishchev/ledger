@@ -10,18 +10,19 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDate
 		scope: {
 			date: '=ngModel'
 		},
-		template: '<input type="text" class="form-control" placeholder="Date">',
+		template: '<input type="text" class="form-control" placeholder="Date"><span style="cursor: pointer;" class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>',
 		link: function(scope, element, attrs) {
+			element.addClass('input-group');
 			var input = element.find('input');
-			var datePicker = input.datetimepicker({
+			var datePicker = element.datetimepicker({
 				language: 'en-gb',
-				sideBySide: true
+				sideBySide: false
 			}).data('DateTimePicker');
 			var handlingChange = false;
 			scope.$watch('date', function(newValue) {
 				datePicker.setDate(newValue);
 			});
-			input.on('dp.change', function(e) {
+			element.on('dp.change', function(e) {
 				scope.date = datePicker.getDate().toDate();
 			})
 			input.keypress(function(e) {
@@ -29,7 +30,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDate
 					datePicker.hide();
 				}
 			})
-			.on('$destroy', function() {
+			scope.$on('$destroy', function() {
 				datePicker.destroy();
 			});
 			datePicker.setDate(scope.date);
@@ -119,48 +120,154 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDate
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', function() {
+}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$compile', '$q', function($rootScope, $timeout, $compile, $q) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};
 	
-	return {
-		restrict: 'A',
-		link: function(scope, element, attrs) {
-			element.click(function() {
-				var initialized;
-				if(!initialized) {
-					initialized = true;
-					element.popover({
-							trigger: 'manual', 
-							html: true,
-							placement: 'auto top',
-							content: function() {
-								var form = $('<form>')
-									.append(input = $('<input type="text" class="form-control">').val(getValue(scope, attrs))
-										.on('focusout', function() {
-											element.popover('hide');
-										})
-										.keypress(function(e) {
-											if(e.keyCode == 27) popover.popover('hide');
-										})
-									).on('submit', function() {
-										scope.$eval(attrs.submit, {newValue: input.val()}).success(function() {
-											element.popover('hide');
-										});
-									});
-								return form;
-							}
-						})
-						.on('shown.bs.popover', function() {
-							input.focus();
-						});
-					element.on('$destroy', function() {
-						element.popover('destroy');
+	var datePickerFactory = (function() {
+		var current = null;
+		var compileNewCurrent = function(resolve) {
+			$timeout(function() {
+				var scope = $rootScope.$new();
+				scope.date = null;
+				var element = $compile('<ldr-datepicker ng-model="date" />')(scope);
+				current = { scope: scope, element: element };
+				if(resolve) resolve();
+				if(current == null) compileNewCurrent();
+			}, 10);
+		}
+		compileNewCurrent();
+		return {
+			build: function() {
+				var defered = $q.defer();
+				if(current) {
+					defered.resolve(current);
+					compileNewCurrent();
+				} else {
+					compileNewCurrent(function() {
+						defered.resolve(current);
+						current = null;
 					});
 				}
-				element.popover('show');
+				return defered.promise;
+			}
+		}
+	})();
+		
+	var editorFactories = {
+		'default': function(scope, element, attrs, resolve) {
+			var input;
+			var form = $('<form>').append(input = $('<input type="text" class="form-control">').val(getValue(scope, attrs))
+			.on('focusout', function() {
+				element.popover('hide');
+			}));
+			var shownHandler;
+			element.on('shown.bs.popover', shownHandler = function() {
+				input.focus();
+			});
+			resolve({
+				form: form,
+				dispose: function() {
+					form.off();
+					element.off('shown.bs.popover', shownHandler);
+				},
+				getNewValue: function() { return input.val(); }
+			});
+		},
+		'date': function(scope, element, attrs, resolve) {
+			var datePicker, form = $('<form class="form-inline">');
+			datePickerFactory.build().then(function(dp) {
+				datePicker = dp;
+				datePicker.scope.date = getValue(scope, attrs);
+				form.append(datePicker.element);
+				var shownHandler;
+				element.on('shown.bs.popover', shownHandler = function() {
+					form.find('input').focus();
+				});
+				resolve({
+					form: form,
+					dispose: function() {
+						datePicker.scope.$destroy();
+						form.off();
+						element.off('shown.bs.popover', shownHandler);
+					},
+					getNewValue: function() {
+						return datePicker.scope.date;
+					}
+				});
 			});
 		}
 	}
-});
+	
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			var editorType = attrs.ldrBubbleEditor || 'default';
+			var initialized, showing, shown;
+			var editor = null;
+			
+			function buildEditor(resolve) {
+				editorFactories[editorType](scope, element, attrs, function(edt) {
+					edt.form.keypress(function(e) {
+						if(e.keyCode == 27) hidePopover();
+					})
+					.on('submit', function() {
+						scope.$eval(attrs.submit, {newValue: edt.getNewValue()}).success(function() {
+							hidePopover(element);
+						});
+					});
+					resolve(edt);
+				});
+			}
+			
+			var showing = false;
+			function showPopover() {
+				if(!shown && !showing) {
+					showing = true;
+					buildEditor(function(edt) {
+						editor = edt;
+						element.popover('show');
+					});
+				}
+			}
+	
+			function hidePopover() {
+				if(shown) {
+					element.popover('hide');
+				}
+			}
+			
+			element.click(function() {
+				if(!initialized) {
+					initialized = true;
+					element.popover({
+							trigger: 'manual',
+							html: true,
+							placement: 'auto top',
+							container: 'body',
+							content: function() {
+								return editor.form;
+							}
+					})
+					.on('shown.bs.popover', function() {
+						shown = true;
+						showing = false;
+					})
+					.on('hidden.bs.popover', function() {
+						if(!shown) return;
+						shown = false
+						editor.dispose()
+						editor = null;
+					});
+				}
+				//Toggle may not work here because of the focusout
+				shown ? hidePopover() : showPopover();
+			});
+			
+			scope.$on('$destroy', function() {
+				element.popover('destroy');
+			});
+		}
+	}
+}]);
