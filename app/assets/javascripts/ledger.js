@@ -4,7 +4,7 @@ angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 	};
 });
 
-var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDatepicker', function() {
+var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).directive('ldrDatepicker', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -120,40 +120,12 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDate
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$compile', '$q', function($rootScope, $timeout, $compile, $q) {
+}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$pooledCompile', '$q', function($rootScope, $timeout, $pooledCompile, $q) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};
 	
-	var datePickerFactory = (function() {
-		var current = null;
-		var compileNewCurrent = function(resolve) {
-			$timeout(function() {
-				var scope = $rootScope.$new();
-				scope.date = null;
-				var element = $compile('<ldr-datepicker ng-model="date" />')(scope);
-				current = { scope: scope, element: element };
-				if(resolve) resolve();
-				if(current == null) compileNewCurrent();
-			}, 10);
-		}
-		compileNewCurrent();
-		return {
-			build: function() {
-				var defered = $q.defer();
-				if(current) {
-					defered.resolve(current);
-					compileNewCurrent();
-				} else {
-					compileNewCurrent(function() {
-						defered.resolve(current);
-						current = null;
-					});
-				}
-				return defered.promise;
-			}
-		}
-	})();
+	var datePickerCompilePool = $pooledCompile.newPool('<ldr-datepicker ng-model="date" />');
 		
 	var editorFactories = {
 		'default': function(scope, element, attrs, resolve) {
@@ -177,7 +149,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', []).directive('ldrDate
 		},
 		'date': function(scope, element, attrs, resolve) {
 			var datePicker, form = $('<form class="form-inline">');
-			datePickerFactory.build().then(function(dp) {
+			datePickerCompilePool.compile().then(function(dp) {
 				datePicker = dp;
 				datePicker.scope.date = getValue(scope, attrs);
 				form.append(datePicker.element);
