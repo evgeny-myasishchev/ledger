@@ -126,6 +126,11 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 	};
 	
 	var datePickerCompilePool = $pooledCompile.newPool('<ldr-datepicker ng-model="date" />');
+	var tagsCompilePool = $pooledCompile.newPool('<ledger-tags-input ng-model="tag_ids" />', {
+		initScope: function(scope) {
+			scope.tag_ids = [];
+		}
+	});
 		
 	var editorFactories = {
 		'default': function(scope, element, attrs, resolve) {
@@ -166,6 +171,32 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 					},
 					getNewValue: function() {
 						return datePicker.scope.date;
+					}
+				});
+			});
+		},
+		'tags': function(scope, element, attrs, resolve) {
+			var tags, form = $('<form class="form-inline" style="width: 200px">')
+			tagsCompilePool.compile().then(function(t) {
+				tags = t;
+				tags.scope.tag_ids = [];
+				tags.element.find('div.bootstrap-tagsinput').css({
+					display: 'block', marginBottom: 0
+				});
+				form.append(tags.element);
+				var shownHandler;
+				element.on('shown.bs.popover', shownHandler = function() {
+					form.find('input').focus();
+				});
+				resolve({
+					form: form,
+					dispose: function() {
+						tags.scope.$destroy();
+						form.off();
+						element.off('shown.bs.popover', shownHandler);
+					},
+					getNewValue: function() {
+						return tags.scope.tag_ids;
 					}
 				});
 			});

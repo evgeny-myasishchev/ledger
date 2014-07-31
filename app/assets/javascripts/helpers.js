@@ -1,11 +1,13 @@
 (function() {
 	var ledgerHelpers = angular.module('ledgerHelpers', []);
 	ledgerHelpers.service('$pooledCompile', ['$rootScope', '$timeout', '$compile', '$q', function($rootScope, $timeout, $compile, $q) {
-		var Pool = function(content) {
+		var Pool = function(content, options) {
 			var latest;
+			var scopeInitializer = (options && options.initScope) || function() {};
 			var scheduleLatestCompile = function(resolve) {
 				$timeout(function() {
 					var scope = $rootScope.$new();
+					scopeInitializer(scope);
 					var element = $compile(content)(scope);
 					latest = { scope: scope, element: element };
 					if(resolve) resolve();
@@ -29,8 +31,8 @@
 			};
 		};
 		return {
-			newPool: function(content) {
-				return new Pool(content);
+			newPool: function(content, options) {
+				return new Pool(content, options);
 			}
 		}
 	}]);
