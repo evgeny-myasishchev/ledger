@@ -120,18 +120,11 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$pooledCompile', '$q', function($rootScope, $timeout, $pooledCompile, $q) {
+}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$q', function($rootScope, $timeout, $pooledCompile, $q) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};
 	
-	var datePickerCompilePool = $pooledCompile.newPool('<ldr-datepicker ng-model="date" />');
-	var tagsCompilePool = $pooledCompile.newPool('<ledger-tags-input ng-model="tag_ids" />', {
-		initScope: function(scope) {
-			scope.tag_ids = [];
-		}
-	});
-		
 	var editorFactories = {
 		'default': function(scope, element, attrs, resolve) {
 			var input;
@@ -153,26 +146,36 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			});
 		},
 		'date': function(scope, element, attrs, resolve) {
-			var datePicker, form = $('<form class="form-inline">');
-			datePickerCompilePool.compile().then(function(dp) {
-				datePicker = dp;
-				datePicker.scope.date = getValue(scope, attrs);
-				form.append(datePicker.element);
-				var shownHandler;
-				element.on('shown.bs.popover', shownHandler = function() {
-					form.find('input').focus();
+			var datepicker, input, form = $('<form class="form-inline">')
+				.append(datepicker = $('<div class="input-group">')
+					.append(input = $('<input type="text" class="form-control" />'))
+					.append('<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>')
+					.datetimepicker()
+				)
+				.on('dp.show', function() {
+					input.focus(); //The dp takes focus when showing. Restoring the focus to avoiding hidding.
+				})
+				.on('focusout', function() {
+					setTimeout(function() {
+						if(!input.is(':focus')) element.popover('hide');
+					}, 100); //Using such a timeout to let focus to be restored if needed (see db.show handler above)
 				});
-				resolve({
-					form: form,
-					dispose: function() {
-						datePicker.scope.$destroy();
-						form.off();
-						element.off('shown.bs.popover', shownHandler);
-					},
-					getNewValue: function() {
-						return datePicker.scope.date;
-					}
-				});
+			datepicker = datepicker.data('DateTimePicker');
+			var shownHandler;
+			element.on('shown.bs.popover', shownHandler = function() {
+				input.focus();
+			});
+			datepicker.setDate(getValue(scope, attrs));
+			resolve({
+				form: form,
+				dispose: function() {
+					form.off();
+					element.off('shown.bs.popover', shownHandler);
+					datepicker.destroy();
+				},
+				getNewValue: function() {
+					return datepicker.getDate().toDate();
+				}
 			});
 		},
 		'tags': function(scope, element, attrs, resolve) {
