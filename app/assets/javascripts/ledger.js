@@ -58,14 +58,10 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			element.html(result.join(' '));
 		}
 	}
-}]).directive('ledgerTagsInput', ['tags', function(tags) {
+}]).directive('ledgerTagsInput', ['tags', 'tagsHelper', function(tags, tagsHelper) {
 	var $ = jQuery;
-	var tagsByName = {};
-	var tagsById = {};
-	$.each(tags, function(index, tag) {
-		tagsByName[tag.name.toLowerCase()] = tag;
-		tagsById[tag.tag_id] = tag;
-	});
+	var tagsByName = tagsHelper.indexByName(tags);
+	var tagsById = tagsHelper.indexById(tags);
 	return {
 		restrict: 'E',
 		scope: {
@@ -120,7 +116,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', ['$rootScope', '$timeout', '$q', function($rootScope, $timeout, $pooledCompile, $q) {
+}]).directive('ldrBubbleEditor', ['tags', 'tagsHelper', function(tags, tagsHelper) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};
@@ -179,29 +175,68 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			});
 		},
 		'tags': function(scope, element, attrs, resolve) {
-			var tags, form = $('<form class="form-inline" style="width: 200px">')
-			tagsCompilePool.compile().then(function(t) {
-				tags = t;
-				tags.scope.tag_ids = [];
-				tags.element.find('div.bootstrap-tagsinput').css({
-					display: 'block', marginBottom: 0
-				});
-				form.append(tags.element);
-				var shownHandler;
-				element.on('shown.bs.popover', shownHandler = function() {
-					form.find('input').focus();
-				});
-				resolve({
-					form: form,
-					dispose: function() {
-						tags.scope.$destroy();
-						form.off();
-						element.off('shown.bs.popover', shownHandler);
-					},
-					getNewValue: function() {
-						return tags.scope.tag_ids;
-					}
-				});
+			var tagsByName = tagsHelper.indexByName(tags);
+			var tagsById = tagsHelper.indexById(tags);
+			
+			var input, form = $('<form class="form-inline" style="width: 200px">')
+				.append($('<div class="form-group" style="display: block;">')
+					.append(input = $('<input type="text" class="form-control" placeholder="Tags" style="width: 100%">'))
+				);
+			input.tagsinput({
+				confirmKeys: [188],
+				tagClass: function(tag) {
+					return tagsByName[tag.toLowerCase()] ? 'label label-info' : 'label label-warning';
+				}
+			});
+			form.find('div.bootstrap-tagsinput').css({display: 'block', marginBottom: 0});
+			var tagsinput = input.data('tagsinput');
+			var actualInput = input.tagsinput('input');
+			actualInput.keypress(function(e) {
+				//Forcing refresh on enter
+				if(e.keyCode == 13) {
+					tagsinput.add(actualInput.val());
+					actualInput.val('');
+					form.trigger('submit');
+				}
+			}).on('focusout', function() {
+				element.popover('hide');
+			});
+			input.on('change', function() {
+				var selectedTagNames = input.tagsinput('items');
+				if(selectedTagNames.length) {
+					actualInput.removeAttr('placeholder');
+				} else {
+					actualInput.attr('placeholder', 'Tags');
+				}
+			});
+			
+			//Set initial value
+			var tagIds = tagsHelper.bracedStringToArray(getValue(scope, attrs));
+			$.each(tagIds, function(index, tagId) {
+				input.tagsinput('add', tagsById[tagId].name);
+			});
+
+			var shownHandler;
+			element.on('shown.bs.popover', shownHandler = function() {
+				form.find('input').focus();
+			});
+			resolve({
+				form: form,
+				dispose: function() {
+					form.off();
+					input.off();
+					element.off('shown.bs.popover', shownHandler);
+					tagsinput.destroy();
+				},
+				getNewValue: function() {
+					var selectedTagNames = input.tagsinput('items');
+					var tagIds = [];
+					$.each(selectedTagNames, function(index, tagName) {
+						var tag = tagsByName[tagName.toLowerCase()];
+						if(tag) tagIds.push(tag.tag_id);
+					});
+					return tagIds;
+				}
 			});
 		}
 	}
