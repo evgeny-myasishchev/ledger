@@ -17,7 +17,19 @@
 				return tagsById;
 			},
 			bracedStringToArray: function(string) {
-				return [4];
+				if(string) {
+					var braceStart, result = [];
+					for(var i = 0; i < string.length; i++) {
+						var char = string[i];
+						if(char == '{') braceStart = i + 1;
+						if(char == '}')  {
+							result.push(parseInt(string.substring(braceStart, i)));
+						}
+					}
+					return result;
+				} else {
+					return [];
+				}
 			}
 		};
 	});
