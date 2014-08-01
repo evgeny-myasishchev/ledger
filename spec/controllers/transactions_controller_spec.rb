@@ -114,18 +114,32 @@ describe TransactionsController do
   describe "adjusting actions" do
     include AuthenticationHelper
     authenticate_user
-
-    describe "POST 'adjust_comment'" do
-      it "should build the AdjustComment command from params and dispatch it" do
-        command = double(:command)
-        expect(cmd::AdjustComment).to receive(:new) do |params|
-          expect(params).to be controller.params
-          command
-        end
-        expect(controller).to receive(:dispatch_command).with(command)
-        post 'adjust_comment', transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
-        expect(response.status).to eql 200
+    
+    def should_dispatch(action, command_class)
+      command = double(:command)
+      expect(command_class).to receive(:new) do |params|
+        expect(params).to be controller.params
+        command
       end
+      expect(controller).to receive(:dispatch_command).with(command)
+      post action, transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
+      expect(response.status).to eql 200
+    end
+    
+    it "should build dispatch adjust ammount command on POST 'adjust_ammount'" do
+      should_dispatch 'adjust_ammount', cmd::AdjustAmmount
+    end
+    
+    it "should build dispatch adjust tags command on POST 'adjust_tags'" do
+      should_dispatch 'adjust_tags', cmd::AdjustTags
+    end
+    
+    it "should build dispatch adjust date command on POST 'adjust_date'" do
+      should_dispatch 'adjust_date', cmd::AdjustDate
+    end
+    
+    it "should build dispatch adjust comment command on POST 'adjust_comment'" do
+      should_dispatch 'adjust_comment', cmd::AdjustComment
     end
   end
 end

@@ -24,6 +24,21 @@ class TransactionsController < ApplicationController
     dispatch_transaction_command ReportTransfer
   end
   
+  def adjust_ammount
+    dispatch_command AdjustAmmount.new params
+    render nothing: true
+  end
+  
+  def adjust_tags
+    dispatch_command AdjustTags.new params
+    render nothing: true
+  end
+  
+  def adjust_date
+    dispatch_command AdjustDate.new params
+    render nothing: true
+  end
+  
   def adjust_comment
     dispatch_command AdjustComment.new params
     render nothing: true
