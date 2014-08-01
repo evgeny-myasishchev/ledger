@@ -159,7 +159,8 @@ describe Application::Commands do
     
     it "should validate presentce of transaction_id" do
       subject = described_class.new command: {}
-      expect { subject.valid? }.to raise_error(ActiveModel::StrictValidationFailed, "Transaction can't be blank")
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
     end
   end
 end
