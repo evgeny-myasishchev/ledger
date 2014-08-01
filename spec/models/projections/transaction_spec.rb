@@ -220,5 +220,11 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionCommentAdjusted.new 'account-1', 't-1', 'New comment 1'
       expect(t1.comment).to eql 'New comment 1'
     end
+    
+    it "should update date on TransactionDateAdjusted" do
+      updated_date = date - 110
+      subject.handle_message e::TransactionDateAdjusted.new 'account-1', 't-1', updated_date
+      expect(t1.date.to_datetime).to eql updated_date.utc
+    end
   end
 end

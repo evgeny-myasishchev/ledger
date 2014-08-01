@@ -241,6 +241,16 @@ describe Domain::Account do
         }
       end
     end
+    
+    describe "adjust_date" do
+      it "should raise TransactionDateAdjusted" do
+        date = DateTime.now
+        subject.adjust_date 't-1', date
+        expect(subject).to have_one_uncommitted_event I::TransactionDateAdjusted, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-1', date: date
+        }
+      end
+    end
   
     describe "add_tag" do
       it "should raise TransactionTagAdded"

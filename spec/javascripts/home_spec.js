@@ -214,7 +214,7 @@ describe("homeApp", function() {
 					}).respond(200);
 					var result = scope.adjustDate(transaction, newDate);
 					$httpBackend.flush();
-					expect(transaction.date).toEqual(newDate.toJSON());
+					expect(transaction.date).toEqual(newDate);
 					expect(result.then).toBeDefined();
 				});
 			});

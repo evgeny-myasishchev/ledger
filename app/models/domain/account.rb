@@ -77,6 +77,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def adjust_date transaction_id, date
+    raise_event TransactionDateAdjusted.new aggregate_id, transaction_id, date
   end
   
   def add_tag transaction_id, tag
@@ -131,5 +132,8 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on TransactionCommentAdjusted do |event|
+  end  
+  
+  on TransactionDateAdjusted do |event|
   end
 end

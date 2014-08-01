@@ -20,4 +20,5 @@ module Domain::Events
   event :TransferSent, :transaction_id, :receiving_account_id, :ammount, :date, :tag_ids, :comment
   event :TransferReceived, :transaction_id, :sending_account_id, :sending_transaction_id, :ammount, :date, :tag_ids, :comment
   event :TransactionCommentAdjusted, :transaction_id, :comment
+  event :TransactionDateAdjusted, :transaction_id, :date
 end

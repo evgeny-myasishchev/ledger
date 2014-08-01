@@ -56,7 +56,7 @@ var homeApp = (function() {
 			return $http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
 				command: {date: date.toJSON()}
 			}).success(function() {
-				transaction.date = jsonDate;
+				transaction.date = date;
 			});
 		};
 		
