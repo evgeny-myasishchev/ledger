@@ -25,9 +25,7 @@ class TransactionsController < ApplicationController
   end
   
   def adjust_comment
-    command = AdjustComment.new params
-    # command.valid?
-    dispatch_command command
+    dispatch_command AdjustComment.new params
     render nothing: true
   end
   

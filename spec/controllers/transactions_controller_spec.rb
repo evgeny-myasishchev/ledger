@@ -24,7 +24,10 @@ describe TransactionsController do
       expect({post: 'accounts/22331/transactions/report-transfer'}).to route_to controller: 'transactions', action: 'report_transfer', account_id: '22331'
     end
     
-    it "routes POST 'adjust-comment'" do
+    it "routes POST 'adjust-[field]'" do
+      expect({post: 'transactions/t-100/adjust-ammount'}).to route_to controller: 'transactions', action: 'adjust_ammount', transaction_id: 't-100'
+      expect({post: 'transactions/t-100/adjust-tags'}).to route_to controller: 'transactions', action: 'adjust_tags', transaction_id: 't-100'
+      expect({post: 'transactions/t-100/adjust-date'}).to route_to controller: 'transactions', action: 'adjust_date', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-comment'}).to route_to controller: 'transactions', action: 'adjust_comment', transaction_id: 't-100'
     end
   end

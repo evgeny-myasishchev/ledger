@@ -5,6 +5,9 @@ Rails.application.routes.draw do
   post 'accounts/:account_id/transactions/report-expence' => 'transactions#report_expence'
   post 'accounts/:account_id/transactions/report-refund' => 'transactions#report_refund'
   post 'accounts/:account_id/transactions/report-transfer' => 'transactions#report_transfer'
+  post 'transactions/:transaction_id/adjust-ammount' => 'transactions#adjust_ammount'
+  post 'transactions/:transaction_id/adjust-tags' => 'transactions#adjust_tags'
+  post 'transactions/:transaction_id/adjust-date' => 'transactions#adjust_date'
   post 'transactions/:transaction_id/adjust-comment' => 'transactions#adjust_comment'
   
   devise_for :users
