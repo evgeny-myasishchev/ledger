@@ -150,6 +150,52 @@ describe Application::Commands do
     end
   end
   
+  describe described_class::AccountCommands::AdjustAmmount do
+    it "should initialize the command from params" do
+      subject = described_class.new transaction_id: 't-100', command: {ammount: '100.5'}
+      expect(subject.transaction_id).to eql('t-100')
+      expect(subject.ammount).to eql('100.5')
+    end
+    
+    it "should validate presentce of transaction_id and ammount" do
+      subject = described_class.new command: {}
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      expect(subject.errors[:ammount]).to eql ["can't be blank"]
+    end
+  end
+  
+  describe described_class::AccountCommands::AdjustTags do
+    it "should initialize the command from params" do
+      subject = described_class.new transaction_id: 't-100', command: {tag_ids: [100, 200]}
+      expect(subject.transaction_id).to eql('t-100')
+      expect(subject.tag_ids).to eql([100, 200])
+    end
+    
+    it "should validate presentce of transaction_id and tag_ids" do
+      subject = described_class.new command: {}
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      expect(subject.errors[:tag_ids]).to eql ["can't be blank"]
+    end
+  end
+  
+  describe described_class::AccountCommands::AdjustDate do
+    it "should initialize the command from params" do
+      date = DateTime.new
+      subject = described_class.new transaction_id: 't-100', command: {date: date}
+      expect(subject.transaction_id).to eql('t-100')
+      expect(subject.date).to eql(date)
+    end
+    
+    it "should validate presentce of transaction_id and date" do
+      subject = described_class.new command: {}
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      expect(subject.errors[:date]).to eql ["can't be blank"]
+    end
+  end
+  
   describe described_class::AccountCommands::AdjustComment do
     it "should initialize the command from params" do
       subject = described_class.new transaction_id: 't-100', command: {comment: 'New comment'}
