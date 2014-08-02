@@ -43,6 +43,12 @@ class Application::AccountsService < CommonDomain::CommandHandler
     end
   end
   
+  on AccountCommands::AdjustTags do |command|
+    perform_adjustment command.transaction_id do |account, transaction_id|
+      account.adjust_tags transaction_id, command.tag_ids
+    end
+  end
+  
   private def perform_adjustment transaction_id, &block
     repository.begin_work do |work|
       transaction = Projections::Transaction.find_by_transaction_id transaction_id
