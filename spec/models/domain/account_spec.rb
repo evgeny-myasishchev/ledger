@@ -252,12 +252,48 @@ describe Domain::Account do
       end
     end
   
-    describe "add_tag" do
-      it "should raise TransactionTagAdded"
-    end
-  
-    describe "remove_tag" do
-      it "should raise TransactionTagRemoved"
+    describe "adjust_tags" do
+      before(:each) do
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 
+          't-1', 
+          Domain::Transaction::ExpenceTypeId, 
+          100, 
+          DateTime.new,
+          [100, 400, 500],
+          'Transaction t-1'
+        subject.apply_event I::TransactionUntagged.new subject.aggregate_id, 't-1', 400
+        subject.apply_event I::TransactionUntagged.new subject.aggregate_id, 't-1', 500
+        subject.adjust_tags 't-1', [100, 200, 300]
+        
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 
+          't-2', 
+          Domain::Transaction::ExpenceTypeId, 
+          100, 
+          DateTime.new,
+          [100, 200, 300],
+          'Transaction t-2'
+        # subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 200
+        # subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 300
+        subject.adjust_tags 't-2', [200]
+      end
+      
+      it "it should raise TransactionTagged for each new tag" do
+        expect(subject).to have_one_uncommitted_event I::TransactionTagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-1', tag_id: 200
+        }, at_index: 0
+        expect(subject).to have_one_uncommitted_event I::TransactionTagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-1', tag_id: 300
+        }, at_index: 1
+      end
+      
+      it "it should raise TransactionUntagged for each removed tag" do
+        expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-2', tag_id: 100
+        }, at_index: 2
+        expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-2', tag_id: 300
+        }, at_index: 3
+      end
     end
   end
 end

@@ -80,10 +80,14 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event TransactionDateAdjusted.new aggregate_id, transaction_id, date
   end
   
-  def add_tag transaction_id, tag
-  end
-  
-  def remove_tag transaction_id, tag
+  def adjust_tags transaction_id, tag_ids
+    current_tags = @transactions[transaction_id][:tag_ids]
+    (tag_ids - current_tags).each { |tag_id|
+      raise_event TransactionTagged.new aggregate_id, transaction_id, tag_id
+    }
+    (current_tags - tag_ids).each { |tag_id|
+      raise_event TransactionUntagged.new aggregate_id, transaction_id, tag_id
+    }
   end
 
   private def raise_transaction_reported transaction_id, type_id, integer_ammount, date, tag_ids, comment
@@ -105,6 +109,7 @@ class Domain::Account < CommonDomain::Aggregate
     @is_open = true
     @currency = Currency[event.currency_code]
     @balance = 0
+    @transactions = {}
   end
   
   on AccountRenamed do |event|
@@ -116,7 +121,9 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on TransactionReported do |event|
-    
+    @transactions[event.transaction_id] = {
+      tag_ids: event.tag_ids
+    }
   end
 
   on TransferSent do |event|
@@ -125,6 +132,14 @@ class Domain::Account < CommonDomain::Aggregate
 
   on TransferReceived do |event|
     
+  end
+  
+  on TransactionTagged do |event|
+    @transactions[event.transaction_id][:tag_ids] << event.tag_id
+  end
+  
+  on TransactionUntagged do |event|
+    @transactions[event.transaction_id][:tag_ids].delete(event.tag_id)
   end
   
   on AccountBalanceChanged do |event|
