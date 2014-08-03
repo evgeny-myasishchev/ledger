@@ -25,8 +25,8 @@ var homeApp = (function() {
 		};
 	});
 
-	homeApp.controller('AccountsController', ['$scope', '$http', '$routeParams', 'tagsHelper', 'accounts', 'activeAccountResolver', 
-	function ($scope, $http, $routeParams, tagsHelper, accounts, activeAccountResolver) {
+	homeApp.controller('AccountsController', ['$scope', '$http', 'tagsHelper', 'accounts', 'activeAccountResolver', 'money',
+	function ($scope, $http, tagsHelper, accounts, activeAccountResolver, money) {
 		$scope.accounts = accounts;
 		var activeAccount = $scope.activeAccount = activeAccountResolver.resolve();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
@@ -68,6 +68,8 @@ var homeApp = (function() {
 				transaction.comment = comment;
 			});
 		};
+		
+		$scope.formatIntegerAsMoney = money.formatInteger;
 		
 		$scope.getTransactionTypeIcon = function(transaction) {
 			if(transaction.is_transfer) return 'glyphicon-transfer';

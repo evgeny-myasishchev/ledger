@@ -7,7 +7,7 @@
 			<a 	href='#/accounts/{{account.sequential_number}}' class='list-group-item'
 			ng-repeat="account in accounts" ng-class="{active: activeAccount == account}">
 			{{account.name}}
-			<span class='pull-right'>{{account.balance}}</span>
+			<span class='pull-right'>{{formatIntegerAsMoney(account.balance)}}</span>
 		</a>
 	</div>
 </div>
@@ -28,7 +28,7 @@
 		<tbody>
 			<tr ng-repeat="transaction in transactions">
 				<td><i class='glyphicon {{getTransactionTypeIcon(transaction)}}'></i></td>
-				<td ldr-bubble-editor submit='adjustAmmount(transaction, newValue)' value="transaction.ammount">{{getTransferAmmountSign(transaction)}}{{transaction.ammount}}</td>
+				<td ldr-bubble-editor submit='adjustAmmount(transaction, newValue)' value="transaction.ammount">{{getTransferAmmountSign(transaction)}}{{formatIntegerAsMoney(transaction.ammount)}}</td>
 				<td ldr-bubble-editor='tags' value='transaction.tag_ids' submit='adjustTags(transaction, newValue)'><ledger-tags ng-model="transaction.tag_ids" /></td>
 				<td ldr-bubble-editor='date' value='transaction.date' submit='adjustDate(transaction, newValue)'>{{transaction.date.toLocaleDateString()}}</td>
 				<td ldr-bubble-editor submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>
