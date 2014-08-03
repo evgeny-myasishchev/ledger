@@ -30,6 +30,11 @@
 				} else {
 					return [];
 				}
+			},
+			arrayToBracedString: function(tag_ids) {
+				result = []
+				for(var i = 0; i < tag_ids.length; i++) result.push('{' + tag_ids[i] + '}');
+				return result.join(',');
 			}
 		};
 	});

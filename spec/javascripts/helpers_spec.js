@@ -23,5 +23,11 @@ describe("ledgerHelpers", function() {
 			expect(subject.bracedStringToArray('{100}')).toEqual([100]);
 			expect(subject.bracedStringToArray('{100},{120},{140}')).toEqual([100,120,140]);
 		});
+		
+		it('shold convert array to braced string', function() {
+			expect(subject.arrayToBracedString([])).toEqual('')
+			expect(subject.arrayToBracedString([100])).toEqual('{100}')
+			expect(subject.arrayToBracedString([100, 200, 300])).toEqual('{100},{200},{300}')
+		});
 	});
 });

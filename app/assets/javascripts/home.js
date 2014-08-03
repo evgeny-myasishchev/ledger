@@ -25,7 +25,8 @@ var homeApp = (function() {
 		};
 	});
 
-	homeApp.controller('AccountsController', function ($scope, $http, $routeParams, accounts, activeAccountResolver) {
+	homeApp.controller('AccountsController', ['$scope', '$http', '$routeParams', 'tagsHelper', 'accounts', 'activeAccountResolver', 
+	function ($scope, $http, $routeParams, tagsHelper, accounts, activeAccountResolver) {
 		$scope.accounts = accounts;
 		var activeAccount = $scope.activeAccount = activeAccountResolver.resolve();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
@@ -47,7 +48,7 @@ var homeApp = (function() {
 			return $http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
 				command: {tag_ids: tag_ids}
 			}).success(function() {
-				transaction.tag_ids = tag_ids;
+				transaction.tag_ids = tagsHelper.arrayToBracedString(tag_ids);
 			});
 		};
 		
@@ -82,7 +83,7 @@ var homeApp = (function() {
 				return null;
 			}
 		};
-	});
+	}]);
 
 	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, accounts, tags) {
 		var activeAccount = $scope.account = activeAccountResolver.resolve();

@@ -200,7 +200,7 @@ describe("homeApp", function() {
 					}).respond(200);
 					var result = scope.adjustTags(transaction, [10, 20, 40]);
 					$httpBackend.flush();
-					expect(transaction.tag_ids).toEqual([10, 20, 40]);
+					expect(transaction.tag_ids).toEqual('{10},{20},{40}');
 					expect(result.then).toBeDefined();
 				});
 			});
