@@ -270,10 +270,10 @@ describe Domain::Account do
           Domain::Transaction::ExpenceTypeId, 
           100, 
           DateTime.new,
-          [100, 200, 300],
+          [100],
           'Transaction t-2'
-        # subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 200
-        # subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 300
+        subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 200
+        subject.apply_event I::TransactionTagged.new subject.aggregate_id, 't-2', 300
         subject.adjust_tags 't-2', [200]
       end
       
@@ -293,6 +293,24 @@ describe Domain::Account do
         expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
           aggregate_id: subject.aggregate_id, transaction_id: 't-2', tag_id: 300
         }, at_index: 3
+      end
+      
+      it "should treat nil tags as empty" do
+        subject.clear_uncommitted_events
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 
+          't-3', 
+          Domain::Transaction::ExpenceTypeId, 
+          100, 
+          DateTime.new,
+          [100, 200],
+          'Transaction t-3'
+        subject.adjust_tags 't-3', nil
+        expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-3', tag_id: 100
+        }, at_index: 0
+        expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
+          aggregate_id: subject.aggregate_id, transaction_id: 't-3', tag_id: 200
+        }, at_index: 1
       end
     end
   end

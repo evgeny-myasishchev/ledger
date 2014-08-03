@@ -81,6 +81,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def adjust_tags transaction_id, tag_ids
+    tag_ids = [] if tag_ids.nil?
     current_tags = @transactions[transaction_id][:tag_ids]
     (tag_ids - current_tags).each { |tag_id|
       raise_event TransactionTagged.new aggregate_id, transaction_id, tag_id

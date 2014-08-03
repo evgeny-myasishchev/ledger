@@ -33,7 +33,6 @@ module Application::Commands
     end
     command :AdjustTags, :transaction_id, :tag_ids do
       include AdjustTransactionBase
-      validates :tag_ids, presence: true
     end
     command :AdjustDate, :transaction_id, :date do
       include AdjustTransactionBase
