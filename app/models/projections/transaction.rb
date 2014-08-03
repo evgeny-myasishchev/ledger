@@ -19,10 +19,17 @@ class Projections::Transaction < ActiveRecord::Base
     if !self.tag_ids.nil? && self.tag_ids.include?(wrapped_tag_id)
       return
     end
-    result = self.tag_ids || ""
-    result << ',' unless result.blank?
-    result << wrapped_tag_id
-    self.tag_ids = result
+    self.tag_ids ||= ""
+    self.tag_ids << ',' unless self.tag_ids.blank?
+    self.tag_ids << wrapped_tag_id
+    self.tag_ids_will_change!
+  end
+  
+  def remove_tag(tag_id)
+    wrapped = "{#{tag_id}}"
+    index = self.tag_ids.index(wrapped)
+    replacement = (index && index > 0 && (index + wrapped.length < self.tag_ids.length)) ? ',' : ''
+    self.tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
   end
   
   def self.get_account_transactions(user, account_id)
@@ -69,6 +76,18 @@ class Projections::Transaction < ActiveRecord::Base
     
     on TransactionDateAdjusted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all date: event.date
+    end
+        
+    on TransactionTagged do |event|
+      transaction = Transaction.find_by_transaction_id(event.transaction_id)
+      transaction.add_tag event.tag_id
+      transaction.save!
+    end
+    
+    on TransactionUntagged do |event|
+      transaction = Transaction.find_by_transaction_id(event.transaction_id)
+      transaction.remove_tag event.tag_id
+      transaction.save!
     end
     
     private def build_transaction event

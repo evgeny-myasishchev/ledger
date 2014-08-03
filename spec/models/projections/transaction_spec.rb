@@ -124,6 +124,8 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should mark the tag_ids as changed" do
+      subject.changed_attributes.clear
+      subject.add_tag 130
       expect(subject.tag_ids_changed?).to be_truthy
     end
     
@@ -132,6 +134,35 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.add_tag 100
       expect(subject.tag_ids).to eql('{100},{110},{120}')
       expect(subject.tag_ids_changed?).to be_falsey
+    end
+  end
+  
+  describe "remove_tag" do
+    subject { p::Transaction.new }
+    before(:each) do
+      subject.tag_ids = "{100},{200},{300},{400},{500}"
+      subject.changed_attributes.clear
+      subject.remove_tag 100
+    end
+    
+    it "should remove the tag" do
+      expect(subject.tag_ids).to eql '{200},{300},{400},{500}'
+      subject.remove_tag 500
+      expect(subject.tag_ids).to eql '{200},{300},{400}'
+      subject.remove_tag 300
+      expect(subject.tag_ids).to eql '{200},{400}'
+    end
+    
+    it "should mark the tag_ids as changed" do
+      expect(subject.tag_ids_changed?).to be_truthy
+    end
+    
+    it "should do nothing if no such tag" do
+      subject.tag_ids = "{100}"
+      subject.changed_attributes.clear
+      subject.remove_tag 300
+      expect(subject.tag_ids).to eql '{100}'
+      expect(subject.tag_ids_changed?).to be_falsy
     end
   end
   
@@ -213,7 +244,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:date) { DateTime.now - 100 }
     let(:t1) { p::Transaction.find_by_transaction_id 't-1' }
     before(:each) do
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, ['t-1'], 'Comment 1'
+      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, [100, 200], 'Comment 1'
     end
     
     it "should update comment on TransactionCommentAdjusted" do
@@ -225,6 +256,19 @@ RSpec.describe Projections::Transaction, :type => :model do
       updated_date = date - 110
       subject.handle_message e::TransactionDateAdjusted.new 'account-1', 't-1', updated_date
       expect(t1.date.to_datetime).to eql updated_date.utc
+    end
+    
+    it "should add new tag on TransactionTagged" do
+      subject.handle_message e::TransactionTagged.new 'account-1', 't-1', 110
+      expect(t1.tag_ids).to eql '{100},{200},{110}'
+    end
+    
+    it "should add new tag on TransactionUntagged" do
+      subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 100
+      expect(t1.tag_ids).to eql '{200}'
+      subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 200
+      t1.reload
+      expect(t1.tag_ids).to eql ''
     end
   end
 end
