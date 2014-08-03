@@ -70,6 +70,21 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def adjust_ammount transaction_id, ammount
+    new_ammount = Money.parse(ammount, @currency)
+    log.debug "Adjusting ammount of transaction_id='#{transaction_id}' to #{new_ammount} of account aggregate_id='#{aggregate_id}'."
+    transaction = get_transaction! transaction_id
+    original_integer_ammount = transaction[:ammount]
+    new_balance = @balance
+    if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
+      new_balance = @balance - original_integer_ammount + new_ammount.integer_ammount
+    elsif transaction[:type_id] == Transaction::ExpenceTypeId
+      new_balance = @balance + original_integer_ammount - new_ammount.integer_ammount
+    else
+      raise "Unknown transaction type: #{transaction[:type_id]}"
+    end
+    log.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
+    raise_event TransactionAmmountAdjusted.new aggregate_id, transaction_id, new_ammount.integer_ammount
+    raise_balance_changed transaction_id, new_balance
   end
   
   def adjust_comment transaction_id, comment
@@ -122,17 +137,15 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on TransactionReported do |event|
-    @transactions[event.transaction_id] = {
-      tag_ids: event.tag_ids
-    }
+    index_transaction event.transaction_id, event.type_id, event
   end
 
   on TransferSent do |event|
-    
+    index_transaction event.transaction_id, Transaction::ExpenceTypeId, event
   end
 
   on TransferReceived do |event|
-    
+    index_transaction event.transaction_id, Transaction::IncomeTypeId, event
   end
   
   on TransactionTagged do |event|
@@ -147,9 +160,28 @@ class Domain::Account < CommonDomain::Aggregate
     @balance = event.balance
   end
   
+  on TransactionAmmountAdjusted do |event|
+    @transactions[event.transaction_id][:ammount] = event.ammount
+  end  
+  
   on TransactionCommentAdjusted do |event|
   end  
   
   on TransactionDateAdjusted do |event|
   end
+  
+  private 
+    def get_transaction! transaction_id
+      raise "Unknown transaction '#{transaction_id}'" unless @transactions.key?(transaction_id)
+      return @transactions[transaction_id]
+    end
+  
+    def index_transaction transaction_id, type_id, event
+      @transactions[transaction_id] = {
+        type_id: type_id,
+        ammount: event.ammount,
+        tag_ids: event.tag_ids,
+        ammount: event.ammount
+      }
+    end
 end

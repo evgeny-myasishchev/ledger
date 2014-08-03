@@ -7,6 +7,7 @@ describe Domain::Account do
   end
   let(:income_id) { Domain::Transaction::IncomeTypeId }
   let(:expence_id) { Domain::Transaction::ExpenceTypeId }
+  let(:refund_id) { Domain::Transaction::RefundTypeId }
   
   describe "create" do
     it "should raise AccountCreated event" do
@@ -229,7 +230,64 @@ describe Domain::Account do
     end
     
     describe "adjust_ammount" do
-      it "should raise TransactionAmmountAdjusted" do
+      before(:each) do
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 11000, DateTime.new, [], ''
+        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-1', 10000
+        
+        subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-2', 's-a-1', 's-t-1', 12000, DateTime.new, [], ''
+        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-2', 10000
+        
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expence_id, 10000, DateTime.new, [], ''
+        
+        subject.apply_event I::TransferSent.new subject.aggregate_id, 't-4', 'r-a-1', 13000, DateTime.new, [], ''
+        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-4', 10000
+        
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-5', refund_id, 10000, DateTime.new, [], ''
+        subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 't-5', 50000
+      end
+      
+      describe "income transactions" do
+        it "should raise balance change and ammount adjustments related events for regular income transaction" do
+          subject.adjust_ammount 't-1', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-1', ammount: 5000}, at_index: 0
+          expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-1', balance: 45000}, at_index: 1
+        end
+        
+        it "should raise balance change and ammount adjustments related events for transfer transaction" do
+          subject.adjust_ammount 't-2', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-2', ammount: 5000}, at_index: 0
+          expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-2', balance: 45000}, at_index: 1
+        end
+        
+        it "should raise balance change and ammount adjustments related events for refund transaction" do
+          subject.adjust_ammount 't-5', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-5', ammount: 5000}, at_index: 0
+          expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-5', balance: 45000}, at_index: 1
+        end
+      end
+      
+      describe "expence transactions" do
+        it "should raise balance cahnge and ammount adjustments related events for regular expence transaction" do
+          subject.adjust_ammount 't-3', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-3', ammount: 5000}, at_index: 0
+          expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-3', balance: 55000}, at_index: 1
+        end
+        
+        it "should raise balance cahnge and ammount adjustments related events for transfer transaction" do
+          subject.adjust_ammount 't-4', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-4', ammount: 5000}, at_index: 0
+          expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-4', balance: 55000}, at_index: 1
+        end
       end
     end
   
