@@ -121,15 +121,27 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', ['tags', 'tagsHelper', function(tags, tagsHelper) {
+}]).directive('ldrBubbleEditor', ['tags', 'tagsHelper', 'money', function(tags, tagsHelper, money) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};
 	
+	var formatters = {
+		money: money.formatInteger
+	}
+	
+	function format(value, attrs) {
+		if(attrs.format) {
+			return formatters[attrs.format](value);
+		} else {
+			return value;
+		}
+	}
+	
 	var editorFactories = {
 		'default': function(scope, element, attrs, resolve) {
-			var input;
-			var form = $('<form>').append(input = $('<input type="text" class="form-control">').val(getValue(scope, attrs))
+			var input, value = getValue(scope, attrs);
+			var form = $('<form>').append(input = $('<input type="text" class="form-control">').val(format(value, attrs))
 			.on('focusout', function() {
 				element.popover('hide');
 			}));
