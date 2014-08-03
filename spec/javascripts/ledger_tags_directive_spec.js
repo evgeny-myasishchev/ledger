@@ -38,4 +38,12 @@ describe('ledgerTags', function() {
     var result = compile(scope);
     expect(result[0].innerHTML).toEqual('');
   });
+  
+  it('should update tags on scope changes', function() {
+      scope.tag_ids = '';
+      var result = compile(scope);
+	  scope.tag_ids = '{100},{102}';
+	  scope.$digest();
+	  expect(result[0].innerHTML).toEqual('<div class="label label-info">Tag 100</div> <div class="label label-info">Tag 102</div>');
+  });
 });

@@ -36,11 +36,19 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			datePicker.setDate(scope.date);
 		}
 	}
-}).directive('ledgerTags', ['tags', function(tags) {
-	var tagsById = {};
-	jQuery.each(tags, function(index, tag) {
-		tagsById['{' + tag.tag_id + '}'] = tag.name;
-	});
+}).directive('ledgerTags', ['tags', 'tagsHelper', function(tags, tagsHelper) {
+	var tagsById = tagsHelper.indexById(tags);
+	
+	var updateTags = function(element, wrappedTagIds) {
+		var tagIds = tagsHelper.bracedStringToArray(wrappedTagIds);
+		var result = [];
+		jQuery.each(tagIds, function(index, tagId) {
+			var tag = tagsById[tagId];
+			if(tag) result.push('<div class="label label-info">' + tag.name + '</div>');
+		});
+		element.html(result.join(' '));
+	};
+	
 	return {
 		scope: {
 			model: '=ngModel'
@@ -48,14 +56,11 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 		restrict: 'E',
 		replace: false,
 		link: function(scope, element, attrs) {
-			if(scope.model == null) return;
-			var tagIds = scope.model.split(',');
-			var result = [];
-			jQuery.each(tagIds, function(index, tagId) {
-				var tagName = tagsById[tagId];
-				if(tagName) result.push('<div class="label label-info">' + tagName + '</div>');
+			scope.$watch('model', function() {
+				updateTags(element, scope.model);
 			});
-			element.html(result.join(' '));
+			if(scope.model == null) return;
+			updateTags(element, scope.model);
 		}
 	}
 }]).directive('ledgerTagsInput', ['tags', 'tagsHelper', function(tags, tagsHelper) {
