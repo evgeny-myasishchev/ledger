@@ -70,6 +70,10 @@ class Projections::Transaction < ActiveRecord::Base
       t.save!
     end
     
+    on TransactionAmmountAdjusted do |event|
+      Transaction.where(transaction_id: event.transaction_id).update_all ammount: event.ammount
+    end
+    
     on TransactionCommentAdjusted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all comment: event.comment
     end

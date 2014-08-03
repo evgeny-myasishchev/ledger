@@ -247,6 +247,11 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, [100, 200], 'Comment 1'
     end
     
+    it "should update ammount on TransactionAmmountAdjusted" do
+      subject.handle_message e::TransactionAmmountAdjusted.new 'account-1', 't-1', 1900
+      expect(t1.ammount).to eql 1900
+    end
+    
     it "should update comment on TransactionCommentAdjusted" do
       subject.handle_message e::TransactionCommentAdjusted.new 'account-1', 't-1', 'New comment 1'
       expect(t1.comment).to eql 'New comment 1'
