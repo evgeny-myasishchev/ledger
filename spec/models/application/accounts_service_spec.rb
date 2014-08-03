@@ -67,6 +67,15 @@ RSpec.describe Application::AccountsService, :type => :model do
     end
   end
   
+  describe "AdjustAmmount" do
+    it "should use the account to adjust the ammount of the transaction" do
+      expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
+      expect(work).to get_and_return_aggregate Domain::Account, 'a-1', account
+      expect(account).to receive(:adjust_ammount).with('t-1', 221190)
+      subject.handle_message c::AdjustAmmount.new transaction_id: 't-1', command: {ammount: 221190}
+    end
+  end
+  
   describe "AdjustComment" do
     describe "regular transaction" do
       it "should get the transaction and use the account to adjust the comment" do

@@ -31,6 +31,12 @@ class Application::AccountsService < CommonDomain::CommandHandler
       command.comment
   end
   
+  on AccountCommands::AdjustAmmount, begin_work: true do |work, command|
+    transaction = Projections::Transaction.find_by_transaction_id command.transaction_id
+    account = work.get_by_id Domain::Account, transaction.account_id
+    account.adjust_ammount command.transaction_id, command.ammount
+  end
+    
   on AccountCommands::AdjustComment do |command|
     perform_adjustment command.transaction_id do |account, transaction_id|
       account.adjust_comment transaction_id, command.comment
