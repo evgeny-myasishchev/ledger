@@ -94,7 +94,8 @@ var homeApp = (function() {
 		};
 	}]);
 
-	homeApp.controller('ReportTransactionsController', function ($scope, $http, activeAccountResolver, accounts, tags) {
+	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'activeAccountResolver', 'accounts', 'money',
+	function ($scope, $http, activeAccountResolver, accounts, money) {
 		var activeAccount = $scope.account = activeAccountResolver.resolve();
 		$scope.accounts = accounts;
 		$scope.reportedTransactions = [];
@@ -130,35 +131,26 @@ var homeApp = (function() {
 				date: $scope.newTransaction.date.toJSON(),
 				comment: $scope.newTransaction.comment
 			};
+			var ammount = money.parse($scope.newTransaction.ammount);
 			if($scope.newTransaction.type == 'transfer') {
 				command.receiving_account_id = $scope.newTransaction.receivingAccount.aggregate_id;
-				command.ammount_sent = $scope.newTransaction.ammount;
-				command.ammount_received = $scope.newTransaction.ammountReceived;
+				command.ammount_sent = ammount;
+				command.ammount_received = money.parse($scope.newTransaction.ammountReceived);
 			} else {
-				command.ammount = $scope.newTransaction.ammount;
+				command.ammount = ammount;
 			}
 			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
 				command: command
 			}).success(function() {
-				addReportedTransaction($scope.newTransaction);
+				var reported = $scope.newTransaction;
 				resetNewTransaction();
+				reported.ammount = ammount;
+				addReportedTransaction(reported);
 			});
 		};
 		
-		$scope.formatTagNames = function(tags) {
-			if(tags && tags.length) {
-				return '{' + tags.join(',') + '}, ';
-			};
-			return '';
-		};
-		
-		$scope.formatDate = function(date) {
-			if(tags && tags.length) {
-				return tags.join(',') + ', ';
-			};
-			return '';
-		};
-	});
+		$scope.formatIntegerAsMoney = money.formatInteger;
+	}]);
 
 	homeApp.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/accounts', {

@@ -304,7 +304,7 @@ describe("homeApp", function() {
 				scope.newTransaction.type = 'income';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-income', function(data) {
 					var command = JSON.parse(data).command;
-					expect(command.ammount).toEqual('10.5');
+					expect(command.ammount).toEqual(1050);
 					expect(command.tag_ids).toEqual([1, 2]);
 					expect(command.date).toEqual(date.toJSON());
 					expect(command.comment).toEqual('New transaction 10.5');
@@ -318,7 +318,7 @@ describe("homeApp", function() {
 				scope.newTransaction.type = 'expence';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-expence', function(data) {
 					var command = JSON.parse(data).command;
-					expect(command.ammount).toEqual('10.5');
+					expect(command.ammount).toEqual(1050);
 					expect(command.tag_ids).toEqual([1, 2]);
 					expect(command.date).toEqual(date.toJSON());
 					expect(command.comment).toEqual('New transaction 10.5');
@@ -333,7 +333,7 @@ describe("homeApp", function() {
 				scope.newTransaction.type = 'refund';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-refund', function(data) {
 					var command = JSON.parse(data).command;
-					expect(command.ammount).toEqual('10.5');
+					expect(command.ammount).toEqual(1050);
 					expect(command.tag_ids).toEqual([1, 2]);
 					expect(command.date).toEqual(date.toJSON());
 					expect(command.comment).toEqual('New transaction 10.5');
@@ -351,8 +351,8 @@ describe("homeApp", function() {
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-transfer', function(data) {
 					var command = JSON.parse(data).command;
 					expect(command.receiving_account_id).toEqual('a-2');
-					expect(command.ammount_sent).toEqual('10.5');
-					expect(command.ammount_received).toEqual('100.22');
+					expect(command.ammount_sent).toEqual(1050);
+					expect(command.ammount_received).toEqual(10022);
 					expect(command.tag_ids).toEqual([1, 2]);
 					expect(command.date).toEqual(date.toJSON());
 					expect(command.comment).toEqual('New transaction 10.5');
@@ -373,7 +373,7 @@ describe("homeApp", function() {
 				it("should insert the transaction into reported transaction", function() {
 					expect(scope.reportedTransactions.length).toEqual(1);
 					expect(scope.reportedTransactions[0]).toEqual({
-						ammount: '10.5', tag_ids: '{1},{2}', type: 'expence', date: date, comment: 'New transaction 10.5'
+						ammount: 1050, tag_ids: '{1},{2}', type: 'expence', date: date, comment: 'New transaction 10.5'
 					});
 				});
 				
@@ -382,6 +382,13 @@ describe("homeApp", function() {
 					expect(scope.newTransaction.tag_ids).toEqual([]);
 					expect(scope.newTransaction.comment).toBeNull();
 				});
+			});
+			
+			describe('on success update activeAccount balance', function() {
+				it('should update the balance on income')
+				it('should update the balance on expence')
+				it('should update the balance on refund')
+				it('should update the balance on on transfer')
 			});
 		});
 	});
