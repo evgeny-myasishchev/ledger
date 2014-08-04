@@ -1,5 +1,5 @@
 <div class="page-header" style='margin-top: 0;'>
-	<h1 style='margin-top: 0;'>{{account.name}}</h1>
+	<h1 style='margin-top: 0;'>{{account.name}} <small>{{formatIntegerAsMoney(account.balance)}}</small></h1>
 </div>
 
 <fieldset ng-show="reportedTransactions.length">
@@ -32,7 +32,7 @@
 			</div>
 			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
 				<label class='control-label' for="type">Target account</label>
-				<select ng-options="account.name for account in accounts track by account.aggregate_id" class='form-control' ng-model='newTransaction.receivingAccount' required>
+				<select ng-options="account.name + ' (' + formatIntegerAsMoney(account.balance) + ')' for account in accounts track by account.aggregate_id" class='form-control' ng-model='newTransaction.receivingAccount' required>
 					<option value="">--Chose account--</option>
 				</select>
 			</div>
