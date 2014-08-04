@@ -41,7 +41,13 @@ var homeApp = (function() {
 			return $http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
 				command: {ammount: ammount}
 			}).success(function() {
+				var oldAmmount = transaction.ammount;
 				transaction.ammount = ammount;
+				if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
+					activeAccount.balance = activeAccount.balance - oldAmmount + ammount;
+				} else if (transaction.type_id == Transaction.expenceId) {
+					activeAccount.balance = activeAccount.balance + oldAmmount - ammount;
+				}
 			});
 		};
 		

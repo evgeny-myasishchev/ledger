@@ -1,3 +1,9 @@
+var Transaction = {
+    incomeId: 1,
+    expenceId: 2,
+    refundId: 3
+};
+
 angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 	return function errorCatcherHandler(exception, cause) {
 		console.error(exception);

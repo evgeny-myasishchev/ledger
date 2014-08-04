@@ -201,6 +201,35 @@ describe("homeApp", function() {
 					$httpBackend.flush();
 					expect(transaction.ammount).toEqual(20043);
 				});
+				
+				describe('update activeAccount balance', function() {
+					beforeEach(function() {
+						$httpBackend.expectPOST('transactions/t-223/adjust-ammount').respond(200);
+						activeAccount.balance = 250;
+						transaction.ammount = 50;
+					});
+					
+					it('should update the balance for income transaction', function() {
+						transaction.type_id = Transaction.incomeId;
+						scope.adjustAmmount(transaction, 100);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(300);
+					});
+					
+					it('should update the balance for refund transaction', function() {
+						transaction.type_id = Transaction.refundId;
+						scope.adjustAmmount(transaction, 100);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(300);
+					});
+					
+					it('should update the balance for expence transaction', function() {
+						transaction.type_id = Transaction.expenceId;
+						scope.adjustAmmount(transaction, 100);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(200);
+					});
+				});
 			});
 			describe('adjustTags', function() {
 				it('should post adjust-tags for given transaction', function() {
