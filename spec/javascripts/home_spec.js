@@ -182,13 +182,24 @@ describe("homeApp", function() {
 				it('should post adjust-ammount for given transaction', function() {
 					$httpBackend.expectPOST('transactions/t-223/adjust-ammount', function(data) {
 						var command = JSON.parse(data).command;
-						expect(command.ammount).toEqual('200.43');
+						expect(command.ammount).toEqual(20043);
+						return true;
+					}).respond(200);
+					var result = scope.adjustAmmount(transaction, 20043);
+					$httpBackend.flush();
+					expect(transaction.ammount).toEqual(20043);
+					expect(result.then).toBeDefined();
+				});
+				
+				it('should parse money string', function() {
+					$httpBackend.expectPOST('transactions/t-223/adjust-ammount', function(data) {
+						var command = JSON.parse(data).command;
+						expect(command.ammount).toEqual(20043);
 						return true;
 					}).respond(200);
 					var result = scope.adjustAmmount(transaction, '200.43');
 					$httpBackend.flush();
-					expect(transaction.ammount).toEqual('200.43');
-					expect(result.then).toBeDefined();
+					expect(transaction.ammount).toEqual(20043);
 				});
 			});
 			describe('adjustTags', function() {

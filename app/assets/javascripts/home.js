@@ -37,6 +37,7 @@ var homeApp = (function() {
 		});
 		
 		$scope.adjustAmmount = function(transaction, ammount) {
+			ammount = money.parse(ammount);
 			return $http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
 				command: {ammount: ammount}
 			}).success(function() {

@@ -78,6 +78,24 @@
 						}
 					}
 					return figures.join('');
+				},
+				parse: function(money) {
+					var type = typeof(money);
+					if(type == 'number') {
+						if(money % 1 != 0) throw new Error('Can not parse ' + money + '. Parsing fractional numbers is not supported.');
+						return money;
+					} else if(type != 'string') {
+						throw new Error('Can not parse. String or number is expected. Got ' + type + '.')
+					}
+					if(!money) throw new Error("Can not parse '" + money + "'. Invalid money string.");
+					var parts = money.split(options.separator);
+					if(parts.length == 0 || parts.length > 2) throw new Error("Can not parse '" + money + "'. Invalid money string.");
+					var integer = parts[0].replace(new RegExp(options.delimiter, 'g'), '');
+					var fraction = parts.length == 2 ? parts[1] : '00';
+					if(fraction.length == 0) throw new Error("Can not parse '" + money + "'. Fractional part is missing.");
+					else if(fraction.length == 1) fraction = fraction + '0';
+					else if(fraction.length > 2) throw new Error("Can not parse '" + money + "'. Fractional part is longer than two dights.");
+					return parseInt(integer + fraction);
 				}
 			}
 		}
