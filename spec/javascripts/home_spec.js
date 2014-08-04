@@ -5,9 +5,9 @@ describe("homeApp", function() {
 		module('homeApp');
 		scope = {};
 		homeApp.constant('accounts',  [
-			account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'},
-			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': '200 UAH'},
-			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': '4432 UAH'}
+			account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
+			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
+			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
 		]);
 		homeApp.value('tags', []); //It has to be value so it could be redefined in other specs
 		inject(function(_$httpBackend_) {
@@ -262,9 +262,9 @@ describe("homeApp", function() {
 	});
 
 	describe('ReportTransactionsController', function() {
-		var activeAccount, scope;
+		var scope;
 		beforeEach(function() {
-			activeAccount = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': '100 UAH'};
+			activeAccount = account1;
 			routeParams = {};
 		});
 		
@@ -346,7 +346,7 @@ describe("homeApp", function() {
 			
 			it("should submit the new transfer transaction", function() {
 				scope.newTransaction.type = 'transfer';
-				scope.newTransaction.receivingAccount = {aggregate_id: 'a-2'};
+				scope.newTransaction.receivingAccount = account2;
 				scope.newTransaction.ammountReceived = '100.22';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-transfer', function(data) {
 					var command = JSON.parse(data).command;
@@ -385,10 +385,40 @@ describe("homeApp", function() {
 			});
 			
 			describe('on success update activeAccount balance', function() {
-				it('should update the balance on income')
-				it('should update the balance on expence')
-				it('should update the balance on refund')
-				it('should update the balance on on transfer')
+				beforeEach(function() {
+					scope.account.balance = 500;
+				});
+				
+				function doReport(ammount, typeKey) {
+					$httpBackend.expectPOST('accounts/a-1/transactions/report-' + typeKey).respond();
+					scope.newTransaction.ammount = ammount;
+					scope.newTransaction.type = typeKey;
+					scope.report();
+					$httpBackend.flush();
+				}
+				
+				it('should update the balance on income', function() {
+					doReport(100, Transaction.incomeKey);
+					expect(scope.account.balance).toEqual(600);
+				});
+				
+				it('should update the balance on expence', function() {
+					doReport(100, Transaction.expenceKey);
+					expect(scope.account.balance).toEqual(400);
+				});
+				
+				it('should update the balance on refund', function() {
+					doReport(100, Transaction.refundKey);
+					expect(scope.account.balance).toEqual(600);
+				});
+				
+				it('should update the balance on on transfer', function() {
+					var receivingAccount = scope.newTransaction.receivingAccount = {aggregate_id: 'a-2', balance: 10000};
+					scope.newTransaction.ammountReceived = '50';
+					doReport(100, Transaction.transferKey);
+					expect(scope.account.balance).toEqual(400);
+					expect(receivingAccount.balance).toEqual(15000);
+				});
 			});
 		});
 	});

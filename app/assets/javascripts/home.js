@@ -108,7 +108,16 @@ var homeApp = (function() {
 		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 		
-		var addReportedTransaction = function(transaction) {
+		var processReportedTransaction = function(transaction) {
+			if(transaction.type == Transaction.incomeKey || transaction.type == Transaction.refundKey) {
+				activeAccount.balance += transaction.ammount;
+			} else if(transaction.type == Transaction.expenceKey) {
+				activeAccount.balance -= transaction.ammount;
+			} else if(transaction.type == Transaction.transferKey) {
+				activeAccount.balance -= transaction.ammount;
+				transaction.receivingAccount.balance += money.parse(transaction.ammountReceived);
+			}
+			
 			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
 				return '{' + tag_id + '}';
 			}).join(',');
@@ -145,7 +154,7 @@ var homeApp = (function() {
 				var reported = $scope.newTransaction;
 				resetNewTransaction();
 				reported.ammount = ammount;
-				addReportedTransaction(reported);
+				processReportedTransaction(reported);
 			});
 		};
 		

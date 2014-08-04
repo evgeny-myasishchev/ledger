@@ -1,7 +1,8 @@
 var Transaction = {
-    incomeId: 1,
-    expenceId: 2,
-    refundId: 3
+    incomeId: 1, incomeKey: 'income',
+    expenceId: 2, expenceKey: 'expence',
+    refundId: 3, refundKey: 'refund',
+	transferKey: 'transfer'
 };
 
 angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
