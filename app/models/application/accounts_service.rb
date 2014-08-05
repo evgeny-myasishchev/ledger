@@ -55,6 +55,12 @@ class Application::AccountsService < CommonDomain::CommandHandler
     end
   end
   
+  on AccountCommands::RemoveTransaction do |command|
+    perform_adjustment command.transaction_id do |account, transaction_id|
+      account.remove_transaction transaction_id
+    end
+  end
+  
   private def perform_adjustment transaction_id, &block
     repository.begin_work do |work|
       transaction = Projections::Transaction.find_by_transaction_id transaction_id

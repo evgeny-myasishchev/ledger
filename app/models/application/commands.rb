@@ -41,5 +41,12 @@ module Application::Commands
     command :AdjustComment, :transaction_id, :comment do
       include AdjustTransactionBase
     end
+    command :RemoveTransaction, :transaction_id do
+      include ActiveModel::Validations
+      validates :transaction_id, presence: true
+      def initialize(params)
+        super(nil, params)
+      end
+    end
   end
 end

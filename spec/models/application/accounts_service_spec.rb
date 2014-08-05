@@ -147,4 +147,29 @@ RSpec.describe Application::AccountsService, :type => :model do
       end
     end
   end
+  
+  describe "RemoveTransaction" do
+    describe "regular transaction" do
+      it "should get the transaction and use the account to remove it" do
+        expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
+        expect(work).to get_and_return_aggregate Domain::Account, 'a-1', account
+        expect(account).to receive(:remove_transaction).with('t-1')
+        subject.handle_message c::RemoveTransaction.new transaction_id: 't-1'
+      end
+    end
+      
+    describe "transfer transaction" do
+      it "should get the transaction and remove both counterparts" do
+        sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
+        expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
+        expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
+        expect(work).to get_and_return_aggregate Domain::Account, 'src-110', sending_account
+        expect(work).to get_and_return_aggregate Domain::Account, 'dst-210', receiving_account
+        expect(sending_account).to receive(:remove_transaction).with('t-1')
+        expect(receiving_account).to receive(:remove_transaction).with('t-2')
+        subject.handle_message c::RemoveTransaction.new transaction_id: 't-1'
+      end
+    end
+  end
+
 end

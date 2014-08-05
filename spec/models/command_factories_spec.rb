@@ -208,4 +208,17 @@ describe Application::Commands do
       expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
     end
   end
+  
+  describe described_class::AccountCommands::RemoveTransaction do
+    it "should initialize the command from params" do
+      subject = described_class.new transaction_id: 't-100'
+      expect(subject.transaction_id).to eql('t-100')
+    end
+    
+    it "should validate presentce of transaction_id" do
+      subject = described_class.new Hash.new
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+    end
+  end
 end
