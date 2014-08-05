@@ -76,6 +76,17 @@ var homeApp = (function() {
 			});
 		};
 		
+		$scope.removeTransaction = function(transaction) {
+			return $http.delete('transactions/' + transaction.transaction_id).success(function() {
+				$scope.transactions.splice($scope.transactions.indexOf(transaction), 1);
+				if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
+					activeAccount.balance -= transaction.ammount;
+				} else if (transaction.type_id == Transaction.expenceId) {
+					activeAccount.balance += transaction.ammount;
+				}
+			});
+		};
+		
 		$scope.formatIntegerAsMoney = money.formatInteger;
 		
 		$scope.getTransactionTypeIcon = function(transaction) {

@@ -164,6 +164,8 @@ describe("homeApp", function() {
 				};
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond([transaction, {transaction_id: 't-1'}, {transaction_id: 't-2'}]);
 				initController();
+				$httpBackend.flush();
+				transaction = jQuery.grep(scope.transactions, function(t) { return t.transaction_id == 't-223'})[0];
 			});
 			describe('adjustComment', function() {
 				it('should post adjust-comment for given transaction', function() {
@@ -256,6 +258,51 @@ describe("homeApp", function() {
 					$httpBackend.flush();
 					expect(transaction.date).toEqual(newDate);
 					expect(result.then).toBeDefined();
+				});
+			});
+			
+			describe('removeTransaction', function() {
+				beforeEach(function() {
+					$httpBackend.whenDELETE('transactions/t-223').respond(200);
+				});
+				
+				it('should DELETE destroy for given transaction', function() {
+					$httpBackend.expectDELETE('transactions/t-223').respond(200);
+					var result = scope.removeTransaction(transaction);
+					$httpBackend.flush();
+					expect(result.then).toBeDefined();
+				});
+				
+				describe('activeAccount.balance', function() {
+					beforeEach(function() {
+						activeAccount.balance = 5000;
+						transaction.ammount = 1000;
+					});
+					
+					it('should subtract for income or refund', function() {
+						transaction.type_id = Transaction.incomeId;
+						scope.removeTransaction(transaction);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(4000);
+						
+						transaction.type_id = Transaction.refundId;
+						scope.removeTransaction(transaction);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(3000);
+					});
+				
+					it('should add for expence', function() {
+						transaction.type_id = Transaction.expenceId;
+						scope.removeTransaction(transaction);
+						$httpBackend.flush();
+						expect(activeAccount.balance).toEqual(6000);
+					});
+				})
+				
+				it('should remove the transaction from scope on success', function() {
+					scope.removeTransaction(transaction);
+					$httpBackend.flush();
+					expect(scope.transactions).not.toContain(transaction);
 				});
 			});
 		});
