@@ -372,4 +372,62 @@ describe Domain::Account do
       end
     end
   end
+  
+  describe "remove_transaction" do
+    before(:each) do
+      subject.make_created
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, [], ''
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-2', refund_id, 10000, DateTime.new, [], ''
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expence_id, 10000, DateTime.new, [], ''
+      subject.apply_event I::TransferSent.new subject.aggregate_id, 't-4', 'r-a-1', 10000, DateTime.new, [], ''
+      subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-5', 's-a-1', 's-t-1', 10000, DateTime.new, [], ''
+      subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 't-5', 50000
+    end
+    
+    it "should raise removed and balance change events for income transactions" do
+      subject.remove_transaction 't-1'
+      expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-1'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-1', balance: 40000}, at_index: 1
+    end
+    
+    it "should raise removed and balance change events for refund transactions" do
+      subject.remove_transaction 't-2'
+      expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-2'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-2', balance: 40000}, at_index: 1
+    end
+    
+    it "should raise removed and balance change for expence transactions" do
+      subject.remove_transaction 't-3'
+      expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-3'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-3', balance: 60000}, at_index: 1
+    end
+        
+    it "should raise removed and balance change for transfer sent transactions" do
+      subject.remove_transaction 't-4'
+      expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-4'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-4', balance: 60000}, at_index: 1
+    end
+    
+    it "should raise removed and balance change for transfer received transactions" do
+      subject.remove_transaction 't-5'
+      expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-5'}, at_index: 0
+      expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
+        aggregate_id: subject.aggregate_id, transaction_id: 't-5', balance: 40000}, at_index: 1
+    end
+    
+    it "should do nothing if already removed" do
+      subject.apply_event I::TransactionRemoved.new subject.aggregate_id, 't-1'
+      subject.remove_transaction 't-1'
+      expect(subject).not_to have_uncommitted_events
+    end
+  end
 end

@@ -24,4 +24,5 @@ module Domain::Events
   event :TransactionDateAdjusted, :transaction_id, :date
   event :TransactionTagged, :transaction_id, :tag_id
   event :TransactionUntagged, :transaction_id, :tag_id
+  event :TransactionRemoved, :transaction_id
 end

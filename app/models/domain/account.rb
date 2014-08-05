@@ -105,6 +105,24 @@ class Domain::Account < CommonDomain::Aggregate
       raise_event TransactionUntagged.new aggregate_id, transaction_id, tag_id
     }
   end
+  
+  def remove_transaction transaction_id
+    return unless @transactions.key?(transaction_id)
+    log.debug "Removing transaction id='#{transaction_id}' from account aggregate_id='#{aggregate_id}'"
+    transaction = @transactions[transaction_id]
+    ammount = transaction[:ammount]
+    new_balance = @balance
+    if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
+      new_balance = @balance - ammount
+    elsif transaction[:type_id] == Transaction::ExpenceTypeId
+      new_balance = @balance + ammount
+    else
+      raise "Unknown transaction type: #{transaction[:type_id]}"
+    end
+    log.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
+    raise_event TransactionRemoved.new aggregate_id, transaction_id
+    raise_balance_changed transaction_id, new_balance
+  end
 
   private def raise_transaction_reported transaction_id, type_id, integer_ammount, date, tag_ids, comment
     raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_ammount, date, tag_ids, comment
@@ -168,6 +186,10 @@ class Domain::Account < CommonDomain::Aggregate
   end  
   
   on TransactionDateAdjusted do |event|
+  end
+  
+  on TransactionRemoved do |event|
+    @transactions.delete event.transaction_id
   end
   
   private 
