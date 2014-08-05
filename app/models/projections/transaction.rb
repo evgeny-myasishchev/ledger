@@ -93,6 +93,11 @@ class Projections::Transaction < ActiveRecord::Base
       transaction.remove_tag event.tag_id
       transaction.save!
     end
+        
+    on TransactionRemoved do |event|
+      transaction = Transaction.find_by_transaction_id(event.transaction_id)
+      transaction.delete
+    end
     
     private def build_transaction event
       t = Transaction.new account_id: event.aggregate_id,

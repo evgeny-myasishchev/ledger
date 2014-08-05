@@ -274,6 +274,11 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 200
       t1.reload
       expect(t1.tag_ids).to eql ''
+    end   
+     
+    it "should remove on TransactionRemoved" do
+      subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+      expect(t1).to be_nil
     end
   end
 end
