@@ -2,6 +2,8 @@ require 'rails_helper'
 
 describe TransactionsController do
   let(:cmd) { Application::Commands::AccountCommands }
+  include AuthenticationHelper
+  
   describe "routes", :type => :routing do
     it "routes nested index route" do
       expect({get: 'accounts/22331/transactions'}).to route_to controller: 'transactions', action: 'index', account_id: '22331'
@@ -30,6 +32,10 @@ describe TransactionsController do
       expect({post: 'transactions/t-100/adjust-date'}).to route_to controller: 'transactions', action: 'adjust_date', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-comment'}).to route_to controller: 'transactions', action: 'adjust_comment', transaction_id: 't-100'
     end
+    
+    it "routes DELETE 'destroy" do
+      expect({delete: 'transactions/t-100'}).to route_to controller: 'transactions', action: 'destroy', transaction_id: 't-100'
+    end
   end
   
   describe "GET 'index'" do
@@ -42,7 +48,6 @@ describe TransactionsController do
     end
     
     describe "authenticated" do
-      include AuthenticationHelper
       authenticate_user
       it "should get transactions for given account" do
         transactions = double(:transactions)
@@ -55,7 +60,6 @@ describe TransactionsController do
   end
   
   describe "reporting actions" do
-    include AuthenticationHelper
     authenticate_user
     
     describe "POST 'report_income'" do
@@ -112,19 +116,7 @@ describe TransactionsController do
   end
   
   describe "adjusting actions" do
-    include AuthenticationHelper
     authenticate_user
-    
-    def should_dispatch(action, command_class)
-      command = double(:command)
-      expect(command_class).to receive(:new) do |params|
-        expect(params).to be controller.params
-        command
-      end
-      expect(controller).to receive(:dispatch_command).with(command)
-      post action, transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
-      expect(response.status).to eql 200
-    end
     
     it "should build dispatch adjust ammount command on POST 'adjust_ammount'" do
       should_dispatch 'adjust_ammount', cmd::AdjustAmmount
@@ -141,5 +133,25 @@ describe TransactionsController do
     it "should build dispatch adjust comment command on POST 'adjust_comment'" do
       should_dispatch 'adjust_comment', cmd::AdjustComment
     end
+  end
+  
+  describe "DELETE 'destroy'" do
+    include AuthenticationHelper
+    authenticate_user
+    
+    it "should dispatch the RemoveTransaction command" do
+      should_dispatch 'destroy', cmd::RemoveTransaction, :delete
+    end
+  end
+  
+  def should_dispatch(action, command_class, verb = :post)
+    command = double(:command)
+    expect(command_class).to receive(:new) do |params|
+      expect(params).to be controller.params
+      command
+    end
+    expect(controller).to receive(:dispatch_command).with(command)
+    send verb, action, transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
+    expect(response.status).to eql 200
   end
 end
