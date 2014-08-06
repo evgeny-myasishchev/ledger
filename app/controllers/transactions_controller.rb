@@ -2,7 +2,16 @@ class TransactionsController < ApplicationController
   include Application::Commands::AccountCommands
   
   def index
-    @transactions = Projections::Transaction.get_account_transactions current_user, params[:account_id]
+    @transactions = Projections::Transaction.get_account_home_data current_user, params[:account_id]
+    respond_to do |format|
+      format.json { render json: @transactions }
+    end
+  end
+  
+  def range
+    from = params[:from].to_i
+    to = params[:to].to_i
+    @transactions = Projections::Transaction.get_range current_user, params[:account_id], offset: from, limit: to - from
     respond_to do |format|
       format.json { render json: @transactions }
     end

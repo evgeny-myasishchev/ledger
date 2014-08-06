@@ -44,7 +44,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
   
-  describe "self.get_account_transactions" do
+  describe "self.get_account_home_data" do
     let(:user) { 
       u = User.new
       u.id = 2233
@@ -61,12 +61,19 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should check if the user is authorized" do
-      described_class.get_account_transactions user, account.aggregate_id
+      described_class.get_account_home_data user, account.aggregate_id
       expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
     end
     
+    it "should include account balance" do
+      account.balance = 2233119
+      account.save!
+      data = described_class.get_account_home_data user, account.aggregate_id
+      expect(data[:account_balance]).to eql(2233119)
+    end
+    
     it "should get all transactions of the user" do
-      transactions = described_class.get_account_transactions user, account.aggregate_id
+      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
       expect(transactions.length).to eql 3
       t1 = transactions.detect { |t| t.transaction_id == 't-1' }
       expect(t1.attributes).to eql('id' => t1.id,
@@ -86,7 +93,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "orders transactions by date descending" do
-      transactions = described_class.get_account_transactions user, account.aggregate_id
+      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
       expect(transactions[0].transaction_id).to eql 't-1'
       expect(transactions[1].transaction_id).to eql 't-2'
       expect(transactions[2].transaction_id).to eql 't-3'
@@ -101,13 +108,104 @@ RSpec.describe Projections::Transaction, :type => :model do
       t1.receiving_transaction_id = 'rt-2'
       t1.save!
       
-      transactions = described_class.get_account_transactions user, account.aggregate_id
+      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
       t1_rec = transactions.detect { |t| t.transaction_id == 't-1' }
       expect(t1_rec['is_transfer']).to be_truthy
       expect(t1_rec['sending_account_id']).to eql('sa-1')
       expect(t1_rec['sending_transaction_id']).to eql('st-1')
       expect(t1_rec['receiving_account_id']).to eql('ra-2')
       expect(t1_rec['receiving_transaction_id']).to eql('rt-2')
+    end
+    
+    it "should paginate and include pagination info" do
+      account_2 = create_account_projection! 'account-2', authorized_user_ids: '{2233}'
+      allow(p::Account).to receive(:ensure_authorized!) { account_2 }
+      20.times do |time|
+        subject.handle_message e::TransactionReported.new account_2.aggregate_id, "a2-t-#{time}", expence_id, 2000, DateTime.new, [], ''
+      end
+      data = described_class.get_account_home_data(user, account_2.aggregate_id, limit: 5)
+      expect(data[:transactions_total]).to eql 20
+      expect(data[:transactions_limit]).to eql 5
+      expect(data[:transactions].length).to eql 5
+    end
+  end
+  
+  describe "self.get_range" do
+    let(:user) { 
+      u = User.new
+      u.id = 2233
+      u
+    }
+    let(:date) { DateTime.now }
+    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    before(:each) do
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      
+      allow(p::Account).to receive(:ensure_authorized!) { account }
+    end
+    
+    it "should check if the user is authorized" do
+      described_class.get_account_home_data user, account.aggregate_id
+      expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
+    end
+    
+    it "should get transactions of the user" do
+      transactions = described_class.get_range(user, account.aggregate_id)
+      expect(transactions.length).to eql 3
+      t1 = transactions.detect { |t| t.transaction_id == 't-1' }
+      expect(t1.attributes).to eql('id' => t1.id,
+        'transaction_id' => 't-1',
+        'type_id' => income_id,
+        'ammount' => 10523,
+        'tag_ids' => '{t-1},{t-2}',
+        'comment' => 'Comment 101',
+        'date' => (date - 100).to_time,
+        'is_transfer' => false,
+        'sending_account_id' => nil,
+        'sending_transaction_id' => nil,
+        'receiving_account_id' => nil,
+        'receiving_transaction_id' => nil)
+      expect(transactions.detect { |t| t.transaction_id == 't-2' }).not_to be_nil
+      expect(transactions.detect { |t| t.transaction_id == 't-3' }).not_to be_nil
+    end
+    
+    it "orders transactions by date descending" do
+      transactions = described_class.get_range(user, account.aggregate_id)
+      expect(transactions[0].transaction_id).to eql 't-1'
+      expect(transactions[1].transaction_id).to eql 't-2'
+      expect(transactions[2].transaction_id).to eql 't-3'
+    end
+    
+    it "should include transfer related attributes" do
+      t1 = p::Transaction.find_by_transaction_id 't-1'
+      t1.is_transfer = true
+      t1.sending_account_id = 'sa-1'
+      t1.sending_transaction_id = 'st-1'
+      t1.receiving_account_id = 'ra-2'
+      t1.receiving_transaction_id = 'rt-2'
+      t1.save!
+      
+      transactions = described_class.get_range(user, account.aggregate_id)
+      t1_rec = transactions.detect { |t| t.transaction_id == 't-1' }
+      expect(t1_rec['is_transfer']).to be_truthy
+      expect(t1_rec['sending_account_id']).to eql('sa-1')
+      expect(t1_rec['sending_transaction_id']).to eql('st-1')
+      expect(t1_rec['receiving_account_id']).to eql('ra-2')
+      expect(t1_rec['receiving_transaction_id']).to eql('rt-2')
+    end
+    
+    it "should track limit and offset" do
+      account_2 = create_account_projection! 'account-2', authorized_user_ids: '{2233}'
+      allow(p::Account).to receive(:ensure_authorized!) { account_2 }
+      20.times do |time|
+        subject.handle_message e::TransactionReported.new account_2.aggregate_id, "a2-t-#{time}", expence_id, 2000, DateTime.new, [], ''
+      end
+      transactions = described_class.get_range(user, account_2.aggregate_id, limit: 5, offset: 10)
+      expect(transactions.length).to eql 5
+      expect(transactions[0]['transaction_id']).to eql('a2-t-10')
+      expect(transactions[4]['transaction_id']).to eql('a2-t-14')
     end
   end
   

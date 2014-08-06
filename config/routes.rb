@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   root 'home#index'
   get 'accounts/:account_id/transactions' => 'transactions#index', as: :account_transactions
+  get 'accounts/:account_id/transactions/:from-:to' => 'transactions#range'
   post 'accounts/:account_id/transactions/report-income' => 'transactions#report_income'
   post 'accounts/:account_id/transactions/report-expence' => 'transactions#report_expence'
   post 'accounts/:account_id/transactions/report-refund' => 'transactions#report_refund'

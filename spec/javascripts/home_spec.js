@@ -84,8 +84,15 @@ describe("homeApp", function() {
 					{transaction1: true, date: date.toJSON()},
 					{transaction2: true, date: date.toJSON()}
 				];
-				$httpBackend.expectGET('accounts/a-1/transactions.json').respond(transactions);
+				activeAccount.balance = 100
+				$httpBackend.expectGET('accounts/a-1/transactions.json').respond({
+					account_balance: 1193392,
+					transactions_total: 4432,
+					transactions_limit: 25,
+					transactions: transactions
+				});
 				initController();
+				spyOn(scope, 'refreshRangeState');
 			});
 			
 			it("should be loaded for current account", function() {
@@ -98,6 +105,126 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 				jQuery.each(scope.transactions, function(i, t) {
 					expect(t.date).toEqual(date);
+				});
+			});
+			
+			it('should update account balance', function() {
+				$httpBackend.flush();
+				expect(activeAccount.balance).toEqual(1193392);
+			});
+			
+			it('should assing transactions info', function() {
+				$httpBackend.flush();
+				expect(scope.transactionsInfo.total).toEqual(4432);
+				expect(scope.transactionsInfo.offset).toEqual(0);
+				expect(scope.transactionsInfo.limit).toEqual(25);
+			});
+			
+			it('should call scope.refreshRangeState', function() {
+				$httpBackend.flush();
+				expect(scope.refreshRangeState).toHaveBeenCalled();
+			});
+		});
+		
+		describe('fetching transactions range', function() {
+			beforeEach(function() {
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({transactions: []});
+				initController();
+				$httpBackend.flush();
+			});
+			
+			it('should let fetching only if total is more than limit', function() {
+				scope.transactionsInfo.total = 20;
+				scope.transactionsInfo.limit = 21;
+				scope.refreshRangeState();
+				expect(scope.canFetchRanges).toBeFalsy();
+				scope.transactionsInfo.limit = 19;
+				scope.refreshRangeState();
+				expect(scope.canFetchRanges).toBeTruthy();
+			});
+			
+			it('should let fetching next range if it will not exceed total', function() {
+				scope.transactionsInfo.total = 21;
+				scope.transactionsInfo.limit = 5;
+				scope.transactionsInfo.offset = 10;
+				scope.refreshRangeState();
+				expect(scope.canFetchNextRange).toBeTruthy();
+				scope.transactionsInfo.offset = 20;
+				scope.refreshRangeState();
+				expect(scope.canFetchNextRange).toBeFalsy();
+			});
+			
+			it('should let fetching prev range if it will not become lower than zero', function() {
+				scope.transactionsInfo.total = 6;
+				scope.transactionsInfo.limit = 5;
+				scope.transactionsInfo.offset = 6;
+				scope.refreshRangeState();
+				expect(scope.canFetchPrevRange).toBeTruthy();
+				scope.transactionsInfo.offset = 5;
+				scope.refreshRangeState();
+				expect(scope.canFetchPrevRange).toBeTruthy();
+				scope.transactionsInfo.offset = 4;
+				scope.refreshRangeState();
+				expect(scope.canFetchPrevRange).toBeFalsy();
+			});
+			
+			it('should calculate currentRangeUpperBound', function() {
+				scope.transactionsInfo.total = 21;
+				scope.transactionsInfo.limit = 5;
+				scope.transactionsInfo.offset = 6;
+				scope.refreshRangeState();
+				expect(scope.currentRangeUpperBound).toEqual(11);
+				scope.transactionsInfo.offset = 19;
+				scope.refreshRangeState();
+				expect(scope.currentRangeUpperBound).toEqual(21);
+			});
+			
+			it('should fetch next page on fetchNextRange', function() {
+				scope.transactionsInfo.offset = 10;
+				scope.transactionsInfo.limit = 20;
+				spyOn(scope, 'fetch');
+				scope.fetchNextRange();
+				expect(scope.fetch).toHaveBeenCalledWith(30);
+			});
+		
+			it('should fetch prev page on fetchPrevRange', function() {
+				scope.transactionsInfo.offset = 40;
+				scope.transactionsInfo.limit = 20;
+				spyOn(scope, 'fetch');
+				scope.fetchPrevRange();
+				expect(scope.fetch).toHaveBeenCalledWith(20);
+			});
+			
+			describe('fetch', function() {
+				beforeEach(function() {
+					date = new Date();
+					transactions = [
+						{transaction1: true, date: date.toJSON()},
+						{transaction2: true, date: date.toJSON()}
+					];
+					$httpBackend.expectGET('accounts/a-1/transactions/10-20.json').respond(transactions);
+					spyOn(scope, 'refreshRangeState');
+					scope.transactionsInfo.limit = 10;
+					scope.fetch(10);
+					$httpBackend.flush();
+				});
+				
+				it('should get transactions range for given account and given offset', function() {
+					expect(scope.transactions.length).toEqual(transactions.length);
+				});
+				
+				it("should have dates converted to date object", function() {
+					jQuery.each(scope.transactions, function(i, t) {
+						expect(t.date).toEqual(date);
+					});
+				});
+				
+				it('should have new offset assigned', function() {
+					expect(scope.transactionsInfo.offset).toEqual(10);
+				});
+				
+				it('should call scope.refreshRangeState', function() {
+					expect(scope.refreshRangeState).toHaveBeenCalled();
 				});
 			});
 		});
@@ -162,7 +289,9 @@ describe("homeApp", function() {
 					date: date.toJSON(),
 					comment: 'Original comment'
 				};
-				$httpBackend.whenGET('accounts/a-1/transactions.json').respond([transaction, {transaction_id: 't-1'}, {transaction_id: 't-2'}]);
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({
+					transactions: [transaction, {transaction_id: 't-1'}, {transaction_id: 't-2'}]
+				});
 				initController();
 				$httpBackend.flush();
 				transaction = jQuery.grep(scope.transactions, function(t) { return t.transaction_id == 't-223'})[0];
@@ -323,6 +452,7 @@ describe("homeApp", function() {
 		}
 
 		it("should assign active account from the accessor", function() {
+			activeAccount.balance = undefined;
 			initController();
 			expect(scope.account).toEqual(activeAccount);
 		});

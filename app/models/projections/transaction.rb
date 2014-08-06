@@ -32,14 +32,30 @@ class Projections::Transaction < ActiveRecord::Base
     self.tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
   end
   
-  def self.get_account_transactions(user, account_id)
+  def self.get_account_home_data(user, account_id, limit: 25)
+    account = Account.ensure_authorized! account_id, user
+    transactions = Transaction.
+      where('account_id = :account_id', account_id: account.aggregate_id).
+      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
+        :is_transfer, :sending_account_id, :sending_transaction_id, 
+        :receiving_account_id, :receiving_transaction_id).
+        order(date: :desc)
+    {
+      account_balance: account.balance,
+      transactions_total: transactions.count(:id),
+      transactions_limit: limit,
+      transactions: transactions.take(limit)
+    }
+  end
+  
+  def self.get_range(user, account_id, offset: 0, limit: 25)
     account = Account.ensure_authorized! account_id, user
     Transaction.
       where('account_id = :account_id', account_id: account.aggregate_id).
       select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
         :is_transfer, :sending_account_id, :sending_transaction_id, 
         :receiving_account_id, :receiving_transaction_id).
-      order(date: :desc)
+        order(date: :desc).offset(offset).take(limit)
   end
   
   projection do

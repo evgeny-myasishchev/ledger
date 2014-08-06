@@ -30,11 +30,47 @@ var homeApp = (function() {
 		$scope.accounts = accounts;
 		var activeAccount = $scope.activeAccount = activeAccountResolver.resolve();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
-			jQuery.each(data, function(i, t) {
+			var transactions = data.transactions;
+			jQuery.each(transactions, function(i, t) {
 				t.date = new Date(t.date);
 			});
-			$scope.transactions = data;
+			$scope.transactionsInfo = {
+				total: data.transactions_total,
+				offset: 0,
+				limit: data.transactions_limit
+			};
+			$scope.transactions = transactions
+			activeAccount.balance = data.account_balance;
+			$scope.refreshRangeState();
 		});
+		
+		$scope.refreshRangeState = function() {
+			$scope.canFetchRanges = $scope.transactionsInfo.total > $scope.transactionsInfo.limit;
+			$scope.canFetchNextRange = $scope.transactionsInfo.offset + $scope.transactionsInfo.limit < $scope.transactionsInfo.total;
+			$scope.canFetchPrevRange = $scope.transactionsInfo.offset - $scope.transactionsInfo.limit >= 0;
+			$scope.currentRangeUpperBound = $scope.transactionsInfo.offset + $scope.transactionsInfo.limit;
+			if($scope.currentRangeUpperBound > $scope.transactionsInfo.total) $scope.currentRangeUpperBound = $scope.transactionsInfo.total;
+		};
+		
+		$scope.fetchNextRange = function() {
+			$scope.fetch($scope.transactionsInfo.offset + $scope.transactionsInfo.limit);
+		};
+		
+		$scope.fetchPrevRange = function() {
+			$scope.fetch($scope.transactionsInfo.offset - $scope.transactionsInfo.limit);
+		};
+		
+		$scope.fetch = function(offset) {
+			var to = offset + $scope.transactionsInfo.limit;
+			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json').success(function(transactions) {
+				jQuery.each(transactions, function(i, t) {
+					t.date = new Date(t.date);
+				});
+				$scope.transactions = transactions
+				$scope.transactionsInfo.offset = offset;
+				$scope.refreshRangeState();
+			});
+		};
 		
 		$scope.adjustAmmount = function(transaction, ammount) {
 			ammount = money.parse(ammount);

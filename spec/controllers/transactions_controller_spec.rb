@@ -10,6 +10,10 @@ describe TransactionsController do
       expect(account_transactions_path('22331')).to eql '/accounts/22331/transactions'
     end
     
+    it "routes page route" do
+      expect({get: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'range', account_id: '22331', from: "1", to: "25"
+    end
+    
     it "routes POST 'report-income'" do
       expect({post: 'accounts/22331/transactions/report-income'}).to route_to controller: 'transactions', action: 'report_income', account_id: '22331'
     end
@@ -51,11 +55,22 @@ describe TransactionsController do
       authenticate_user
       it "should get transactions for given account" do
         transactions = double(:transactions)
-        expect(Projections::Transaction).to receive(:get_account_transactions).with(user, 'a-100').and_return(transactions)
+        expect(Projections::Transaction).to receive(:get_account_home_data).with(user, 'a-100').and_return(transactions)
         get 'index', account_id: 'a-100', format: :json
         expect(response.status).to eql 200
         expect(assigns(:transactions)).to be transactions
       end
+    end
+  end
+  
+  describe "GET 'range'" do
+    authenticate_user
+    it "should get transactions range" do
+      transactions = double(:transactions)
+      expect(Projections::Transaction).to receive(:get_range).with(user, 'a-100', offset: 10, limit: 15).and_return(transactions)
+      get 'range', account_id: 'a-100', from: '10', to: '25', format: :json
+      expect(response.status).to eql 200
+      expect(assigns(:transactions)).to be transactions
     end
   end
   
