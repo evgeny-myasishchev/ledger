@@ -2,18 +2,6 @@
 	<h1 style='margin-top: 0;'>{{account.name}} <small>{{formatIntegerAsMoney(account.balance)}}</small></h1>
 </div>
 
-<fieldset ng-show="reportedTransactions.length">
-	<legend>Reported transactions</fieldset>
-	<ul class="list-group">
-		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
-			<strong>{{formatIntegerAsMoney(transaction.ammount)}} ({{transaction.type}})</strong> 
-			<ledger-tags ng-model='transaction.tag_ids'></ledger-tags>
-			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
-			{{transaction.comment}}
-		</li>
-	</ul>
-</fieldset>
-
 <div class="panel panel-default" id='report-new-transaction-container'>
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
@@ -57,3 +45,15 @@
 		</div>
 	</form>
 </div>
+
+<fieldset ng-show="reportedTransactions.length">
+	<legend>Reported transactions</fieldset>
+	<ul class="list-group">
+		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
+			<strong>{{formatIntegerAsMoney(transaction.ammount)}} ({{transaction.type}})</strong> 
+			<ledger-tags ng-model='transaction.tag_ids'></ledger-tags>
+			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
+			{{transaction.comment}}
+		</li>
+	</ul>
+</fieldset>

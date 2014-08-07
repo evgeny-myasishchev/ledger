@@ -542,13 +542,14 @@ describe("homeApp", function() {
 			
 			describe('on success', function() {
 				beforeEach(function() {
+					scope.reportedTransactions.push({test: true});
 					$httpBackend.expectPOST('accounts/a-1/transactions/report-expence').respond();
 					scope.report();
 					$httpBackend.flush();
 				});
 				
-				it("should insert the transaction into reported transaction", function() {
-					expect(scope.reportedTransactions.length).toEqual(1);
+				it("should insert the transaction into the begining of the reported transactions", function() {
+					expect(scope.reportedTransactions.length).toEqual(2);
 					expect(scope.reportedTransactions[0]).toEqual({
 						ammount: 1050, tag_ids: '{1},{2}', type: 'expence', date: date, comment: 'New transaction 10.5'
 					});

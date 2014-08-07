@@ -168,7 +168,7 @@ var homeApp = (function() {
 			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
 				return '{' + tag_id + '}';
 			}).join(',');
-			$scope.reportedTransactions.push(transaction);
+			$scope.reportedTransactions.unshift(transaction);
 		};
 		
 		var resetNewTransaction = function() {
