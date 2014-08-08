@@ -12,7 +12,7 @@ module Domain::Events
   event :TagRemoved, :tag_id
   
   #Account events
-  event :AccountCreated, :ledger_id, :sequential_number, :name, :currency_code
+  event :AccountCreated, :ledger_id, :sequential_number, :name, :initial_balance, :currency_code
   event :AccountRenamed, :name
   event :AccountClosed
   event :AccountBalanceChanged, :transaction_id, :balance

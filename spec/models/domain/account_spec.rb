@@ -13,17 +13,18 @@ describe Domain::Account do
     it "should raise AccountCreated event" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('account-100')
       currency = Currency['UAH']
-      subject.create 'ledger-100', 1, 'Account 100', currency
+      subject.create 'ledger-100', 1, 'Account 100', '100.32', currency
       expect(subject).to have_one_uncommitted_event I::AccountCreated, 
         aggregate_id: subject.aggregate_id,
         ledger_id: 'ledger-100', 
         sequential_number: 1,
         name: 'Account 100', 
+        initial_balance: 10032,
         currency_code: currency.code
     end
     
     it "should assign the aggregate_id on created event" do
-      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 1, 'Account 332', 'UAH'
+      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 1, 'Account 332', 100, 'UAH'
       expect(subject.aggregate_id).to eql 'account-332'
     end
   end

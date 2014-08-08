@@ -39,7 +39,7 @@ fake_transactions_data = [
 
 cache_uah_account_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('Cache', uah)
+  account = work.add_new l.create_new_account('Cache', 0, uah)
   account.aggregate_id
   account.report_income '36332.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
   100.times do
@@ -51,7 +51,7 @@ end
 
 pb_credit_account_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('PB Credit Card', uah)
+  account = work.add_new l.create_new_account('PB Credit Card', 0, uah)
   account.report_income '23448.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
   account.report_income '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
   account.report_income '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
@@ -65,7 +65,7 @@ end
 
 pb_deposit_id = context.repository.begin_work do |work|
   l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('PB Deposit', uah)
+  account = work.add_new l.create_new_account('PB Deposit', 0, uah)
   account.aggregate_id
 end
 

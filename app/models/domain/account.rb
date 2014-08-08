@@ -4,9 +4,10 @@ class Domain::Account < CommonDomain::Aggregate
   include Domain
   include Domain::Events
   
-  def create ledger_id, sequential_number, name, currency
+  def create ledger_id, sequential_number, name, initial_balance, currency
     log.debug "Creating new account '#{name}' for ledger_id='#{ledger_id}'"
-    raise_event AccountCreated.new AggregateId.new_id, ledger_id, sequential_number, name, currency.code
+    initial_balance = Money.parse(initial_balance, currency)
+    raise_event AccountCreated.new AggregateId.new_id, ledger_id, sequential_number, name, initial_balance.integer_ammount, currency.code
   end
   
   def rename new_name

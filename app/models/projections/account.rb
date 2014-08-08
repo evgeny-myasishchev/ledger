@@ -27,7 +27,7 @@ class Projections::Account < ActiveRecord::Base
       }
     end
     
-    on AccountCreated do |event|      
+    on AccountCreated do |event|
       unless Account.exists? aggregate_id: event.aggregate_id
         ledger = Ledger.find_by_aggregate_id event.ledger_id
         account = Account.new(aggregate_id: event.aggregate_id, 
@@ -35,8 +35,8 @@ class Projections::Account < ActiveRecord::Base
           sequential_number: event.sequential_number,
           owner_user_id: ledger.owner_user_id,
           name: event.name, 
-          currency_code: event.currency_code, 
-          balance: 0,
+          currency_code: event.currency_code,
+          balance: event.initial_balance,
           is_closed: false) 
         account.set_authorized_users ledger.authorized_user_ids
         account.save!
