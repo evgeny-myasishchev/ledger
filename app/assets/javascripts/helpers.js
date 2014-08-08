@@ -49,7 +49,7 @@
 		};
 		
 		var toFiguresArray = function(number) {
-			var rest = number;
+			var rest = Math.abs(number);
 			var figures = [];
 			do {
 				remeinder = rest % 10;
@@ -64,6 +64,7 @@
 				formatInteger: function(number) {
 					if(number % 1 != 0) throw new Error(number + ' is not integer.');
 					var figures = toFiguresArray(number);
+					if(number < 0) figures.unshift('-');
 					
 					//Adding leading zeros if needed
 					while(figures.length < 3) figures.unshift(0);

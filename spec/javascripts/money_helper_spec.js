@@ -32,6 +32,10 @@ describe("money", function() {
 			expect(subject.formatInteger(199988877766655)).toEqual('1-999-888-777-666|55');
 		});
 		
+		it('should format negative integers', function() {
+			expect(subject.formatInteger(-100000)).toEqual('-1-000|00');
+		});
+		
 		it('should raise error if formatting fractional number', function() {
 			expect(function() {
 				subject.formatInteger(100.2);
