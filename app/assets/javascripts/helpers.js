@@ -100,4 +100,10 @@
 			}
 		}
 	});
+	
+	ledgerHelpers.filter('money', ['money', function(money) {
+		return function(input) {
+			return money.formatInteger(input);
+		}
+	}]);
 })();

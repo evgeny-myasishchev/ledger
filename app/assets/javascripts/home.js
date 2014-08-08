@@ -123,8 +123,6 @@ var homeApp = (function() {
 			});
 		};
 		
-		$scope.formatIntegerAsMoney = money.formatInteger;
-		
 		$scope.getTransactionTypeIcon = function(transaction) {
 			if(transaction.is_transfer) return 'glyphicon-transfer';
 			if(transaction.type_id == 1) return 'glyphicon-plus';
@@ -162,7 +160,12 @@ var homeApp = (function() {
 				activeAccount.balance -= transaction.ammount;
 			} else if(transaction.type == Transaction.transferKey) {
 				activeAccount.balance -= transaction.ammount;
-				transaction.receivingAccount.balance += money.parse(transaction.ammountReceived);
+				$.each(accounts, function(index, account) {
+					if(account.aggregate_id == transaction.receivingAccountId) {
+						account.balance += money.parse(transaction.ammountReceived);
+						return false;
+					}
+				});
 			}
 			
 			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
@@ -175,7 +178,7 @@ var homeApp = (function() {
 			$scope.newTransaction = {
 				ammount: null,
 				tag_ids: [],
-				type: 'expence',
+				type: Transaction.expenceKey,
 				date: new Date(),
 				comment: null
 			};
@@ -189,7 +192,7 @@ var homeApp = (function() {
 			};
 			var ammount = money.parse($scope.newTransaction.ammount);
 			if($scope.newTransaction.type == 'transfer') {
-				command.receiving_account_id = $scope.newTransaction.receivingAccount.aggregate_id;
+				command.receiving_account_id = $scope.newTransaction.receivingAccountId;
 				command.ammount_sent = ammount;
 				command.ammount_received = money.parse($scope.newTransaction.ammountReceived);
 			} else {
@@ -204,8 +207,6 @@ var homeApp = (function() {
 				processReportedTransaction(reported);
 			});
 		};
-		
-		$scope.formatIntegerAsMoney = money.formatInteger;
 	}]);
 
 	homeApp.config(['$routeProvider', function($routeProvider) {

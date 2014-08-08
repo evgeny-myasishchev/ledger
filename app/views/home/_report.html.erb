@@ -1,5 +1,5 @@
 <div class="page-header" style='margin-top: 0;'>
-	<h1 style='margin-top: 0;'>{{account.name}} <small>{{formatIntegerAsMoney(account.balance)}}</small></h1>
+	<h1 style='margin-top: 0;'>{{account.name}} <small>{{account.balance | money}}</small></h1>
 </div>
 
 <div class="panel panel-default" id='report-new-transaction-container'>
@@ -20,8 +20,9 @@
 			</div>
 			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
 				<label class='control-label' for="type">Target account</label>
-				<select ng-options="account.name + ' (' + formatIntegerAsMoney(account.balance) + ')' for account in accounts track by account.aggregate_id" class='form-control' ng-model='newTransaction.receivingAccount' required>
+				<select class='form-control' ng-model='newTransaction.receivingAccountId' required>
 					<option value="">--Chose account--</option>
+					<option ng-repeat="account in accounts" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
 				</select>
 			</div>
 			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
@@ -50,7 +51,7 @@
 	<legend>Reported transactions</fieldset>
 	<ul class="list-group">
 		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
-			<strong>{{formatIntegerAsMoney(transaction.ammount)}} ({{transaction.type}})</strong> 
+			<strong>{{transaction.ammount | money}} ({{transaction.type}})</strong> 
 			<ledger-tags ng-model='transaction.tag_ids'></ledger-tags>
 			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
 			{{transaction.comment}}

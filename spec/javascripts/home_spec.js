@@ -523,7 +523,7 @@ describe("homeApp", function() {
 			
 			it("should submit the new transfer transaction", function() {
 				scope.newTransaction.type = 'transfer';
-				scope.newTransaction.receivingAccount = account2;
+				scope.newTransaction.receivingAccountId = account2.aggregate_id;
 				scope.newTransaction.ammountReceived = '100.22';
 				$httpBackend.expectPOST('accounts/a-1/transactions/report-transfer', function(data) {
 					var command = JSON.parse(data).command;
@@ -591,7 +591,9 @@ describe("homeApp", function() {
 				});
 				
 				it('should update the balance on on transfer', function() {
-					var receivingAccount = scope.newTransaction.receivingAccount = {aggregate_id: 'a-2', balance: 10000};
+					var receivingAccount = scope.accounts[1];
+					receivingAccount.balance = 10000;
+					scope.newTransaction.receivingAccountId = receivingAccount.aggregate_id;
 					scope.newTransaction.ammountReceived = '50';
 					doReport(100, Transaction.transferKey);
 					expect(scope.account.balance).toEqual(400);
@@ -600,4 +602,5 @@ describe("homeApp", function() {
 			});
 		});
 	});
+
 });

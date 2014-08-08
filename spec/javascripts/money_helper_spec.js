@@ -90,4 +90,15 @@ describe("money", function() {
 			});
 		});
 	});
+	
+	describe('moneyFilter', function() {
+		var filter;
+		beforeEach(function() {
+			inject(function(moneyFilter) { filter = moneyFilter; });
+		});
+		
+		it('should use money to format integers', function() {
+			expect(filter(123456789)).toEqual(subject.formatInteger(123456789));
+		});
+	});
 });
