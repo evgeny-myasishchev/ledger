@@ -5,15 +5,19 @@ describe Domain::Account do
   module I
     include Domain::Events
   end
+  let(:i) {
+    Module.new do
+      include Domain
+    end
+  }
   let(:income_id) { Domain::Transaction::IncomeTypeId }
   let(:expence_id) { Domain::Transaction::ExpenceTypeId }
   let(:refund_id) { Domain::Transaction::RefundTypeId }
   
   describe "create" do
     it "should raise AccountCreated event" do
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('account-100')
       currency = Currency['UAH']
-      subject.create 'ledger-100', 1, 'Account 100', '100.32', currency
+      subject.create 'ledger-100', i::Account::AccountId.new('account-100', 1), i::Account::InitialData.new('Account 100', '100.32', currency)
       expect(subject).to have_one_uncommitted_event I::AccountCreated, 
         aggregate_id: subject.aggregate_id,
         ledger_id: 'ledger-100', 

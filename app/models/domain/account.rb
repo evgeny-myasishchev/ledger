@@ -4,10 +4,13 @@ class Domain::Account < CommonDomain::Aggregate
   include Domain
   include Domain::Events
   
-  def create ledger_id, sequential_number, name, initial_balance, currency
-    log.debug "Creating new account '#{name}' for ledger_id='#{ledger_id}'"
-    initial_balance = Money.parse(initial_balance, currency)
-    raise_event AccountCreated.new AggregateId.new_id, ledger_id, sequential_number, name, initial_balance.integer_ammount, currency.code
+  AccountId = Struct.new(:aggregate_id, :sequential_number)
+  InitialData = Struct.new(:name, :initial_balance, :currency)
+  
+  def create ledger_id, account_id, initial_data
+    initial_balance = Money.parse(initial_data.initial_balance, initial_data.currency)
+    raise_event AccountCreated.new account_id.aggregate_id, ledger_id, account_id.sequential_number, 
+      initial_data.name, initial_balance.integer_ammount, initial_data.currency.code
   end
   
   def rename new_name

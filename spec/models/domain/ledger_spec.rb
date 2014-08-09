@@ -5,6 +5,11 @@ describe Domain::Ledger do
   module I
     include Domain::Events
   end
+  let(:i) {
+    Module.new do
+      include Domain
+    end
+  }
   
   it "should be an aggregate" do
     expect(subject).to be_an_aggregate
@@ -64,8 +69,9 @@ describe Domain::Ledger do
     it "should create new account and return it raising AccountAddedToLedger event" do
       expect(Domain::Account).to receive(:new).and_return account
       currency = Currency['UAH']
-      expect(account).to receive(:create).with('ledger-1', 1, 'Account 100', '100.33', currency)
-      expect(subject.create_new_account('Account 100', '100.33', currency)).to be account
+      expect(account).to receive(:create).with('ledger-1', 
+        i::Account::AccountId.new('a-1', 1), i::Account::InitialData.new('Account 100', '100.33', currency))
+      expect(subject.create_new_account('a-1', i::Account::InitialData.new('Account 100', '100.33', currency))).to be account
       expect(subject).to have_one_uncommitted_event I::AccountAddedToLedger, aggregate_id: 'ledger-1', account_id: 'account-100'
     end
     
@@ -73,8 +79,16 @@ describe Domain::Ledger do
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-101'
       allow(Domain::Account).to receive(:new) { account }
-      expect(account).to receive(:create).with('ledger-1', 3, 'Account 100', '100.23', Currency['UAH'])
-      subject.create_new_account('Account 100', '100.23', Currency['UAH'])
+      expect(account).to receive(:create).with('ledger-1', 
+        i::Account::AccountId.new('a-1', 3), i::Account::InitialData.new('Account 100', '100.33', Currency['UAH']))
+      subject.create_new_account('a-1', i::Account::InitialData.new('Account 100', '100.33', Currency['UAH']))
+    end
+    
+    it "should raise error if account_id is not unique" do
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
+      expect {
+        subject.create_new_account('account-100', i::Account::InitialData.new('', '0', Currency['UAH']))
+      }.to raise_error ArgumentError, "account_id='account-100' is not unique"
     end
   end
   

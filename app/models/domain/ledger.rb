@@ -19,10 +19,11 @@ class Domain::Ledger < CommonDomain::Aggregate
     raise_event LedgerShared.new aggregate_id, user_id
   end
   
-  def create_new_account name, initial_balance, currency
-    log.debug "Creating new account '#{name}' currency='#{currency}'"
+  def create_new_account id, initial_data
+    raise ArgumentError.new "account_id='#{id}' is not unique" if @all_accounts.include?(id)
+    log.debug "Creating new account ledger_id='#{aggregate_id}' id='#{id}' '#{initial_data}'"
     account = Domain::Account.new
-    account.create aggregate_id, @account_sequential_number, name, initial_balance, currency
+    account.create aggregate_id, Domain::Account::AccountId.new(id, @account_sequential_number), initial_data
     raise_event AccountAddedToLedger.new aggregate_id, account.aggregate_id
     account
   end
