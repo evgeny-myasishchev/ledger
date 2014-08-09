@@ -126,99 +126,140 @@ describe Application::Commands do
     end
   end
   
-  describe described_class::AccountCommands::ReportIncome do
-    it "should include the IncomeExpenceCommandFactory" do
-      expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
+  describe described_class::AccountCommands do
+    describe described_class::ReportIncome do
+      it "should include the IncomeExpenceCommandFactory" do
+        expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
+      end
     end
-  end
   
-  describe described_class::AccountCommands::ReportExpence do
-    it "should include the IncomeExpenceCommandFactory" do
-      expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
+    describe described_class::ReportExpence do
+      it "should include the IncomeExpenceCommandFactory" do
+        expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
+      end
     end
-  end
   
-  describe described_class::AccountCommands::ReportRefund do
-    it "should include the IncomeExpenceCommandFactory" do
-      expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
-    end
-  end
-    
-  describe described_class::AccountCommands::ReportTransfer do
-    it "should include the TransferCommandFactory" do
-      expect(subject).to be_a(Application::Commands::TransferCommandFactory)
-    end
-  end
-  
-  describe described_class::AccountCommands::AdjustAmmount do
-    it "should initialize the command from params" do
-      subject = described_class.new transaction_id: 't-100', command: {ammount: '100.5'}
-      expect(subject.transaction_id).to eql('t-100')
-      expect(subject.ammount).to eql('100.5')
+    describe described_class::ReportRefund do
+      it "should include the IncomeExpenceCommandFactory" do
+        expect(subject).to be_a(Application::Commands::IncomeExpenceCommandFactory)
+      end
     end
     
-    it "should validate presentce of transaction_id and ammount" do
-      subject = described_class.new command: {}
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
-      expect(subject.errors[:ammount]).to eql ["can't be blank"]
+    describe described_class::ReportTransfer do
+      it "should include the TransferCommandFactory" do
+        expect(subject).to be_a(Application::Commands::TransferCommandFactory)
+      end
+    end
+  
+    describe described_class::AdjustAmmount do
+      it "should initialize the command from params" do
+        subject = described_class.new transaction_id: 't-100', command: {ammount: '100.5'}
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.ammount).to eql('100.5')
+      end
+    
+      it "should validate presentce of transaction_id and ammount" do
+        subject = described_class.new command: {}
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+        expect(subject.errors[:ammount]).to eql ["can't be blank"]
+      end
+    end
+  
+    describe described_class::AdjustTags do
+      it "should initialize the command from params" do
+        subject = described_class.new transaction_id: 't-100', command: {tag_ids: [100, 200]}
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.tag_ids).to eql([100, 200])
+      end
+    
+      it "should validate presentce of transaction_id" do
+        subject = described_class.new command: {}
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      end
+    end
+  
+    describe described_class::AdjustDate do
+      it "should initialize the command from params" do
+        date = DateTime.new
+        subject = described_class.new transaction_id: 't-100', command: {date: date}
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.date).to eql(date)
+      end
+    
+      it "should validate presentce of transaction_id and date" do
+        subject = described_class.new command: {}
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+        expect(subject.errors[:date]).to eql ["can't be blank"]
+      end
+    end
+  
+    describe described_class::AdjustComment do
+      it "should initialize the command from params" do
+        subject = described_class.new transaction_id: 't-100', command: {comment: 'New comment'}
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.comment).to eql('New comment')
+      end
+    
+      it "should validate presentce of transaction_id" do
+        subject = described_class.new command: {}
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      end
+    end
+  
+    describe described_class::RemoveTransaction do
+      it "should initialize the command from params" do
+        subject = described_class.new transaction_id: 't-100'
+        expect(subject.transaction_id).to eql('t-100')
+      end
+    
+      it "should validate presentce of transaction_id" do
+        subject = described_class.new Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+      end
+    end
+    
+    describe described_class::RenameAccount do
+      it "shold validate presence of all attributes" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:name]).to eql ["can't be blank"]
+        subject = described_class.from_hash aggregate_id: 'l-1', name: 'New name'
+        expect(subject.valid?).to be_truthy
+      end
     end
   end
   
-  describe described_class::AccountCommands::AdjustTags do
-    it "should initialize the command from params" do
-      subject = described_class.new transaction_id: 't-100', command: {tag_ids: [100, 200]}
-      expect(subject.transaction_id).to eql('t-100')
-      expect(subject.tag_ids).to eql([100, 200])
+  describe described_class::LedgerCommands do
+    describe described_class::CreateNewAccount do
+      it "should vlaidate presence of all attributes" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:account_id]).to eql ["can't be blank"]
+        expect(subject.errors[:name]).to eql ["can't be blank"]
+        expect(subject.errors[:initial_balance]).to eql ["can't be blank"]
+        expect(subject.errors[:currency_code]).to eql ["can't be blank"]
+        
+        subject = described_class.from_hash aggregate_id: 'l-1', account_id: 'a-1', name: 'a-1-name', initial_balance: 100, currency_code: 'uah'
+        expect(subject.valid?).to be_truthy
+      end
     end
     
-    it "should validate presentce of transaction_id" do
-      subject = described_class.new command: {}
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
-    end
-  end
-  
-  describe described_class::AccountCommands::AdjustDate do
-    it "should initialize the command from params" do
-      date = DateTime.new
-      subject = described_class.new transaction_id: 't-100', command: {date: date}
-      expect(subject.transaction_id).to eql('t-100')
-      expect(subject.date).to eql(date)
-    end
-    
-    it "should validate presentce of transaction_id and date" do
-      subject = described_class.new command: {}
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
-      expect(subject.errors[:date]).to eql ["can't be blank"]
-    end
-  end
-  
-  describe described_class::AccountCommands::AdjustComment do
-    it "should initialize the command from params" do
-      subject = described_class.new transaction_id: 't-100', command: {comment: 'New comment'}
-      expect(subject.transaction_id).to eql('t-100')
-      expect(subject.comment).to eql('New comment')
-    end
-    
-    it "should validate presentce of transaction_id" do
-      subject = described_class.new command: {}
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
-    end
-  end
-  
-  describe described_class::AccountCommands::RemoveTransaction do
-    it "should initialize the command from params" do
-      subject = described_class.new transaction_id: 't-100'
-      expect(subject.transaction_id).to eql('t-100')
-    end
-    
-    it "should validate presentce of transaction_id" do
-      subject = described_class.new Hash.new
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+    describe described_class::CloseAccount do
+      it "shold validate presence of all attributes" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:account_id]).to eql ["can't be blank"]
+        subject = described_class.from_hash aggregate_id: 'l-1', account_id: 'a-1'
+        expect(subject.valid?).to be_truthy
+      end
     end
   end
 end

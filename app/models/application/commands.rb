@@ -13,7 +13,23 @@ module Application::Commands
     end
   end
   
+  commands_group :LedgerCommands do
+    command :CreateNewAccount, :account_id, :name, :initial_balance, :currency_code do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :account_id, :name, :initial_balance, :currency_code
+    end
+    command :CloseAccount, :account_id do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :account_id
+    end
+  end
+  
   commands_group :AccountCommands do
+    command :RenameAccount, :name do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :name
+    end
+    
     # TODO: Rework other commands to use ActiveModel::Validations instead of custom factories
     command :ReportIncome, :ammount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
