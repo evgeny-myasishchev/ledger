@@ -48,7 +48,7 @@ describe("homeApp", function() {
 		});
 	});
 	
-	describe('AccountsController', function() {
+	describe('HomeController', function() {
 		var routeParams, activeAccount;
 		beforeEach(function() {
 			activeAccount = account1;
@@ -61,7 +61,7 @@ describe("homeApp", function() {
 		function initController() {
 			inject(function($rootScope, $controller) {
 				scope = $rootScope.$new();
-				controller = $controller('AccountsController', {$scope: scope, $routeParams: routeParams});
+				controller = $controller('HomeController', {$scope: scope, $routeParams: routeParams});
 			});
 		}
 		

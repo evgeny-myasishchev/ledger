@@ -21,5 +21,7 @@
 //= require locales/bootstrap-datetimepicker.en-gb.js
 //= require bootstrap-tagsinput
 //= require typeahead.bundle
+//= require home
+//= require home.report
 //= require_tree .
 //= require_self
