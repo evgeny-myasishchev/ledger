@@ -1,1 +1,27 @@
-<h1>Hello</h1>
+<div class="panel panel-default" id='report-new-transaction-container'>
+	<div class="panel-heading">New account</div>
+	<div class="panel-body">
+		<form name='newAccountForm' role="form" class='form' ng-submit='report()'>
+			<div class="form-group">
+				<label>New account name:</label>
+				<input autofocus type="text" class="form-control" placeholder="Enter name" ng-model='newAccount.name' required>
+			</div>
+			<div class="form-group">
+				<label>Currency:</label>
+				<select class='form-control'>
+					<option>USD</option>
+					<option>UAH</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label>Initial balance:</label>
+				<input autofocus type="text" class="form-control" placeholder="Enter initial balance" ng-model='newAccount.initialBalance' required>
+			</div>
+			<div class="form-group" style='display: block; margin-top: 15px;'>
+				<button class="btn btn-primary"	type='submit'>Create this account</button>
+				or
+				<a href='#/accounts'>Not this time</a>
+			</div>
+		</div>
+	</form>
+</div>
