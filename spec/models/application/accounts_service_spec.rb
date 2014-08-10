@@ -163,7 +163,7 @@ RSpec.describe Application::AccountsService, :type => :model do
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
         expect(work).to get_and_return_aggregate Domain::Account, 'a-1', account
         expect(account).to receive(:remove_transaction).with('t-1')
-        subject.handle_message c::RemoveTransaction.new transaction_id: 't-1'
+        subject.handle_message c::RemoveTransaction.new id: 't-1'
       end
     end
       
@@ -176,7 +176,7 @@ RSpec.describe Application::AccountsService, :type => :model do
         expect(work).to get_and_return_aggregate Domain::Account, 'dst-210', receiving_account
         expect(sending_account).to receive(:remove_transaction).with('t-1')
         expect(receiving_account).to receive(:remove_transaction).with('t-2')
-        subject.handle_message c::RemoveTransaction.new transaction_id: 't-1'
+        subject.handle_message c::RemoveTransaction.new id: 't-1'
       end
     end
   end

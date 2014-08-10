@@ -212,7 +212,7 @@ describe Application::Commands do
   
     describe described_class::RemoveTransaction do
       it "should initialize the command from params" do
-        subject = described_class.new transaction_id: 't-100'
+        subject = described_class.new id: 't-100'
         expect(subject.transaction_id).to eql('t-100')
       end
     

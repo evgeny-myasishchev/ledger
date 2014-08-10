@@ -61,7 +61,7 @@ module Application::Commands
       include ActiveModel::Validations
       validates :transaction_id, presence: true
       def initialize(params)
-        super(nil, params)
+        super(nil, transaction_id: params[:id])
       end
     end
   end

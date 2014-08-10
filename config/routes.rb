@@ -1,16 +1,16 @@
 Rails.application.routes.draw do
   root 'home#index'
-  get 'accounts/:account_id/transactions' => 'transactions#index', as: :account_transactions
-  get 'accounts/:account_id/transactions/:from-:to' => 'transactions#range'
-  post 'accounts/:account_id/transactions/report-income' => 'transactions#report_income'
-  post 'accounts/:account_id/transactions/report-expence' => 'transactions#report_expence'
-  post 'accounts/:account_id/transactions/report-refund' => 'transactions#report_refund'
-  post 'accounts/:account_id/transactions/report-transfer' => 'transactions#report_transfer'
-  post 'transactions/:transaction_id/adjust-ammount' => 'transactions#adjust_ammount'
-  post 'transactions/:transaction_id/adjust-tags' => 'transactions#adjust_tags'
-  post 'transactions/:transaction_id/adjust-date' => 'transactions#adjust_date'
-  post 'transactions/:transaction_id/adjust-comment' => 'transactions#adjust_comment'
-  delete 'transactions/:transaction_id' => 'transactions#destroy'
+  
+  resources :accounts, only: [] do
+    resources :transactions, only: [:index] do
+      post 'report-income', 'report-expence', 'report-refund', 'report-transfer', on: :collection
+      get ':from-:to' => 'transactions#range', on: :collection
+    end
+  end
+  
+  resources :transactions, only: [:destroy] do
+    post 'adjust-ammount', 'adjust-tags', 'adjust-date', 'adjust-comment'
+  end
   
   devise_for :users
   # The priority is based upon order of creation: first created -> highest priority.
