@@ -5,6 +5,7 @@ RSpec.describe AccountsController, :type => :controller do
     Module.new do
       include Application::Commands::LedgerCommands
       include Application::Commands::AccountCommands
+      include CommonDomain::Infrastructure
     end
   }
   include AuthenticationHelper
@@ -25,6 +26,23 @@ RSpec.describe AccountsController, :type => :controller do
     
     it "routes rename" do
       expect({put: 'accounts/33223/rename'}).to route_to controller: 'accounts', action: 'rename', aggregate_id: '33223'
+    end
+  end
+  
+  describe "GET 'new'" do
+    it "should load and assign known currencies" do
+      known_currencies = double(:known_currencies)
+      expect(Currency).to receive(:known).and_return(known_currencies)
+      get :new, ledger_id: 221, format: :json
+      expect(response.status).to eql 200
+      expect(assigns(:currencies)).to be known_currencies
+    end
+      
+    it "should generate and assign new account_id" do
+      expect(i::AggregateId).to receive(:new_id).and_return('new-account-223')
+      get :new, ledger_id: 221, format: :json
+      expect(response.status).to eql 200
+      expect(assigns(:new_account_id)).to eql 'new-account-223'
     end
   end
   
