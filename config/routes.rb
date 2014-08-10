@@ -1,6 +1,14 @@
 Rails.application.routes.draw do
   root 'home#index'
   
+  resources :ledgers, only: [] do
+    resources :accounts, only: [:new, :create] do
+      post 'close'
+    end
+  end
+  resources :accounts, only: [], param: :aggregate_id do
+    put 'rename', on: :member
+  end
   resources :accounts, only: [] do
     resources :transactions, only: [:index] do
       post 'report-income', 'report-expence', 'report-refund', 'report-transfer', on: :collection
