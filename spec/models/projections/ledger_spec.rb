@@ -11,6 +11,16 @@ RSpec.describe Projections::Ledger, :type => :model do
   
   let(:ledger_1) { ledger = described_class.find_by_aggregate_id 'ledger-1' }
   
+  describe "self.get_user_ledgers" do
+    it "should return ledgers owed by the user" do
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil
+      l2 = p::Ledger.create! aggregate_id: 'l-2', owner_user_id: 11222, name: 'Ledger 2', shared_with_user_ids: nil
+      l3 = p::Ledger.create! aggregate_id: 'l-3', owner_user_id: 11223, name: 'Ledger 3', shared_with_user_ids: nil
+      expect(p::Ledger.get_user_ledgers(User.new id: 11222)).to eql([l1, l2])
+      expect(p::Ledger.get_user_ledgers(User.new id: 11223)).to eql([l3])
+    end
+  end
+  
   describe "on LedgerCreated" do
     it "should create corresponding ledger record" do
       ledger_1 = described_class.find_by aggregate_id: 'ledger-1'

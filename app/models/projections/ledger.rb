@@ -13,6 +13,10 @@ class Projections::Ledger < ActiveRecord::Base
     end    
   end
   
+  def self.get_user_ledgers(user)
+    where(owner_user_id: user.id).to_a
+  end
+  
   projection do
     on LedgerCreated do |event|
       Ledger.create!(aggregate_id: event.aggregate_id, owner_user_id: event.user_id, name: event.name) unless

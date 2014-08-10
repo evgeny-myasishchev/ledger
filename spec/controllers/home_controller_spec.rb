@@ -19,13 +19,16 @@ describe HomeController do
     describe "authenticated" do
       include AuthenticationHelper
       authenticate_user
-      it "should load accounts and tags for given user" do
+      it "should related data for given user" do
+        ledgers = double(:ledgers)
         accounts = double(:accounts)
         tags = double(:tags)
+        expect(Projections::Ledger).to receive(:get_user_ledgers).with(user).and_return(ledgers)
         expect(Projections::Account).to receive(:get_user_accounts).with(user).and_return(accounts)
         expect(Projections::Tag).to receive(:get_user_tags).with(user).and_return(tags)
         get 'index'
         expect(response.status).to eql 200
+        expect(assigns(:ledgers)).to be ledgers
         expect(assigns(:accounts)).to be accounts
         expect(assigns(:tags)).to be tags
       end
