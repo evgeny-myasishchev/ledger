@@ -1,0 +1,50 @@
+<p style="text-align: left;">
+	<a href='#/accounts/{{activeAccount.sequential_number}}/report' class='btn btn-primary'><i class='glyphicon glyphicon-plus-sign'></i> Report transactions</a>
+</p>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		Transactions
+		<div class="pull-right" ng-show="transactionsInfo.total > transactionsInfo.limit">
+			<strong>{{transactionsInfo.offset + 1}}-{{currentRangeUpperBound}}</strong> of <strong>{{transactionsInfo.total}}</strong>
+			<div class="btn-group btn-group-xs">
+				<button type="button" class="btn btn-default" ng-click='fetchPrevRange()' ng-disabled='!canFetchPrevRange'><i class='glyphicon glyphicon-chevron-left'></i></button>
+				<button type="button" class="btn btn-default" ng-click='fetchNextRange()' ng-disabled='!canFetchNextRange'><i class='glyphicon glyphicon-chevron-right'></i></button>
+			</div>
+		</div>
+	</div>
+	<table class='table table-condensed'>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Ammount</th>
+				<th>Tags</th>
+				<th>Date</th>
+				<th>Description</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="transaction in transactions">
+				<td><i class='glyphicon {{getTransactionTypeIcon(transaction)}}'></i></td>
+				<td ldr-bubble-editor format='money' submit='adjustAmmount(transaction, newValue)' value="transaction.ammount">{{getTransferAmmountSign(transaction)}}{{transaction.ammount | money}}</td>
+				<td ldr-bubble-editor='tags' value='transaction.tag_ids' submit='adjustTags(transaction, newValue)'><ledger-tags ng-model="transaction.tag_ids" /></td>
+				<td ldr-bubble-editor='date' value='transaction.date' submit='adjustDate(transaction, newValue)'>{{transaction.date.toLocaleDateString()}}</td>
+				<td ldr-bubble-editor submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>
+				<td style="padding-top: 3px; padding-bottom: 3px;">
+					<div ng-show="confirmRemoval" class="alert alert-danger" style="margin-bottom: 0px; position: absolute; right: 40px; z-index: 100; white-space: nowrap; margin-top: -4px; padding-top: 3px; padding-bottom: 3px;">The transaction will be removed. Continue?
+						<button ng-click="removeTransaction(transaction)" class="btn btn-danger btn-xs">Yes</button>
+						<button ng-click="confirmRemoval = false" class="btn btn-default btn-xs">No</button>
+					</div>
+					<div class="btn-group">
+						<button style='padding-top: 2px;' type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+							<i class='glyphicon glyphicon-cog'></i>
+						</button>
+						<ul class="dropdown-menu" role="menu">
+							<li><a ng-click="confirmRemoval = true" ng-init="confirmRemoval = false"><i class='glyphicon glyphicon-trash'></i> Remove</a></li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
