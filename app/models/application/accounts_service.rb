@@ -1,6 +1,11 @@
 class Application::AccountsService < CommonDomain::CommandHandler
   include Application::Commands
   
+  on AccountCommands::RenameAccount, begin_work: true do |work, command|
+    account = work.get_by_id Domain::Account, command.aggregate_id
+    account.rename command.name
+  end
+  
   on AccountCommands::ReportIncome, begin_work: true do |work, command|
     account = work.get_by_id Domain::Account, command.aggregate_id
     account.report_income command.ammount, command.date, command.tag_ids, command.comment

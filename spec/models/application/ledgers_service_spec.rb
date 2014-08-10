@@ -31,4 +31,16 @@ RSpec.describe Application::LedgersService, :type => :model do
       subject.handle_message cmd
     end
   end
+  
+  describe "CloseAccount" do
+    it "use the ledger to close the account" do
+      cmd = i::LedgerCommands::CloseAccount.new 'ledger-1', 
+        account_id: 'account-1332'
+      account = double(:account)
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-1332', account
+      expect(ledger1).to receive(:close_account).with(account)
+      subject.handle_message cmd
+    end
+  end
 end

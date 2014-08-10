@@ -17,6 +17,15 @@ RSpec.describe Application::AccountsService, :type => :model do
     @work = expect(repository).to begin_work
   end
   
+  describe "RenameAccount" do
+    it "should use the account to rename" do
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
+      expect(account).to receive(:rename).with('New Name 112')
+      cmd = c::RenameAccount.new('account-112', name: 'New Name 112')
+      subject.handle_message cmd
+    end
+  end
+  
   
   describe "ReportIncome" do
     it "should use account to report the income" do

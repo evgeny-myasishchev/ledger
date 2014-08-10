@@ -14,6 +14,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def rename new_name
+    log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{new_name}'"
     raise_event AccountRenamed.new aggregate_id, new_name
   end
   
