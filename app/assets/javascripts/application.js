@@ -23,5 +23,6 @@
 //= require typeahead.bundle
 //= require home
 //= require home.report
+//= require home.accounts
 //= require_tree .
 //= require_self

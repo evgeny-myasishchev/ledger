@@ -143,7 +143,11 @@ var homeApp = (function() {
 			$routeProvider.when('/accounts', {
 				templateUrl: "accounts.html",
 				controller: 'HomeController'
-			}).when('/accounts/:accountSequentialNumber', {
+			}).when('/accounts/new', {
+				templateUrl: "new_account.html",
+				controller: 'NewAccountController'
+			})
+			.when('/accounts/:accountSequentialNumber', {
 				templateUrl: "accounts.html",
 				controller: 'HomeController'
 			}).when('/accounts/:accountSequentialNumber/report', {

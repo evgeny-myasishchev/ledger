@@ -5,6 +5,9 @@
 	<script type="text/ng-template" id='report.html'>
 	<%= render partial: 'report' %>
 	</script>
+	<script type="text/ng-template" id='new_account.html'>
+	<%= render partial: 'new_account' %>
+	</script>
 	<script type="text/javascript">
 		homeApp.constant('accounts', <%= raw @accounts.to_json %>);
 		homeApp.constant('tags', <%= raw @tags.to_json %>);
