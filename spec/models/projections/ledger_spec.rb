@@ -19,6 +19,12 @@ RSpec.describe Projections::Ledger, :type => :model do
       expect(p::Ledger.get_user_ledgers(User.new id: 11222)).to eql([l1, l2])
       expect(p::Ledger.get_user_ledgers(User.new id: 11223)).to eql([l3])
     end
+    
+    it "should load limited set of attributes only" do
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil
+      actual_l1 = p::Ledger.get_user_ledgers(User.new id: 11222).first
+      expect(actual_l1.attribute_names).to eql ['id', 'aggregate_id', 'name']
+    end
   end
   
   describe "on LedgerCreated" do
