@@ -4,7 +4,7 @@ RSpec.shared_context 'dispatch command middleware shared stuff' do
   let(:the_next) { double(:next, call: nil) }
   let(:context) { double(:context) }
   let(:command) { CommonDomain::Command.new 'aggregate-100' }
-  subject { described_class.new the_next}
+  subject { described_class.new the_next }
 end
 
 RSpec.describe CommonDomain::DispatchCommand::Middleware::Base do
@@ -88,50 +88,26 @@ end
 
 RSpec.describe CommonDomain::DispatchCommand::Middleware::TrackUser do
   include_context 'dispatch command middleware shared stuff'
-  let(:request) { double(:request, remote_ip: '11.22.33.44')}
-  let(:session) { Hash.new }
-  let(:controller) { double(:controller, request: request, session: session) }
+
   before(:each) do
-    allow(context).to receive(:controller) { controller }
+    allow(context).to receive(:user_id) { 'user-332211' }
+    allow(context).to receive(:remote_ip) { '11.22.33.44' }
   end
   
-  shared_examples 'TrackUser.call' do
+  describe "call" do
     it "should assign the ip address" do
       subject.call(command, context)
       expect(command.headers[:ip_address]).to eql '11.22.33.44'
     end
     
+    it "should assign user_id" do
+      subject.call(command, context)
+      expect(command.headers[:user_id]).to eql 'user-332211'
+    end
+    
     it "should call the next" do
       expect(the_next).to receive(:call).with(command, context) { 'result-7692' }
       expect(subject.call(command, context)).to eql 'result-7692'
-    end
-  end
-  
-  describe "call" do
-    describe "with user_id as a session_key option" do
-      it_behaves_like 'TrackUser.call'
-      subject { described_class.new the_next, user_id: 'user-id-session-key' }
-      before(:each) do
-        session['user-id-session-key'] = 'user-332211'
-      end
-      
-      it "should take the user_id from the session by key and assign it as a user_id header" do
-        subject.call(command, context)
-        expect(command.headers[:user_id]).to eql 'user-332211'
-      end
-    end
-    
-    describe "with user_id as a proc" do
-      it_behaves_like 'TrackUser.call'
-      subject { described_class.new the_next, user_id: lambda { |c|  
-        expect(c).to be context
-        'user-332211-from-proc'
-      } }
-      
-      it "should take the user_id from the session by key and assign it as a user_id header" do
-        subject.call(command, context)
-        expect(command.headers[:user_id]).to eql 'user-332211-from-proc'
-      end
     end
   end
 end
