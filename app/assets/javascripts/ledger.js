@@ -343,7 +343,6 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 		var ledgers = [];
 		this.assignLedgers = function(l) {
 			ledgers = l;
-			console.log(l);
 		};
 		
 		this.$get = function() {
