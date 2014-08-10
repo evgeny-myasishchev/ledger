@@ -336,3 +336,22 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 		}
 	}
 }]);
+
+!function() {
+	var ledgersProvider = angular.module('ledgersProvider', []);
+	ledgersProvider.provider('ledgers', function() {
+		var ledgers = [];
+		this.assignLedgers = function(l) {
+			ledgers = l;
+			console.log(l);
+		};
+		
+		this.$get = function() {
+			return {
+				getActiveLedger: function() {
+					return ledgers[0];
+				}
+			}
+		}
+	});
+}();
