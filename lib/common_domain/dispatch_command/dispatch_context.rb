@@ -9,6 +9,15 @@ module CommonDomain::DispatchCommand::DispatchContext
     end
   end
   
+  class StaticDispatchContext
+    attr_reader :user_id, :remote_ip
+    
+    def initialize user_id, remote_ip
+      @user_id = user_id
+      @remote_ip = remote_ip
+    end
+  end
+  
   class ControllerDispatchContext < Base
     def initialize controller, options = {}
       @controller = controller

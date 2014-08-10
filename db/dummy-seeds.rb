@@ -1,19 +1,26 @@
 # This file contains initialization of the dummy data that is used for development purposes
 log = Rails.logger
-context = Rails.application.domain_context
+@log = log
+@context = Rails.application.domain_context
 
 log.info 'Loadding dummy seeds...'
 
 log.debug 'Doing existing data clenup...'
-context.event_store.purge
-context.projections.for_each { |projection| projection.cleanup! }
+@context.event_store.purge
+@context.projections.for_each { |projection| projection.cleanup! }
 
 log.info 'Creating user dev@domain.com'
 user = User.create_with(id: 1, password: 'password').find_or_create_by! email: 'dev@domain.com'
 
+@dispatch_context = CommonDomain::DispatchCommand::DispatchContext::StaticDispatchContext.new user.id, '127.0.0.1'
+
+def dispatch command
+  @context.command_dispatch_middleware.call command, @dispatch_context
+end
+
 log.info 'Creating ledger for the user'
 tag_ids_by_name = {}
-ledger = context.repository.begin_work do |work|
+ledger = @context.repository.begin_work do |work|
   l = work.add_new Domain::Ledger.new.create user.id, 'Family'
   tag_ids_by_name['food'] = l.create_tag 'Food'
   tag_ids_by_name['lunch'] = l.create_tag 'Lunch'
@@ -37,46 +44,66 @@ fake_transactions_data = [
   {ammount: '620.32', tags: [tag_ids_by_name['gas'], tag_ids_by_name['car']], comment: 'Gas and washing liquid'},
 ]
 
-cache_uah_account_id = context.repository.begin_work do |work|
-  l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('Cache', 0, uah)
-  account.aggregate_id
-  account.report_income '36332.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
-  100.times do
-    data = fake_transactions_data[rand(fake_transactions_data.length)]
-    account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
-  end
-  account.aggregate_id
-end
-
-pb_credit_account_id = context.repository.begin_work do |work|
-  l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('PB Credit Card', 0, uah)
-  account.report_income '23448.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
-  account.report_income '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
-  account.report_income '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
-  100.times do
-    data = fake_transactions_data[rand(fake_transactions_data.length)]
-    account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
-  end
-  
-  account.aggregate_id
-end
-
-pb_deposit_id = context.repository.begin_work do |work|
-  l = work.get_by_id(Domain::Ledger, ledger.aggregate_id)
-  account = work.add_new l.create_new_account('PB Deposit', 0, uah)
-  account.aggregate_id
-end
-
 include Application::Commands
 
-context.command_dispatcher.dispatch AccountCommands::ReportRefund.new cache_uah_account_id,
-  ammount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
+def create_account(ledger, name, currency, &block)
+  @log.info "Creating new account: #{name}"
+  account_id = CommonDomain::Infrastructure::AggregateId.new_id
+  dispatch LedgerCommands::CreateNewAccount.new ledger.aggregate_id, account_id: account_id, name: name, initial_balance: 0, currency_code: currency.code
+  if block_given? 
+    yield(account_id) 
+  else
+    account_id
+  end
+end
 
-context.command_dispatcher.dispatch AccountCommands::ReportRefund.new pb_credit_account_id,
-  ammount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
+def report_income account_id, ammount, date, tags, comment
+  dispatch AccountCommands::ReportIncome.new account_id, ammount: ammount, date: date, tag_ids: tags, comment: comment
+end
 
-context.command_dispatcher.dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
+def report_expence account_id, ammount, date, tags, comment
+  dispatch AccountCommands::ReportExpence.new account_id, ammount: ammount, date: date, tag_ids: tags, comment: comment
+end
+
+cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
+  report_income account_id, '36332.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
+  report_expence account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
+  
+  # Reporting in bulk directly. It just works faster.
+  @context.repository.begin_work do |work|
+    account = work.get_by_id Domain::Account, account_id
+    100.times do
+      data = fake_transactions_data[rand(fake_transactions_data.length)]
+      account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
+    end
+  end
+  dispatch AccountCommands::ReportRefund.new account_id,
+    ammount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
+  account_id
+end
+
+pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_id|
+  report_income account_id, '23448.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
+  report_income account_id, '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
+  report_income account_id, '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
+  
+  @context.repository.begin_work do |work|
+    account = work.get_by_id Domain::Account, account_id
+    100.times do
+      data = fake_transactions_data[rand(fake_transactions_data.length)]
+      account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
+    end
+  end
+  dispatch AccountCommands::ReportRefund.new account_id,
+    ammount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
+  account_id
+end
+
+pb_deposit_id = create_account ledger, 'PB Deposit', uah
+
+dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: cache_uah_account_id,
+  ammount_sent: '15000.00', ammount_received: '15000.00', date: DateTime.now, tag_ids: [], comment: 'Getting cache'
+
+dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
   ammount_sent: '5000.00', ammount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
