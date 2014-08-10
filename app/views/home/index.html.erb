@@ -11,6 +11,9 @@
 	<script type="text/javascript">
 		homeApp.constant('accounts', <%= raw @accounts.to_json %>);
 		homeApp.constant('tags', <%= raw @tags.to_json %>);
+		homeApp.config(['ledgersProvider', function(ledgersProvider) {
+			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
+		}]);
 	</script>
 	<div ng-view class='row'>
 	</div>
