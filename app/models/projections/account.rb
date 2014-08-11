@@ -5,7 +5,9 @@ class Projections::Account < ActiveRecord::Base
   include UserAuthorizable
   
   def self.get_user_accounts(user)
-    Account.where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
+    Account.
+      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number).
+      where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   
   def ensure_authorized!(user)

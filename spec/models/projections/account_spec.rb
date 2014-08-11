@@ -47,23 +47,27 @@ RSpec.describe Projections::Account, :type => :model do
   end
   
   describe "get_user_accounts" do
+    let(:user) { User.new id: 100 }
+    before(:each) do
+      @a1 = create_account_projection! 'a1', 'l1', authorized_user_ids: '{100},{110}'
+      @a2 = create_account_projection! 'a2', 'l1', authorized_user_ids: '{110},{100},{130}'
+      @a3 = create_account_projection! 'a3', 'l1', authorized_user_ids: '{110},{130},{100}'
+      @a4 = create_account_projection! 'a4', 'l1', authorized_user_ids: '{110},{120},{130}'
+      
+      @user_accounts = p::Account.get_user_accounts user
+    end
     it "should return authorized accounts for specified user" do
-      user = User.new
-      user.id = 100
-      
-      a1 = create_account_projection! 'a1', 'l1', authorized_user_ids: '{100},{110}'
-      a2 = create_account_projection! 'a2', 'l1', authorized_user_ids: '{110},{100},{130}'
-      a3 = create_account_projection! 'a3', 'l1', authorized_user_ids: '{110},{130},{100}'
-      a4 = create_account_projection! 'a4', 'l1', authorized_user_ids: '{110},{120},{130}'
-      
-      user_accounts = p::Account.get_user_accounts user
-      expect(user_accounts.length).to eql 3
-      expect(user_accounts).to include(a1)
-      expect(user_accounts).to include(a2)
-      expect(user_accounts).to include(a3)
+      expect(@user_accounts.length).to eql 3
+      expect(@user_accounts.detect { |a| a.aggregate_id == 'a1' }).not_to be_nil
+      expect(@user_accounts.detect { |a| a.aggregate_id == 'a2' }).not_to be_nil
+      expect(@user_accounts.detect { |a| a.aggregate_id == 'a3' }).not_to be_nil
     end
     
-    it "should skip system fields that can lead to information flow"
+    it "should skip system fields that can lead to information flow" do
+      actual_a1 = @user_accounts.detect { |a| a.aggregate_id == @a1.aggregate_id }
+      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'id'])
+      expect(actual_a1.id).to be_nil #it's present somehow even if not specified
+    end
   end
   
   describe "projection" do
