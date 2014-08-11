@@ -8,14 +8,14 @@
 			</div>
 			<div class="form-group">
 				<label>Currency:</label>
-				<select class='form-control'>
-					<option>USD</option>
-					<option>UAH</option>
+				<select class='form-control' ng-model='newAccount.currencyCode' required>
+					<option value="">--Chose currency--</option>
+					<option ng-repeat="currency in currencies | orderBy:'code'" value="{{currency.code}}">{{currency.code}} - {{currency.english_name}}</option>
 				</select>
 			</div>
 			<div class="form-group">
 				<label>Initial balance:</label>
-				<input autofocus type="text" class="form-control" placeholder="Enter initial balance" ng-model='newAccount.initialBalance' required>
+				<input autofocus type="text" class="form-control" placeholder="Enter initial balance" ng-model='newAccount.initialBalance'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<button class="btn btn-primary"	type='submit'>Create this account</button>
