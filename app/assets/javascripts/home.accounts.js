@@ -1,6 +1,7 @@
 !function($) {
 	var homeApp = angular.module('homeApp');
-	homeApp.controller('NewAccountController', ['$scope', '$http', 'ledgers', function($scope, $http, ledgers) {
+	homeApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
+	function($scope, $http, money, ledgers, accounts) {
 		$scope.newAccount = {
 			name: null,
 			currencyCode: null,
@@ -20,7 +21,12 @@
 				currency_code: $scope.newAccount.currencyCode,
 				initial_balance: $scope.newAccount.initialBalance
 			}).success(function() {
-				
+				accounts.add({
+					aggregate_id: $scope.newAccount.newAccountId,
+					name: $scope.newAccount.name,
+					currency_code: $scope.newAccount.currencyCode,
+					balance: money.parse($scope.newAccount.initialBalance)
+				});
 			})
 		};
 	}]);

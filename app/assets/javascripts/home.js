@@ -26,6 +26,14 @@ var homeApp = (function() {
 						activeAccount = accounts[0];
 					}
 					return activeAccount;
+				},
+				add: function(account) {
+					var lastSequentialNumber = 0;
+					$.each(accounts, function(index, account) {
+						if(account.sequential_number > lastSequentialNumber) lastSequentialNumber = account.sequential_number;
+					});
+					account.sequential_number = lastSequentialNumber + 1;
+					accounts.push(account);
 				}
 			}
 		}];

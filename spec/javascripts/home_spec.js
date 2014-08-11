@@ -7,9 +7,9 @@ describe("homeApp", function() {
 		scope = {};
 		homeApp.config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
-				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
-				account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
-				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
+				account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
+				account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
+				account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
 			]);
 		}]);
 		homeApp.value('tags', []); //It has to be value so it could be redefined in other specs
@@ -53,6 +53,12 @@ describe("homeApp", function() {
 		it("should set first account as active if no accountId in params", function() {
 			initProvider();
 			expect(subject.getActive()).toEqual(account1);
+		});
+		
+		it('should insert the account assigning sequential number on add', function() {
+			initProvider();
+			subject.add({aggregate_id: 'a4'});
+			expect(subject.getAll()).toEqual([account1, account2, account3, {aggregate_id: 'a4', sequential_number: 204}]);
 		});
 	});
 	
