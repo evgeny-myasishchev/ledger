@@ -40,7 +40,8 @@ describe("NewAccountController", function() {
 		});
 	});
 	
-	describe('report', function() {
+	describe('create', function() {
+		var accounts;
 		beforeEach(function() {
 			$httpBackend.whenGET('ledgers/ledger-332/accounts/new.json').respond({new_account_id: '1', currencies: []});
 			initController();
@@ -49,9 +50,11 @@ describe("NewAccountController", function() {
 			scope.newAccount.name = 'New account';
 			scope.newAccount.currencyCode = 'UAH';
 			scope.newAccount.initialBalance = '2332.31';
+			inject(['accounts', function(a) { accounts = a;}]);
+			spyOn(accounts, 'add');
 		});
 		
-		it('should POST ledger/accounts', function() {
+		it('should POST ledger/accounts setting progress flags', function() {
 			$httpBackend.expectPOST('ledgers/ledger-332/accounts', function(data) {
 				var command = JSON.parse(data);
 				expect(command.account_id).toEqual('account-223');
@@ -60,16 +63,53 @@ describe("NewAccountController", function() {
 				expect(command.initial_balance).toEqual('2332.31');
 				return true;
 			}).respond();
-			scope.report();
+			expect(scope.created).toBeFalsy();
+			expect(scope.creating).toBeFalsy();
+			scope.create();
+			expect(scope.creating).toBeTruthy();
+			$httpBackend.flush();
+			expect(scope.creating).toBeFalsy();
+			expect(scope.created).toBeTruthy();
+		});
+		
+		it('should add the account on success', function() {
+			$httpBackend.whenPOST('ledgers/ledger-332/accounts').respond();
+			scope.create();
+			$httpBackend.flush();
+			expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231})
+		});
+	});
+	
+	describe('createAnother', function() {
+		beforeEach(function() {
+			$httpBackend.whenGET('ledgers/ledger-332/accounts/new.json').respond({ new_account_id: 'new-account-332', currencies: [] });
+			initController();
 			$httpBackend.flush();
 		});
 		
-		it('should add the account on success', inject(function(accounts) {
-			spyOn(accounts, 'add');
-			$httpBackend.whenPOST('ledgers/ledger-332/accounts').respond();
-			scope.report();
+		it('should load and assign new account data', function() {
+			$httpBackend.expectGET('ledgers/ledger-332/accounts/new.json').respond({ new_account_id: 'new-account-333', currencies: [] });
+			scope.createAnother();
 			$httpBackend.flush();
-			expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231})
-		}));
+			expect(scope.newAccount.newAccountId).toEqual('new-account-333');
+		});
+		
+		it('should reset progress flags on success', function() {
+			scope.created = true;
+			scope.createAnother();
+			$httpBackend.flush();
+			expect(scope.created).toBeFalsy();
+		});
+		
+		it('should reset new account data on success', function() {
+			scope.newAccount.name = 'Some name';
+			scope.newAccount.currencyCode = 'UAH';
+			scope.newAccount.initialBalance = '2200.30';
+			scope.createAnother();
+			$httpBackend.flush();
+			expect(scope.newAccount.name).toBeNull();
+			expect(scope.newAccount.currencyCode).toBeNull();
+			expect(scope.newAccount.initialBalance).toEqual('0');
+		});
 	});
 });

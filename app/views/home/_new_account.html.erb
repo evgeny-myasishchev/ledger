@@ -1,26 +1,43 @@
 <div class="panel panel-default" id='report-new-transaction-container'>
-	<div class="panel-heading">New account</div>
+	<div class="panel-heading">
+		<span ng-hide='created'>New account</span>
+		<div class='label label-success' ng-show='created'>Account created successfully!</div>
+	</div>
 	<div class="panel-body">
-		<form name='newAccountForm' role="form" class='form' ng-submit='report()'>
-			<div class="form-group">
-				<label>New account name:</label>
-				<input autofocus type="text" class="form-control" placeholder="Enter name" ng-model='newAccount.name' required>
-			</div>
-			<div class="form-group">
-				<label>Currency:</label>
-				<select class='form-control' ng-model='newAccount.currencyCode' required>
-					<option value="">--Chose currency--</option>
-					<option ng-repeat="currency in currencies | orderBy:'code'" value="{{currency.code}}">{{currency.code}} - {{currency.english_name}}</option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label>Initial balance:</label>
-				<input autofocus type="text" class="form-control" placeholder="Enter initial balance" ng-model='newAccount.initialBalance'>
-			</div>
-			<div class="form-group" style='display: block; margin-top: 15px;'>
+		<form name='newAccountForm' role="form" class='form' ng-submit='create()'>
+			<fieldset ng-disabled='created'>
+				<div class="form-group">
+					<label>New account name:</label>
+					<input autofocus type="text" class="form-control" placeholder="Enter name" ng-model='newAccount.name' required>
+				</div>
+				<div class="form-group">
+					<label>Currency:</label>
+					<select class='form-control' ng-model='newAccount.currencyCode' required>
+						<option value="">--Chose currency--</option>
+						<option ng-selected='newAccount.currencyCode == currency.code' ng-repeat="currency in currencies | orderBy:'code'" value="{{currency.code}}">{{currency.code}} - {{currency.english_name}}</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label>Initial balance:</label>
+					<input autofocus type="text" class="form-control" placeholder="Enter initial balance" ng-model='newAccount.initialBalance'>
+				</div>
+			</fieldset>
+			<div class="form-group" style='display: block; margin-top: 15px;' ng-hide="creating || created">
 				<button class="btn btn-primary"	type='submit'>Create this account</button>
 				or
-				<a href='#/accounts'>Not this time</a>
+				<a href='#/accounts'>I'm done here</a>
+			</div>
+			<div class="form-group" style='display: block; margin-top: 15px;' ng-show='created'>
+				<button class="btn btn-primary"	type='button' ng-click='createAnother()'>Create another</button>
+				or
+				<a href='#/accounts'>I'm done here</a>
+			</div>
+			<div class='form-group' ng-show="creating">
+				<div class="progress">
+					<div class="progress-bar progress-bar-striped active"  role="progressbar" style="width: 100%">
+						Creating...
+					</div>
+				</div>
 			</div>
 		</div>
 	</form>

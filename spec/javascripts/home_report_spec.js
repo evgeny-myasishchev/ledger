@@ -34,7 +34,10 @@ describe("ReportTransactionsController", function() {
 
 	it("initializes initial scope", function() {
 		initController();
-		expect(scope.newTransaction.date.toJSON()).toEqual(new Date().toJSON());
+		var currentDate = new Date();
+		currentDate.setMilliseconds(0);
+		scope.newTransaction.date.setMilliseconds(0);
+		expect(scope.newTransaction.date.toJSON()).toEqual(currentDate.toJSON());
 		scope.newTransaction.date = null;
 		expect(scope.newTransaction).toEqual({
 			ammount: null, tag_ids: [], type: 'expence', date: null, comment: null
