@@ -1,9 +1,9 @@
 !function() {
 	var homeApp = angular.module('homeApp');
-	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'activeAccountResolver', 'accounts', 'money',
-	function ($scope, $http, activeAccountResolver, accounts, money) {
-		var activeAccount = $scope.account = activeAccountResolver.resolve();
-		$scope.accounts = accounts;
+	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
+	function ($scope, $http, accounts, money) {
+		var activeAccount = $scope.account = accounts.getActive();
+		$scope.accounts = accounts.getAll();
 		$scope.reportedTransactions = [];
 		//For testing purposes
 		// $scope.reportedTransactions = [
@@ -21,7 +21,7 @@
 				activeAccount.balance -= transaction.ammount;
 			} else if(transaction.type == Transaction.transferKey) {
 				activeAccount.balance -= transaction.ammount;
-				$.each(accounts, function(index, account) {
+				$.each(accounts.getAll(), function(index, account) {
 					if(account.aggregate_id == transaction.receivingAccountId) {
 						account.balance += money.parse(transaction.ammountReceived);
 						return false;

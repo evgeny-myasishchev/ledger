@@ -5,47 +5,54 @@ describe("homeApp", function() {
 	beforeEach(function() {
 		module('homeApp');
 		scope = {};
-		homeApp.value('accounts',  [
-			account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
-			account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
-			account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
-		]);
+		homeApp.config(['accountsProvider', function(accountsProvider) {
+			accountsProvider.assignAccounts([
+				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
+				account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
+				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
+			]);
+		}]);
 		homeApp.value('tags', []); //It has to be value so it could be redefined in other specs
 		inject(function(_$httpBackend_) {
 			$httpBackend = _$httpBackend_;
 		});
 	});
-
-	describe('activeAccountResolver', function() {
-		var resolver;
+	
+	describe('accountsProvider', function() {
+		var subject;
 		beforeEach(function() {
 			inject(function($routeParams) {
 				routeParams = $routeParams;
 			});
 		});
 		
-		function initResolver() {
+		function initProvider() {
 			inject(function($injector) {
-				resolver = $injector.get('activeAccountResolver');
+				subject = $injector.get('accounts');
 			});
-		}
+		};
+		
+		it('should return all accounts on getAll', function() {
+			initProvider();
+			expect(subject.getAll()).toEqual([account1, account2, account3]);
+		});
 
 		it("should set active account from route params", function() {
 			routeParams.accountSequentialNumber = account2.sequential_number;
-			initResolver();
-			expect(resolver.resolve()).toEqual(account2);
+			initProvider();
+			expect(subject.getActive()).toEqual(account2);
 		});
 
 		it("should change active account if route params changed", function() {
 			routeParams.accountSequentialNumber = account1.sequential_number;
-			initResolver();
+			initProvider();
 			routeParams.accountSequentialNumber = account2.sequential_number;
-			expect(resolver.resolve()).toEqual(account2);
+			expect(subject.getActive()).toEqual(account2);
 		});
 		
 		it("should set first account as active if no accountId in params", function() {
-			initResolver();
-			expect(resolver.resolve()).toEqual(account1);
+			initProvider();
+			expect(subject.getActive()).toEqual(account1);
 		});
 	});
 	

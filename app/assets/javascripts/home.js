@@ -4,31 +4,37 @@ var homeApp = (function() {
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
-
-	homeApp.factory('activeAccountResolver', function(accounts, $routeParams) {
-		return {
-			resolve: function() {
-				var activeAccount = null;
-
-				var getActiveAccountFromRoute = function() {
-					return jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0]
-				};
-
-				if($routeParams.accountSequentialNumber) {
-					activeAccount = getActiveAccountFromRoute();
-				} else {
-					activeAccount = accounts[0];
-				}
-
-				return activeAccount;
-			}
+	
+	homeApp.provider('accounts', function() {
+		var accounts;
+		this.assignAccounts = function(value) {
+			accounts = value;
 		};
+		this.$get = ['$routeParams', function($routeParams) {
+			return {
+				getAll: function() {
+					return accounts;
+				},
+				getActive: function() {
+					var activeAccount = null;
+					var getActiveAccountFromRoute = function() {
+						return jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0]
+					};
+					if($routeParams.accountSequentialNumber) {
+						activeAccount = getActiveAccountFromRoute();
+					} else {
+						activeAccount = accounts[0];
+					}
+					return activeAccount;
+				}
+			}
+		}];
 	});
 
-	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'accounts', 'activeAccountResolver', 'money',
-	function ($scope, $http, tagsHelper, accounts, activeAccountResolver, money) {
-		$scope.accounts = accounts;
-		var activeAccount = $scope.activeAccount = activeAccountResolver.resolve();
+	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'accounts', 'money',
+	function ($scope, $http, tagsHelper, accounts, money) {
+		$scope.accounts = accounts.getAll();
+		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
 			var transactions = data.transactions;
 			jQuery.each(transactions, function(i, t) {

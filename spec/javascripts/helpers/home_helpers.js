@@ -4,9 +4,9 @@ HomeHelpers = (function() {
 		include: function(target) {
 			target.assignActiveAccount = function(account) {
 				activeAccount = account;
-				inject(function(activeAccountResolver) {
-					if(!jasmine.isSpy(activeAccountResolver.resolve)) {
-						jasmine.currentEnv_.spyOn(activeAccountResolver, 'resolve').and.callFake(function() {
+				inject(function(accounts) {
+					if(!jasmine.isSpy(accounts.getActive)) {
+						jasmine.currentEnv_.spyOn(accounts, 'getActive').and.callFake(function() {
 							return activeAccount;
 						});
 					}
