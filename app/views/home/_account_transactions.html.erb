@@ -8,14 +8,14 @@
 				<span class="glyphicon glyphicon-cog"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
-				<li><a href="#">Rename</a></li>
+				<li><a href="#" ng-click='isRenaming = true; $event.preventDefault();'>Rename account</a></li>
 				<li><a href="#">Close account</a></li>
 			</ul>
 		</div>
 	</div>
 	<div class='pull-right' style='padding-right: 10px'>
 		<h2 style='margin-top: 0'>
-			<small>{{activeAccount.balance | money}}</small> <span ldr-bubble-editor value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
+			<small>{{activeAccount.balance | money}}</small> <span ldr-bubble-editor trigger-on='isRenaming' finally='isRenaming = false' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
 		</h2>
 	</div>
 </div>

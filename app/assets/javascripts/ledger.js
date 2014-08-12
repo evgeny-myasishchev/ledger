@@ -303,7 +303,14 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 				}
 			}
 			
-			element.click(function() {
+			function evalFinally() {
+				if(attrs.finally) {
+					scope.$eval(attrs.finally);
+					scope.$digest();
+				}
+			}
+			
+			var trigger = function() {
 				if(!initialized) {
 					initialized = true;
 					element.popover({
@@ -324,11 +331,20 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 						shown = false
 						editor.dispose()
 						editor = null;
+						evalFinally();
 					});
 				}
 				//Toggle may not work here because of the focusout
 				shown ? hidePopover() : showPopover();
-			});
+			};
+			
+			if(attrs.triggerOn) {
+				scope.$watch(attrs.triggerOn, function(newValue) {
+					if(newValue) trigger();
+				});
+			} else {
+				element.click(trigger);
+			}
 			
 			scope.$on('$destroy', function() {
 				element.popover('destroy');
