@@ -91,9 +91,7 @@ describe("homeApp", function() {
 		
 		describe('renameAccount', function() {
 			beforeEach(function() {
-				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({
-					transactions: []
-				});
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
 				initController();
 				$httpBackend.flush();
 			});
@@ -106,6 +104,22 @@ describe("homeApp", function() {
 				var result = scope.renameAccount(account2, 'New name 223');
 				$httpBackend.flush();
 				expect(account2.name).toEqual('New name 223');
+				expect(result.then).toBeDefined();
+			});
+		});
+		
+		describe('closeAccount', function() {
+			beforeEach(function() {
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
+				initController();
+				$httpBackend.flush();
+				HomeHelpers.include(this);
+				this.assignActiveLedger({aggregate_id: 'ledger-332'});
+			});
+			it('should post rename for given account', function() {
+				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/close').respond(200);
+				var result = scope.closeAccount(account2);
+				$httpBackend.flush();
 				expect(result.then).toBeDefined();
 			});
 		});

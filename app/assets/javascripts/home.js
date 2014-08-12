@@ -39,8 +39,8 @@ var homeApp = (function() {
 		}];
 	});
 
-	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'accounts', 'money',
-	function ($scope, $http, tagsHelper, accounts, money) {
+	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'ledgers', 'accounts', 'money',
+	function ($scope, $http, tagsHelper, ledgers, accounts, money) {
 		$scope.accounts = accounts.getAll();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
@@ -63,6 +63,11 @@ var homeApp = (function() {
 				name: newName
 			}).success(function() {
 				account.name = newName;
+			});
+		};
+		
+		$scope.closeAccount = function(account) {
+			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/close').success(function() {
 			});
 		};
 		

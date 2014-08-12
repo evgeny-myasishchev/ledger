@@ -46,7 +46,6 @@
 			});
 		};
 		$scope.createAnother = function() {
-			console.log('createAnother');
 			$http.get('ledgers/' + activeLedger.aggregate_id + '/accounts/new.json').success(function(data) {
 				resetNewAccount();
 				$scope.newAccount.newAccountId = data.new_account_id;
