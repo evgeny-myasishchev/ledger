@@ -58,6 +58,14 @@ var homeApp = (function() {
 			$scope.refreshRangeState();
 		});
 		
+		$scope.renameAccount = function(account, newName) {
+			return $http.put('accounts/' + account.aggregate_id + '/rename', {
+				name: newName
+			}).success(function() {
+				account.name = newName;
+			});
+		};
+		
 		$scope.refreshRangeState = function() {
 			$scope.canFetchRanges = $scope.transactionsInfo.total > $scope.transactionsInfo.limit;
 			$scope.canFetchNextRange = $scope.transactionsInfo.offset + $scope.transactionsInfo.limit < $scope.transactionsInfo.total;

@@ -89,6 +89,27 @@ describe("homeApp", function() {
 			expect(scope.activeAccount).toEqual(account2);
 		});
 		
+		describe('renameAccount', function() {
+			beforeEach(function() {
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({
+					transactions: []
+				});
+				initController();
+				$httpBackend.flush();
+			});
+			it('should post rename for given account', function() {
+				$httpBackend.expectPUT('accounts/a-2/rename', function(data) {
+					var command = JSON.parse(data);
+					expect(command.name).toEqual('New name 223');
+					return true;
+				}).respond(200);
+				var result = scope.renameAccount(account2, 'New name 223');
+				$httpBackend.flush();
+				expect(account2.name).toEqual('New name 223');
+				expect(result.then).toBeDefined();
+			});
+		});
+		
 		describe('transactions', function() {
 			var transactions, date;
 			beforeEach(function() {
