@@ -14,6 +14,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def rename new_name
+    return if @name == new_name
     log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{new_name}'"
     raise_event AccountRenamed.new aggregate_id, new_name
   end
@@ -76,9 +77,13 @@ class Domain::Account < CommonDomain::Aggregate
   
   def adjust_ammount transaction_id, ammount
     new_ammount = Money.parse(ammount, @currency)
-    log.debug "Adjusting ammount of transaction_id='#{transaction_id}' to #{new_ammount} of account aggregate_id='#{aggregate_id}'."
     transaction = get_transaction! transaction_id
     original_integer_ammount = transaction[:ammount]
+    log.debug "Adjusting ammount of transaction_id='#{transaction_id}' to #{new_ammount} of account aggregate_id='#{aggregate_id}'."
+    if(original_integer_ammount == new_ammount.integer_ammount)
+      log.debug "The ammount is the same. Further processing skipped."
+      return 
+    end
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
       new_balance = @balance - original_integer_ammount + new_ammount.integer_ammount
@@ -93,10 +98,12 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def adjust_comment transaction_id, comment
+    return if get_transaction!(transaction_id)[:comment] == comment
     raise_event TransactionCommentAdjusted.new aggregate_id, transaction_id, comment
   end
   
   def adjust_date transaction_id, date
+    return if get_transaction!(transaction_id)[:date] == date
     raise_event TransactionDateAdjusted.new aggregate_id, transaction_id, date
   end
   
@@ -145,6 +152,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountCreated do |event|
     @aggregate_id = event.aggregate_id
+    @name = event.name
     @is_open = true
     @currency = Currency[event.currency_code]
     @balance = 0
@@ -152,7 +160,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on AccountRenamed do |event|
-    
+    @name = event.name
   end
   
   on AccountClosed do |event|
@@ -188,9 +196,11 @@ class Domain::Account < CommonDomain::Aggregate
   end  
   
   on TransactionCommentAdjusted do |event|
+    @transactions[event.transaction_id][:comment] = event.comment
   end  
   
   on TransactionDateAdjusted do |event|
+    @transactions[event.transaction_id][:date] = event.date
   end
   
   on TransactionRemoved do |event|
@@ -208,7 +218,9 @@ class Domain::Account < CommonDomain::Aggregate
         type_id: type_id,
         ammount: event.ammount,
         tag_ids: event.tag_ids,
-        ammount: event.ammount
+        ammount: event.ammount,
+        date: event.date,
+        comment: event.comment
       }
     end
 end

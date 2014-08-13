@@ -38,6 +38,13 @@ describe Domain::Account do
       subject.make_created.rename 'Account 332 renamed'
       expect(subject).to have_one_uncommitted_event I::AccountRenamed, aggregate_id: subject.aggregate_id, name: 'Account 332 renamed'
     end
+    
+    it "should not raise any event if name hasn't changed" do
+      subject.make_created.rename 'New name 9932'
+      subject.clear_uncommitted_events
+      subject.rename 'New name 9932'
+      expect(subject).not_to have_uncommitted_events
+    end
   end
   
   describe "close" do
@@ -232,11 +239,11 @@ describe Domain::Account do
   describe "transaction adjustments" do
     before(:each) do
       subject.make_created
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 11000, DateTime.new, [], ''
     end
     
     describe "adjust_ammount" do
       before(:each) do
-        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 11000, DateTime.new, [], ''
         subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-1', 10000
         
         subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-2', 's-a-1', 's-t-1', 12000, DateTime.new, [], ''
@@ -275,6 +282,13 @@ describe Domain::Account do
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-5', balance: 45000}, at_index: 1
         end
+        
+        it "should raise nothing if the ammount didn't change" do
+          subject.adjust_ammount 't-1', 10000
+          subject.adjust_ammount 't-2', 10000
+          subject.adjust_ammount 't-5', 10000
+          expect(subject).not_to have_uncommitted_events
+        end
       end
       
       describe "expence transactions" do
@@ -293,6 +307,13 @@ describe Domain::Account do
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-4', balance: 55000}, at_index: 1
         end
+        
+        it "should raise nothing if the ammount didn't change" do
+          subject.adjust_ammount 't-3', 10000
+          subject.adjust_ammount 't-4', 10000
+          expect(subject).not_to have_uncommitted_events
+        end
+
       end
     end
   
@@ -303,6 +324,12 @@ describe Domain::Account do
           aggregate_id: subject.aggregate_id, transaction_id: 't-1', comment: 'New comment for t1'
         }
       end
+      
+      it "should raise nothing if comment is the same" do
+        subject.apply_event I::TransactionCommentAdjusted.new subject.aggregate_id, 't-1', 'Comment t1'
+        subject.adjust_comment 't-1', 'Comment t1'
+        expect(subject).not_to have_uncommitted_events
+      end
     end
     
     describe "adjust_date" do
@@ -312,6 +339,13 @@ describe Domain::Account do
         expect(subject).to have_one_uncommitted_event I::TransactionDateAdjusted, {
           aggregate_id: subject.aggregate_id, transaction_id: 't-1', date: date
         }
+      end
+      
+      it "should raise nothing if date is the same" do
+        date = DateTime.new
+        subject.apply_event I::TransactionDateAdjusted.new subject.aggregate_id, 't-1', date
+        subject.adjust_date 't-1', date
+        expect(subject).not_to have_uncommitted_events
       end
     end
   
@@ -374,6 +408,12 @@ describe Domain::Account do
         expect(subject).to have_one_uncommitted_event I::TransactionUntagged, {
           aggregate_id: subject.aggregate_id, transaction_id: 't-3', tag_id: 200
         }, at_index: 1
+      end
+      
+      it "should raise nothing if tags are the same" do
+        subject.clear_uncommitted_events
+        subject.adjust_tags 't-1', [100, 200, 300]
+        expect(subject).not_to have_uncommitted_events
       end
     end
   end
