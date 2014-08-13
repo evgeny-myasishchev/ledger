@@ -278,9 +278,15 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 						if(e.keyCode == 27) hidePopover();
 					})
 					.on('submit', function() {
-						scope.$eval(attrs.submit, {newValue: edt.getNewValue()}).success(function() {
+						var originalValue = getValue(scope, attrs);
+						var newValue = edt.getNewValue();
+						if(newValue == originalValue) {
 							hidePopover(element);
-						});
+						} else {
+							scope.$eval(attrs.submit, {newValue: edt.getNewValue()}).success(function() {
+								hidePopover(element);
+							});
+						}
 					});
 					resolve(edt);
 				});
