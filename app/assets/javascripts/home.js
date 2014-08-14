@@ -34,6 +34,11 @@ var homeApp = (function() {
 					});
 					account.sequential_number = lastSequentialNumber + 1;
 					accounts.push(account);
+					return account;
+				},
+				remove: function(account) {
+					var index = accounts.indexOf(account);
+					accounts.splice(index, 1);
 				}
 			}
 		}];
@@ -51,8 +56,8 @@ var homeApp = (function() {
 		}
 	});
 	
-	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
-	function ($scope, $http, tagsHelper, ledgers, accounts, money, accountsState) {
+	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
+	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState) {
 		$scope.accounts = accounts.getAll();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
@@ -82,6 +87,21 @@ var homeApp = (function() {
 			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/close')
 				.success(function() {
 					account.is_closed = true;
+				});
+		};
+		
+		$scope.reopenAccount = function(account) {
+			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/reopen')
+				.success(function() {
+					account.is_closed = false;
+				});
+		};
+		
+		$scope.removeAccount = function(account) {
+			return $http.delete('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id)
+				.success(function() {
+					accounts.remove(account);
+					$location.path('/accounts');
 				});
 		};
 		

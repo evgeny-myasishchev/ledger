@@ -3,6 +3,9 @@
 		<a href='#/accounts/{{activeAccount.sequential_number}}/report' ng-hide='activeAccount.is_closed' class='btn btn-sm btn-primary'>
 			<i class='glyphicon glyphicon-plus-sign'></i> Report transactions
 		</a>
+		<button ng-hide='!activeAccount.is_closed' class='btn btn-sm btn-danger' ng-click='removeAccount(activeAccount)'>
+			<i class='glyphicon glyphicon-exclamation-sign'></i> Remove account
+		</button>
 	</p>
 	<div class='pull-right'>
 		<div class="btn-group">
@@ -12,6 +15,7 @@
 			<ul class="dropdown-menu" role="menu">
 				<li><a href="#" ng-click='isRenaming = true; $event.preventDefault();'>Rename account</a></li>
 				<li ng-show="!activeAccount.is_closed"><a href="#" ng-click='closeAccount(activeAccount); $event.preventDefault();'>Close account</a></li>
+				<li ng-show="activeAccount.is_closed"><a href="#" ng-click='reopenAccount(activeAccount); $event.preventDefault();'>Reopen account</a></li>
 			</ul>
 		</div>
 	</div>

@@ -60,6 +60,14 @@ describe("homeApp", function() {
 			subject.add({aggregate_id: 'a4'});
 			expect(subject.getAll()).toEqual([account1, account2, account3, {aggregate_id: 'a4', sequential_number: 204}]);
 		});
+		
+		it('should remove the account on remove', function() {
+			initProvider();
+			var a4;
+			subject.add(a4 = {aggregate_id: 'a4'});
+			subject.remove(a4);
+			expect(subject.getAll()).toEqual([account1, account2, account3]);
+		});
 	});
 	
 	describe('accountsStateProvider', function() {
@@ -121,7 +129,7 @@ describe("homeApp", function() {
 			});
 		});
 		
-		describe('closeAccount', function() {
+		describe('close/reopen/remove account', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
 				initController();
@@ -130,13 +138,31 @@ describe("homeApp", function() {
 				this.assignActiveLedger({aggregate_id: 'ledger-332'});
 			});
 			
-			it('should post close for given account', function() {
+			it('should post close for given account and update closed flag on success when closing', function() {
 				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/close').respond(200);
 				var result = scope.closeAccount(account2);
 				$httpBackend.flush();
-				expect(result.then).toBeDefined();
 				expect(account2.is_closed).toBeTruthy();
 			});
+			
+			it('should post reopen for given account and update closed flag on success when reopening', function() {
+				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/reopen').respond(200);
+				account2.is_closed = true;
+				var result = scope.reopenAccount(account2);
+				$httpBackend.flush();
+				expect(account2.is_closed).toBeFalsy();
+			});
+			
+			it('should DELETE destroy for given account and remove it from the service on success when removing', 
+			inject(['accounts', '$location', function(accounts, $location) {
+				spyOn(accounts, 'remove');
+				spyOn($location, 'path');
+				$httpBackend.expectDELETE('ledgers/ledger-332/accounts/a-2').respond(200);
+				var result = scope.removeAccount(account2);
+				$httpBackend.flush();
+				expect(accounts.remove).toHaveBeenCalledWith(account2);
+				expect($location.path).toHaveBeenCalledWith('/accounts');
+			}]));
 		});
 		
 		it('should determine if there are closed accounts with hasClosedAccounts method', function() {
