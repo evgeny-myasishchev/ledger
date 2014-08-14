@@ -62,6 +62,19 @@ describe("homeApp", function() {
 		});
 	});
 	
+	describe('accountsStateProvider', function() {
+		var provider;
+		beforeEach(function() {
+			inject(['accountsState', function(p) { provider = p;}]);
+		});
+		
+		it('should get/set if showing closed accounts', function() {
+			expect(provider.showingClosed()).toBeFalsy();
+			expect(provider.showingClosed(true)).toBeTruthy();
+			expect(provider.showingClosed()).toBeTruthy();
+		});
+	});
+	
 	describe('HomeController', function() {
 		var activeAccount;
 		beforeEach(function() {
@@ -116,12 +129,22 @@ describe("homeApp", function() {
 				HomeHelpers.include(this);
 				this.assignActiveLedger({aggregate_id: 'ledger-332'});
 			});
-			it('should post rename for given account', function() {
+			
+			it('should post close for given account', function() {
 				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/close').respond(200);
 				var result = scope.closeAccount(account2);
 				$httpBackend.flush();
 				expect(result.then).toBeDefined();
+				expect(account2.is_closed).toBeTruthy();
 			});
+		});
+		
+		it('should determine if there are closed accounts with hasClosedAccounts method', function() {
+			initController();
+			scope.accounts = [{is_closed: false}, {is_closed: false}];
+			expect(scope.hasClosedAccounts()).toBeFalsy();
+			scope.accounts = [{is_closed: false}, {is_closed: false}, {is_closed: true}];
+			expect(scope.hasClosedAccounts()).toBeTruthy();
 		});
 		
 		describe('transactions', function() {

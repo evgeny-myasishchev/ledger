@@ -39,8 +39,20 @@ var homeApp = (function() {
 		}];
 	});
 
-	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'ledgers', 'accounts', 'money',
-	function ($scope, $http, tagsHelper, ledgers, accounts, money) {
+	homeApp.provider('accountsState', function() {
+		var showingClosed = false;
+		this.$get = function() {
+			return {
+				showingClosed: function(value) {
+					if(typeof(value) != 'undefined') showingClosed = value;
+					return showingClosed;
+				}
+			}
+		}
+	});
+	
+	homeApp.controller('HomeController', ['$scope', '$http', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
+	function ($scope, $http, tagsHelper, ledgers, accounts, money, accountsState) {
 		$scope.accounts = accounts.getAll();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
@@ -67,8 +79,24 @@ var homeApp = (function() {
 		};
 		
 		$scope.closeAccount = function(account) {
-			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/close').success(function() {
-			});
+			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/close')
+				.success(function() {
+					account.is_closed = true;
+				});
+		};
+		
+		$scope.showClosed = accountsState.showingClosed();
+		$scope.toggleShouldShowClosedAccounts = function() {
+			$scope.showClosed = accountsState.showingClosed(!$scope.showClosed);
+		};
+		
+		$scope.hasClosedAccounts = function() {
+			for(var i = 0; i < $scope.accounts.length; i++) {
+				if($scope.accounts[i].is_closed) {
+					return true;
+				}
+			}
+			return false;
 		};
 		
 		$scope.refreshRangeState = function() {

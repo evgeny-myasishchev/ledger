@@ -76,7 +76,7 @@ describe("NewAccountController", function() {
 			$httpBackend.whenPOST('ledgers/ledger-332/accounts').respond();
 			scope.create();
 			$httpBackend.flush();
-			expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231})
+			expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231, is_closed: false})
 		});
 	});
 	

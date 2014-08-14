@@ -1,6 +1,8 @@
 <div class='clearfix'>
 	<p style="text-align: left;" class='pull-left'>
-		<a href='#/accounts/{{activeAccount.sequential_number}}/report' class='btn btn-sm btn-primary'><i class='glyphicon glyphicon-plus-sign'></i> Report transactions</a>
+		<a href='#/accounts/{{activeAccount.sequential_number}}/report' ng-hide='activeAccount.is_closed' class='btn btn-sm btn-primary'>
+			<i class='glyphicon glyphicon-plus-sign'></i> Report transactions
+		</a>
 	</p>
 	<div class='pull-right'>
 		<div class="btn-group">
@@ -9,13 +11,15 @@
 			</button>
 			<ul class="dropdown-menu" role="menu">
 				<li><a href="#" ng-click='isRenaming = true; $event.preventDefault();'>Rename account</a></li>
-				<li><a href="#" ng-click='closeAccount(activeAccount); $event.preventDefault();'>Close account</a></li>
+				<li ng-show="!activeAccount.is_closed"><a href="#" ng-click='closeAccount(activeAccount); $event.preventDefault();'>Close account</a></li>
 			</ul>
 		</div>
 	</div>
 	<div class='pull-right' style='padding-right: 10px'>
 		<h2 style='margin-top: 0'>
-			<small>{{activeAccount.balance | money}}</small> <span ldr-bubble-editor trigger-on='isRenaming' finally='isRenaming = false' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
+			<small ng-show='activeAccount.is_closed'><span class='glyphicon glyphicon-lock'></span></small>
+			<small>{{activeAccount.balance | money}}</small> 
+			<span ldr-bubble-editor trigger-on='isRenaming' finally='isRenaming = false' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
 		</h2>
 	</div>
 </div>

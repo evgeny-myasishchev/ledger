@@ -65,7 +65,7 @@ RSpec.describe Projections::Account, :type => :model do
     
     it "should skip system fields that can lead to information flow" do
       actual_a1 = @user_accounts.detect { |a| a.aggregate_id == @a1.aggregate_id }
-      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'id'])
+      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'is_closed', 'id'])
       expect(actual_a1.id).to be_nil #it's present somehow even if not specified
     end
   end

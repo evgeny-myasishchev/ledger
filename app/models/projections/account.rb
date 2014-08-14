@@ -6,7 +6,7 @@ class Projections::Account < ActiveRecord::Base
   
   def self.get_user_accounts(user)
     Account.
-      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number).
+      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number, :is_closed).
       where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   

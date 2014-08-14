@@ -38,7 +38,8 @@
 					aggregate_id: $scope.newAccount.newAccountId,
 					name: $scope.newAccount.name,
 					currency_code: $scope.newAccount.currencyCode,
-					balance: money.parse($scope.newAccount.initialBalance)
+					balance: money.parse($scope.newAccount.initialBalance),
+					is_closed: false
 				});
 				$scope.created = true;
 			}).finally(function() {
