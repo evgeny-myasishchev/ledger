@@ -379,4 +379,28 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1).to be_nil
     end
   end
+  
+  describe "on AccountRemoved" do
+    let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
+    let(:account2) { create_account_projection! 'account-2', authorized_user_ids: '{100}' }
+    
+    before(:each) do
+      date = DateTime.new
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-3', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-4', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-5', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-6', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::AccountRemoved.new account1.aggregate_id
+    end
+    
+    it "should remove all belonging transactions" do
+      expect(p::Transaction.where(account_id: account1.aggregate_id).length).to eql 0
+    end
+    
+    it "should not affect other transactions" do
+      expect(p::Transaction.where(account_id: account2.aggregate_id).length).to eql 3
+    end
+  end
 end

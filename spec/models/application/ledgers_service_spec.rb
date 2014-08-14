@@ -34,12 +34,33 @@ RSpec.describe Application::LedgersService, :type => :model do
   
   describe "CloseAccount" do
     it "use the ledger to close the account" do
-      cmd = i::LedgerCommands::CloseAccount.new 'ledger-1', 
-        account_id: 'account-1332'
+      cmd = i::LedgerCommands::CloseAccount.new 'ledger-1', account_id: 'account-1332'
       account = double(:account)
       expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
       expect(work).to get_and_return_aggregate Domain::Account, 'account-1332', account
       expect(ledger1).to receive(:close_account).with(account)
+      subject.handle_message cmd
+    end
+  end
+  
+  describe "ReopenAccount" do
+    it "use the ledger to reopen the account" do
+      cmd = i::LedgerCommands::ReopenAccount.new 'ledger-1', account_id: 'account-1332'
+      account = double(:account)
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-1332', account
+      expect(ledger1).to receive(:reopen_account).with(account)
+      subject.handle_message cmd
+    end
+  end
+  
+  describe "RemoveAccount" do
+    it "use the ledger to remove the account" do
+      cmd = i::LedgerCommands::RemoveAccount.new 'ledger-1', account_id: 'account-1332'
+      account = double(:account)
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-1332', account
+      expect(ledger1).to receive(:remove_account).with(account)
       subject.handle_message cmd
     end
   end

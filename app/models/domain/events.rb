@@ -7,6 +7,8 @@ module Domain::Events
   event :LedgerShared, :user_id
   event :AccountAddedToLedger, :account_id
   event :LedgerAccountClosed, :account_id
+  event :LedgerAccountReopened, :account_id
+  event :LedgerAccountRemoved, :account_id
   event :TagCreated, :tag_id, :name
   event :TagRenamed, :tag_id, :name
   event :TagRemoved, :tag_id
@@ -15,6 +17,8 @@ module Domain::Events
   event :AccountCreated, :ledger_id, :sequential_number, :name, :initial_balance, :currency_code
   event :AccountRenamed, :name
   event :AccountClosed
+  event :AccountReopened
+  event :AccountRemoved
   event :AccountBalanceChanged, :transaction_id, :balance
   event :TransactionReported, :transaction_id, :type_id, :ammount, :date, :tag_ids, :comment
   event :TransferSent, :transaction_id, :receiving_account_id, :ammount, :date, :tag_ids, :comment

@@ -30,11 +30,27 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   def close_account account
     log.debug "Closing account id='#{account.aggregate_id}'"
-    raise "Account '#{account.aggregate_id}' is not from ledger '#{@name}'." unless @all_accounts.include?(account.aggregate_id)
+    ensure_known! account
     if @open_accounts.include?(account.aggregate_id)
       account.close
       raise_event LedgerAccountClosed.new aggregate_id, account.aggregate_id
     end
+  end
+  
+  def reopen_account account
+    log.debug "Reopening account id='#{account.aggregate_id}'"
+    ensure_known! account
+    ensure_closed! account
+    account.reopen
+    raise_event LedgerAccountReopened.new aggregate_id, account.aggregate_id
+  end
+  
+  def remove_account account
+    log.debug "Removing account id='#{account.aggregate_id}'"
+    ensure_known! account
+    ensure_closed! account
+    account.remove
+    raise_event LedgerAccountRemoved.new aggregate_id, account.aggregate_id
   end
   
   def create_tag name
@@ -52,6 +68,14 @@ class Domain::Ledger < CommonDomain::Aggregate
   def remove_tag tag_id
     log.debug "Renaming the tag with tag_id='#{tag_id}'"
     raise_event TagRemoved.new aggregate_id, tag_id
+  end
+  
+  private def ensure_known! account
+    raise "Account '#{account.aggregate_id}' is not from ledger '#{@name}'." unless @all_accounts.include?(account.aggregate_id)
+  end
+  
+  private def ensure_closed! account
+    raise "Account '#{account.aggregate_id}' is not closed." if @open_accounts.include?(account.aggregate_id)
   end
   
   on LedgerCreated do |event|
@@ -80,6 +104,15 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   on LedgerAccountClosed do |event|
     @open_accounts.delete event.account_id
+  end
+  
+  on LedgerAccountReopened do |event|
+    @open_accounts << event.account_id
+  end
+  
+  on LedgerAccountRemoved do |event|
+    @open_accounts.delete event.account_id
+    @all_accounts.delete event.account_id
   end
   
   on TagCreated do |event|

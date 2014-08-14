@@ -118,6 +118,56 @@ describe Domain::Ledger do
     end
   end
   
+  describe "reopen_account" do
+    let(:account) { double(:account, aggregate_id: 'account-100') }
+    before(:each) do
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
+      subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
+    end
+    
+    it "should raise error if account is from different ledger" do
+      different_account = double(:account, aggregate_id: 'account-110')
+      expect(lambda { subject.reopen_account(different_account) }).to raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
+    end
+    
+    it "should raise error if not closed" do
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-110'
+      expect { subject.reopen_account double(:account, aggregate_id: 'account-110')}.to raise_error "Account 'account-110' is not closed."
+    end
+    
+    it "should reopen the account and raise LedgerAccountReopened event" do
+      expect(account).to receive(:reopen)
+      subject.reopen_account account
+      expect(subject).to have_one_uncommitted_event I::LedgerAccountReopened, aggregate_id: 'ledger-1', account_id: 'account-100'
+    end
+  end
+    
+  describe "remove_account" do
+    let(:account) { double(:account, aggregate_id: 'account-100') }
+    before(:each) do
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
+      subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
+    end
+    
+    it "should raise error if account is from different ledger" do
+      different_account = double(:account, aggregate_id: 'account-110')
+      expect(lambda { subject.remove_account(different_account) }).to raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
+    end
+    
+    it "should raise error if not closed" do
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-110'
+      expect { subject.reopen_account double(:account, aggregate_id: 'account-110')}.to raise_error "Account 'account-110' is not closed."
+    end
+    
+    it "should remove the account and raise LedgerAccountRemoved event" do
+      expect(account).to receive(:remove)
+      subject.remove_account account
+      expect(subject).to have_one_uncommitted_event I::LedgerAccountRemoved, aggregate_id: 'ledger-1', account_id: 'account-100'
+    end
+  end
+  
   describe "create_tag" do
     before(:each) do
       subject.make_created

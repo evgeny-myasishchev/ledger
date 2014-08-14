@@ -59,6 +59,10 @@ class Projections::Transaction < ActiveRecord::Base
   end
   
   projection do
+    on AccountRemoved do |event|
+      Transaction.where(account_id: event.aggregate_id).delete_all
+    end
+    
     on TransactionReported do |event|
       t = build_transaction(event)
       t.type_id = event.type_id

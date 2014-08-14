@@ -12,4 +12,16 @@ class Application::LedgersService < CommonDomain::CommandHandler
     account = work.get_by_id Domain::Account, command.account_id
     ledger.close_account account
   end
+  
+  on LedgerCommands::ReopenAccount, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    account = work.get_by_id Domain::Account, command.account_id
+    ledger.reopen_account account
+  end
+  
+  on LedgerCommands::RemoveAccount, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    account = work.get_by_id Domain::Account, command.account_id
+    ledger.remove_account account
+  end
 end

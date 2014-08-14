@@ -26,4 +26,14 @@ class AccountsController < ApplicationController
     dispatch_command CloseAccount.new params[:ledger_id], params
     render nothing: true
   end
+  
+  def reopen
+    dispatch_command ReopenAccount.new params[:ledger_id], params
+    render nothing: true
+  end
+  
+  def destroy
+    dispatch_command RemoveAccount.new params[:ledger_id], params
+    render nothing: true
+  end
 end

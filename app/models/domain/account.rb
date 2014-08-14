@@ -24,6 +24,17 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountClosed.new aggregate_id
   end
   
+  def reopen
+    ensure_closed!
+    raise_event AccountReopened.new aggregate_id
+  end
+  
+  def remove
+    ensure_closed!
+    return if @is_removed
+    raise_event AccountRemoved.new aggregate_id
+  end
+  
   def report_income ammount, date, tag_ids = nil, comment = nil
     log.debug "Reporting #{ammount} of income for account aggregate_id='#{aggregate_id}'"
     ammount = Money.parse(ammount, @currency)
@@ -150,10 +161,15 @@ class Domain::Account < CommonDomain::Aggregate
     return [tag_ids]
   end
   
+  def ensure_closed!
+    raise "Account '#{aggregate_id}' is not closed." if @is_open
+  end
+  
   on AccountCreated do |event|
     @aggregate_id = event.aggregate_id
     @name = event.name
     @is_open = true
+    @is_removed = false
     @currency = Currency[event.currency_code]
     @balance = 0
     @transactions = {}
@@ -165,6 +181,14 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountClosed do |event|
     @is_open = false
+  end
+  
+  on AccountReopened do |event|
+    @is_open = true
+  end
+  
+  on AccountRemoved do |event|
+    @is_removed = true
   end
   
   on TransactionReported do |event|

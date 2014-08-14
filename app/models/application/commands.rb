@@ -22,6 +22,14 @@ module Application::Commands
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id
     end
+    command :ReopenAccount, :account_id do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :account_id
+    end
+    command :RemoveAccount, :account_id do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :account_id
+    end
   end
   
   commands_group :AccountCommands do

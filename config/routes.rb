@@ -2,8 +2,9 @@ Rails.application.routes.draw do
   root 'home#index'
   
   resources :ledgers, only: [] do
-    resources :accounts, only: [:new, :create] do
-      post 'close'
+    resources :accounts, only: [:new, :create, :destroy], param: :account_id do
+      post 'close', on: :member
+      post 'reopen', on: :member
     end
   end
   resources :accounts, only: [], param: :aggregate_id do

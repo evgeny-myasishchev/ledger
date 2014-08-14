@@ -60,6 +60,19 @@ describe Application::Commands do
     end
   end
   
+  shared_examples 'a command with required aggregate_id and account_id' do
+    it "shold validate presence of aggregate_id" do
+      subject = described_class.from_hash Hash.new
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+      expect(subject.errors[:account_id]).to eql ["can't be blank"]
+      subject = described_class.from_hash aggregate_id: 'aggregate-1', account_id: 'account-1'
+      expect(subject.valid?).to be_truthy
+      expect(subject.aggregate_id).to eql 'aggregate-1'
+      expect(subject.account_id).to eql 'account-1'
+    end
+  end
+  
   describe described_class::TransferCommandFactory do
     let(:described_class) {
       Class.new(CommonDomain::Command) do
@@ -252,14 +265,15 @@ describe Application::Commands do
     end
     
     describe described_class::CloseAccount do
-      it "shold validate presence of all attributes" do
-        subject = described_class.from_hash Hash.new
-        expect(subject.valid?).to be_falsey
-        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
-        expect(subject.errors[:account_id]).to eql ["can't be blank"]
-        subject = described_class.from_hash aggregate_id: 'l-1', account_id: 'a-1'
-        expect(subject.valid?).to be_truthy
-      end
+      it_behaves_like 'a command with required aggregate_id and account_id'
+    end
+    
+    describe described_class::ReopenAccount do
+      it_behaves_like 'a command with required aggregate_id and account_id'
+    end
+    
+    describe described_class::RemoveAccount do
+      it_behaves_like 'a command with required aggregate_id and account_id'
     end
   end
 end

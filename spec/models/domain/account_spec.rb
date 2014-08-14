@@ -63,6 +63,46 @@ describe Domain::Account do
     end
   end
   
+  describe "reopen" do
+    before(:each) do
+      subject.make_created
+      subject.apply_event I::AccountClosed.new subject.aggregate_id
+    end
+    
+    it "should raise AccountReopened event" do
+      subject.reopen
+      expect(subject).to have_one_uncommitted_event I::AccountReopened, aggregate_id: subject.aggregate_id
+    end
+    
+    it "should raise error if not closed" do
+      subject.apply_event I::AccountReopened.new subject.aggregate_id
+      expect { subject.reopen }.to raise_error "Account '#{subject.aggregate_id}' is not closed."
+    end
+  end
+  
+  describe "remove" do
+    before(:each) do
+      subject.make_created
+      subject.apply_event I::AccountClosed.new subject.aggregate_id
+    end
+    
+    it "should raise AccountReopened event" do
+      subject.remove
+      expect(subject).to have_one_uncommitted_event I::AccountRemoved, aggregate_id: subject.aggregate_id
+    end
+    
+    it "should raise error if not closed" do
+      subject.apply_event I::AccountReopened.new subject.aggregate_id
+      expect { subject.remove }.to raise_error "Account '#{subject.aggregate_id}' is not closed."
+    end
+    
+    it "should do nothing if already removed" do
+      subject.apply_event I::AccountRemoved.new subject.aggregate_id
+      subject.remove
+      expect(subject).not_to have_uncommitted_events
+    end
+  end
+  
   describe "report_income" do
     it "should raise TransactionReported and AccountBalanceChanged events" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')

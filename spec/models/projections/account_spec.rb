@@ -123,6 +123,23 @@ RSpec.describe Projections::Account, :type => :model do
       end
     end
     
+    describe "on AccountReopened" do
+      it "should clear closed flag" do
+        account_223.is_closed = true
+        subject.handle_message e::AccountReopened.new 'account-223'
+        account_223.reload
+        expect(account_223.is_closed).to be_falsy
+      end
+    end
+    
+    describe "on AccountRemoved" do
+      it "should delete the account" do
+        account_223 #to have it loaded
+        subject.handle_message e::AccountRemoved.new 'account-223'
+        expect(described_class.exists?(account_223.id)).to be_falsy
+      end
+    end
+    
     describe "on AccountBalanceChanged" do
       it "should update corresponding balance" do
         a1 = create_account_projection! 'a-1', ledger.aggregate_id

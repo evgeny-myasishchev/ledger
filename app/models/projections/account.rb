@@ -53,6 +53,14 @@ class Projections::Account < ActiveRecord::Base
       Account.where(aggregate_id: event.aggregate_id).update_all is_closed: true
     end
     
+    on AccountReopened do |event|
+      Account.where(aggregate_id: event.aggregate_id).update_all is_closed: false
+    end
+    
+    on AccountRemoved do |event|
+      Account.where(aggregate_id: event.aggregate_id).delete_all
+    end
+    
     on AccountBalanceChanged do |event|
       Account.where(aggregate_id: event.aggregate_id).update_all balance: event.balance
     end

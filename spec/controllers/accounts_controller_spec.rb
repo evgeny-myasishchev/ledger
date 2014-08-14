@@ -23,6 +23,14 @@ RSpec.describe AccountsController, :type => :controller do
     it "routes ledgers nested close route" do
       expect({post: 'ledgers/22331/accounts/33322/close'}).to route_to controller: 'accounts', action: 'close', ledger_id: '22331', account_id: '33322'
     end
+        
+    it "routes ledgers nested reopen route" do
+      expect({post: 'ledgers/22331/accounts/33322/reopen'}).to route_to controller: 'accounts', action: 'reopen', ledger_id: '22331', account_id: '33322'
+    end
+    
+    it "routes ledgers nested delete route" do
+      expect({delete: 'ledgers/22331/accounts/33322'}).to route_to controller: 'accounts', action: 'destroy', ledger_id: '22331', account_id: '33322'
+    end
     
     it "routes rename" do
       expect({put: 'accounts/33223/rename'}).to route_to controller: 'accounts', action: 'rename', aggregate_id: '33223'
@@ -65,6 +73,14 @@ RSpec.describe AccountsController, :type => :controller do
     
     it "should disaptch close command on POST 'close'" do
       should_dispatch :post, 'close', i::CloseAccount
+    end
+    
+    it "should disaptch reopen command on POST 'reopen'" do
+      should_dispatch :post, 'reopen', i::ReopenAccount
+    end
+    
+    it "should disaptch remove command on DELETE 'destroy'" do
+      should_dispatch :delete, 'destroy', i::RemoveAccount
     end
   end
   
