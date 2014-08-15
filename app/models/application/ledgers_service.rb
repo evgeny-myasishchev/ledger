@@ -24,4 +24,19 @@ class Application::LedgersService < CommonDomain::CommandHandler
     account = work.get_by_id Domain::Account, command.account_id
     ledger.remove_account account
   end
+    
+  on LedgerCommands::CreateTag, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.create_tag command.name
+  end
+  
+  on LedgerCommands::RenameTag, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.rename_tag command.tag_id, command.name
+  end
+  
+  on LedgerCommands::RemoveTag, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.remove_tag command.tag_id
+  end
 end

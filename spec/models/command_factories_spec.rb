@@ -275,5 +275,46 @@ describe Application::Commands do
     describe described_class::RemoveAccount do
       it_behaves_like 'a command with required aggregate_id and account_id'
     end
+    
+    describe described_class::CreateTag do
+      it "shold validate presence of aggregate_id and name" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:name]).to eql ["can't be blank"]
+        subject = described_class.from_hash aggregate_id: 'l-1', name: 'tag-1'
+        expect(subject.valid?).to be_truthy
+        expect(subject.aggregate_id).to eql 'l-1'
+        expect(subject.name).to eql 'tag-1'
+      end
+    end
+    
+    describe described_class::RenameTag do
+      it "shold validate presence of aggregate_id, tag_id and name" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:tag_id]).to eql ["can't be blank"]
+        expect(subject.errors[:name]).to eql ["can't be blank"]
+        subject = described_class.from_hash aggregate_id: 'l-1', tag_id: 't-1', name: 'tag-1'
+        expect(subject.valid?).to be_truthy
+        expect(subject.aggregate_id).to eql 'l-1'
+        expect(subject.tag_id).to eql 't-1'
+        expect(subject.name).to eql 'tag-1'
+      end
+    end
+    
+    describe described_class::RemoveTag do
+      it "shold validate presence of aggregate_id, tag_id" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:tag_id]).to eql ["can't be blank"]
+        subject = described_class.from_hash aggregate_id: 'l-1', tag_id: 't-1'
+        expect(subject.valid?).to be_truthy
+        expect(subject.aggregate_id).to eql 'l-1'
+        expect(subject.tag_id).to eql 't-1'
+      end
+    end
   end
 end

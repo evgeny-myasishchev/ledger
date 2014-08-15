@@ -64,4 +64,31 @@ RSpec.describe Application::LedgersService, :type => :model do
       subject.handle_message cmd
     end
   end
+  
+  describe "CreateTag" do
+    it "use the ledger to create tag and return it's id" do
+      cmd = i::LedgerCommands::CreateTag.new 'ledger-1', name: 'tag-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:create_tag).with('tag-1') { 22332 }
+      expect(subject.handle_message cmd).to eql 22332
+    end
+  end
+  
+  describe "RenameTag" do
+    it "use the ledger to rename tag" do
+      cmd = i::LedgerCommands::RenameTag.new 'ledger-1', tag_id: 't-1', name: 'tag-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:rename_tag).with('t-1', 'tag-1')
+      subject.handle_message cmd
+    end
+  end
+  
+  describe "RemoveTag" do
+    it "use the ledger to remove tag" do
+      cmd = i::LedgerCommands::RemoveTag.new 'ledger-1', tag_id: 't-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:remove_tag).with('t-1')
+      subject.handle_message cmd
+    end
+  end
 end

@@ -6,6 +6,9 @@ Rails.application.routes.draw do
       post 'close', on: :member
       post 'reopen', on: :member
     end
+    
+    resources :tags, only: [:create, :update, :destroy], param: :tag_id do
+    end
   end
   resources :accounts, only: [], param: :aggregate_id do
     put 'rename', on: :member
