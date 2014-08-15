@@ -5,6 +5,7 @@ class Projections::Tag < ActiveRecord::Base
   include UserAuthorizable
   
   def self.get_user_tags(user)
+    # TODO: Limit attributes
     Tag.where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
 
