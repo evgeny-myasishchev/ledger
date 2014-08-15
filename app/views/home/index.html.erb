@@ -8,6 +8,9 @@
 	<script type="text/ng-template" id='new_account.html'>
 	<%= render partial: 'new_account' %>
 	</script>
+	<script type="text/ng-template" id='tags.html'>
+	<%= render partial: 'tags' %>
+	</script>
 	<script type="text/javascript">
 		homeApp.constant('tags', <%= raw @tags.to_json %>);
 		homeApp.config(['ledgersProvider', 'accountsProvider', function(ledgersProvider, accountsProvider) {

@@ -215,7 +215,11 @@ var homeApp = (function() {
 	}]);
 
 	homeApp.config(['$routeProvider', function($routeProvider) {
-			$routeProvider.when('/accounts', {
+			$routeProvider.when('/tags', {
+				templateUrl: "tags.html",
+				controller: 'TagsController'
+			})
+			.when('/accounts', {
 				templateUrl: "accounts.html",
 				controller: 'HomeController'
 			}).when('/accounts/new', {
