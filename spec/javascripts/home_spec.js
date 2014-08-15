@@ -12,7 +12,6 @@ describe("homeApp", function() {
 				account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
 			]);
 		}]);
-		homeApp.value('tags', []); //It has to be value so it could be redefined in other specs
 		inject(function(_$httpBackend_) {
 			$httpBackend = _$httpBackend_;
 		});

@@ -2,7 +2,8 @@ describe('ledgerTags', function() {
   var scope;
   beforeEach(function() {
     module('ledgerDirectives');
-	ledgerDirectives.constant('tags', [
+	HomeHelpers.include(this);
+	this.assignTags([
       {tag_id: 100, name: 'Tag 100'},
       {tag_id: 101, name: 'Tag 101'},
       {tag_id: 102, name: 'Tag 102'}

@@ -11,7 +11,7 @@ angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 	};
 });
 
-var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).directive('ldrDatepicker', function() {
+var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tagsProvider']).directive('ldrDatepicker', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -44,7 +44,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 		}
 	}
 }).directive('ledgerTags', ['tags', 'tagsHelper', function(tags, tagsHelper) {
-	var tagsById = tagsHelper.indexById(tags);
+	var tagsById = tagsHelper.indexById(tags.getAll());
 	
 	var updateTags = function(element, wrappedTagIds) {
 		var tagIds = tagsHelper.bracedStringToArray(wrappedTagIds);
@@ -72,8 +72,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 	}
 }]).directive('ledgerTagsInput', ['tags', 'tagsHelper', function(tags, tagsHelper) {
 	var $ = jQuery;
-	var tagsByName = tagsHelper.indexByName(tags);
-	var tagsById = tagsHelper.indexById(tags);
+	var tagsByName = tagsHelper.indexByName(tags.getAll());
+	var tagsById = tagsHelper.indexById(tags.getAll());
 	return {
 		restrict: 'E',
 		scope: {
@@ -199,8 +199,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 			});
 		},
 		'tags': function(scope, element, attrs, resolve) {
-			var tagsByName = tagsHelper.indexByName(tags);
-			var tagsById = tagsHelper.indexById(tags);
+			var tagsByName = tagsHelper.indexByName(tags.getAll());
+			var tagsById = tagsHelper.indexById(tags.getAll());
 			
 			var input, form = $('<form class="form-inline" style="width: 200px">')
 				.append($('<div class="form-group" style="display: block;">')
@@ -374,5 +374,51 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers']).dir
 				}
 			}
 		}
+	});
+	
+	var tagsProvider = angular.module('tagsProvider', ['ledgersProvider']);
+	tagsProvider.provider('tags', function() {
+		var tags = [];
+		this.assignTags = function(value) {
+			tags = value;
+		};
+		this.$get = ['$http', 'ledgers', function($http, ledgers) {
+			return {
+				getAll: function() {
+					return tags;
+				},
+				create: function(name) {
+					return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/tags', {
+						name: name
+					}).success(function(data) {
+						tags.push({tag_id: data.tag_id, name: name});
+					});
+				},
+				rename: function(tag_id, name) {
+					return $http.put('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/tags/' + tag_id, {
+						name: name
+					}).success(function(data) {
+						$.each(tags, function(index, tag) {
+							if(tag.tag_id == tag_id) {
+								tag.name = name;
+								return false;
+							}
+						});
+					});
+				},
+				remove: function(tag_id) {
+					return $http.delete('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/tags/' + tag_id).success(function(data) {
+						var tagIndex;
+						$.each(tags, function(index, tag) {
+							if(tag.tag_id == tag_id) {
+								tagIndex = index;
+								return false;
+							}
+						});
+						tags.splice(tagIndex, 1);
+					});;
+				}
+			}
+		}];
 	});
 }();

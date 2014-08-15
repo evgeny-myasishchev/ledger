@@ -2,6 +2,12 @@ HomeHelpers = (function() {
 	var activeAccount, actibeLedger;
 	return {
 		include: function(target) {
+			target.assignTags = function(value) {
+				inject(function(tags) {
+					spyOn(tags, 'getAll').and.returnValue(value);
+				});
+			};
+			
 			target.assignActiveAccount = function(account) {
 				activeAccount = account;
 				inject(function(accounts) {

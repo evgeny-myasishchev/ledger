@@ -12,10 +12,10 @@
 	<%= render partial: 'tags' %>
 	</script>
 	<script type="text/javascript">
-		homeApp.constant('tags', <%= raw @tags.to_json %>);
-		homeApp.config(['ledgersProvider', 'accountsProvider', function(ledgersProvider, accountsProvider) {
+		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', function(ledgersProvider, accountsProvider, tagsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
 			accountsProvider.assignAccounts(<%= raw @accounts.to_json %>);
+			tagsProvider.assignTags(<%= raw @tags.to_json %>);
 		}]);
 	</script>
 	<div ng-view class='row'>

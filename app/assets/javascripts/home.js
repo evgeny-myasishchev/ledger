@@ -1,5 +1,5 @@
 var homeApp = (function() {
-	var homeApp = angular.module('homeApp', ['ErrorLogger', 'ngRoute', 'ledgerDirectives', 'ledgersProvider']);
+	var homeApp = angular.module('homeApp', ['ErrorLogger', 'ngRoute', 'ledgerDirectives', 'ledgersProvider', 'tagsProvider']);
 	
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
