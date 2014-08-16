@@ -20,6 +20,27 @@ describe("TagsController", function() {
 		expect(scope.tags).toEqual([tag1, tag2, tag3]);
 	});
 	
+	it('should reset flags and delegate create to tags service', function() {
+		scope.isCreated = true;
+		var promise = jQuery.Deferred().promise();
+		spyOn(tags, 'create').and.returnValue(promise);
+		scope.newTagName = 'New tag';
+		expect(scope.create().then).toBeDefined();
+		expect(scope.isCreated).toBeFalsy();
+		expect(tags.create).toHaveBeenCalledWith('New tag');
+	});
+	
+	it('should set scope flags on created', function() {
+		var deferred = jQuery.Deferred();
+		var promise = deferred.promise();
+		spyOn(tags, 'create').and.returnValue(promise);
+		scope.newTagName = 'New tag';
+		scope.create();
+		deferred.resolve();
+		expect(scope.isCreated).toBeTruthy();
+		expect(scope.newTagName).toBeNull();
+	});
+	
 	it('should delegate rename to tags service', function() {
 		var promise = {};
 		spyOn(tags, 'rename').and.returnValue(promise);

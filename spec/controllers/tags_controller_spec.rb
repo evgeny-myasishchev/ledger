@@ -41,6 +41,12 @@ RSpec.describe TagsController, :type => :controller do
       should_dispatch :post, 'create', i::CreateTag
     end
     
+    it "should return tag_id when created" do
+      expect(controller).to receive(:dispatch_command) { 332290 }
+      post :create, ledger_id: 'ledger-221', name: 'New tag'
+      expect(response.body).to eql({tag_id: 332290}.to_json)
+    end
+    
     it "should disaptch rename command on PUT 'update'" do
       should_dispatch :put, 'update', i::RenameTag
     end

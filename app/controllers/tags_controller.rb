@@ -2,8 +2,8 @@ class TagsController < ApplicationController
   include Application::Commands::LedgerCommands
   
   def create
-    dispatch_command CreateTag.new params[:ledger_id], params
-    render nothing: true
+    tag_id = dispatch_command CreateTag.new params[:ledger_id], params
+    render json: {tag_id: tag_id}
   end
   
   def update

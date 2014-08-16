@@ -5,6 +5,17 @@
 <div class='row'>
 	<div class='col-sm-8 col-md-5'>
 		<div class='panel panel-default'>
+			<div class="panel-heading">
+				<button class='btn btn-sm btn-default' title='Add new tag' ng-click='addingNew = true;' ng-hide='addingNew'>
+					<i class='glyphicon glyphicon-plus'></i>
+				</button>
+				<form ng-show='addingNew' class='form-inline' ng-submit='create()'>
+					<input ng-model='newTagName' type='text' class='form-control'>
+					<button class='btn btn-sm btn-primary'><i class='glyphicon glyphicon-ok'></i></button>
+					<button class='btn btn-sm btn-default' type='reset' ng-click='addingNew = false; isCreated = false;'><i class='glyphicon glyphicon-remove'></i></button>
+					<label class='label label-success' ng-show='isCreated'>Tag added</label>
+				</form>
+			</div>
 			<div class='list-group'>
 				<a class='list-group-item' ng-repeat="tag in tags | orderBy:'name'" >
 					<div ldr-bubble-editor value="tag.name" submit='renameTag(tag, newValue)' class='label label-info' style='cursor: pointer;'>
