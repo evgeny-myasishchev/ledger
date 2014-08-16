@@ -1,1 +1,25 @@
-<h1> Hello from tags </h1>
+<div class="page-header" style='margin-top: 0;'>
+	<h1 style='margin-top: 0;'>Tags</h1>
+</div>
+
+<div class='row'>
+	<div class='col-sm-8 col-md-5'>
+		<div class='panel panel-default'>
+			<div class='list-group'>
+				<a class='list-group-item' ng-repeat="tag in tags | orderBy:'name'" >
+					<div ldr-bubble-editor value="tag.name" submit='renameTag(tag, newValue)' class='label label-info' style='cursor: pointer;'>
+						{{tag.name}}
+					</div>
+					<div class='alert alert-danger' ng-show='confirmingRemove' style='margin-bottom: 0; margin-top: 10px;'>
+						The tag will be removed. Continue?
+						<button class='btn btn-xs btn-danger' ng-click='removeTag(tag);'>Yes</button>
+						<button class='btn btn-default btn-xs' ng-click='confirmingRemove = false;'>No</button>
+					</div>
+					<button class='btn btn-xs btn-default pull-right' ng-show='!confirmingRemove' ng-click='confirmingRemove = true;'>
+						<span class='glyphicon glyphicon-trash'></span>
+					</button>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
