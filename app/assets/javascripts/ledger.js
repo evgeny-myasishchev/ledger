@@ -105,6 +105,10 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 				}
 			});
 			var actualInput = input.tagsinput('input');
+			if(attrs.tabindex) {
+				element.attr('tabindex', null);
+				actualInput.attr('tabindex', attrs.tabindex);
+			}
 			actualInput.keypress(function(e) {
 				//Forcing refresh on enter
 				if(e.keyCode == 13) {

@@ -7,7 +7,7 @@
 	<div class="panel-body">
 		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
 			<div class="form-group">
-				<input autofocus='newTransaction.ammount == null' type="text" class="form-control" placeholder="Ammount" ng-model='newTransaction.ammount' required>
+				<input tabindex="1" autofocus='newTransaction.ammount == null' type="text" class="form-control" placeholder="Ammount" ng-model='newTransaction.ammount' required>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="type">Type</label>
@@ -33,10 +33,10 @@
 				<ldr-datepicker ng-model='newTransaction.date' />
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<ledger-tags-input ng-model='newTransaction.tag_ids' />
+				<ledger-tags-input tabindex="2" ng-model='newTransaction.tag_ids' />
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<input type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
+				<input tabindex="3" type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
