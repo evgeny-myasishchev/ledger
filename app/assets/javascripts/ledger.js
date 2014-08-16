@@ -11,7 +11,21 @@ angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
 	};
 });
 
-var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tagsProvider']).directive('ldrDatepicker', function() {
+var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tagsProvider'])
+.directive('autofocus', function() {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+			if(attrs.autofocus) scope.$watch(attrs.autofocus, function(newVal, oldVal) {
+				//Using some moderate timeout to let the element be shown.
+				if(newVal) setTimeout(function() {
+					element.focus();
+				}, 100);
+			});
+		}
+	}
+})
+.directive('ldrDatepicker', function() {
 	return {
 		restrict: 'E',
 		scope: {
@@ -43,7 +57,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 			datePicker.setDate(scope.date);
 		}
 	}
-}).directive('ledgerTags', ['tags', 'tagsHelper', function(tags, tagsHelper) {
+})
+.directive('ledgerTags', ['tags', 'tagsHelper', function(tags, tagsHelper) {
 	var tagsById = tagsHelper.indexById(tags.getAll());
 	
 	var updateTags = function(element, wrappedTagIds) {
@@ -70,7 +85,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 			updateTags(element, scope.model);
 		}
 	}
-}]).directive('ledgerTagsInput', ['tags', 'tagsHelper', function(tags, tagsHelper) {
+}])
+.directive('ledgerTagsInput', ['tags', 'tagsHelper', function(tags, tagsHelper) {
 	var $ = jQuery;
 	var tagsByName = tagsHelper.indexByName(tags.getAll());
 	var tagsById = tagsHelper.indexById(tags.getAll());
@@ -128,7 +144,8 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 			//TODO: Consider cleanup. Sample: element.on('$destroy', ...)
 		}
 	}
-}]).directive('ldrBubbleEditor', ['tags', 'tagsHelper', 'money', function(tags, tagsHelper, money) {
+}])
+.directive('ldrBubbleEditor', ['tags', 'tagsHelper', 'money', function(tags, tagsHelper, money) {
 	function getValue(scope, attrs) {
 		return scope.$eval(attrs.value);
 	};

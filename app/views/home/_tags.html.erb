@@ -10,7 +10,7 @@
 					<i class='glyphicon glyphicon-plus'></i>
 				</button>
 				<form ng-show='addingNew' class='form-inline' ng-submit='create()'>
-					<input ng-model='newTagName' type='text' class='form-control'>
+					<input ng-model='newTagName' type='text' class='form-control' autofocus='addingNew'>
 					<button class='btn btn-sm btn-primary'><i class='glyphicon glyphicon-ok'></i></button>
 					<button class='btn btn-sm btn-default' type='reset' ng-click='addingNew = false; isCreated = false;'><i class='glyphicon glyphicon-remove'></i></button>
 					<label class='label label-success' ng-show='isCreated'>Tag added</label>
