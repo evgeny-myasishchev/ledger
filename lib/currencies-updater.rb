@@ -64,7 +64,6 @@ class CurrenciesUpdater
         file.write "#\n"
         currencies.each { |currency|
           next if currency[:code] == 'XTS'
-          next if currency[:code] == 'XXX'
           unless registered.include?(currency[:code])
             file.write %(Currency.register id: #{currency[:id].to_i}, code: '#{currency[:code]}', english_name: '#{currency[:english_name]}'\n)
             registered << currency[:code]
