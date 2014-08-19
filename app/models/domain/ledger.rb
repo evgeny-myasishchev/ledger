@@ -4,7 +4,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   include Domain::Events
   
   def create owner_user_id, name
-    log.debug "Creating account: #{name}"
+    log.debug "Creating ledger: #{name}"
     raise_event LedgerCreated.new AggregateId.new_id, owner_user_id, name
   end
   
