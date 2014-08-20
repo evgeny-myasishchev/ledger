@@ -13,11 +13,6 @@
 
 ActiveRecord::Schema.define(version: 20140615083229) do
 
-  create_table "categories", force: true do |t|
-    t.integer "user_id", null: false
-    t.string  "name",    null: false
-  end
-
   create_table "projections_accounts", force: true do |t|
     t.string  "ledger_id",           null: false
     t.string  "aggregate_id",        null: false
@@ -33,6 +28,15 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id", unique: true
   add_index "projections_accounts", ["ledger_id", "sequential_number"], name: "index_projections_accounts_on_ledger_id_and_sequential_number", unique: true
   add_index "projections_accounts", ["ledger_id"], name: "index_projections_accounts_on_ledger_id"
+
+  create_table "projections_categories", force: true do |t|
+    t.string  "ledger_id",           null: false
+    t.integer "category_id",         null: false
+    t.string  "name",                null: false
+    t.string  "authorized_user_ids", null: false
+  end
+
+  add_index "projections_categories", ["ledger_id", "category_id"], name: "index_projections_categories_on_ledger_id_and_category_id", unique: true
 
   create_table "projections_ledgers", force: true do |t|
     t.string  "aggregate_id",         null: false
