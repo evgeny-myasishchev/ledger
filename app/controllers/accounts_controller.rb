@@ -32,6 +32,11 @@ class AccountsController < ApplicationController
     render nothing: true
   end
   
+  def set_category
+    dispatch_command SetAccountCategory.new params[:ledger_id], params
+    render nothing: true
+  end
+  
   def destroy
     dispatch_command RemoveAccount.new params[:ledger_id], params
     render nothing: true

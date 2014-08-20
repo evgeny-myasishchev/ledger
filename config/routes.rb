@@ -5,10 +5,11 @@ Rails.application.routes.draw do
     resources :accounts, only: [:new, :create, :destroy], param: :account_id do
       post 'close', on: :member
       post 'reopen', on: :member
+      put 'set-category', on: :member
     end
     
-    resources :tags, only: [:create, :update, :destroy], param: :tag_id do
-    end
+    resources :tags, only: [:create, :update, :destroy], param: :tag_id
+    resources :categories, only: [:create, :update, :destroy], param: :category_id
   end
   resources :accounts, only: [], param: :aggregate_id do
     put 'rename', on: :member

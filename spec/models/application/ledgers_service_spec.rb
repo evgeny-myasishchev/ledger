@@ -91,4 +91,42 @@ RSpec.describe Application::LedgersService, :type => :model do
       subject.handle_message cmd
     end
   end
+  
+  describe "CreateCategory" do
+    it "use the ledger to create category and return it's id" do
+      cmd = i::LedgerCommands::CreateCategory.new 'ledger-1', name: 'category-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:create_category).with('category-1') { 22332 }
+      expect(subject.handle_message cmd).to eql 22332
+    end
+  end
+  
+  describe "RenameCategory" do
+    it "use the ledger to rename category" do
+      cmd = i::LedgerCommands::RenameCategory.new 'ledger-1', category_id: 'c-1', name: 'category-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:rename_category).with('c-1', 'category-1')
+      subject.handle_message cmd
+    end
+  end
+  
+  describe "RemoveCategory" do
+    it "use the ledger to remove category" do
+      cmd = i::LedgerCommands::RemoveCategory.new 'ledger-1', category_id: 'c-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:remove_category).with('c-1')
+      subject.handle_message cmd
+    end
+  end
+  
+  describe 'SetAccountCategory' do
+    it 'should use the ledger to set account category' do
+      cmd = i::LedgerCommands::SetAccountCategory.new 'ledger-1', account_id: 'account-1332', category_id: 'category-33223'
+      account = double(:account)
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-1332', account
+      expect(ledger1).to receive(:set_account_category).with(account, 'category-33223')
+      subject.handle_message cmd
+    end
+  end
 end

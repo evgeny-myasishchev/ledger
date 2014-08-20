@@ -28,6 +28,13 @@ class Domain::Ledger < CommonDomain::Aggregate
     account
   end
   
+  def set_account_category account, category_id
+    log.debug "Assigning account id='#{account.aggregate_id}' to category '#{category_id}'"
+    ensure_known! account
+    raise "Category id='#{category_id}' is not from ledger '#{@name}'." unless @known_categories.include?(category_id)
+    raise_event AccountCategoryAssigned.new aggregate_id, account.aggregate_id, category_id
+  end
+  
   def close_account account
     log.debug "Closing account id='#{account.aggregate_id}'"
     ensure_known! account
@@ -69,6 +76,23 @@ class Domain::Ledger < CommonDomain::Aggregate
     log.debug "Renaming the tag with tag_id='#{tag_id}'"
     raise_event TagRemoved.new aggregate_id, tag_id
   end
+    
+  def create_category name
+    category_id = @last_category_id + 1
+    log.debug "Creating category '#{name}' category_id='#{category_id}'"
+    raise_event CategoryCreated.new aggregate_id, category_id, name
+    category_id
+  end
+  
+  def rename_category category_id, name
+    log.debug "Renaming the category with category_id='#{category_id}' to '#{name}"
+    raise_event CategoryRenamed.new aggregate_id, category_id, name
+  end
+  
+  def remove_category category_id
+    log.debug "Renaming the category with category_id='#{category_id}'"
+    raise_event CategoryRemoved.new aggregate_id, category_id
+  end
   
   private def ensure_known! account
     raise "Account '#{account.aggregate_id}' is not from ledger '#{@name}'." unless @all_accounts.include?(account.aggregate_id)
@@ -80,11 +104,13 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   on LedgerCreated do |event|
     @last_tag_id = 0
+    @last_category_id = 0
     @aggregate_id = event.aggregate_id
     @name = event.name
     @shared_with = Set.new
     @all_accounts = Set.new
     @open_accounts = Set.new
+    @known_categories = Set.new
     @account_sequential_number = 1
   end
   
@@ -125,5 +151,21 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   on TagRemoved do |event|
     
+  end
+  
+  on CategoryCreated do |event|
+    @last_category_id = event.category_id if event.category_id > @last_category_id
+    @known_categories << event.category_id
+  end
+  
+  on CategoryRenamed do |event|
+    
+  end
+  
+  on CategoryRemoved do |event|
+    @known_categories.delete event.category_id
+  end
+  
+  on AccountCategoryAssigned do |event|
   end
 end

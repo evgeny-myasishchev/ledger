@@ -35,6 +35,10 @@ RSpec.describe AccountsController, :type => :controller do
     it "routes rename" do
       expect({put: 'accounts/33223/rename'}).to route_to controller: 'accounts', action: 'rename', aggregate_id: '33223'
     end
+    
+    it "routes ledgers nested set-category route" do
+      expect({put: 'ledgers/22331/accounts/33322/set-category'}).to route_to controller: 'accounts', action: 'set_category', ledger_id: '22331', account_id: '33322'
+    end
   end
   
   describe "GET 'new'" do
@@ -81,6 +85,10 @@ RSpec.describe AccountsController, :type => :controller do
     
     it "should disaptch remove command on DELETE 'destroy'" do
       should_dispatch :delete, 'destroy', i::RemoveAccount
+    end
+    
+    it "should disaptch set category command on PUT 'set_category'" do
+      should_dispatch :put, 'set_category', i::SetAccountCategory
     end
   end
   

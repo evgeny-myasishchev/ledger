@@ -92,6 +92,34 @@ describe Domain::Ledger do
     end
   end
   
+  describe 'set_account_category' do
+    let(:account) { double(:account, aggregate_id: 'account-100')}
+    
+    before(:each) do
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
+      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 110, 'Checking'
+      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 120, 'Savings'
+      subject.apply_event I::CategoryRemoved.new subject.aggregate_id, 120
+    end
+    
+    it "should raise error if account is from different ledger" do
+      different_account = double(:account, aggregate_id: 'account-110')
+      expect(lambda { subject.set_account_category(different_account, 110) }).to raise_error("Account 'account-110' is not from ledger 'Ledger 1'.")
+    end
+    
+    it "should raise error if unknown category" do
+      expect(lambda { subject.set_account_category(account, 993) }).to raise_error("Category id='993' is not from ledger 'Ledger 1'.")
+      expect(lambda { subject.set_account_category(account, 120) }).to raise_error("Category id='120' is not from ledger 'Ledger 1'.")
+    end
+    
+    it 'should raise AccountCategoryAssigned event' do
+      subject.set_account_category(account, 110)
+      expect(subject).to have_one_uncommitted_event I::AccountCategoryAssigned, aggregate_id: subject.aggregate_id, 
+        account_id: account.aggregate_id, category_id: 110
+    end
+  end 
+  
   describe "close_account" do
     let(:account) { double(:account, aggregate_id: 'account-100') }
     before(:each) do
@@ -168,40 +196,81 @@ describe Domain::Ledger do
     end
   end
   
-  describe "create_tag" do
-    before(:each) do
-      subject.make_created
-    end
+  describe "tags" do
+    describe "create_tag" do
+      before(:each) do
+        subject.make_created
+      end
     
-    it "should raise TagCreatedEvent" do
-      tag_id = subject.create_tag 'Food'
-      expect(subject).to have_one_uncommitted_event I::TagCreated, aggregate_id: subject.aggregate_id, tag_id: tag_id, name: 'Food'
-    end
+      it "should raise TagCreatedEvent" do
+        tag_id = subject.create_tag 'Food'
+        expect(subject).to have_one_uncommitted_event I::TagCreated, aggregate_id: subject.aggregate_id, tag_id: tag_id, name: 'Food'
+      end
     
-    it "should increment tag_ids sequentally" do
-      tag_id = subject.create_tag 'Food'
-      expect(tag_id).to eql 1
-      tag_id = subject.create_tag 'Lunch'
-      expect(tag_id).to eql 2
-      subject.apply_event I::TagCreated.new subject.aggregate_id, 5, 'Gas'
-      tag_id = subject.create_tag 'Lunch'
-      expect(tag_id).to eql 6
+      it "should increment tag_ids sequentally" do
+        tag_id = subject.create_tag 'Food'
+        expect(tag_id).to eql 1
+        tag_id = subject.create_tag 'Lunch'
+        expect(tag_id).to eql 2
+        subject.apply_event I::TagCreated.new subject.aggregate_id, 5, 'Gas'
+        tag_id = subject.create_tag 'Lunch'
+        expect(tag_id).to eql 6
+      end
+    end
+  
+    describe "rename_tag" do
+      it "should raise TagRenamedEvent" do
+        subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.rename_tag 10001, 'Food-1'
+        expect(subject).to have_one_uncommitted_event I::TagRenamed, aggregate_id: subject.aggregate_id, tag_id: 10001, name: 'Food-1'
+      end
+    end
+  
+    describe "remove_tag" do
+      it "should raise TagRemovedEvent" do
+        subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.remove_tag 10001
+        expect(subject).to have_one_uncommitted_event I::TagRemoved, aggregate_id: subject.aggregate_id, tag_id: 10001
+      end
     end
   end
   
-  describe "rename_tag" do
-    it "should raise TagRenamedEvent" do
-      subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
-      subject.rename_tag 10001, 'Food-1'
-      expect(subject).to have_one_uncommitted_event I::TagRenamed, aggregate_id: subject.aggregate_id, tag_id: 10001, name: 'Food-1'
+  describe "categories" do
+    describe "create_category" do
+      before(:each) do
+        subject.make_created
+      end
+    
+      it "should raise CategoryCreatedEvent" do
+        category_id = subject.create_category 'Food'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, category_id: category_id, name: 'Food'
+      end
+    
+      it "should increment category_ids sequentally" do
+        category_id = subject.create_category 'Food'
+        expect(category_id).to eql 1
+        category_id = subject.create_category 'Lunch'
+        expect(category_id).to eql 2
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 5, 'Gas'
+        category_id = subject.create_category 'Lunch'
+        expect(category_id).to eql 6
+      end
     end
-  end
   
-  describe "remove_tag" do
-    it "should raise TagRemovedEvent" do
-      subject.make_created.apply_event I::TagCreated.new subject.aggregate_id, 10001, 'Food'
-      subject.remove_tag 10001
-      expect(subject).to have_one_uncommitted_event I::TagRemoved, aggregate_id: subject.aggregate_id, tag_id: 10001
+    describe "rename_category" do
+      it "should raise CategoryRenamedEvent" do
+        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.rename_category 10001, 'Food-1'
+        expect(subject).to have_one_uncommitted_event I::CategoryRenamed, aggregate_id: subject.aggregate_id, category_id: 10001, name: 'Food-1'
+      end
+    end
+  
+    describe "remove_category" do
+      it "should raise CategoryRemovedEvent" do
+        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.remove_category 10001
+        expect(subject).to have_one_uncommitted_event I::CategoryRemoved, aggregate_id: subject.aggregate_id, category_id: 10001
+      end
     end
   end
 end

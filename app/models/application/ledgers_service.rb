@@ -39,4 +39,25 @@ class Application::LedgersService < CommonDomain::CommandHandler
     ledger = work.get_by_id Domain::Ledger, command.aggregate_id
     ledger.remove_tag command.tag_id
   end
+  
+  on LedgerCommands::CreateCategory, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.create_category command.name
+  end
+  
+  on LedgerCommands::RenameCategory, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.rename_category command.category_id, command.name
+  end
+  
+  on LedgerCommands::RemoveCategory, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.remove_category command.category_id
+  end
+  
+  on LedgerCommands::SetAccountCategory, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    account = work.get_by_id Domain::Account, command.account_id
+    ledger.set_account_category account, command.category_id
+  end
 end
