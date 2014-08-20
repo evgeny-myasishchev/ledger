@@ -6,7 +6,7 @@ class Projections::Account < ActiveRecord::Base
   
   def self.get_user_accounts(user)
     Account.
-      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number, :is_closed).
+      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number, :category_id, :is_closed).
       where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   
@@ -63,6 +63,10 @@ class Projections::Account < ActiveRecord::Base
     
     on AccountBalanceChanged do |event|
       Account.where(aggregate_id: event.aggregate_id).update_all balance: event.balance
+    end
+    
+    on AccountCategoryAssigned do |event|
+      Account.where(ledger_id: event.aggregate_id, aggregate_id: event.account_id).update_all category_id: event.category_id
     end
   end
 end

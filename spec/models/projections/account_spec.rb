@@ -65,7 +65,7 @@ RSpec.describe Projections::Account, :type => :model do
     
     it "should skip system fields that can lead to information flow" do
       actual_a1 = @user_accounts.detect { |a| a.aggregate_id == @a1.aggregate_id }
-      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'is_closed', 'id'])
+      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'category_id', 'is_closed', 'id'])
       expect(actual_a1.id).to be_nil #it's present somehow even if not specified
     end
   end
@@ -153,6 +153,22 @@ RSpec.describe Projections::Account, :type => :model do
         
         expect(a1.balance).to eql 110011
         expect(a2.balance).to eql 220022
+      end
+    end
+    
+    describe "on AccountCategoryAssigned" do
+      it "should update category_id" do
+        a1 = create_account_projection! 'a-1', ledger.aggregate_id
+        a2 = create_account_projection! 'a-2', ledger.aggregate_id
+
+        subject.handle_message e::AccountCategoryAssigned.new ledger.aggregate_id, 'a-1', 110011
+        subject.handle_message e::AccountCategoryAssigned.new ledger.aggregate_id, 'a-2', 220022
+        
+        a1.reload
+        a2.reload
+        
+        expect(a1.category_id).to eql 110011
+        expect(a2.category_id).to eql 220022
       end
     end
   end

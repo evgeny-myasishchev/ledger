@@ -6,6 +6,7 @@ class CreateProjectionsAccounts < ActiveRecord::Migration
       t.integer :sequential_number, null: false
       t.integer :owner_user_id, null: false
       t.string :authorized_user_ids, null: false
+      t.integer :category_id, null: true
       t.string :currency_code, null: false
       t.string :name, null: false
       t.integer :balance, null: false
