@@ -80,7 +80,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   def create_category name
     category_id = @last_category_id + 1
     log.debug "Creating category '#{name}' category_id='#{category_id}'"
-    raise_event CategoryCreated.new aggregate_id, category_id, name
+    raise_event CategoryCreated.new aggregate_id, category_id, @max_category_display_order + 1, name
     category_id
   end
   
@@ -112,6 +112,7 @@ class Domain::Ledger < CommonDomain::Aggregate
     @open_accounts = Set.new
     @known_categories = Set.new
     @account_sequential_number = 1
+    @max_category_display_order = 0
   end
   
   on LedgerRenamed do |event|
@@ -156,6 +157,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   on CategoryCreated do |event|
     @last_category_id = event.category_id if event.category_id > @last_category_id
     @known_categories << event.category_id
+    @max_category_display_order = event.display_order if event.display_order > @max_category_display_order
   end
   
   on CategoryRenamed do |event|

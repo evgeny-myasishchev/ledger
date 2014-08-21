@@ -12,7 +12,7 @@ module Domain::Events
   event :TagCreated, :tag_id, :name
   event :TagRenamed, :tag_id, :name
   event :TagRemoved, :tag_id
-  event :CategoryCreated, :category_id, :name
+  event :CategoryCreated, :category_id, :display_order, :name
   event :CategoryRenamed, :category_id, :name
   event :CategoryRemoved, :category_id
   event :AccountCategoryAssigned, :account_id, :category_id

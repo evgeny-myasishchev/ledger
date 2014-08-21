@@ -8,19 +8,19 @@ RSpec.describe Projections::Category, :type => :model do
   before(:each) do
     p::Ledger.create!(aggregate_id: 'ledger-1', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
     p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 23331, shared_with_user_ids: Set.new([23332, 23333]), name: 'ledger 2')
-    subject.handle_message e::CategoryCreated.new 'ledger-1', 1, 'category-1'
-    subject.handle_message e::CategoryCreated.new 'ledger-1', 2, 'category-2'
-    subject.handle_message e::CategoryCreated.new 'ledger-1', 3, 'category-3'
+    subject.handle_message e::CategoryCreated.new 'ledger-1', 1, 1, 'category-1'
+    subject.handle_message e::CategoryCreated.new 'ledger-1', 2, 2, 'category-2'
+    subject.handle_message e::CategoryCreated.new 'ledger-1', 3, 3, 'category-3'
 
-    subject.handle_message e::CategoryCreated.new 'ledger-2', 1, 'category-1'
-    subject.handle_message e::CategoryCreated.new 'ledger-2', 2, 'category-2'
+    subject.handle_message e::CategoryCreated.new 'ledger-2', 1, 1, 'category-1'
+    subject.handle_message e::CategoryCreated.new 'ledger-2', 2, 2, 'category-2'
   end
 
   describe "get_user_categories" do
     it "should return tags that this user is authorized to access" do
-      c1 = described_class.create! ledger_id: 'ledger-10', category_id: 1, name: 'category 1', authorized_user_ids: '{10}'
-      c2 = described_class.create! ledger_id: 'ledger-20', category_id: 1, name: 'category 2', authorized_user_ids: '{10},{20}'
-      c3 = described_class.create! ledger_id: 'ledger-30', category_id: 1, name: 'category 3', authorized_user_ids: '{10},{20},{30}'
+      c1 = described_class.create! ledger_id: 'ledger-10', category_id: 1, display_order: 1, name: 'category 1', authorized_user_ids: '{10}'
+      c2 = described_class.create! ledger_id: 'ledger-20', category_id: 2, display_order: 2, name: 'category 2', authorized_user_ids: '{10},{20}'
+      c3 = described_class.create! ledger_id: 'ledger-30', category_id: 3, display_order: 3, name: 'category 3', authorized_user_ids: '{10},{20},{30}'
 
       expect(described_class.get_user_categories(User.new id: 10))
         .to match_array(Projections::Category.select('id, category_id, name').where(id: [c1.id, c2.id, c3.id]))
@@ -31,9 +31,9 @@ RSpec.describe Projections::Category, :type => :model do
     end
     
     it 'should have a limited set of attributes' do
-      c2 = described_class.create! ledger_id: 'ledger-20', category_id: 1, name: 'category 2', authorized_user_ids: '{10},{20}'
+      c2 = described_class.create! ledger_id: 'ledger-20', category_id: 1, display_order: 1, name: 'category 2', authorized_user_ids: '{10},{20}'
       actual_c2 = described_class.get_user_categories(User.new id: 10)[0]
-      expect(actual_c2.attribute_names).to eql ['id', 'category_id', 'name']
+      expect(actual_c2.attribute_names).to eql ['id', 'category_id', 'display_order', 'name']
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe Projections::Category, :type => :model do
     end
 
     it "should be idempotent" do
-      expect { subject.handle_message e::CategoryCreated.new 'ledger-1', 1, 'category-1' }.not_to change { described_class.count }
+      expect { subject.handle_message e::CategoryCreated.new 'ledger-1', 1, 1, 'category-1' }.not_to change { described_class.count }
     end
   end
 

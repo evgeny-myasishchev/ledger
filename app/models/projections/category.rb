@@ -5,7 +5,7 @@ class Projections::Category < ActiveRecord::Base
   include UserAuthorizable
 
   def self.get_user_categories(user)
-    Category.select('id, category_id, name').where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
+    Category.select('id, category_id, display_order, name').where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
 
   projection do
@@ -19,7 +19,7 @@ class Projections::Category < ActiveRecord::Base
     on CategoryCreated do |event|
       unless Category.exists? ledger_id: event.aggregate_id, category_id: event.category_id
         ledger = Ledger.find_by_aggregate_id event.aggregate_id
-        tag = Category.new ledger_id: event.aggregate_id, category_id: event.category_id, name: event.name
+        tag = Category.new ledger_id: event.aggregate_id, category_id: event.category_id, display_order: event.display_order, name: event.name
         tag.set_authorized_users ledger.authorized_user_ids
         tag.save!
       end

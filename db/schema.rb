@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
   create_table "projections_categories", force: true do |t|
     t.string  "ledger_id",           null: false
     t.integer "category_id",         null: false
+    t.integer "display_order",       null: false
     t.string  "name",                null: false
     t.string  "authorized_user_ids", null: false
   end

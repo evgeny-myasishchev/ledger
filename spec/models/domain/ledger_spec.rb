@@ -98,8 +98,8 @@ describe Domain::Ledger do
     before(:each) do
       subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
-      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 110, 'Checking'
-      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 120, 'Savings'
+      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 110, 0, 'Checking'
+      subject.apply_event I::CategoryCreated.new subject.aggregate_id, 120, 1, 'Savings'
       subject.apply_event I::CategoryRemoved.new subject.aggregate_id, 120
     end
     
@@ -243,7 +243,8 @@ describe Domain::Ledger do
     
       it "should raise CategoryCreatedEvent" do
         category_id = subject.create_category 'Food'
-        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, category_id: category_id, name: 'Food'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, 
+          category_id: category_id, display_order: 1, name: 'Food'
       end
     
       it "should increment category_ids sequentally" do
@@ -251,15 +252,24 @@ describe Domain::Ledger do
         expect(category_id).to eql 1
         category_id = subject.create_category 'Lunch'
         expect(category_id).to eql 2
-        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 5, 'Gas'
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 5, 0, 'Gas'
         category_id = subject.create_category 'Lunch'
         expect(category_id).to eql 6
+      end
+      
+      it "should set initial display_order to max order + 1" do
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 1, 0, 'c 1'
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 2, 1, 'c 2'
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 3, 2, 'c 3'
+        subject.create_category 'Lunch'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, 
+          category_id: 4, display_order: 3, name: 'Lunch'
       end
     end
   
     describe "rename_category" do
       it "should raise CategoryRenamedEvent" do
-        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 0, 'Food'
         subject.rename_category 10001, 'Food-1'
         expect(subject).to have_one_uncommitted_event I::CategoryRenamed, aggregate_id: subject.aggregate_id, category_id: 10001, name: 'Food-1'
       end
@@ -267,7 +277,7 @@ describe Domain::Ledger do
   
     describe "remove_category" do
       it "should raise CategoryRemovedEvent" do
-        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 'Food'
+        subject.make_created.apply_event I::CategoryCreated.new subject.aggregate_id, 10001, 0, 'Food'
         subject.remove_category 10001
         expect(subject).to have_one_uncommitted_event I::CategoryRemoved, aggregate_id: subject.aggregate_id, category_id: 10001
       end
