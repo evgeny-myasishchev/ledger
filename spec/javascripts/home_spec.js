@@ -17,58 +17,6 @@ describe("homeApp", function() {
 		});
 	});
 	
-	describe('accountsProvider', function() {
-		var subject;
-		beforeEach(function() {
-			inject(function($routeParams) {
-				routeParams = $routeParams;
-			});
-		});
-		
-		function initProvider() {
-			inject(function($injector) {
-				subject = $injector.get('accounts');
-			});
-		};
-		
-		it('should return all accounts on getAll', function() {
-			initProvider();
-			expect(subject.getAll()).toEqual([account1, account2, account3]);
-		});
-
-		it("should set active account from route params", function() {
-			routeParams.accountSequentialNumber = account2.sequential_number;
-			initProvider();
-			expect(subject.getActive()).toEqual(account2);
-		});
-
-		it("should change active account if route params changed", function() {
-			routeParams.accountSequentialNumber = account1.sequential_number;
-			initProvider();
-			routeParams.accountSequentialNumber = account2.sequential_number;
-			expect(subject.getActive()).toEqual(account2);
-		});
-		
-		it("should set first account as active if no accountId in params", function() {
-			initProvider();
-			expect(subject.getActive()).toEqual(account1);
-		});
-		
-		it('should insert the account assigning sequential number on add', function() {
-			initProvider();
-			subject.add({aggregate_id: 'a4'});
-			expect(subject.getAll()).toEqual([account1, account2, account3, {aggregate_id: 'a4', sequential_number: 204}]);
-		});
-		
-		it('should remove the account on remove', function() {
-			initProvider();
-			var a4;
-			subject.add(a4 = {aggregate_id: 'a4'});
-			subject.remove(a4);
-			expect(subject.getAll()).toEqual([account1, account2, account3]);
-		});
-	});
-	
 	describe('accountsStateProvider', function() {
 		var provider;
 		beforeEach(function() {

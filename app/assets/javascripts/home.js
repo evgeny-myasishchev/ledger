@@ -4,45 +4,6 @@ var homeApp = (function() {
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
-	
-	homeApp.provider('accounts', function() {
-		var accounts;
-		this.assignAccounts = function(value) {
-			accounts = value;
-		};
-		this.$get = ['$routeParams', function($routeParams) {
-			return {
-				getAll: function() {
-					return accounts;
-				},
-				getActive: function() {
-					var activeAccount = null;
-					var getActiveAccountFromRoute = function() {
-						return jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0]
-					};
-					if($routeParams.accountSequentialNumber) {
-						activeAccount = getActiveAccountFromRoute();
-					} else {
-						activeAccount = accounts[0];
-					}
-					return activeAccount;
-				},
-				add: function(account) {
-					var lastSequentialNumber = 0;
-					$.each(accounts, function(index, account) {
-						if(account.sequential_number > lastSequentialNumber) lastSequentialNumber = account.sequential_number;
-					});
-					account.sequential_number = lastSequentialNumber + 1;
-					accounts.push(account);
-					return account;
-				},
-				remove: function(account) {
-					var index = accounts.indexOf(account);
-					accounts.splice(index, 1);
-				}
-			}
-		}];
-	});
 
 	homeApp.provider('accountsState', function() {
 		var showingClosed = false;
