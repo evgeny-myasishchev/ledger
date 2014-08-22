@@ -2,14 +2,20 @@
 	var homeApp = angular.module('homeApp');
 	
 	homeApp.provider('accounts', function() {
-		var accounts;
+		var accounts, categories;
 		this.assignAccounts = function(value) {
 			accounts = value;
+		};
+		this.assignCategories = function(value) {
+			categories = value;
 		};
 		this.$get = ['$routeParams', function($routeParams) {
 			return {
 				getAll: function() {
 					return accounts;
+				},
+				getAllCategories: function() {
+					return categories;
 				},
 				getActive: function() {
 					var activeAccount = null;
