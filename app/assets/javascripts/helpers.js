@@ -64,7 +64,6 @@
 				formatInteger: function(number) {
 					if(number % 1 != 0) throw new Error(number + ' is not integer.');
 					var figures = toFiguresArray(number);
-					if(number < 0) figures.unshift('-');
 					
 					//Adding leading zeros if needed
 					while(figures.length < 3) figures.unshift(0);
@@ -78,6 +77,7 @@
 							figures.splice(i, 0, options.delimiter);
 						}
 					}
+					if(number < 0) figures.unshift('-');
 					return figures.join('');
 				},
 				parse: function(money) {

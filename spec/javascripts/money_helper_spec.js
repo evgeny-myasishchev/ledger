@@ -33,6 +33,7 @@ describe("money", function() {
 		});
 		
 		it('should format negative integers', function() {
+			expect(subject.formatInteger(-10000)).toEqual('-100|00');
 			expect(subject.formatInteger(-100000)).toEqual('-1-000|00');
 		});
 		
