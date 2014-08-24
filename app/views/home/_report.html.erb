@@ -18,25 +18,27 @@
 					<option value="transfer">Transfer</option>
 				</select>
 			</div>
-			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
-				<label class='control-label' for="type">Target account</label>
-				<select class='form-control' ng-model='newTransaction.receivingAccountId' required>
-					<option value="">--Chose account--</option>
-					<option ng-repeat="account in accounts" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
-				</select>
-			</div>
-			<div class='form-group' ng-if='newTransaction.type == "transfer"'>
-				<input type="text" class="form-control" placeholder="Target ammount" ng-model='newTransaction.ammountReceived' required>
-			</div>
 			<div class="form-group">
 				<label class='control-label' for="date">Date</label>
 				<ldr-datepicker ng-model='newTransaction.date' />
 			</div>
-			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<ledger-tags-input tabindex="2" ng-model='newTransaction.tag_ids' />
+			<div style='margin-top: 15px;' ng-if='newTransaction.type == "transfer"'>
+				<div class='form-group'>
+					<input tabindex="2" type="text" class="form-control" placeholder="Target ammount" ng-model='newTransaction.ammountReceived' required>
+				</div>
+				<div class='form-group'>
+					<label class='control-label' for="type">Target account</label>
+					<select tabindex="3" class='form-control' ng-model='newTransaction.receivingAccountId' required>
+						<option value="">--Chose account--</option>
+						<option ng-repeat="account in accounts" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
+					</select>
+				</div>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<input tabindex="3" type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
+				<ledger-tags-input tabindex="4" ng-model='newTransaction.tag_ids' />
+			</div>
+			<div class="form-group" style='display: block; margin-top: 15px;'>
+				<input tabindex="5" type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group" style='display: block; margin-top: 15px;'>
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
