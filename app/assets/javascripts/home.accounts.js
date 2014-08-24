@@ -5,6 +5,7 @@
 		var accounts, categories;
 		this.assignAccounts = function(value) {
 			accounts = value;
+			console.log(accounts);
 		};
 		this.assignCategories = function(value) {
 			categories = value;

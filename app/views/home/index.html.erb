@@ -15,6 +15,7 @@
 		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', function(ledgersProvider, accountsProvider, tagsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
 			accountsProvider.assignAccounts(<%= raw @accounts.to_json %>);
+			accountsProvider.assignCategories(<%= raw @categories.to_json %>);
 			tagsProvider.assignTags(<%= raw @tags.to_json %>);
 		}]);
 	</script>

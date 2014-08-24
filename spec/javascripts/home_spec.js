@@ -1,6 +1,7 @@
 describe("homeApp", function() {
 	var account1, account2, account3;
 	var controller, scope,  $httpBackend;
+	var category1, category2;
 	var routeParams;
 	beforeEach(function() {
 		module('homeApp');
@@ -10,6 +11,10 @@ describe("homeApp", function() {
 				account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
 				account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
 				account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
+			]);
+			accountsProvider.assignCategories([
+				category1 = {id: 1, display_order: 1, name: 'Category 1'},
+				category2 = {id: 1, display_order: 2, name: 'Category 2'}
 			]);
 		}]);
 		inject(function(_$httpBackend_) {
@@ -49,6 +54,11 @@ describe("homeApp", function() {
 		it("should have default accounts", function() {
 			initController();
 			expect(scope.accounts.length).toEqual(3);
+		});
+		
+		it("should have categories assigned", function() {
+			initController();
+			expect(scope.categories).toEqual([category1, category2]);
 		});
 		
 		it("should set active account from accessor", function() {

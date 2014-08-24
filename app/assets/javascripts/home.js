@@ -20,6 +20,7 @@ var homeApp = (function() {
 	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState) {
 		$scope.accounts = accounts.getAll();
+		$scope.categories = accounts.getAllCategories();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
 			var transactions = data.transactions;
@@ -67,9 +68,6 @@ var homeApp = (function() {
 		};
 		
 		$scope.showClosed = accountsState.showingClosed();
-		$scope.toggleShouldShowClosedAccounts = function() {
-			$scope.showClosed = accountsState.showingClosed(!$scope.showClosed);
-		};
 		
 		$scope.hasClosedAccounts = function() {
 			for(var i = 0; i < $scope.accounts.length; i++) {

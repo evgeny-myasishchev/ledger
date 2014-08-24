@@ -8,20 +8,38 @@
 				</a>
 			</div>
 		</div>
-		<table class='table table-condensed table-hover' class='list-group' ng-init='filter = showClosed ? {} : {is_closed: false}'>
-			<tr ng-repeat="account in accounts | filter:filter | orderBy:['is_closed', 'name']" ng-class="{active: activeAccount == account}">
+		<table class='table table-condensed table-hover' class='list-group'>
+			<tr ng-repeat-start='category in categories | orderBy:display_order' class='info'>
 				<td>
-					<span ng-show='account.is_closed' class='glyphicon glyphicon-lock'></span>
-					<a 	href='#/accounts/{{account.sequential_number}}'>
+					{{category.name}}
+				</td>
+			</tr>
+			<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | filter:filter | orderBy:'name'" ng-class="{active: activeAccount == account}">
+				<td>
+					<a href='#/accounts/{{account.sequential_number}}'>
+						{{account.name}}
+					</a>
+					<span class='pull-right'>{{account.balance | money }}</span> 
+				</td>
+			</tr>
+			<tr ng-show='showClosed' class='info'>
+				<td>
+					Closed accounts
+				</td>
+			</tr>
+			<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | orderBy:'name'" ng-class="{active: activeAccount == account}">
+				<td>
+					<span class='glyphicon glyphicon-lock'></span>
+					<a href='#/accounts/{{account.sequential_number}}'>
 						{{account.name}}
 					</a>
 					<span class='pull-right'>{{account.balance | money }}</span> 
 				</td>
 			</tr>
 			<tr>
-				<td>
-					<a href='#' ng-show='hasClosedAccounts()' ng-click='toggleShouldShowClosedAccounts(); filter = showClosed ? {} : {is_closed: false}; $event.preventDefault();'>
-						<span ng-show='!showClosed'>Show closed accounts</span>
+				<td class='info'>
+					<a href='#' ng-show='hasClosedAccounts()' ng-click='showClosed = !showClosed; $event.preventDefault();'>
+						<span ng-show='!showClosed'><span class='glyphicon glyphicon-lock'></span> Show closed accounts</span>
 						<span ng-show='showClosed'>Hide closed accounts</span>
 					</a>
 				</td>
