@@ -19,7 +19,7 @@
 					<a href='#/accounts/{{account.sequential_number}}'>
 						{{account.name}}
 					</a>
-					<span class='pull-right'>{{account.balance | money }}</span> 
+					<span class='pull-right'><strong>{{account.balance | money }}</strong> <sup>{{account.currency_code}}</sup></span> 
 				</td>
 			</tr>
 			<tr ng-show='showClosed' class='info'>
