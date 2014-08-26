@@ -18,10 +18,12 @@ def dispatch command
   @context.command_dispatch_middleware.call command, @dispatch_context
 end
 
+uah = Currency['UAH']
+
 log.info 'Creating ledger for the user'
 tag_ids_by_name = {}
 ledger = @context.repository.begin_work do |work|
-  l = work.add_new Domain::Ledger.new.create user.id, 'Family'
+  l = work.add_new Domain::Ledger.new.create user.id, 'Family', uah
   tag_ids_by_name['food'] = l.create_tag 'Food'
   tag_ids_by_name['lunch'] = l.create_tag 'Lunch'
   tag_ids_by_name['entertainment'] = l.create_tag 'Entertainment'
@@ -32,8 +34,6 @@ ledger = @context.repository.begin_work do |work|
   tag_ids_by_name['deposits'] = l.create_tag 'Deposits'
   l
 end
-
-uah = Currency['UAH']
 
 date = DateTime.now
 fake_transactions_data = [

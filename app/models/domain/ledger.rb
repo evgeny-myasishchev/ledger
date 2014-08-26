@@ -3,9 +3,9 @@ class Domain::Ledger < CommonDomain::Aggregate
   include CommonDomain::Infrastructure
   include Domain::Events
   
-  def create owner_user_id, name
+  def create owner_user_id, name, default_currency
     log.debug "Creating ledger: #{name}"
-    raise_event LedgerCreated.new AggregateId.new_id, owner_user_id, name
+    raise_event LedgerCreated.new AggregateId.new_id, owner_user_id, name, default_currency.code
   end
   
   def rename name

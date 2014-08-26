@@ -4,24 +4,25 @@ RSpec.describe Projections::Ledger, :type => :model do
   subject { described_class.create_projection }
   let(:e) { Domain::Events }
   let(:p) { Projections }
+  let(:currency) { currency = Currency['UAH'] }
 
   before(:each) do
-    subject.handle_message e::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+    subject.handle_message e::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
   end
   
   let(:ledger_1) { ledger = described_class.find_by_aggregate_id 'ledger-1' }
   
   describe "self.get_user_ledgers" do
     it "should return ledgers owed by the user" do
-      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil
-      l2 = p::Ledger.create! aggregate_id: 'l-2', owner_user_id: 11222, name: 'Ledger 2', shared_with_user_ids: nil
-      l3 = p::Ledger.create! aggregate_id: 'l-3', owner_user_id: 11223, name: 'Ledger 3', shared_with_user_ids: nil
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil, currency_code: currency.code
+      l2 = p::Ledger.create! aggregate_id: 'l-2', owner_user_id: 11222, name: 'Ledger 2', shared_with_user_ids: nil, currency_code: currency.code
+      l3 = p::Ledger.create! aggregate_id: 'l-3', owner_user_id: 11223, name: 'Ledger 3', shared_with_user_ids: nil, currency_code: currency.code
       expect(p::Ledger.get_user_ledgers(User.new id: 11222)).to eql([l1, l2])
       expect(p::Ledger.get_user_ledgers(User.new id: 11223)).to eql([l3])
     end
     
     it "should load limited set of attributes only" do
-      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil, currency_code: currency.code
       actual_l1 = p::Ledger.get_user_ledgers(User.new id: 11222).first
       expect(actual_l1.attribute_names).to eql ['id', 'aggregate_id', 'name']
     end
@@ -35,7 +36,7 @@ RSpec.describe Projections::Ledger, :type => :model do
     end
     
     it "should be idempotent" do
-      expect { subject.handle_message e::LedgerCreated.new 'ledger-1', 100, 'Ledger 1' }.not_to change { described_class.count }
+      expect { subject.handle_message e::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code }.not_to change { described_class.count }
     end
   end
   
@@ -63,7 +64,7 @@ RSpec.describe Projections::Ledger, :type => :model do
 
   describe "authorized_user_ids" do
     it "should return an array of all users that are authorized to access the ledger" do
-      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
+      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1', currency_code: currency.code)
       expect(ledger.authorized_user_ids).to eql([22332, 22333, 22331])
     end
   end

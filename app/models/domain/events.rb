@@ -2,7 +2,7 @@ module Domain::Events
   include CommonDomain::DomainEvent::DSL
   
   #Ledger events
-  event :LedgerCreated, :user_id, :name
+  event :LedgerCreated, :user_id, :name, :currency_code
   event :LedgerRenamed, :name
   event :LedgerShared, :user_id
   event :AccountAddedToLedger, :account_id

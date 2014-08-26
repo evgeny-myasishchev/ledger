@@ -11,6 +11,8 @@ describe Domain::Ledger do
     end
   }
   
+  let(:currency) { currency = Currency['UAH'] }
+  
   it "should be an aggregate" do
     expect(subject).to be_an_aggregate
   end
@@ -18,23 +20,23 @@ describe Domain::Ledger do
   describe "create" do
     it "should raise LedgerCreated event" do
       expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('ledger-1')
-      subject.create 100, 'Ledger 1'
-      expect(subject).to have_one_uncommitted_event I::LedgerCreated, aggregate_id: 'ledger-1', user_id: 100, name: 'Ledger 1'
+      subject.create 100, 'Ledger 1', currency
+      expect(subject).to have_one_uncommitted_event I::LedgerCreated, aggregate_id: 'ledger-1', user_id: 100, name: 'Ledger 1', currency_code: currency.code
     end
     
     it "should return self" do
-      expect(subject.create(100, 'Ledger 1')).to be subject
+      expect(subject.create(100, 'Ledger 1', currency)).to be subject
     end
     
     it "should assign the id on LedgerCreated" do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
       expect(subject.aggregate_id).to eql 'ledger-1'
     end
   end
   
   describe "rename" do
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
     end
     
     it "should raise LedgerRenamed event" do
@@ -45,7 +47,7 @@ describe Domain::Ledger do
   
   describe "share" do
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
     end
     
     it "should share LedgerShared event" do
@@ -63,7 +65,7 @@ describe Domain::Ledger do
   describe "create_new_account" do
     let(:account) { double(:account, aggregate_id: 'account-100')}
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
     end
     
     it "should create new account and return it raising AccountAddedToLedger event" do
@@ -96,7 +98,7 @@ describe Domain::Ledger do
     let(:account) { double(:account, aggregate_id: 'account-100')}
     
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
       subject.apply_event I::CategoryCreated.new subject.aggregate_id, 110, 0, 'Checking'
       subject.apply_event I::CategoryCreated.new subject.aggregate_id, 120, 1, 'Savings'
@@ -123,7 +125,7 @@ describe Domain::Ledger do
   describe "close_account" do
     let(:account) { double(:account, aggregate_id: 'account-100') }
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
     end
     
@@ -149,7 +151,7 @@ describe Domain::Ledger do
   describe "reopen_account" do
     let(:account) { double(:account, aggregate_id: 'account-100') }
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
       subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
     end
@@ -174,7 +176,7 @@ describe Domain::Ledger do
   describe "remove_account" do
     let(:account) { double(:account, aggregate_id: 'account-100') }
     before(:each) do
-      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1'
+      subject.apply_event I::LedgerCreated.new 'ledger-1', 100, 'Ledger 1', currency.code
       subject.apply_event I::AccountAddedToLedger.new 'ledger-1', 'account-100'
       subject.apply_event I::LedgerAccountClosed.new 'ledger-1', 'account-100'
     end

@@ -19,7 +19,7 @@ class Projections::Ledger < ActiveRecord::Base
   
   projection do
     on LedgerCreated do |event|
-      Ledger.create!(aggregate_id: event.aggregate_id, owner_user_id: event.user_id, name: event.name) unless
+      Ledger.create!(aggregate_id: event.aggregate_id, owner_user_id: event.user_id, name: event.name, currency_code: event.currency_code) unless
         Ledger.exists?(aggregate_id: event.aggregate_id)
     end
     

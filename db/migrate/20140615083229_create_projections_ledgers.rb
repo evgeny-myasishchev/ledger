@@ -5,6 +5,7 @@ class CreateProjectionsLedgers < ActiveRecord::Migration
       t.integer :owner_user_id, null: false
       t.string :shared_with_user_ids
       t.string :name, null: false
+      t.string :currency_code, null: false
     end
     add_index :projections_ledgers, :aggregate_id, unique: true
   end

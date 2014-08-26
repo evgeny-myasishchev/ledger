@@ -45,6 +45,7 @@ ActiveRecord::Schema.define(version: 20140615083229) do
     t.integer "owner_user_id",        null: false
     t.string  "shared_with_user_ids"
     t.string  "name",                 null: false
+    t.string  "currency_code",        null: false
   end
 
   add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id", unique: true
