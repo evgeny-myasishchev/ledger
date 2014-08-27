@@ -1,0 +1,5 @@
+<span class='glyphicon glyphicon-lock' ng-if='account.is_closed'></span>
+<a href='#/accounts/{{account.sequential_number}}'>
+	{{account.name}}
+</a>
+<span class='pull-right'><strong>{{account.balance | money }}</strong> <sup>{{account.currency_code}}</sup></span> 

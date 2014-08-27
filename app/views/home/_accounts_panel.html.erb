@@ -8,6 +8,11 @@
 		</div>
 	</div>
 	<table class='table table-condensed table-hover' class='list-group'>
+		<tr ng-repeat-end ng-repeat="account in uncategorised | orderBy:'name'" ng-class="{active: activeAccount == account}">
+			<td>
+				<%= render partial: 'account_info' %>
+			</td>
+		</tr>
 		<tr ng-repeat-start='category in categories | orderBy:display_order' class='info'>
 			<td>
 				{{category.name}}
@@ -15,10 +20,7 @@
 		</tr>
 		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | filter:filter | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
-				<a href='#/accounts/{{account.sequential_number}}'>
-					{{account.name}}
-				</a>
-				<span class='pull-right'><strong>{{account.balance | money }}</strong> <sup>{{account.currency_code}}</sup></span> 
+				<%= render partial: 'account_info' %>
 			</td>
 		</tr>
 		<tr ng-show='showClosed' class='info'>
@@ -28,11 +30,7 @@
 		</tr>
 		<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
-				<span class='glyphicon glyphicon-lock'></span>
-				<a href='#/accounts/{{account.sequential_number}}'>
-					{{account.name}}
-				</a>
-				<span class='pull-right'>{{account.balance | money }}</span> 
+				<%= render partial: 'account_info' %>
 			</td>
 		</tr>
 		<tr>
