@@ -131,10 +131,18 @@ describe("homeApp", function() {
 				spyOn(scope, 'refreshRangeState');
 			});
 			
-			it("should be loaded for current account", function() {
+			it("should be loaded for active account", function() {
 			    expect(scope.transactions).toBeUndefined();
 				$httpBackend.flush();
 				expect(scope.transactions.length).toEqual(transactions.length);
+			});
+			
+			it("should not be loaded if active account", function() {
+				this.assignActiveAccount(null);
+				initController();
+			    expect(scope.transactions).toBeUndefined();
+				$httpBackend.flush();
+				expect(scope.transactions).toBeUndefined();
 			});
 			
 			it("should have dates converted to date object", function() {

@@ -9,7 +9,10 @@
 		this.assignCategories = function(value) {
 			categories = value;
 		};
-		this.$get = ['$routeParams', function($routeParams) {
+		var getActiveAccountFromRoute = function(sequential_number) {
+			return jQuery.grep(accounts, function(a) { return a.sequential_number == sequential_number; })[0];
+		};
+		this.$get = ['$routeParams', '$location', function($routeParams, $location) {
 			return {
 				getAll: function() {
 					return accounts;
@@ -24,15 +27,13 @@
 				},
 				getActive: function() {
 					var activeAccount = null;
-					var getActiveAccountFromRoute = function() {
-						return jQuery.grep(accounts, function(a) { return a.sequential_number == $routeParams.accountSequentialNumber;})[0]
-					};
 					if($routeParams.accountSequentialNumber) {
-						activeAccount = getActiveAccountFromRoute();
-					} else {
-						activeAccount = accounts[0];
+						activeAccount = getActiveAccountFromRoute($routeParams.accountSequentialNumber);
 					}
 					return activeAccount;
+				},
+				makeActive: function(account) {
+					$location.path('/accounts/' + account.sequential_number);
 				},
 				add: function(account) {
 					var lastSequentialNumber = 0;
@@ -81,6 +82,12 @@
 					}
 					return false;
 				};
+				var activeAccount = accounts.getActive();
+				scope.onRenderingAccount = function(account) {
+					if(activeAccount) return;
+					accounts.makeActive(account);
+					activeAccount = account;
+				}
 			}
 		}
 	}]);

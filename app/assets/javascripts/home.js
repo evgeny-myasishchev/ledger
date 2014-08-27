@@ -8,20 +8,23 @@ var homeApp = (function() {
 	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
-		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
-			var transactions = data.transactions;
-			jQuery.each(transactions, function(i, t) {
-				t.date = new Date(t.date);
+		
+		if(activeAccount) {
+			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
+				var transactions = data.transactions;
+				jQuery.each(transactions, function(i, t) {
+					t.date = new Date(t.date);
+				});
+				$scope.transactionsInfo = {
+					total: data.transactions_total,
+					offset: 0,
+					limit: data.transactions_limit
+				};
+				$scope.transactions = transactions
+				activeAccount.balance = data.account_balance;
+				$scope.refreshRangeState();
 			});
-			$scope.transactionsInfo = {
-				total: data.transactions_total,
-				offset: 0,
-				limit: data.transactions_limit
-			};
-			$scope.transactions = transactions
-			activeAccount.balance = data.account_balance;
-			$scope.refreshRangeState();
-		});
+		}
 		
 		$scope.renameAccount = function(account, newName) {
 			return $http.put('accounts/' + account.aggregate_id + '/rename', {

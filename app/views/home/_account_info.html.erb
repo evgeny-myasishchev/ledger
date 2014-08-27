@@ -3,3 +3,4 @@
 	{{account.name}}
 </a>
 <span class='pull-right'><strong>{{account.balance | money }}</strong> <sup>{{account.currency_code}}</sup></span> 
+<hidden name='active-account' value="{{account.aggregate_id}}" ng-init='onRenderingAccount(account);' />

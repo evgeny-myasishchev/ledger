@@ -53,9 +53,9 @@ describe('home.acounts', function() {
 			expect(subject.getActive()).toEqual(account2);
 		});
 		
-		it("should set first account as active if no accountId in params", function() {
+		it("should return null if no account info in route params", function() {
 			initProvider();
-			expect(subject.getActive()).toEqual(account1);
+			expect(subject.getActive()).toBeNull();
 		});
 		
 		it('should insert the account assigning sequential number on add', function() {
