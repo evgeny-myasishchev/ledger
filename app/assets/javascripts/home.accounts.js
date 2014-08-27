@@ -87,14 +87,16 @@
 					if(activeAccount) return;
 					accounts.makeActive(account);
 					activeAccount = account;
-				}
+				};
+				scope.toggleShowClosedAccounts = function() {
+					scope.showClosed = accountsState.showingClosed(!scope.showClosed);
+				};
 			}
 		}
 	}]);
 	
 	homeApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
 	function($scope, $http, money, ledgers, accounts) {
-		
 		var resetNewAccount = function() {
 			$scope.newAccount = {
 				name: null,

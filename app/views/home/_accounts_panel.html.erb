@@ -35,7 +35,7 @@
 		</tr>
 		<tr>
 			<td class='info'>
-				<a href='#' ng-show='hasClosedAccounts()' ng-click='showClosed = !showClosed; $event.preventDefault();'>
+				<a href='#' ng-show='hasClosedAccounts()' ng-click='toggleShowClosedAccounts(); $event.preventDefault();'>
 					<span ng-show='!showClosed'><span class='glyphicon glyphicon-lock'></span> Show closed accounts</span>
 					<span ng-show='showClosed'>Hide closed accounts</span>
 				</a>

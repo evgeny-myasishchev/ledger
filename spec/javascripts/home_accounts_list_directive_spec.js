@@ -61,4 +61,13 @@ describe('home.accountsPanel', function() {
 		scope.accounts = [{is_closed: false}, {is_closed: false}, {is_closed: true}];
 		expect(scope.hasClosedAccounts()).toBeTruthy();
 	});
+	
+	it('should toggle showClosed flag using accountsState', inject(['accountsState', function(accountsState) {
+		compile();
+		scope.showClosed = true;
+		spyOn(accountsState, 'showingClosed').and.returnValue(false);
+		scope.toggleShowClosedAccounts();
+		expect(scope.showClosed).toBeFalsy();
+		expect(accountsState.showingClosed).toHaveBeenCalledWith(false);
+	}]));
 });
