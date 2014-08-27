@@ -51,6 +51,40 @@
 		}];
 	});
 	
+	homeApp.provider('accountsState', function() {
+		var showingClosed = false;
+		this.$get = function() {
+			return {
+				showingClosed: function(value) {
+					if(typeof(value) != 'undefined') showingClosed = value;
+					return showingClosed;
+				}
+			}
+		}
+	});
+	
+	homeApp.directive('accountsPanel', ['accounts', 'accountsState', function(accounts, accountsState) {
+		return {
+			restrict: 'E',
+			templateUrl: 'accounts-panel.html',
+			link: function(scope, element, attrs) {
+				scope.accounts = accounts.getAll();
+				scope.uncategorised = accounts.getUncategorisedAccounts();
+				scope.categories = accounts.getAllCategories();
+				
+				scope.showClosed = accountsState.showingClosed();
+				scope.hasClosedAccounts = function() {
+					for(var i = 0; i < scope.accounts.length; i++) {
+						if(scope.accounts[i].is_closed) {
+							return true;
+						}
+					}
+					return false;
+				};
+			}
+		}
+	}]);
+	
 	homeApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
 	function($scope, $http, money, ledgers, accounts) {
 		

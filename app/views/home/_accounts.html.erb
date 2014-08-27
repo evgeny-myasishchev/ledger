@@ -1,51 +1,5 @@
 <div class='col-sm-5 col-md-4'>
-	<div class='panel panel-default'>
-		<div class='panel-heading'>
-			<strong>Accounts</strong>
-			<div class='pull-right'>
-				<a href='#/accounts/new' class="btn btn-default btn-xs" title="Add new account">
-					<i class="glyphicon glyphicon-plus"></i>
-				</a>
-			</div>
-		</div>
-		<table class='table table-condensed table-hover' class='list-group'>
-			<tr ng-repeat-start='category in categories | orderBy:display_order' class='info'>
-				<td>
-					{{category.name}}
-				</td>
-			</tr>
-			<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | filter:filter | orderBy:'name'" ng-class="{active: activeAccount == account}">
-				<td>
-					<a href='#/accounts/{{account.sequential_number}}'>
-						{{account.name}}
-					</a>
-					<span class='pull-right'><strong>{{account.balance | money }}</strong> <sup>{{account.currency_code}}</sup></span> 
-				</td>
-			</tr>
-			<tr ng-show='showClosed' class='info'>
-				<td>
-					Closed accounts
-				</td>
-			</tr>
-			<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | orderBy:'name'" ng-class="{active: activeAccount == account}">
-				<td>
-					<span class='glyphicon glyphicon-lock'></span>
-					<a href='#/accounts/{{account.sequential_number}}'>
-						{{account.name}}
-					</a>
-					<span class='pull-right'>{{account.balance | money }}</span> 
-				</td>
-			</tr>
-			<tr>
-				<td class='info'>
-					<a href='#' ng-show='hasClosedAccounts()' ng-click='showClosed = !showClosed; $event.preventDefault();'>
-						<span ng-show='!showClosed'><span class='glyphicon glyphicon-lock'></span> Show closed accounts</span>
-						<span ng-show='showClosed'>Hide closed accounts</span>
-					</a>
-				</td>
-			</tr>
-		</table>
-	</div>
+	<accounts-panel></accounts-panel>
 </div>
 <div class='col-sm-7 col-md-8'>
 	<%= render partial: 'account_transactions' %>

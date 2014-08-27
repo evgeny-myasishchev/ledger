@@ -51,16 +51,6 @@ describe("homeApp", function() {
 			});
 		}
 		
-		it("should have default accounts", function() {
-			initController();
-			expect(scope.accounts.length).toEqual(3);
-		});
-		
-		it("should have categories assigned", function() {
-			initController();
-			expect(scope.categories).toEqual([category1, category2]);
-		});
-		
 		it("should set active account from accessor", function() {
 			this.assignActiveAccount(account2);
 			initController();
@@ -120,14 +110,6 @@ describe("homeApp", function() {
 				expect(accounts.remove).toHaveBeenCalledWith(account2);
 				expect($location.path).toHaveBeenCalledWith('/accounts');
 			}]));
-		});
-		
-		it('should determine if there are closed accounts with hasClosedAccounts method', function() {
-			initController();
-			scope.accounts = [{is_closed: false}, {is_closed: false}];
-			expect(scope.hasClosedAccounts()).toBeFalsy();
-			scope.accounts = [{is_closed: false}, {is_closed: false}, {is_closed: true}];
-			expect(scope.hasClosedAccounts()).toBeTruthy();
 		});
 		
 		describe('transactions', function() {

@@ -4,23 +4,9 @@ var homeApp = (function() {
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
-
-	homeApp.provider('accountsState', function() {
-		var showingClosed = false;
-		this.$get = function() {
-			return {
-				showingClosed: function(value) {
-					if(typeof(value) != 'undefined') showingClosed = value;
-					return showingClosed;
-				}
-			}
-		}
-	});
 	
 	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState) {
-		$scope.accounts = accounts.getAll();
-		$scope.categories = accounts.getAllCategories();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
 			var transactions = data.transactions;
@@ -65,17 +51,6 @@ var homeApp = (function() {
 					accounts.remove(account);
 					$location.path('/accounts');
 				});
-		};
-		
-		$scope.showClosed = accountsState.showingClosed();
-		
-		$scope.hasClosedAccounts = function() {
-			for(var i = 0; i < $scope.accounts.length; i++) {
-				if($scope.accounts[i].is_closed) {
-					return true;
-				}
-			}
-			return false;
 		};
 		
 		$scope.refreshRangeState = function() {
