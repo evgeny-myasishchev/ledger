@@ -1,20 +1,21 @@
 describe('home.acounts', function() {
 	describe('accountsProvider', function() {
 		var subject;
-		var account1, account2, account3;
+		var account1, account2, account3, account4;
 		var category1, category2;
 		var routeParams;
 		beforeEach(function() {
 			module('homeApp');
 			homeApp.config(['accountsProvider', function(accountsProvider) {
 				accountsProvider.assignAccounts([
-					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
-					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
-					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
+					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1},
+					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2},
+					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, category_id: null},
+					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, category_id: null}
 				]);
 				accountsProvider.assignCategories([
 					category1 = {id: 1, display_order: 1, name: 'Category 1'},
-					category2 = {id: 1, display_order: 2, name: 'Category 2'}
+					category2 = {id: 2, display_order: 2, name: 'Category 2'}
 				]);
 			}]);
 
@@ -31,7 +32,12 @@ describe('home.acounts', function() {
 		
 		it('should return all accounts on getAll', function() {
 			initProvider();
-			expect(subject.getAll()).toEqual([account1, account2, account3]);
+			expect(subject.getAll()).toEqual([account1, account2, account3, account4]);
+		});
+		
+		it('should return all accounts without category assigned getUncategorisedAccounts', function() {
+			initProvider();
+			expect(subject.getUncategorisedAccounts()).toEqual([account3, account4]);
 		});
 
 		it("should set active account from route params", function() {
@@ -55,7 +61,7 @@ describe('home.acounts', function() {
 		it('should insert the account assigning sequential number on add', function() {
 			initProvider();
 			subject.add({aggregate_id: 'a4'});
-			expect(subject.getAll()).toEqual([account1, account2, account3, {aggregate_id: 'a4', sequential_number: 204}]);
+			expect(subject.getAll()).toEqual([account1, account2, account3, account4, {aggregate_id: 'a4', sequential_number: 205}]);
 		});
 		
 		it('should remove the account on remove', function() {
@@ -63,7 +69,7 @@ describe('home.acounts', function() {
 			var a4;
 			subject.add(a4 = {aggregate_id: 'a4'});
 			subject.remove(a4);
-			expect(subject.getAll()).toEqual([account1, account2, account3]);
+			expect(subject.getAll()).toEqual([account1, account2, account3, account4]);
 		});
 		
 		describe('categories', function() {

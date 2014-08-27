@@ -5,7 +5,6 @@
 		var accounts, categories;
 		this.assignAccounts = function(value) {
 			accounts = value;
-			console.log(accounts);
 		};
 		this.assignCategories = function(value) {
 			categories = value;
@@ -14,6 +13,11 @@
 			return {
 				getAll: function() {
 					return accounts;
+				},
+				getUncategorisedAccounts: function() {
+					return $.grep(accounts, function(account) {
+						return account.category_id == null;
+					});
 				},
 				getAllCategories: function() {
 					return categories;
