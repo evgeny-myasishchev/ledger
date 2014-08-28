@@ -34,6 +34,15 @@ var homeApp = (function() {
 			});
 		};
 		
+		$scope.setAccountCategory = function(account, category_id) {
+			return $http.put('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/set-category', {
+					category_id: category_id
+				})
+				.success(function() {
+					account.category_id = category_id;
+				});
+		};
+		
 		$scope.closeAccount = function(account) {
 			return $http.post('ledgers/' + ledgers.getActiveLedger().aggregate_id + '/accounts/' + account.aggregate_id + '/close')
 				.success(function() {

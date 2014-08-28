@@ -76,13 +76,23 @@ describe("homeApp", function() {
 			});
 		});
 		
-		describe('close/reopen/remove account', function() {
+		describe('set-category/close/reopen/remove account', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
 				initController();
 				$httpBackend.flush();
 				HomeHelpers.include(this);
 				this.assignActiveLedger({aggregate_id: 'ledger-332'});
+			});
+			
+			it('should put set-category for given account and update category_id on success', function() {
+				$httpBackend.expectPUT('ledgers/ledger-332/accounts/a-2/set-category', function(data) {
+					expect(JSON.parse(data).category_id).toEqual(332);
+					return true;
+				}).respond(200);
+				var result = scope.setAccountCategory(account2, 332);
+				$httpBackend.flush();
+				expect(account2.category_id).toEqual(332);
 			});
 			
 			it('should post close for given account and update closed flag on success when closing', function() {
