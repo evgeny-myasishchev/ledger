@@ -73,9 +73,25 @@ describe('home.acounts', function() {
 		});
 		
 		describe('categories', function() {
-			it('should return all categories on getAllCategories', function() {
+			beforeEach(function() {
 				initProvider();
+			});
+			
+			it('should return all categories on getAllCategories', function() {
 				expect(subject.getAllCategories()).toEqual([category1, category2]);
+			});
+			
+			it('should insert new category on addCategory', function() {
+				var all = subject.getAllCategories();
+				subject.addCategory(110, 'New category 110');
+				expect(all).toEqual([category1, category2, {category_id: 110, display_order: 3, name: 'New category 110'}]);
+			});
+			
+			it('should remove the category on removeCategory', function() {
+				subject.removeCategory(category1);
+				expect(subject.getAllCategories()).toEqual([category2]);
+				subject.removeCategory(category2);
+				expect(subject.getAllCategories()).toEqual([]);
 			});
 		});
 	});

@@ -47,6 +47,17 @@
 				remove: function(account) {
 					var index = accounts.indexOf(account);
 					accounts.splice(index, 1);
+				},
+				addCategory: function(category_id, name) {
+					var lastDisplayOrder = 0;
+					$.each(categories, function(index, category) {
+						if(category.display_order > lastDisplayOrder) lastDisplayOrder = category.display_order;
+					});
+					categories.push({category_id: category_id, display_order: lastDisplayOrder + 1, name: name});
+				},
+				removeCategory: function(category) {
+					var index = categories.indexOf(category);
+					categories.splice(index, 1);
 				}
 			}
 		}];

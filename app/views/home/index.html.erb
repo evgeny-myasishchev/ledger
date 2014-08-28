@@ -14,6 +14,9 @@
 	<script type="text/ng-template" id='tags.html'>
 	<%= render partial: 'tags' %>
 	</script>
+	<script type="text/ng-template" id='categories.html'>
+	<%= render partial: 'categories' %>
+	</script>
 	<script type="text/javascript">
 		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', function(ledgersProvider, accountsProvider, tagsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);

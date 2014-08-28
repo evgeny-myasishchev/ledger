@@ -1,0 +1,36 @@
+<div class="page-header" style='margin-top: 0;'>
+	<h1 style='margin-top: 0;'>Categories</h1>
+</div>
+
+<div class='row'>
+	<div class='col-sm-8 col-md-5'>
+		<div class='panel panel-default'>
+			<div class="panel-heading">
+				<button class='btn btn-sm btn-default' title='Add new category' ng-click='addingNew = true;' ng-hide='addingNew'>
+					<i class='glyphicon glyphicon-plus'></i>
+				</button>
+				<form ng-show='addingNew' class='form-inline' ng-submit='createCategory()'>
+					<input ng-model='newCategoryName' type='text' class='form-control' autofocus='addingNew'>
+					<button class='btn btn-sm btn-primary'><i class='glyphicon glyphicon-ok'></i></button>
+					<button class='btn btn-sm btn-default' type='reset' ng-click='addingNew = false; isCreated = false;'><i class='glyphicon glyphicon-remove'></i></button>
+					<label class='label label-success' ng-show='isCreated'>Category added</label>
+				</form>
+			</div>
+			<div class='list-group'>
+				<div class='list-group-item' ng-repeat="category in categories | orderBy:'display_order'" >
+					<span ldr-bubble-editor value="category.name" submit='renameCategory(category, newValue)' style='cursor: pointer;'>
+						{{category.name}}
+					</span>
+					<div class='alert alert-danger' ng-show='confirmingRemove' style='margin-bottom: 0; margin-top: 10px;'>
+						The category will be removed. Continue?
+						<button class='btn btn-xs btn-danger' ng-click='removeCategory(category);'>Yes</button>
+						<button class='btn btn-default btn-xs' ng-click='confirmingRemove = false;'>No</button>
+					</div>
+					<button class='btn btn-xs btn-default pull-right' ng-show='!confirmingRemove' ng-click='confirmingRemove = true;'>
+						<span class='glyphicon glyphicon-trash'></span>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

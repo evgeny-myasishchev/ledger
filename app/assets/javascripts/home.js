@@ -166,6 +166,10 @@ var homeApp = (function() {
 				templateUrl: "tags.html",
 				controller: 'TagsController'
 			})
+			.when('/categories', {
+				templateUrl: "categories.html",
+				controller: 'CategoriesController'
+			})
 			.when('/accounts', {
 				templateUrl: "accounts.html",
 				controller: 'HomeController'
