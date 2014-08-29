@@ -33,9 +33,9 @@
 				<%= render partial: 'account_info' %>
 			</td>
 		</tr>
-		<tr>
+		<tr ng-if='hasClosedAccounts()'>
 			<td class='info'>
-				<a href='#' ng-show='hasClosedAccounts()' ng-click='toggleShowClosedAccounts(); $event.preventDefault();'>
+				<a href='#' ng-click='toggleShowClosedAccounts(); $event.preventDefault();'>
 					<span ng-show='!showClosed'><span class='glyphicon glyphicon-lock'></span> Show closed accounts</span>
 					<span ng-show='showClosed'>Hide closed accounts</span>
 				</a>

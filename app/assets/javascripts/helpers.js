@@ -107,4 +107,13 @@
 			return money.formatInteger(input);
 		}
 	}]);
+	
+	ledgerHelpers.filter('then', [function() {
+		return function(promise, expression) {
+			var that = this;
+			return promise.then(function() {
+				that.$eval(expression, {});
+			});
+		}
+	}]);
 })();

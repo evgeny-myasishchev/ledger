@@ -14,7 +14,7 @@
 			</button>
 			<ul class="dropdown-menu" role="menu">
 				<li><a href="#" ng-click='isRenaming = true; $event.preventDefault();'>Rename account</a></li>
-				<li><a href="#" ng-click='assigningCategory = true; $event.preventDefault();'>Set category</a></li>
+				<li ng-show='categories.length'><a href="#" ng-click='assigningCategory = true; $event.preventDefault();'>Set category</a></li>
 				<li ng-show="!activeAccount.is_closed"><a href="#" ng-click='closeAccount(activeAccount); $event.preventDefault();'>Close account</a></li>
 				<li ng-show="activeAccount.is_closed"><a href="#" ng-click='reopenAccount(activeAccount); $event.preventDefault();'>Reopen account</a></li>
 			</ul>
@@ -28,7 +28,7 @@
 		</h2>
 	</div>
 	<div class='pull-right' ng-show='assigningCategory'>
-		<form name='setAccountCategoryForm' ng-submit='setAccountCategory(activeAccount, categoryId)' class='form-inline'>
+		<form name='setAccountCategoryForm' ng-submit='setAccountCategory(activeAccount, categoryId) | then:"assigningCategory=false"' class='form-inline'>
 			<input type='hidden' name='test' value='test1' ng-model='test1'>
 			<label>Select new category:</label>
 			<select ng-init='categoryId = activeAccount.category_id' ng-model='categoryId' class='form-control' autofocus='assigningCategory'

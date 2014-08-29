@@ -30,4 +30,22 @@ describe("ledgerHelpers", function() {
 			expect(subject.arrayToBracedString([100, 200, 300])).toEqual('{100},{200},{300}')
 		});
 	});
+	
+	describe('thenFilter', function() {
+		var scope, $q, $rootScope;
+		beforeEach(inject(['$q', '$rootScope', 'thenFilter', function(theQ, theRootScope, thenFilter) { 
+			$q = theQ;
+			$rootScope = theRootScope;
+			scope = $rootScope.$new();
+			scope.thenFilter = thenFilter; 
+		}]));
+		
+		it('should evaluate given expression when promise is resolved', function() {
+			var deferred = $q.defer();
+			scope.thenFilter(deferred.promise, 'test="value"');
+			deferred.resolve();
+			$rootScope.$apply();
+			expect(scope.test).toEqual('value');
+		});
+	});
 });
