@@ -120,6 +120,12 @@ describe Domain::Ledger do
       expect(subject).to have_one_uncommitted_event I::AccountCategoryAssigned, aggregate_id: subject.aggregate_id, 
         account_id: account.aggregate_id, category_id: 110
     end
+        
+    it 'should not raise AccountCategoryAssigned event if same category' do
+      subject.apply_event I::AccountCategoryAssigned.new subject.aggregate_id, account.aggregate_id, 110
+      subject.set_account_category(account, 110)
+      expect(subject).not_to have_uncommitted_events
+    end
   end 
   
   describe "close_account" do

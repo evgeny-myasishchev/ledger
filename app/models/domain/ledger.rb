@@ -32,7 +32,8 @@ class Domain::Ledger < CommonDomain::Aggregate
     log.debug "Assigning account id='#{account.aggregate_id}' to category '#{category_id}'"
     ensure_known! account
     raise "Category id='#{category_id}' is not from ledger '#{@name}'." unless @known_categories.include?(category_id)
-    raise_event AccountCategoryAssigned.new aggregate_id, account.aggregate_id, category_id
+    raise_event AccountCategoryAssigned.new aggregate_id, account.aggregate_id, category_id unless 
+      @all_accounts[account.aggregate_id][:category_id] == category_id
   end
   
   def close_account account
@@ -108,7 +109,7 @@ class Domain::Ledger < CommonDomain::Aggregate
     @aggregate_id = event.aggregate_id
     @name = event.name
     @shared_with = Set.new
-    @all_accounts = Set.new
+    @all_accounts = Hash.new
     @open_accounts = Set.new
     @known_categories = Set.new
     @account_sequential_number = 1
@@ -124,7 +125,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   on AccountAddedToLedger do |event|
-    @all_accounts << event.account_id
+    @all_accounts[event.account_id] = {}
     @open_accounts << event.account_id
     @account_sequential_number += 1
   end
@@ -169,5 +170,6 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   on AccountCategoryAssigned do |event|
+    @all_accounts[event.account_id][:category_id] = event.category_id
   end
 end

@@ -4,7 +4,11 @@ RSpec.describe Projections::Account, :type => :model do
   include AccountHelpers::P
   let(:p) { Projections }
   let(:ledger) {
-    p::Ledger.create!(aggregate_id: 'ledger-1', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
+    p::Ledger.create!(aggregate_id: 'ledger-1', 
+      owner_user_id: 22331, 
+      shared_with_user_ids: Set.new([22332, 22333]), 
+      name: 'ledger 1',
+      currency_code: 'UAH')
   }
   
   describe "authorize_user" do

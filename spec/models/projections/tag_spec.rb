@@ -6,8 +6,8 @@ RSpec.describe Projections::Tag, :type => :model do
   let(:e) { Domain::Events }
 
   before(:each) do
-    p::Ledger.create!(aggregate_id: 'ledger-1', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1')
-    p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 23331, shared_with_user_ids: Set.new([23332, 23333]), name: 'ledger 2')
+    p::Ledger.create!(aggregate_id: 'ledger-1', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1', currency_code: 'UAH')
+    p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 23331, shared_with_user_ids: Set.new([23332, 23333]), name: 'ledger 2', currency_code: 'UAH')
     subject.handle_message e::TagCreated.new 'ledger-1', 1, 'tag-1'
     subject.handle_message e::TagCreated.new 'ledger-1', 2, 'tag-2'
     subject.handle_message e::TagCreated.new 'ledger-1', 3, 'tag-3'
