@@ -11,7 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140615083229) do
+ActiveRecord::Schema.define(version: 20140829122418) do
+
+  create_table "currency_rates", force: true do |t|
+    t.string   "from",       null: false
+    t.string   "to",         null: false
+    t.float    "rate",       null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "currency_rates", ["from", "to"], name: "index_currency_rates_on_from_and_to", unique: true
 
   create_table "projections_accounts", force: true do |t|
     t.string  "ledger_id",           null: false
