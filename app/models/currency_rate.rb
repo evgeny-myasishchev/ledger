@@ -24,7 +24,12 @@ class CurrencyRate < ActiveRecord::Base
             log.debug "Updating outdated rate."
             outdated = CurrencyRate.find_by(from: rate[:from], to: rate[:to])
             outdated.rate = rate[:rate]
-            outdated.save!
+            if outdated.changed?
+              outdated.save!
+            else
+              #Making sure updated_at date is set to current so next update will occur in 24 hours.
+              outdated.touch
+            end
             rates[rate[:from]] = outdated
           end
         }
@@ -32,8 +37,35 @@ class CurrencyRate < ActiveRecord::Base
       rates.values
     end
     
-    def fetch from: nil, to: nil
-      raise "Not implemented"
+    YqlServiceUrl = "https://query.yahooapis.com/v1/public/yql"
+    private def fetch from: nil, to: nil
+      # Sample query to be executed
+      # https://query.yahooapis.com/v1/public/yql?q=select * from yahoo.finance.xchange where pair in ("USDUAH", "EURUAH")&format=json&env=store://datatables.org/alltableswithkeys
+      
+      inComponent = from.map { |from_code| %("#{from_code}#{to}") }.join(',')
+      yqlQuery = "select * from yahoo.finance.xchange where pair in(#{inComponent})"
+      data_uri = URI.parse(YqlServiceUrl)
+      data_uri.query = "q=#{URI.encode(yqlQuery)}&format=json&env=store://datatables.org/alltableswithkeys"
+      log.debug "Sending YQL query: #{yqlQuery}"
+      response = Net::HTTP.get_response(data_uri)
+      if response.code != "200"
+        raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
+      end
+      result = JSON.parse response.body
+      rates = []
+      rate = result['query']['results']['rate']
+      if from.length > 1
+        result['query']['results']['rate'].each { |rate| process_raw_rate rates, rate, to }
+      else
+        process_raw_rate rates, result['query']['results']['rate'], to
+      end
+      rates
+    end
+    
+    private def process_raw_rate rates, raw_rate, to
+      log.debug "Raw fetched rate: #{raw_rate}"
+      from = raw_rate['id'].gsub(to, '')
+      rates << {from: from, to: to, rate: raw_rate['Rate']}
     end
   end
 end
