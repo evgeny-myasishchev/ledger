@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root 'home#index'
   
   resources :ledgers, only: [] do
+    get 'currency-rates'
     resources :accounts, only: [:new, :create, :destroy], param: :account_id do
       post 'close', on: :member
       post 'reopen', on: :member
