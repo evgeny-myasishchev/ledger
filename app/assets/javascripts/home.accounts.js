@@ -93,16 +93,20 @@
 					}
 					return false;
 				};
-				var activeAccount = accounts.getActive();
-				scope.onRenderingAccount = function(account) {
-					if(activeAccount) return;
-					accounts.makeActive(account);
-					activeAccount = account;
-				};
 				scope.toggleShowClosedAccounts = function() {
 					scope.showClosed = accountsState.showingClosed(!scope.showClosed);
 				};
 			}
+		}
+	}]);
+	
+	homeApp.filter('activateFirstAccount', ['accounts', '$location', function(accounts, $location) {
+		return function(account) {
+			var activeAccount = accounts.getActive();
+			if(activeAccount) return account;
+			else if($location.$$path.startsWith('/accounts/')) return account;
+			accounts.makeActive(account);
+			return account;
 		}
 	}]);
 	
