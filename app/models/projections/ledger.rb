@@ -13,8 +13,26 @@ class Projections::Ledger < ActiveRecord::Base
     end    
   end
   
+  def ensure_authorized! user
+    
+  end
+  
   def self.get_user_ledgers(user)
     where(owner_user_id: user.id).select(:id, :aggregate_id, :name).to_a
+  end
+  
+  def self.get_rates user, ledger_id
+    ledger = find_by_aggregate_id ledger_id
+    ledger.get_rates user
+  end
+  
+  def get_rates user
+    ensure_authorized! user
+    currency_codes = Account.select(:currency_code).
+      where('ledger_id = ? AND authorized_user_ids LIKE ? AND NOT currency_code = ?', aggregate_id, "%{#{user.id}}%", currency_code).
+      distinct.
+      map { |a| a.currency_code }
+    CurrencyRate.get from: currency_codes, to: currency_code
   end
   
   projection do

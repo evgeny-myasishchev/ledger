@@ -12,14 +12,14 @@ module AccountHelpers
   end
   
   module P
-    def create_account_projection! aggregate_id, ledger_id = 'ledger-1', owner_user_id = 100, authorized_user_ids: "{100}"
+    def create_account_projection! aggregate_id, ledger_id = 'ledger-1', owner_user_id = 100, authorized_user_ids: "{#{owner_user_id}}", currency_code: 'UAH'
       last_sequential_number = Projections::Account.where(ledger_id: ledger_id).maximum(:sequential_number) || 0
-      Projections::Account.create! aggregate_id: aggregate_id,
+      a = Projections::Account.create! aggregate_id: aggregate_id,
         ledger_id: ledger_id,
         sequential_number: last_sequential_number + 1,
         owner_user_id: 100,
         authorized_user_ids: authorized_user_ids,
-        currency_code: 'UAH',
+        currency_code: currency_code,
         name: 'A 1',
         balance: 0,
         is_closed: false

@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Projections::Ledger, :type => :model do
+  include AccountHelpers::P
+  
   subject { described_class.create_projection }
   let(:e) { Domain::Events }
   let(:p) { Projections }
@@ -25,6 +27,61 @@ RSpec.describe Projections::Ledger, :type => :model do
       l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil, currency_code: currency.code
       actual_l1 = p::Ledger.get_user_ledgers(User.new id: 11222).first
       expect(actual_l1.attribute_names).to eql ['id', 'aggregate_id', 'name']
+    end
+  end
+  
+  describe 'self.get_rates' do
+    let(:user) { User.new id: ledger_1.owner_user_id }
+    before(:each) do
+      allow(CurrencyRate).to receive(:get) { double(:rates) }
+    end
+    
+    it 'should ensure the user is authorized' do
+      expect(ledger_1).to receive(:ensure_authorized!).with(user)
+      ledger_1.get_rates user
+    end
+    
+    it 'should get rates for all accounts of the ledger' do
+      a1 = create_account_projection! 'a1', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: currency.code
+      a2 = create_account_projection! 'a2', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'USD'
+      a3 = create_account_projection! 'a3', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'EUR'
+      
+      rates = double(:rates)
+      expect(CurrencyRate).to receive(:get).with(from: ['USD', 'EUR'], to: 'UAH').and_return rates
+      expect(described_class.get_rates(user, ledger_1.aggregate_id)).to eql rates
+    end
+    
+    it 'should skip rates of accounts from different ledger' do
+      create_account_projection! 'a1', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'AUD'
+      create_account_projection! 'a2', 'l-2', ledger_1.owner_user_id, currency_code: 'USD'
+      create_account_projection! 'a3', 'l-2', ledger_1.owner_user_id, currency_code: 'EUR'
+      
+      rates = double(:rates)
+      expect(CurrencyRate).to receive(:get).with(from: ['AUD'], to: 'UAH').and_return rates
+      described_class.get_rates(user, ledger_1.aggregate_id)
+    end
+    
+    it 'should skip rates of unauthorized accounts' do
+      create_account_projection! 'a1', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'AUD'
+      create_account_projection! 'a2', ledger_1.aggregate_id, ledger_1.owner_user_id, authorized_user_ids: "{110}", currency_code: 'USD'
+      create_account_projection! 'a3', ledger_1.aggregate_id, ledger_1.owner_user_id, authorized_user_ids: "{110}", currency_code: 'EUR'
+      
+      rates = double(:rates)
+      expect(CurrencyRate).to receive(:get).with(from: ['AUD'], to: 'UAH').and_return rates
+      described_class.get_rates(user, ledger_1.aggregate_id)
+    end
+  end
+  
+  describe 'ensure_authorized!' do
+    it 'should do nothing if the user is owner'
+    it 'should do nothing if the ledger is shared with the user'
+    it 'should raise AuthorizationFailedError if the user is not owner or not shared'
+  end
+  
+  describe "authorized_user_ids" do
+    it "should return an array of all users that are authorized to access the ledger" do
+      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1', currency_code: currency.code)
+      expect(ledger.authorized_user_ids).to eql([22332, 22333, 22331])
     end
   end
   
@@ -62,10 +119,4 @@ RSpec.describe Projections::Ledger, :type => :model do
     end
   end
 
-  describe "authorized_user_ids" do
-    it "should return an array of all users that are authorized to access the ledger" do
-      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1', currency_code: currency.code)
-      expect(ledger.authorized_user_ids).to eql([22332, 22333, 22331])
-    end
-  end
 end
