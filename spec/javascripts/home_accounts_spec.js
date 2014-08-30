@@ -34,11 +34,6 @@ describe('home.acounts', function() {
 			initProvider();
 			expect(subject.getAll()).toEqual([account1, account2, account3, account4]);
 		});
-		
-		it('should return all accounts without category assigned getUncategorisedAccounts', function() {
-			initProvider();
-			expect(subject.getUncategorisedAccounts()).toEqual([account3, account4]);
-		});
 
 		it("should set active account from route params", function() {
 			routeParams.accountSequentialNumber = account2.sequential_number;
@@ -61,7 +56,7 @@ describe('home.acounts', function() {
 		it('should insert the account assigning sequential number on add', function() {
 			initProvider();
 			subject.add({aggregate_id: 'a4'});
-			expect(subject.getAll()).toEqual([account1, account2, account3, account4, {aggregate_id: 'a4', sequential_number: 205}]);
+			expect(subject.getAll()).toEqual([account1, account2, account3, account4, {aggregate_id: 'a4', sequential_number: 205, category_id: null}]);
 		});
 		
 		it('should remove the account on remove', function() {

@@ -8,7 +8,7 @@
 		</div>
 	</div>
 	<table class='table table-condensed table-hover' class='list-group'>
-		<tr ng-repeat-end ng-repeat="account in uncategorised | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: null, is_closed: false}  | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
@@ -18,7 +18,7 @@
 				{{category.name}}
 			</td>
 		</tr>
-		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | filter:filter | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>

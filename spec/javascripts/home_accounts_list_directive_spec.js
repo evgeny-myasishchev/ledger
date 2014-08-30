@@ -47,13 +47,6 @@ describe('home.accountsPanel', function() {
 		expect(scope.categories).toEqual([category1, category2]);
 	});
 	
-	it('should assign accounts that are not assigned to any category', function() {
-		var uncategorised = [account2, account3];
-		spyOn(accounts, 'getUncategorisedAccounts').and.returnValue(uncategorised);
-		compile();
-		expect(scope.uncategorised).toEqual(uncategorised);
-	});
-	
 	it('should determine if there are closed accounts with hasClosedAccounts method', function() {
 		compile();
 		scope.accounts = [{is_closed: false}, {is_closed: false}];

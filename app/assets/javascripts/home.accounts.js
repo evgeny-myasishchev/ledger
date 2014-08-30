@@ -17,11 +17,6 @@
 				getAll: function() {
 					return accounts;
 				},
-				getUncategorisedAccounts: function() {
-					return $.grep(accounts, function(account) {
-						return account.category_id == null;
-					});
-				},
 				getAllCategories: function() {
 					return categories;
 				},
@@ -41,6 +36,7 @@
 						if(account.sequential_number > lastSequentialNumber) lastSequentialNumber = account.sequential_number;
 					});
 					account.sequential_number = lastSequentialNumber + 1;
+					account.category_id = null;
 					accounts.push(account);
 					return account;
 				},
@@ -81,7 +77,6 @@
 			templateUrl: 'accounts-panel.html',
 			link: function(scope, element, attrs) {
 				scope.accounts = accounts.getAll();
-				scope.uncategorised = accounts.getUncategorisedAccounts();
 				scope.categories = accounts.getAllCategories();
 				
 				scope.showClosed = accountsState.showingClosed();
