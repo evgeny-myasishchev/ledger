@@ -14,7 +14,9 @@ class Projections::Ledger < ActiveRecord::Base
   end
   
   def ensure_authorized! user
-    
+    unless authorized_user_ids.include?(user.id)
+      raise Errors::AuthorizationFailedError.new "The user(id=#{user.id}) is not authorized on ledger(aggregate_id=#{aggregate_id})."
+    end
   end
   
   def self.get_user_ledgers(user)

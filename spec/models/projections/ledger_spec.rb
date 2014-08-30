@@ -73,9 +73,19 @@ RSpec.describe Projections::Ledger, :type => :model do
   end
   
   describe 'ensure_authorized!' do
-    it 'should do nothing if the user is owner'
-    it 'should do nothing if the ledger is shared with the user'
-    it 'should raise AuthorizationFailedError if the user is not owner or not shared'
+    it 'should do nothing if the user is owner' do
+      expect { ledger_1.ensure_authorized! User.new id: 100 }.not_to raise_error
+    end
+    
+    it 'should do nothing if the ledger is shared with the user' do
+      ledger_1.shared_with_user_ids.add 110
+      expect { ledger_1.ensure_authorized! User.new id: 100 }.not_to raise_error
+    end
+    
+    it 'should raise AuthorizationFailedError if the user is not owner or not shared' do
+      ledger_1.shared_with_user_ids.add 110
+      expect { ledger_1.ensure_authorized! User.new id: 120 }.to raise_error Errors::AuthorizationFailedError
+    end
   end
   
   describe "authorized_user_ids" do
