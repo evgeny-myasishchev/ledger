@@ -91,6 +91,31 @@ describe('home.acounts', function() {
 		});
 	});
 	
+	describe('calculateTotalFilter', function() {
+		var a1, a2, a3, all;
+		var scope;
+		beforeEach(function() {
+			module('homeApp');
+			a1 = {balance: 10000};
+			a2 = {balance: 20000};
+			a3 = {balance: 30000};
+			all = [a1, a2, a3];
+			inject(['$rootScope', 'calculateTotalFilter', function($rootScope, theFilter) {
+				scope = $rootScope.$new();
+				scope.filter = theFilter;
+			}]);
+		});
+		
+		it('should return supplied accounts', function() {
+			expect(scope.filter(all, 'result')).toEqual(all);
+		});
+		
+		it('should assign summary of all balances to given variable', function() {
+			scope.filter(all, 'result');
+			expect(scope.result).toEqual(60000);
+		});
+	});
+	
 	describe("NewAccountController", function() {
 		var controller, scope,  $httpBackend;
 		beforeEach(function() {

@@ -105,6 +105,17 @@
 		}
 	}]);
 	
+	homeApp.filter('calculateTotal', [function() {
+		return function(accounts, resultExpression) {
+			var result = 0;
+			$.each(accounts, function(index, account) {
+				result += account.balance;
+			});
+			this.$eval(resultExpression + '=' + result);
+			return accounts;
+		}
+	}]);
+	
 	homeApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
 	function($scope, $http, money, ledgers, accounts) {
 		var resetNewAccount = function() {

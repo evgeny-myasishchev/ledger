@@ -8,17 +8,17 @@
 		</div>
 	</div>
 	<table class='table table-condensed table-hover' class='list-group'>
-		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: null, is_closed: false}  | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: null, is_closed: false} | calculateTotal:'uncategorisedTotal'  | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
 		</tr>
 		<tr ng-repeat-start='category in categories | orderBy:display_order' class='info'>
 			<td>
-				{{category.name}}
+				{{category.name}} <small class='pull-right'>{{categorisedTotal | money}}</small>
 			</td>
 		</tr>
-		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | calculateTotal:'categorisedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
