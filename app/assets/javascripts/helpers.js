@@ -104,6 +104,7 @@
 	
 	ledgerHelpers.filter('money', ['money', function(money) {
 		return function(input) {
+			if(typeof(input) == 'undefined') return input;
 			return money.formatInteger(input);
 		}
 	}]);

@@ -105,5 +105,9 @@ describe("money", function() {
 		it('should use money to format integers', function() {
 			expect(filter(123456789)).toEqual(subject.formatInteger(123456789));
 		});
+		
+		it('should return undefined for undefined values', function() {
+			expect(filter(undefined)).toBeUndefined();
+		});
 	});
 });
