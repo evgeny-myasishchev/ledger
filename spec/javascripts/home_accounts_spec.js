@@ -96,13 +96,21 @@ describe('home.acounts', function() {
 		var scope;
 		beforeEach(function() {
 			module('homeApp');
-			a1 = {balance: 10000};
-			a2 = {balance: 20000};
-			a3 = {balance: 30000};
+			a1 = {balance: 10000, currency_code: 'UAH'};
+			a2 = {balance: 20000, currency_code: 'UAH'};
+			a3 = {balance: 30000, currency_code: 'UAH'};
 			all = [a1, a2, a3];
-			inject(['$rootScope', 'calculateTotalFilter', function($rootScope, theFilter) {
+			
+			inject(['$rootScope', 'calculateTotalFilter', 'ledgers', function($rootScope, theFilter, ledgers) {
 				scope = $rootScope.$new();
 				scope.filter = theFilter;
+				var deferredCurrencyRates = $.Deferred();
+				deferredCurrencyRates.resolve({
+					EUR: {"id":14,"from":"EUR","to":"UAH","rate":16.22},
+					USD: {"id":13,"from":"USD","to":"UAH","rate":12.93}
+				});
+				spyOn(ledgers, 'getActiveLedger').and.returnValue({aggregate_id: 'l-1', currency_code: 'UAH'});
+				spyOn(ledgers, 'loadCurrencyRates').and.returnValue(deferredCurrencyRates.promise());
 			}]);
 		});
 		
@@ -112,7 +120,25 @@ describe('home.acounts', function() {
 		
 		it('should assign summary of all balances to given variable', function() {
 			scope.filter(all, 'result');
+			scope.$digest();
 			expect(scope.result).toEqual(60000);
+		});
+		
+		it('should multiply the balance by rate if ledger currency is different', function() {
+			a1.currency_code = 'EUR';
+			a1.balance = 10044;
+			a2.currency_code = 'USD';
+			scope.filter(all, 'result');
+			scope.$digest();
+			expect(scope.result).toEqual(162913 + 258600 + 30000);
+		});
+		
+		it('should not calculate if rate for the account is not present', function() {
+			a1.currency_code = 'GBP';
+			a2.currency_code = 'GBP';
+			scope.filter(all, 'result');
+			scope.$digest();
+			expect(scope.result).toEqual(30000);
 		});
 	});
 	

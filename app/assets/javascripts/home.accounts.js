@@ -105,13 +105,24 @@
 		}
 	}]);
 	
-	homeApp.filter('calculateTotal', [function() {
+	homeApp.filter('calculateTotal', ['ledgers', 'money', function(ledgers, money) {
 		return function(accounts, resultExpression) {
-			var result = 0;
-			$.each(accounts, function(index, account) {
-				result += account.balance;
+			var that = this;
+			ledgers.loadCurrencyRates().then(function(rates) {
+				var result = 0;
+				var activeLedger = ledgers.getActiveLedger();
+				$.each(accounts, function(index, account) {
+					if(activeLedger.currency_code == account.currency_code) {
+						result += account.balance;
+					} else {
+						var rate = rates[account.currency_code];
+						if(rate) {
+							result += money.toIntegerMoney((money.toNumber(account.balance) * rate.rate));
+						}
+					}
+				});
+				that.$eval(resultExpression + '=' + result);
 			});
-			this.$eval(resultExpression + '=' + result);
 			return accounts;
 		}
 	}]);
