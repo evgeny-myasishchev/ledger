@@ -163,9 +163,24 @@ describe('home.acounts', function() {
 		it("initializes initial scope", function() {
 			initController();
 			expect(scope.newAccount).toEqual({
-				name: null, currencyCode: null, initialBalance: '0'
+				name: null, currency: null, initialBalance: '0', unit: null
 			});
 			expect(scope.currencies).toEqual([]);
+		});
+		
+		it('should watch newAccount currency changes and set default unit of oz if currency unit is oz', function() {
+			$httpBackend.whenGET('ledgers/ledger-332/accounts/new.json').respond({
+				new_account_id: 'new-account-332',
+				currencies: [{c1: true}, {c2: true}]
+			});
+			initController();
+			scope.newAccount.currency = {code: 'XAU', unit: 'oz'};
+			scope.$digest();
+			expect(scope.newAccount.unit).toEqual('oz');
+
+			scope.newAccount.currency = {code: 'UAH'};
+			scope.$digest();
+			expect(scope.newAccount.unit).toBeNull();
 		});
 	
 		describe('load new account data', function() {
@@ -192,7 +207,7 @@ describe('home.acounts', function() {
 				$httpBackend.flush();
 				scope.newAccount.newAccountId = 'account-223';
 				scope.newAccount.name = 'New account';
-				scope.newAccount.currencyCode = 'UAH';
+				scope.newAccount.currency = {code: 'UAH'};
 				scope.newAccount.initialBalance = '2332.31';
 				inject(['accounts', function(a) { accounts = a;}]);
 				spyOn(accounts, 'add');
@@ -205,6 +220,7 @@ describe('home.acounts', function() {
 					expect(command.name).toEqual('New account');
 					expect(command.currency_code).toEqual('UAH');
 					expect(command.initial_balance).toEqual('2332.31');
+					expect(command.unit).toBeUndefined();
 					return true;
 				}).respond();
 				expect(scope.created).toBeFalsy();
@@ -215,12 +231,35 @@ describe('home.acounts', function() {
 				expect(scope.creating).toBeFalsy();
 				expect(scope.created).toBeTruthy();
 			});
-		
-			it('should add the account on success', function() {
-				$httpBackend.whenPOST('ledgers/ledger-332/accounts').respond();
+			
+			it('should include unit if specified', function() {
+				$httpBackend.expectPOST('ledgers/ledger-332/accounts', function(data) {
+					var command = JSON.parse(data);
+					expect(command.unit).toEqual('oz');
+					return true;
+				}).respond();
+				scope.newAccount.unit = 'oz';
 				scope.create();
 				$httpBackend.flush();
-				expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231, is_closed: false})
+			});
+			
+			describe('on success', function() {
+				beforeEach(function() {
+					$httpBackend.whenPOST('ledgers/ledger-332/accounts').respond();
+				});
+				
+				it('should add the account', function() {
+					scope.create();
+					$httpBackend.flush();
+					expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231, is_closed: false})
+				});
+			
+				it('include unit', function() {
+					scope.newAccount.unit = 'oz';
+					scope.create();
+					$httpBackend.flush();
+					expect(accounts.add).toHaveBeenCalledWith(jasmine.objectContaining({unit: 'oz'}))
+				});
 			});
 		});
 	
@@ -247,13 +286,15 @@ describe('home.acounts', function() {
 		
 			it('should reset new account data on success', function() {
 				scope.newAccount.name = 'Some name';
-				scope.newAccount.currencyCode = 'UAH';
+				scope.newAccount.currency =  {code: 'UAH'};
 				scope.newAccount.initialBalance = '2200.30';
+				scope.newAccount.unit = 'oz';
 				scope.createAnother();
 				$httpBackend.flush();
 				expect(scope.newAccount.name).toBeNull();
-				expect(scope.newAccount.currencyCode).toBeNull();
+				expect(scope.newAccount.currency).toBeNull();
 				expect(scope.newAccount.initialBalance).toEqual('0');
+				expect(scope.newAccount.unit).toBeNull();
 			});
 		});
 	});

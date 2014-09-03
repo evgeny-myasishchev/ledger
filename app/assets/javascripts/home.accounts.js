@@ -132,8 +132,9 @@
 		var resetNewAccount = function() {
 			$scope.newAccount = {
 				name: null,
-				currencyCode: null,
-				initialBalance: '0'
+				currency: null,
+				initialBalance: '0',
+				unit: null
 			};
 		}
 		resetNewAccount();
@@ -148,25 +149,37 @@
 		$http.get('ledgers/' + activeLedger.aggregate_id + '/accounts/new.json').success(function(data) {
 			$scope.newAccount.newAccountId = data.new_account_id;
 			$scope.currencies = data.currencies;
+			
+			//For testing
+			// $scope.newAccount.currency = data.currencies[174];
+		});
+		
+		$scope.$watch('newAccount.currency.unit', function(newVal) {
+			if(newVal == 'oz') $scope.newAccount.unit = 'oz';
+			else $scope.newAccount.unit = null;
 		});
 		
 		$scope.created = false;
 		$scope.creating = false;
 		$scope.create = function() {
 			$scope.creating = true;
-			$http.post('ledgers/' + activeLedger.aggregate_id + '/accounts', {
+			var commandData = {
 				account_id: $scope.newAccount.newAccountId,
 				name: $scope.newAccount.name,
-				currency_code: $scope.newAccount.currencyCode,
+				currency_code: $scope.newAccount.currency.code,
 				initial_balance: $scope.newAccount.initialBalance
-			}).success(function() {
-				accounts.add({
-					aggregate_id: $scope.newAccount.newAccountId,
-					name: $scope.newAccount.name,
-					currency_code: $scope.newAccount.currencyCode,
-					balance: money.parse($scope.newAccount.initialBalance),
+			};
+			if($scope.newAccount.unit) commandData.unit = $scope.newAccount.unit;
+			$http.post('ledgers/' + activeLedger.aggregate_id + '/accounts', commandData).success(function() {
+				var account = {
+					aggregate_id: commandData.account_id,
+					name: commandData.name,
+					currency_code: commandData.currency_code,
+					balance: money.parse(commandData.initial_balance),
 					is_closed: false
-				});
+				};
+				if(commandData.unit) account.unit = commandData.unit;
+				accounts.add(account);
 				$scope.created = true;
 			}).finally(function() {
 				$scope.creating = false;

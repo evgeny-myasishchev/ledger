@@ -12,9 +12,15 @@
 				</div>
 				<div class="form-group">
 					<label>Currency:</label>
-					<select class='form-control' ng-model='newAccount.currencyCode' required>
+					<select class='form-control' name='currency' ng-model='newAccount.currency' ng-options="(currency.code + ' - ' + currency.english_name) for currency in (currencies | orderBy:'code')" required>
 						<option value="">--Chose currency--</option>
-						<option ng-selected='newAccount.currencyCode == currency.code' ng-repeat="currency in currencies | orderBy:'code'" value="{{currency.code}}">{{currency.code}} - {{currency.english_name}}</option>
+					</select>
+				</div>
+				<div class="form-group" ng-if='newAccount.currency.unit == "oz"'>
+					<label>Unit of measurement:</label>
+					<select class='form-control' ng-model='newAccount.unit' required>
+						<option value="oz">Ounces</option>
+						<option value="g">Grams</option>
 					</select>
 				</div>
 				<div class="form-group">
