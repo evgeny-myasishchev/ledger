@@ -20,7 +20,7 @@ class Projections::Ledger < ActiveRecord::Base
   end
   
   def self.get_user_ledgers(user)
-    where(owner_user_id: user.id).select(:id, :aggregate_id, :name).to_a
+    where(owner_user_id: user.id).select(:id, :aggregate_id, :name, :currency_code).to_a
   end
   
   def self.get_rates user, ledger_id
