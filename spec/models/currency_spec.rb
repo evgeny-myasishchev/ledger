@@ -21,6 +21,11 @@ describe Currency do
       expect(subject.id).to eql 980
     end
     
+    it 'should assign optional unit attribute' do
+      subject = described_class.new english_name: 'Hryvnia', code: 'UAH', id: 980, unit: :oz
+      expect(subject.unit).to eql :oz
+    end
+    
     it "should raise error if any attribute is missing" do
       expect { described_class.new code: 'UAH', id: 980 }.to raise_error(ArgumentError, 'english_name attribute is missing.')
       expect { described_class.new english_name: '', code: 'UAH', id: 980 }.to raise_error(ArgumentError, 'english_name attribute is missing.')
@@ -80,11 +85,13 @@ describe Currency do
       uah1 = Currency.new english_name: 'Hryvnia', code: 'UAH', id: 980
       uah2 = Currency.new english_name: 'Hryvnia', code: 'UAH', id: 980
       eur = Currency.new english_name: 'Euro', code: 'EUR', id: 978
+      eur_oz = Currency.new english_name: 'Euro', code: 'EUR', id: 978, unit: :oz
       
       expect(uah1 == uah2).to be_truthy
       expect(uah1).to eql uah2
       expect(uah1 == eur).to be_falsey
       expect(uah1).not_to eql eur
+      expect(eur).not_to eql eur_oz
     end
   end
   

@@ -54,6 +54,9 @@ class CurrenciesUpdater
       }
     end
     
+    # Currency codes whos units are ounces (oz)
+    OzCurrencies = Set.new(['XAU', 'XAG', 'XPD', 'XPT'])
+    
     def write(currencies, output)
       log.debug "Writting parsed currencies. Output: #{output}"
       registered = Set.new
@@ -65,7 +68,9 @@ class CurrenciesUpdater
         currencies.each { |currency|
           next if currency[:code] == 'XTS'
           unless registered.include?(currency[:code])
-            file.write %(Currency.register id: #{currency[:id].to_i}, code: '#{currency[:code]}', english_name: '#{currency[:english_name]}'\n)
+            file.write %(Currency.register id: #{currency[:id].to_i}, code: '#{currency[:code]}', english_name: '#{currency[:english_name]}')
+            file.write %(, unit: :oz) if OzCurrencies.include?(currency[:code])
+            file.write %(\n)
             registered << currency[:code]
           end
         }

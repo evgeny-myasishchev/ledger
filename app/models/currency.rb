@@ -8,16 +8,20 @@ class Currency
   # English name of the currency
   attr_reader :english_name
   
+  attr_reader :unit
+  
   def initialize(attribs)
     @english_name = get_required_attrib attribs, :english_name
     @code = get_required_attrib attribs, :code
     @id = get_required_attrib attribs, :id
+    @unit = attribs[:unit] if attribs[:unit]
   end
   
   def ==(other)
     return english_name == other.english_name && 
       code == other.code && 
-      id == other.id
+      id == other.id &&
+      unit == other.unit
   end
   
   def eql?(other)
@@ -25,7 +29,8 @@ class Currency
   end
   
   def to_s
-    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}"
+    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}" if unit.empty?
+    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}, unit: #{unit}" unless unit.empty?
   end
   
   private
