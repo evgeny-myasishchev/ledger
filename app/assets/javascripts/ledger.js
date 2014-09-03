@@ -388,13 +388,35 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 			ledgers = l;
 		};
 		
-		this.$get = function() {
-			return {
+		var currencyRates = {};
+		var resolveCachedRate = function(ledger, deferred) {
+			deferred.resolve(currencyRates[ledger.aggregate_id]);
+		};
+		this.$get = ['$http', '$q', function($http, $q) {
+			var provider;
+			return provider = {
 				getActiveLedger: function() {
 					return ledgers[0];
+				},
+				loadCurrencyRates: function() {
+					var activeLedger = provider.getActiveLedger();
+					if(currencyRates[activeLedger.aggregate_id]) {
+						return currencyRates[activeLedger.aggregate_id];
+					} else {
+						var deferred = $.Deferred();
+						currencyRates[activeLedger.aggregate_id] = deferred.promise();
+						$http.get('ledgers/' + activeLedger.aggregate_id + '/currency-rates.json').success(function(rates) {
+							var byFrom = {};
+							$.each(rates, function(index, rate) {
+								byFrom[rate.from] = rate;
+							});
+							deferred.resolve(byFrom);
+						});
+						return deferred.promise();
+					}
 				}
 			}
-		}
+		}]
 	});
 	
 	var tagsProvider = angular.module('tagsProvider', ['ledgersProvider']);
