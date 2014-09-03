@@ -61,6 +61,13 @@
 		
 		this.$get = function() {
 			return {
+				toNumber: function(integerMoney) {
+					return integerMoney / 100;
+				},
+				
+				toIntegerMoney: function(number) {
+					return Math.floor(number * 100);
+				},
 				formatInteger: function(number) {
 					if(number % 1 != 0) throw new Error(number + ' is not integer.');
 					var figures = toFiguresArray(number);

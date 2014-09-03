@@ -10,6 +10,26 @@ describe("money", function() {
 		inject(function(money) { subject = money; });
 	});
 	
+	describe('toNumber', function() {
+		it('should convert the integer to floating point number', function() {
+			expect(subject.toNumber(100)).toEqual(1.00);
+			expect(subject.toNumber(983223)).toEqual(9832.23);
+		});
+	});
+	
+	describe('toIntegerMoney', function() {
+		it('should convert floating point number to integer money', function() {
+			expect(subject.toIntegerMoney(1)).toEqual(100);
+			expect(subject.toIntegerMoney(1.00)).toEqual(100);
+			expect(subject.toIntegerMoney(9832.23)).toEqual(983223);
+		});
+		
+		it('should reject all decimals after second number', function() {
+			expect(subject.toIntegerMoney(1.00332)).toEqual(100);
+			expect(subject.toIntegerMoney(99321.98732)).toEqual(9932198);
+		});
+	});
+	
 	describe('formatInteger', function() {
 		it('should format zero', function() { 
 			expect(subject.formatInteger(0)).toEqual('0|00');
