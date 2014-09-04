@@ -26,6 +26,15 @@ RSpec.describe Application::AccountsService, :type => :model do
     end
   end
   
+  describe "SetAccountUnit" do
+    it "should use the account to set unit" do
+      expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
+      expect(account).to receive(:set_unit).with('new-unit-1')
+      cmd = c::SetAccountUnit.new('account-112', unit: 'new-unit-1')
+      subject.handle_message cmd
+    end
+  end
+  
   
   describe "ReportIncome" do
     it "should use account to report the income" do

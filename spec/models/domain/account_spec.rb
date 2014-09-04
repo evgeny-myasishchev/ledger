@@ -17,18 +17,32 @@ describe Domain::Account do
   describe "create" do
     it "should raise AccountCreated event" do
       currency = Currency['UAH']
-      subject.create 'ledger-100', i::Account::AccountId.new('account-100', 1), i::Account::InitialData.new('Account 100', '100.32', currency)
+      subject.create 'ledger-100', i::Account::AccountId.new('account-100', 1), i::Account::InitialData.new('Account 100', '100.32', currency, 'oz')
       expect(subject).to have_one_uncommitted_event I::AccountCreated, 
         aggregate_id: subject.aggregate_id,
         ledger_id: 'ledger-100', 
         sequential_number: 1,
         name: 'Account 100', 
         initial_balance: 10032,
-        currency_code: currency.code
+        currency_code: currency.code,
+        unit: 'oz'
+    end
+    
+    it 'should set currency unit if it was not provided with initial data' do
+      currency = Currency['XAU']
+      subject.create 'ledger-100', i::Account::AccountId.new('account-100', 1), i::Account::InitialData.new('Account 100', '100.32', currency)
+      expect(subject).to have_one_uncommitted_event I::AccountCreated, 
+        aggregate_id: subject.aggregate_id,
+        ledger_id: 'ledger-100', 
+        sequential_number: 1,
+        name: 'Account 100',
+        initial_balance: 10032,
+        currency_code: currency.code,
+        unit: currency.unit
     end
     
     it "should assign the aggregate_id on created event" do
-      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 1, 'Account 332', 100, 'UAH'
+      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 1, 'Account 332', 100, 'UAH', nil
       expect(subject.aggregate_id).to eql 'account-332'
     end
   end
@@ -43,6 +57,19 @@ describe Domain::Account do
       subject.make_created.rename 'New name 9932'
       subject.clear_uncommitted_events
       subject.rename 'New name 9932'
+      expect(subject).not_to have_uncommitted_events
+    end
+  end
+  
+  describe "set_unit" do
+    it "should raise AccountUnitAdjusted event" do
+      subject.make_created.set_unit 'oz'
+      expect(subject).to have_one_uncommitted_event I::AccountUnitAdjusted, aggregate_id: subject.aggregate_id, unit: 'oz'
+    end
+    
+    it "should not raise any event if the unit hasn't changed" do
+      subject.make_created unit: 'g'
+      subject.set_unit 'g'
       expect(subject).not_to have_uncommitted_events
     end
   end

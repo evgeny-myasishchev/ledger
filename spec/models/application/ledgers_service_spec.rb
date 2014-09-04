@@ -22,8 +22,9 @@ RSpec.describe Application::LedgersService, :type => :model do
         account_id: 'account-1332',
         name: 'Account 1223',
         initial_balance: '100.23',
-        currency_code: 'UAH'
-      initial_data = Domain::Account::InitialData.new('Account 1223', '100.23', Currency['UAH'])
+        currency_code: 'UAH',
+        unit: 'oz'
+      initial_data = Domain::Account::InitialData.new('Account 1223', '100.23', Currency['UAH'], 'oz')
       expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
       account = double(:account)
       expect(ledger1).to receive(:create_new_account).with('account-1332', initial_data).and_return(account)

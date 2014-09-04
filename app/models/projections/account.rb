@@ -6,7 +6,7 @@ class Projections::Account < ActiveRecord::Base
   
   def self.get_user_accounts(user)
     Account.
-      select(:aggregate_id, :name, :balance, :currency_code, :sequential_number, :category_id, :is_closed).
+      select(:aggregate_id, :name, :balance, :currency_code, :unit, :sequential_number, :category_id, :is_closed).
       where('authorized_user_ids LIKE ?', "%{#{user.id}}%")
   end
   
@@ -42,6 +42,7 @@ class Projections::Account < ActiveRecord::Base
           owner_user_id: ledger.owner_user_id,
           name: event.name, 
           currency_code: event.currency_code,
+          unit: event.unit,
           balance: event.initial_balance,
           is_closed: false) 
         account.set_authorized_users ledger.authorized_user_ids

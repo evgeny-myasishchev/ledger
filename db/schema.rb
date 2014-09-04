@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20140829122418) do
     t.integer "category_id"
     t.string  "currency_code",       null: false
     t.string  "name",                null: false
+    t.string  "unit"
     t.integer "balance",             null: false
     t.boolean "is_closed",           null: false
   end

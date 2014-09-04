@@ -14,7 +14,7 @@ module Application::Commands
   end
   
   commands_group :LedgerCommands do
-    command :CreateNewAccount, :account_id, :name, :initial_balance, :currency_code do
+    command :CreateNewAccount, :account_id, :name, :initial_balance, :currency_code, :unit do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id, :name, :initial_balance, :currency_code
     end
@@ -70,6 +70,10 @@ module Application::Commands
     command :RenameAccount, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
+    end
+    command :SetAccountUnit, :unit do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id
     end
     
     # TODO: Rework other commands to use ActiveModel::Validations instead of custom factories

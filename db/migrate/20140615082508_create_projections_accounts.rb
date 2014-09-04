@@ -9,6 +9,7 @@ class CreateProjectionsAccounts < ActiveRecord::Migration
       t.integer :category_id, null: true
       t.string :currency_code, null: false
       t.string :name, null: false
+      t.string :unit
       t.integer :balance, null: false
       t.boolean :is_closed, null: false
     end

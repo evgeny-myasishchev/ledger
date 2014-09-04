@@ -5,18 +5,25 @@ class Domain::Account < CommonDomain::Aggregate
   include Domain::Events
   
   AccountId = Struct.new(:aggregate_id, :sequential_number)
-  InitialData = Struct.new(:name, :initial_balance, :currency)
+  InitialData = Struct.new(:name, :initial_balance, :currency, :unit)
   
   def create ledger_id, account_id, initial_data
     initial_balance = Money.parse(initial_data.initial_balance, initial_data.currency)
+    unit = initial_data.unit || initial_data.currency.unit
     raise_event AccountCreated.new account_id.aggregate_id, ledger_id, account_id.sequential_number, 
-      initial_data.name, initial_balance.integer_ammount, initial_data.currency.code
+      initial_data.name, initial_balance.integer_ammount, initial_data.currency.code, unit
   end
   
   def rename new_name
     return if @name == new_name
     log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{new_name}'"
     raise_event AccountRenamed.new aggregate_id, new_name
+  end
+  
+  def set_unit new_unit
+    return if @unit == new_unit
+    log.debug "Assigning account unit aggregate_id='#{aggregate_id}. New unit: #{new_unit}'"
+    raise_event AccountUnitAdjusted.new aggregate_id, new_unit
   end
   
   def close
@@ -168,6 +175,7 @@ class Domain::Account < CommonDomain::Aggregate
   on AccountCreated do |event|
     @aggregate_id = event.aggregate_id
     @name = event.name
+    @unit = event.unit
     @is_open = true
     @is_removed = false
     @currency = Currency[event.currency_code]
@@ -177,6 +185,10 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountRenamed do |event|
     @name = event.name
+  end
+  
+  on AccountUnitAdjusted do |event|
+    @unit = event.unit
   end
   
   on AccountClosed do |event|

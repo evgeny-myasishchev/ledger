@@ -78,7 +78,7 @@ RSpec.describe Projections::Account, :type => :model do
     
     it "should skip system fields that can lead to information flow" do
       actual_a1 = @user_accounts.detect { |a| a.aggregate_id == @a1.aggregate_id }
-      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'sequential_number', 'category_id', 'is_closed', 'id'])
+      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'unit', 'sequential_number', 'category_id', 'is_closed', 'id'])
       expect(actual_a1.id).to be_nil #it's present somehow even if not specified
     end
   end
@@ -88,7 +88,7 @@ RSpec.describe Projections::Account, :type => :model do
     let(:e) { Domain::Events }
   
     before(:each) do
-      subject.handle_message e::AccountCreated.new 'account-223', ledger.aggregate_id, 1, 'Account 223', 1000, 'UAH'
+      subject.handle_message e::AccountCreated.new 'account-223', ledger.aggregate_id, 1, 'Account 223', 1000, 'UAH', 'oz'
     end
     let(:account_223) { described_class.find_by_aggregate_id 'account-223' }
     
@@ -99,13 +99,14 @@ RSpec.describe Projections::Account, :type => :model do
         expect(account_223.owner_user_id).to eql ledger.owner_user_id
         expect(account_223.authorized_user_ids).to eql "{22332},{22333},{22331}"
         expect(account_223.currency_code).to eql 'UAH'
+        expect(account_223.unit).to eql 'oz'
         expect(account_223.name).to eql 'Account 223'
         expect(account_223.balance).to eql 1000
         expect(account_223.is_closed).to be_falsey
       end
     
       it "should be idempotent" do
-        expect { subject.handle_message e::AccountCreated.new 'account-223', 'ledger-1', 1, 'Account 223', 0, 'UAH' }.not_to change { described_class.count }
+        expect { subject.handle_message e::AccountCreated.new 'account-223', 'ledger-1', 1, 'Account 223', 0, 'UAH', 'oz' }.not_to change { described_class.count }
       end
     end
     

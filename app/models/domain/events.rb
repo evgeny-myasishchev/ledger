@@ -18,8 +18,9 @@ module Domain::Events
   event :AccountCategoryAssigned, :account_id, :category_id
   
   #Account events
-  event :AccountCreated, :ledger_id, :sequential_number, :name, :initial_balance, :currency_code
+  event :AccountCreated, :ledger_id, :sequential_number, :name, :initial_balance, :currency_code, :unit
   event :AccountRenamed, :name
+  event :AccountUnitAdjusted, :unit
   event :AccountClosed
   event :AccountReopened
   event :AccountRemoved

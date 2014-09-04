@@ -246,6 +246,17 @@ describe Application::Commands do
         expect(subject.valid?).to be_truthy
       end
     end
+    
+    describe described_class::SetAccountUnit do
+      it "shold validate presence aggregate_id" do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        
+        subject = described_class.from_hash aggregate_id: 'l-1', unit: 'oz'
+        expect(subject.valid?).to be_truthy
+      end
+    end
   end
   
   describe described_class::LedgerCommands do
