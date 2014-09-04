@@ -69,7 +69,7 @@ class CurrenciesUpdater
           next if currency[:code] == 'XTS'
           unless registered.include?(currency[:code])
             file.write %(Currency.register id: #{currency[:id].to_i}, code: '#{currency[:code]}', english_name: '#{currency[:english_name]}')
-            file.write %(, unit: :oz) if OzCurrencies.include?(currency[:code])
+            file.write %(, unit: 'ozt') if OzCurrencies.include?(currency[:code])
             file.write %(\n)
             registered << currency[:code]
           end

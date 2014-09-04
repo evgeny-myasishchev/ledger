@@ -176,7 +176,7 @@ Currency.register id: 956, code: 'XBB', english_name: 'Bond Markets Unit Europea
 Currency.register id: 957, code: 'XBC', english_name: 'Bond Markets Unit European Unit of Account 9 (E.U.A.-9)'
 Currency.register id: 958, code: 'XBD', english_name: 'Bond Markets Unit European Unit of Account 17 (E.U.A.-17)'
 Currency.register id: 999, code: 'XXX', english_name: 'The codes assigned for transactions where no currency is involved'
-Currency.register id: 959, code: 'XAU', english_name: 'Gold', unit: :oz
-Currency.register id: 964, code: 'XPD', english_name: 'Palladium', unit: :oz
-Currency.register id: 962, code: 'XPT', english_name: 'Platinum', unit: :oz
-Currency.register id: 961, code: 'XAG', english_name: 'Silver', unit: :oz
+Currency.register id: 959, code: 'XAU', english_name: 'Gold', unit: 'ozt'
+Currency.register id: 964, code: 'XPD', english_name: 'Palladium', unit: 'ozt'
+Currency.register id: 962, code: 'XPT', english_name: 'Platinum', unit: 'ozt'
+Currency.register id: 961, code: 'XAG', english_name: 'Silver', unit: 'ozt'
