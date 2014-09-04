@@ -89,10 +89,37 @@ describe('home.acounts', function() {
 				expect(subject.getAllCategories()).toEqual([]);
 			});
 		});
+		
+		describe('getActualBalance', function() {
+			var subject, rates;
+			beforeEach(function() {
+				inject(['accounts', 'ledgers', function(accounts, ledgers) {
+					rates = {
+						EUR: {"id":14,"from":"EUR","to":"UAH","rate":16.22},
+						USD: {"id":13,"from":"USD","to":"UAH","rate":12.93}
+					};
+					subject = accounts;
+					spyOn(ledgers, 'getActiveLedger').and.returnValue({aggregate_id: 'l-1', currency_code: 'UAH'});
+					account1.currency_code = 'UAH';
+				}]);
+			});
+			
+			it('should return the balance as is if curency_code is same as ledger has', function() {
+				expect(subject.getActualBalance(account1, rates)).toEqual(account1.balance);
+			});
+			
+			it('should multiply the balance by rate if ledger currency is different', function() {
+				account1.currency_code = 'EUR';
+				account1.balance = 10044;
+				var result = subject.getActualBalance(account1, rates);
+				expect(result).toEqual(162913);
+			});
+		})
 	});
 	
 	describe('calculateTotalFilter', function() {
-		var a1, a2, a3, all;
+		var a1, a2, a3, all, rates;
+		var accounts;
 		var scope;
 		beforeEach(function() {
 			module('homeApp');
@@ -101,11 +128,12 @@ describe('home.acounts', function() {
 			a3 = {balance: 30000, currency_code: 'UAH'};
 			all = [a1, a2, a3];
 			
-			inject(['$rootScope', 'calculateTotalFilter', 'ledgers', function($rootScope, theFilter, ledgers) {
+			inject(['$rootScope', 'calculateTotalFilter', 'ledgers', 'accounts', function($rootScope, theFilter, ledgers, a) {
+				accounts = a;
 				scope = $rootScope.$new();
 				scope.filter = theFilter;
 				var deferredCurrencyRates = $.Deferred();
-				deferredCurrencyRates.resolve({
+				deferredCurrencyRates.resolve(rates = {
 					EUR: {"id":14,"from":"EUR","to":"UAH","rate":16.22},
 					USD: {"id":13,"from":"USD","to":"UAH","rate":12.93}
 				});
@@ -118,19 +146,18 @@ describe('home.acounts', function() {
 			expect(scope.filter(all, 'result')).toEqual(all);
 		});
 		
+		it('should operate with actual balance using accounts', function() {
+			spyOn(accounts, 'getActualBalance').and.callOriginal;
+			expect(scope.filter(all, 'result')).toEqual(all);
+			expect(accounts.getActualBalance).toHaveBeenCalledWith(a1, rates);
+			expect(accounts.getActualBalance).toHaveBeenCalledWith(a2, rates);
+			expect(accounts.getActualBalance).toHaveBeenCalledWith(a3, rates);
+		});
+		
 		it('should assign summary of all balances to given variable', function() {
 			scope.filter(all, 'result');
 			scope.$digest();
 			expect(scope.result).toEqual(60000);
-		});
-		
-		it('should multiply the balance by rate if ledger currency is different', function() {
-			a1.currency_code = 'EUR';
-			a1.balance = 10044;
-			a2.currency_code = 'USD';
-			scope.filter(all, 'result');
-			scope.$digest();
-			expect(scope.result).toEqual(162913 + 258600 + 30000);
 		});
 		
 		it('should not calculate if rate for the account is not present', function() {

@@ -12,7 +12,7 @@
 		var getActiveAccountFromRoute = function(sequential_number) {
 			return jQuery.grep(accounts, function(a) { return a.sequential_number == sequential_number; })[0];
 		};
-		this.$get = ['$routeParams', '$location', function($routeParams, $location) {
+		this.$get = ['$routeParams', '$location', 'ledgers', 'money', function($routeParams, $location, ledgers, money) {
 			return {
 				getAll: function() {
 					return accounts;
@@ -54,6 +54,17 @@
 				removeCategory: function(category) {
 					var index = categories.indexOf(category);
 					categories.splice(index, 1);
+				},
+				getActualBalance: function(account, rates) {
+					var activeLedger = ledgers.getActiveLedger();
+					if(activeLedger.currency_code == account.currency_code) {
+						return account.balance;
+					} else {
+						var rate = rates[account.currency_code];
+						if(rate) {
+							return money.toIntegerMoney((money.toNumber(account.balance) * rate.rate));
+						}
+					}
 				}
 			}
 		}];
@@ -105,21 +116,15 @@
 		}
 	}]);
 	
-	homeApp.filter('calculateTotal', ['ledgers', 'money', function(ledgers, money) {
+	homeApp.filter('calculateTotal', ['ledgers', 'accounts', 'money', function(ledgers, accountsService, money) {
 		return function(accounts, resultExpression) {
 			var that = this;
 			ledgers.loadCurrencyRates().then(function(rates) {
 				var result = 0;
 				var activeLedger = ledgers.getActiveLedger();
 				$.each(accounts, function(index, account) {
-					if(activeLedger.currency_code == account.currency_code) {
-						result += account.balance;
-					} else {
-						var rate = rates[account.currency_code];
-						if(rate) {
-							result += money.toIntegerMoney((money.toNumber(account.balance) * rate.rate));
-						}
-					}
+					var actualBalance = accountsService.getActualBalance(account, rates);
+					if(actualBalance) result += actualBalance;
 				});
 				that.$eval(resultExpression + '=' + result);
 			});
