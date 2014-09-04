@@ -12,7 +12,7 @@
 		var getActiveAccountFromRoute = function(sequential_number) {
 			return jQuery.grep(accounts, function(a) { return a.sequential_number == sequential_number; })[0];
 		};
-		this.$get = ['$routeParams', '$location', 'ledgers', 'money', function($routeParams, $location, ledgers, money) {
+		this.$get = ['$routeParams', '$location', 'ledgers', 'money', 'units', function($routeParams, $location, ledgers, money, units) {
 			return {
 				getAll: function() {
 					return accounts;
@@ -57,12 +57,16 @@
 				},
 				getActualBalance: function(account, rates) {
 					var activeLedger = ledgers.getActiveLedger();
+					var balance = account.balance;
+					if(account.unit != account.currency.unit) {
+						balance = units.convert(account.unit, account.currency.unit, account.balance);
+					}
 					if(activeLedger.currency_code == account.currency_code) {
-						return account.balance;
+						return balance;
 					} else {
 						var rate = rates[account.currency_code];
 						if(rate) {
-							return money.toIntegerMoney((money.toNumber(account.balance) * rate.rate));
+							return money.toIntegerMoney((money.toNumber(balance) * rate.rate));
 						}
 					}
 				}

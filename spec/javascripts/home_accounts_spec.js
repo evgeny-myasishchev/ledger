@@ -93,6 +93,9 @@ describe('home.acounts', function() {
 		describe('getActualBalance', function() {
 			var subject, rates;
 			beforeEach(function() {
+				account1.currency = {
+					id: 980, code: 'UAH'
+				};
 				inject(['accounts', 'ledgers', function(accounts, ledgers) {
 					rates = {
 						EUR: {"id":14,"from":"EUR","to":"UAH","rate":16.22},
@@ -107,6 +110,14 @@ describe('home.acounts', function() {
 			it('should return the balance as is if curency_code is same as ledger has', function() {
 				expect(subject.getActualBalance(account1, rates)).toEqual(account1.balance);
 			});
+			
+			it('should convert the balance using units service if account unit is different from currency', inject(['units', function(units) {
+				spyOn(units, 'convert').and.returnValue(332223);
+				account1.currency.unit = 'unit-1';
+				account1.unit = 'unit-2';
+				expect(subject.getActualBalance(account1, rates)).toEqual(332223);
+				expect(units.convert).toHaveBeenCalledWith('unit-2', 'unit-1', account1.balance);
+			}]));
 			
 			it('should multiply the balance by rate if ledger currency is different', function() {
 				account1.currency_code = 'EUR';
@@ -140,6 +151,9 @@ describe('home.acounts', function() {
 				spyOn(ledgers, 'getActiveLedger').and.returnValue({aggregate_id: 'l-1', currency_code: 'UAH'});
 				spyOn(ledgers, 'loadCurrencyRates').and.returnValue(deferredCurrencyRates.promise());
 			}]);
+			spyOn(accounts, 'getActualBalance').and.callFake(function(account, rates) {
+				return account.balance;
+			});
 		});
 		
 		it('should return supplied accounts', function() {
@@ -147,7 +161,6 @@ describe('home.acounts', function() {
 		});
 		
 		it('should operate with actual balance using accounts', function() {
-			spyOn(accounts, 'getActualBalance').and.callOriginal;
 			expect(scope.filter(all, 'result')).toEqual(all);
 			expect(accounts.getActualBalance).toHaveBeenCalledWith(a1, rates);
 			expect(accounts.getActualBalance).toHaveBeenCalledWith(a2, rates);
@@ -161,6 +174,10 @@ describe('home.acounts', function() {
 		});
 		
 		it('should not calculate if rate for the account is not present', function() {
+			accounts.getActualBalance.and.callFake(function(account) {
+				if(account == a3) return a3.balance;
+				return null;
+			});
 			a1.currency_code = 'GBP';
 			a2.currency_code = 'GBP';
 			scope.filter(all, 'result');
