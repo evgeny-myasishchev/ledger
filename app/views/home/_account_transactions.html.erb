@@ -23,7 +23,11 @@
 	<div class='pull-right' style='padding-right: 10px' ng-show='!assigningCategory'>
 		<h2 style='margin-top: 0'>
 			<small ng-show='activeAccount.is_closed'><span class='glyphicon glyphicon-lock'></span></small>
-			<small>{{activeAccount.balance | money}}</small> 
+			<small>
+				{{activeAccount.balance | money}}
+				<small ng-if='activeAccount.unit'>{{activeAccount.unit}}.</small>
+				<sup>{{activeAccount.currency_code}}</sup>
+			</small> 
 			<span ldr-bubble-editor trigger-on='isRenaming' finally='isRenaming = false' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
 		</h2>
 	</div>
