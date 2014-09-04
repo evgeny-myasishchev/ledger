@@ -12,7 +12,8 @@
 		var getActiveAccountFromRoute = function(sequential_number) {
 			return jQuery.grep(accounts, function(a) { return a.sequential_number == sequential_number; })[0];
 		};
-		this.$get = ['$routeParams', '$location', 'ledgers', 'money', 'units', function($routeParams, $location, ledgers, money, units) {
+		this.$get = ['$routeParams', '$location', '$rootScope', 'ledgers', 'money', 'units', 
+		function($routeParams, $location, $rootScope, ledgers, money, units) {
 			return {
 				getAll: function() {
 					return accounts;
@@ -38,6 +39,7 @@
 					account.sequential_number = lastSequentialNumber + 1;
 					account.category_id = null;
 					accounts.push(account);
+					$rootScope.$broadcast('account-added', account);
 					return account;
 				},
 				remove: function(account) {

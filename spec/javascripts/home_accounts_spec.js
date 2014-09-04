@@ -53,10 +53,25 @@ describe('home.acounts', function() {
 			expect(subject.getActive()).toBeNull();
 		});
 		
-		it('should insert the account assigning sequential number on add', function() {
-			initProvider();
-			subject.add({aggregate_id: 'a4'});
-			expect(subject.getAll()).toEqual([account1, account2, account3, account4, {aggregate_id: 'a4', sequential_number: 205, category_id: null}]);
+		describe('add', function() {
+			var $rootScope;
+			beforeEach(inject(['$rootScope', function(rs) {
+				$rootScope = rs;
+			}]));
+			it('should insert the account assigning sequential number', function() {
+				initProvider();
+				subject.add({aggregate_id: 'a4'});
+				expect(subject.getAll()).toEqual([account1, account2, account3, account4, {aggregate_id: 'a4', sequential_number: 205, category_id: null}]);
+			});
+			
+			it('should broadcast account-added event', function() {
+				var accountAdded = jasmine.createSpy('account-added');
+				$rootScope.$on('account-added', accountAdded);
+				initProvider();
+				var account;
+				subject.add(account = {aggregate_id: 'a4'});
+				expect(accountAdded).toHaveBeenCalledWith(jasmine.any(Object), account);
+			});
 		});
 		
 		it('should remove the account on remove', function() {

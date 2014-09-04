@@ -392,8 +392,16 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 		var resolveCachedRate = function(ledger, deferred) {
 			deferred.resolve(currencyRates[ledger.aggregate_id]);
 		};
-		this.$get = ['$http', '$q', function($http, $q) {
+		this.$get = ['$http', '$q', '$rootScope', function($http, $q, $rootScope) {
 			var provider;
+			$rootScope.$on('account-added', function(event, account) {
+				var activeledger = provider.getActiveLedger();
+				if(!activeledger) return;
+				var rates = currencyRates[activeledger.aggregate_id];
+				if(rates && !rates[account.currency_code]) {
+					delete currencyRates[activeledger.aggregate_id];
+				}
+			});
 			return provider = {
 				getActiveLedger: function() {
 					return ledgers[0];
