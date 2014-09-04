@@ -11,6 +11,15 @@ RSpec.describe Projections::Account, :type => :model do
       currency_code: 'UAH')
   }
   
+  describe 'currency' do
+    it 'should return appropriate currency' do
+      subject.currency_code = 'UAH'
+      expect(subject.currency).to eql(Currency['UAH'])
+      subject.currency_code = 'EUR'
+      expect(subject.currency).to eql(Currency['EUR'])
+    end
+  end
+  
   describe "authorize_user" do
     it "should add user id to a list of ids" do
       a = create_account_projection! 'a-2233', ledger.aggregate_id, authorized_user_ids: '{22},{33}'

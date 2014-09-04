@@ -21,6 +21,10 @@ class Projections::Account < ActiveRecord::Base
     Account.find_by_aggregate_id(account_id).ensure_authorized! user
   end
   
+  def currency
+    Currency[currency_code]
+  end
+  
   projection do
     on LedgerShared do |event|
       Account.where(ledger_id: event.aggregate_id).each { |a|
