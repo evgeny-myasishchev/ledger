@@ -184,6 +184,7 @@
 					aggregate_id: commandData.account_id,
 					name: commandData.name,
 					currency_code: commandData.currency_code,
+					currency: $scope.newAccount.currency,
 					balance: money.parse(commandData.initial_balance),
 					is_closed: false
 				};

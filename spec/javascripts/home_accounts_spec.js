@@ -295,7 +295,7 @@ describe('home.acounts', function() {
 				it('should add the account', function() {
 					scope.create();
 					$httpBackend.flush();
-					expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', balance: 233231, is_closed: false})
+					expect(accounts.add).toHaveBeenCalledWith({aggregate_id: 'account-223', name: 'New account', currency_code: 'UAH', currency: scope.newAccount.currency, balance: 233231, is_closed: false})
 				});
 			
 				it('include unit', function() {
