@@ -48,4 +48,15 @@ describe("ledgerHelpers", function() {
 			expect(scope.test).toEqual('value');
 		});
 	});
+
+	describe('units', function() {
+		var subject
+		beforeEach(inject(function(units) { subject = units; }));
+		
+		describe('convert', function() {
+			it('should convert from gram to ounces', function() {
+				expect(subject.convert('g', 'ozt', 10000)).toEqual(Math.floor((100 / 31.1034768) * 100));
+			});
+		});
+	});
 });

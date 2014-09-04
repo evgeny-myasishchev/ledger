@@ -124,4 +124,18 @@
 			});
 		}
 	}]);
+	
+	ledgerHelpers.provider('units', function() {
+		this.$get = function() {
+			return {
+				convert: function(from, to, amount) {
+					if(from == 'g' && to == 'ozt') {
+						return Math.floor((amount / 31.1034768));
+					} else {
+						throw "Conversion from '" + from + "' to '" + to + "' is not supported.";
+					}
+				}
+			}
+		}
+	});
 })();
