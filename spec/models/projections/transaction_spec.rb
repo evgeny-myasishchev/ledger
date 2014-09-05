@@ -241,6 +241,25 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(result[0]).to eql described_class.find_by transaction_id: 't-1'
       expect(result[1]).to eql described_class.find_by transaction_id: 't-2'
     end
+    
+    it 'should filter by comment' do
+      t1 = described_class.find_by transaction_id: 't-1'
+      t1.comment = 'This is t-1 comment'
+      t1.save!
+      
+      t2 = described_class.find_by transaction_id: 't-2'
+      t2.comment = 'This is t-2 comment'
+      t2.save!
+      
+      result = described_class.search user, account.aggregate_id, criteria: {comment: 'is t-1'}
+      expect(result.length).to eql 1
+      expect(result[0]).to eql t1
+      
+      result = described_class.search user, account.aggregate_id, criteria: {comment: 'This is'}
+      expect(result.length).to eql 2
+      expect(result[0]).to eql t1
+      expect(result[1]).to eql t2
+    end
   end
   
   def expect_required_attributes transaction

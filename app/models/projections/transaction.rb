@@ -76,6 +76,7 @@ class Projections::Transaction < ActiveRecord::Base
       }
       query = query.where [tag_ids_serach_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
     end
+    query = query.where 'comment like ?', "%#{criteria[:comment]}%" if criteria[:comment]
     query
   end
   
