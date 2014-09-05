@@ -58,6 +58,27 @@ class Projections::Transaction < ActiveRecord::Base
         order(date: :desc).offset(offset).take(limit)
   end
   
+  # criteria is a hash that accepts following keys
+  # * tag_ids - array of tag ids
+  # * comment
+  # * amount - exact amount to find
+  # * from - date from
+  # * to - date to
+  def self.search user, account_id, criteria: {}
+    account = Account.ensure_authorized! account_id, user
+    query = Transaction.where(account_id: account_id)
+    query = query.order(date: :desc)
+    if criteria[:tag_ids]
+      tag_ids_serach_query = ''
+      criteria[:tag_ids].each { |tag_id|
+        tag_ids_serach_query << ' or ' unless tag_ids_serach_query.empty?
+        tag_ids_serach_query << 'tag_ids like ?'
+      }
+      query = query.where [tag_ids_serach_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
+    end
+    query
+  end
+  
   projection do
     on AccountRemoved do |event|
       Transaction.where(account_id: event.aggregate_id).delete_all

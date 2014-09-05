@@ -131,11 +131,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   end
   
   describe "self.get_range" do
-    let(:user) { 
-      u = User.new
-      u.id = 2233
-      u
-    }
+    let(:user) { User.new id: 2233 }
     let(:date) { DateTime.now }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
     before(:each) do
@@ -207,6 +203,51 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(transactions[0]['transaction_id']).to eql('a2-t-10')
       expect(transactions[4]['transaction_id']).to eql('a2-t-14')
     end
+  end
+  
+  describe 'self.search' do
+    let(:date) { DateTime.now }
+    let(:user) { User.new id: 2233 }
+    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    
+    before(:each) do
+      allow(p::Account).to receive(:ensure_authorized!) { account }
+      
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 0, date - 110, ['tag-3'], ''
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 0, date - 100, ['tag-2'], ''
+    end
+    
+    it "should check if the user is authorized" do
+      described_class.search user, account.aggregate_id
+      expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
+    end
+    
+    it 'should have required attributes' do
+      result = described_class.search user, account.aggregate_id
+      expect_required_attributes result.first
+    end
+    
+    it 'should order transactions by date descending' do
+      transactions = described_class.search user, account.aggregate_id
+      expect(transactions[0].transaction_id).to eql 't-1'
+      expect(transactions[1].transaction_id).to eql 't-2'
+      expect(transactions[2].transaction_id).to eql 't-3'
+    end
+    
+    it 'should filter by tag_ids' do
+      result = described_class.search user, account.aggregate_id, criteria: {tag_ids: ['tag-1', 'tag-2']}
+      expect(result.length).to eql 2
+      expect(result[0]).to eql described_class.find_by transaction_id: 't-1'
+      expect(result[1]).to eql described_class.find_by transaction_id: 't-2'
+    end
+  end
+  
+  def expect_required_attributes transaction
+    expect(transaction.attributes.keys).to eql ["id", "transaction_id",
+      "account_id", "type_id", "ammount", "tag_ids",
+      "comment", "date", "is_transfer", "sending_account_id",
+      "sending_transaction_id", "receiving_account_id", "receiving_transaction_id"]
   end
   
   describe "add_tag" do
