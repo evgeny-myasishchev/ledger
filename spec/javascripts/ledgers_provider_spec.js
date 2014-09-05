@@ -79,4 +79,13 @@ describe("ledgersProvider", function() {
 		$httpBackend.flush();
 		expect(loadedRates['USD']).toEqual(rate2);
 	});
+	
+	describe('activeLedgerFilter', function() {
+		it('should return given attribute of te active ledger', inject(['ledgers', 'activeLedgerFilter', function(ledgers, activeLedgerFilter) {
+			var activeLedger = {aggregate_id: 'ledger-1', currency_code: 'UAH'};
+			spyOn(ledgers, 'getActiveLedger').and.returnValue(activeLedger);
+			expect(activeLedgerFilter('aggregate_id')).toEqual('ledger-1');
+			expect(activeLedgerFilter('currency_code')).toEqual('UAH');
+		}]));
+	});
 });

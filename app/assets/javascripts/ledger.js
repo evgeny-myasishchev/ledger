@@ -427,6 +427,12 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 		}]
 	});
 	
+	ledgersProvider.filter('activeLedger', ['ledgers', function(ledgers) {
+		return function(attribute) {
+			return ledgers.getActiveLedger()[attribute];
+		};
+	}]);
+	
 	var tagsProvider = angular.module('tagsProvider', ['ledgersProvider']);
 	tagsProvider.provider('tags', function() {
 		var tags = [];
