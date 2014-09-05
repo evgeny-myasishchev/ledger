@@ -2,13 +2,11 @@
 	<div class='panel-heading'>
 		<strong>Accounts</strong>
 		<div class='pull-right'>
-			<a href='#/accounts/new' class="btn btn-default btn-xs" title="Add new account">
-				<i class="glyphicon glyphicon-plus"></i>
-			</a>
+			{{allAccountsTotal - closedTotal | money}}
 		</div>
 	</div>
 	<table class='table table-condensed table-hover' class='list-group'>
-		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: null, is_closed: false} | calculateTotal:'uncategorisedTotal'  | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | calculateTotal:'allAccountsTotal' | filter:{category_id: null, is_closed: false} | calculateTotal:'uncategorisedTotal'  | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
@@ -28,7 +26,7 @@
 				Closed accounts
 			</td>
 		</tr>
-		<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | calculateTotal:'closedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
