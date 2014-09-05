@@ -275,6 +275,44 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
     end
+    
+    it 'should filter by date from' do
+      t1 = described_class.find_by transaction_id: 't-1'
+      t1.date = date - 10
+      t1.save!
+      
+      t2 = described_class.find_by transaction_id: 't-2'
+      t2.date = date - 20
+      t2.save!
+      
+      result = described_class.search user, account.aggregate_id, criteria: {from: t2.date}
+      expect(result.length).to eql 2
+      expect(result[0]).to eql t1
+      expect(result[1]).to eql t2
+      
+      result = described_class.search user, account.aggregate_id, criteria: {from: t1.date}
+      expect(result.length).to eql 1
+      expect(result[0]).to eql t1
+    end
+    
+    it 'should filter by date to' do
+      t1 = described_class.find_by transaction_id: 't-1'
+      t1.date = date - 10
+      t1.save!
+      
+      t2 = described_class.find_by transaction_id: 't-2'
+      t2.date = date - 20
+      t2.save!
+      
+      t3 = described_class.find_by transaction_id: 't-3'
+      t3.date = date - 30
+      t3.save!
+      
+      result = described_class.search user, account.aggregate_id, criteria: {to: t2.date}
+      expect(result.length).to eql 2
+      expect(result[0]).to eql t2
+      expect(result[1]).to eql t3
+    end
   end
   
   def expect_required_attributes transaction

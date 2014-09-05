@@ -78,6 +78,8 @@ class Projections::Transaction < ActiveRecord::Base
     end
     query = query.where 'comment like ?', "%#{criteria[:comment]}%" if criteria[:comment]
     query = query.where ammount: criteria[:amount] if criteria[:amount]
+    query = query.where 'date >= ?', criteria[:from] if criteria[:from]
+    query = query.where 'date <= ?', criteria[:to] if criteria[:to]
     query
   end
   
