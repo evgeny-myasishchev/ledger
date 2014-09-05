@@ -260,6 +260,21 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
     end
+    
+    it 'should filter by exact amount' do
+      t1 = described_class.find_by transaction_id: 't-1'
+      t1.ammount = 10023
+      t1.save!
+      
+      t2 = described_class.find_by transaction_id: 't-2'
+      t2.ammount = 10023
+      t2.save!
+      
+      result = described_class.search user, account.aggregate_id, criteria: {amount: 10023}
+      expect(result.length).to eql 2
+      expect(result[0]).to eql t1
+      expect(result[1]).to eql t2
+    end
   end
   
   def expect_required_attributes transaction
