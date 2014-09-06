@@ -10,8 +10,9 @@ describe TransactionsController do
       expect(account_transactions_path('22331')).to eql '/accounts/22331/transactions'
     end
     
-    it "routes page route" do
-      expect({get: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'range', account_id: '22331', from: "1", to: "25"
+    it "routes search" do
+      expect({get: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'search', account_id: '22331', from: "1", to: "25"
+      expect({post: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'search', account_id: '22331', from: "1", to: "25"
     end
     
     it "routes POST 'report-income'" do
@@ -63,15 +64,15 @@ describe TransactionsController do
     end
   end
   
-  describe "GET 'range'" do
+  describe "GET 'search'" do
     authenticate_user
-    it "should get transactions range" do
+    it "should get transactions search" do
       result = { 'transactions' => [{'t1' => true}, {'t2' => true}] }
-      expect(Projections::Transaction).to receive(:get_range).with(user, 'a-100', 
+      expect(Projections::Transaction).to receive(:search).with(user, 'a-100', 
         criteria: {key1: 'value-1', key2: 'value-2'}, offset: 10, limit: 15, with_total: true
       ).and_return(result)
       
-      get 'range', { account_id: 'a-100', from: '10', to: '25', format: :json, 
+      get 'search', { account_id: 'a-100', from: '10', to: '25', format: :json, 
         criteria: { key1: 'value-1', key2: 'value-2' }, 'with-total' => true
       }
       expect(response.status).to eql 200

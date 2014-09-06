@@ -94,7 +94,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
   
-  describe "self.get_range" do
+  describe "self.search" do
     let(:user) { User.new id: 2233 }
     let(:date) { DateTime.now }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
@@ -112,25 +112,25 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should check if the user is authorized" do
-      described_class.get_range user, account.aggregate_id
+      described_class.search user, account.aggregate_id
       expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
     end
     
     it 'should build serach query for given account and criteria' do
       criteria = double(:criteria)
       expect(described_class).to receive(:build_search_query).with(account.aggregate_id, criteria: criteria) { query }
-      expect(described_class.get_range(user, account.aggregate_id, criteria: criteria)).to eql(transactions: query)
+      expect(described_class.search(user, account.aggregate_id, criteria: criteria)).to eql(transactions: query)
     end
     
     it 'should use limit and offset' do
       expect(query).to receive(:offset).with(200) { query }
       expect(query).to receive(:take).with(23) { query }
-      described_class.get_range(user, account.aggregate_id, offset: 200, limit: 23)
+      described_class.search(user, account.aggregate_id, offset: 200, limit: 23)
     end
     
     it 'should include total if required' do
       expect(query).to receive(:count).with(:id) { 23321 }
-      result = described_class.get_range(user, account.aggregate_id, criteria: {}, with_total: true)
+      result = described_class.search(user, account.aggregate_id, criteria: {}, with_total: true)
       expect(result[:transactions_total]).to eql 23321
     end
   end

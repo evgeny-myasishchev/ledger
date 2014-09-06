@@ -8,10 +8,10 @@ class TransactionsController < ApplicationController
     end
   end
   
-  def range
+  def search
     from = params[:from].to_i
     to = params[:to].to_i
-    result = Projections::Transaction.get_range current_user, params[:account_id], criteria: params[:criteria], offset: from, limit: to - from, with_total: params['with-total']
+    result = Projections::Transaction.search current_user, params[:account_id], criteria: params[:criteria], offset: from, limit: to - from, with_total: params['with-total']
     respond_to do |format|
       format.json { 
         render json: result

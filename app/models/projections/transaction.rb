@@ -43,7 +43,7 @@ class Projections::Transaction < ActiveRecord::Base
     }
   end
   
-  def self.get_range(user, account_id, criteria: {}, offset: 0, limit: 25, with_total: false)
+  def self.search(user, account_id, criteria: {}, offset: 0, limit: 25, with_total: false)
     account = Account.ensure_authorized! account_id, user
     query = build_search_query(account_id, criteria: criteria)
     result = {
