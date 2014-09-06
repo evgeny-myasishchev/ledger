@@ -11,6 +11,7 @@ class TransactionsController < ApplicationController
   def search
     from = params[:from].to_i
     to = params[:to].to_i
+    # TODO: Make sure criteri.from/to dates are converted from iso 8601 string to DateTime object
     result = Projections::Transaction.search current_user, params[:account_id], criteria: params[:criteria], offset: from, limit: to - from, with_total: params['with-total']
     respond_to do |format|
       format.json { 

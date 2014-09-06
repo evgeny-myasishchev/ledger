@@ -66,6 +66,7 @@
 					var criteria;
 					if(criteria = tryParseAmount(expression)) return criteria;
 					if(criteria = tryParseTagIds(expression)) return criteria;
+					//TODO: Implement dates parsing
 					
 					return { comment: expression };
 				}
