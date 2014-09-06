@@ -72,61 +72,25 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(data[:account_balance]).to eql(2233119)
     end
     
-    it "should get all transactions of the user" do
-      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
-      expect(transactions.length).to eql 3
-      t1 = transactions.detect { |t| t.transaction_id == 't-1' }
-      expect(t1.attributes).to eql('id' => t1.id,
-        'transaction_id' => 't-1',
-        'type_id' => income_id,
-        'ammount' => 10523,
-        'tag_ids' => '{t-1},{t-2}',
-        'comment' => 'Comment 101',
-        'date' => (date - 100).to_time,
-        'is_transfer' => false,
-        'sending_account_id' => nil,
-        'sending_transaction_id' => nil,
-        'receiving_account_id' => nil,
-        'receiving_transaction_id' => nil)
-      expect(transactions.detect { |t| t.transaction_id == 't-2' }).not_to be_nil
-      expect(transactions.detect { |t| t.transaction_id == 't-3' }).not_to be_nil
-    end
-    
-    it "orders transactions by date descending" do
-      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
-      expect(transactions[0].transaction_id).to eql 't-1'
-      expect(transactions[1].transaction_id).to eql 't-2'
-      expect(transactions[2].transaction_id).to eql 't-3'
-    end
-    
-    it "should include transfer related attributes" do
-      t1 = p::Transaction.find_by_transaction_id 't-1'
-      t1.is_transfer = true
-      t1.sending_account_id = 'sa-1'
-      t1.sending_transaction_id = 'st-1'
-      t1.receiving_account_id = 'ra-2'
-      t1.receiving_transaction_id = 'rt-2'
-      t1.save!
+    it "should get all transactions for given account using query builder" do
+      query = double(:query)
+      allow(query).to receive(:take) { query }
+      allow(query).to receive(:count) { 100 }
+      expect(described_class).to receive(:build_search_query).with(account.aggregate_id) { query }
       
       transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
-      t1_rec = transactions.detect { |t| t.transaction_id == 't-1' }
-      expect(t1_rec['is_transfer']).to be_truthy
-      expect(t1_rec['sending_account_id']).to eql('sa-1')
-      expect(t1_rec['sending_transaction_id']).to eql('st-1')
-      expect(t1_rec['receiving_account_id']).to eql('ra-2')
-      expect(t1_rec['receiving_transaction_id']).to eql('rt-2')
+      expect(transactions).to be query
     end
     
     it "should paginate and include pagination info" do
-      account_2 = create_account_projection! 'account-2', authorized_user_ids: '{2233}'
-      allow(p::Account).to receive(:ensure_authorized!) { account_2 }
-      20.times do |time|
-        subject.handle_message e::TransactionReported.new account_2.aggregate_id, "a2-t-#{time}", expence_id, 2000, DateTime.new, [], ''
-      end
-      data = described_class.get_account_home_data(user, account_2.aggregate_id, limit: 5)
+      query = double(:query)
+      expect(query).to receive(:take).with(5) { query }
+      expect(query).to receive(:count) { 20 }
+      expect(described_class).to receive(:build_search_query).with(account.aggregate_id) { query }
+      data = described_class.get_account_home_data(user, account.aggregate_id, limit: 5)
       expect(data[:transactions_total]).to eql 20
       expect(data[:transactions_limit]).to eql 5
-      expect(data[:transactions].length).to eql 5
+      expect(data[:transactions]).to be query
     end
   end
   

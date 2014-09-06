@@ -34,12 +34,7 @@ class Projections::Transaction < ActiveRecord::Base
   
   def self.get_account_home_data(user, account_id, limit: 25)
     account = Account.ensure_authorized! account_id, user
-    transactions = Transaction.
-      where('account_id = :account_id', account_id: account.aggregate_id).
-      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
-        :is_transfer, :sending_account_id, :sending_transaction_id, 
-        :receiving_account_id, :receiving_transaction_id).
-        order(date: :desc)
+    transactions = build_search_query account_id
     {
       account_balance: account.balance,
       transactions_total: transactions.count(:id),
