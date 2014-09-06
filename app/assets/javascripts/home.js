@@ -5,8 +5,8 @@ var homeApp = (function() {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
 	
-	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState',
-	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState) {
+	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState', 'search',
+	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		
 		if(activeAccount) {
@@ -81,23 +81,39 @@ var homeApp = (function() {
 			$scope.fetch($scope.transactionsInfo.offset - $scope.transactionsInfo.limit);
 		};
 		
-		$scope.fetch = function(offset) {
+		$scope.fetch = function(offset, options) {
+			options = $.extend({
+				updateTotal: false
+			}, options);
 			var to = offset + $scope.transactionsInfo.limit;
-			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json').success(function(data) {
+			var data = {
+				criteria: $scope.searchCriteria.criteria
+			};
+			if(options.updateTotal) data['with-total'] = true;
+			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json', data).success(function(data) {
 				var transactions = data['transactions'];
 				jQuery.each(transactions, function(i, t) {
 					t.date = new Date(t.date);
 				});
 				$scope.transactions = transactions
 				$scope.transactionsInfo.offset = offset;
+				if(options.updateTotal) $scope.transactionsInfo.total = data['transactions_total'];
 				$scope.refreshRangeState();
 			});
 		};
 		
 		$scope.searchCriteria = {
-			expression: null
+			expression: null,
+			criteria: null
 		};
+		
 		$scope.search = function() {
+			if($scope.searchCriteria.expression) {
+				$scope.searchCriteria.criteria = search.parseExpression($scope.searchCriteria.expression);
+			} else {
+				$scope.searchCriteria.criteria = null;
+			}
+			$scope.fetch(0, {updateTotal: true});
 		};
 		
 		$scope.adjustAmmount = function(transaction, ammount) {

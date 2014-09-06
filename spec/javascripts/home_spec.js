@@ -256,7 +256,7 @@ describe("homeApp", function() {
 						{transaction1: true, date: date.toJSON()},
 						{transaction2: true, date: date.toJSON()}
 					];
-					$httpBackend.expectGET('accounts/a-1/transactions/10-20.json').respond({transactions: transactions});
+					$httpBackend.whenPOST('accounts/a-1/transactions/10-20.json').respond({transactions: transactions});
 					spyOn(scope, 'refreshRangeState');
 					scope.transactionsInfo.limit = 10;
 					scope.fetch(10);
@@ -280,6 +280,66 @@ describe("homeApp", function() {
 				it('should call scope.refreshRangeState', function() {
 					expect(scope.refreshRangeState).toHaveBeenCalled();
 				});
+				
+				it('should post with search criteria if provided', function() {
+					scope.searchCriteria.criteria = {'key1': 'vlaue-1', 'key2': 'vlaue-2'};
+					$httpBackend.expectPOST('accounts/a-1/transactions/10-20.json', function(postBody) {
+						var data = JSON.parse(postBody);
+						expect(data['criteria']).toEqual(scope.searchCriteria.criteria);
+						return true;
+					}).respond({transactions: transactions});
+					scope.fetch(10);
+					$httpBackend.flush();
+				});
+				
+				it('should update total if special option provided', function() {
+					$httpBackend.expectPOST('accounts/a-1/transactions/0-10.json', function(postBody) {
+						var data = JSON.parse(postBody);
+						expect(data['with-total']).toBeTruthy();
+						return true;
+					}).respond({transactions: transactions, transactions_total: 22332});
+					scope.transactionsInfo.total = 200;
+					scope.fetch(0, {updateTotal: true});
+					$httpBackend.flush();
+					expect(scope.transactionsInfo.total).toEqual(22332);
+				});
+			});
+		});
+		
+		describe('search', function() {
+			var search;
+			beforeEach(inject(['search', function(s) {
+				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({transactions: []});
+				initController();
+				$httpBackend.flush();
+				search = s;
+			}]));
+			
+			it('should use search provdier and parse the expression', function() {
+				scope.searchCriteria.expression = 'Search expression';
+				spyOn(search, 'parseExpression').and.returnValue({key1: 'value1'});
+				scope.search();
+				expect(search.parseExpression).toHaveBeenCalledWith('Search expression');
+				expect(scope.searchCriteria.criteria).toEqual({key1: 'value1'});
+			});
+			
+			it('should set the criteria to null if expression is null or empty', function() {
+				scope.searchCriteria.criteria = {key1: 'value1'};
+				scope.searchCriteria.expression = '';
+				scope.search();
+				expect(scope.searchCriteria.criteria).toBeNull();
+				
+				scope.searchCriteria.criteria = {key1: 'value1'};
+				scope.searchCriteria.expression = null;
+				scope.search();
+				expect(scope.searchCriteria.criteria).toBeNull();
+			});
+			
+			it('should fetch with zero offset', function() {
+				scope.transactionsInfo.offset = 100;
+				spyOn(scope, 'fetch');
+				scope.search();
+				expect(scope.fetch).toHaveBeenCalledWith(0, {updateTotal: true});
 			});
 		});
 		
