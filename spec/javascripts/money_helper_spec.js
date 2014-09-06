@@ -101,6 +101,11 @@ describe("money", function() {
 					subject.parse('100|200|300');
 				}).toThrowError("Can not parse '100|200|300'. Invalid money string.")
 			});
+			it('should raise error if string not a money', function() {
+				expect(function() {
+					subject.parse('regular string');
+				}).toThrowError("Can not parse 'regular string'. Invalid money string.")
+			});
 		});
 		describe('integer', function() {
 			it('should return it as is', function() {

@@ -39,6 +39,40 @@
 		};
 	});
 	
+	ledgerHelpers.provider('search', function() {
+		this.$get = ['tags', 'tagsHelper', 'money', function(tags, tagsHelper, money) {
+			var tryParseAmount = function(expression) {
+				try {
+					var amount = money.parse(expression);
+					return { amount: amount };
+				} catch(e) { } //Doing nothing. It was not a money.
+				return false;
+			};
+			var tryParseTagIds = function(expression) {
+				var tagsByName = tagsHelper.indexByName(tags.getAll());
+				var parts = expression.split(',');
+				var tagIds = [];
+				$.each(parts, function(index, part) {
+					part = part.trim().toLowerCase();
+					var tag = tagsByName[part];
+					if(tag) tagIds.push(tag.tag_id);
+					else return false;
+				});
+				if(tagIds.length) return {tag_ids: tagIds};
+				return false;
+			};
+			return {
+				parseExpression: function(expression) {
+					var criteria;
+					if(criteria = tryParseAmount(expression)) return criteria;
+					if(criteria = tryParseTagIds(expression)) return criteria;
+					
+					return { comment: expression };
+				}
+			}
+		}];
+	});
+	
 	ledgerHelpers.provider('money', function() {
 		var options = {
 			separator: '.', //decimal separator
@@ -103,7 +137,9 @@
 					if(fraction.length == 0) throw new Error("Can not parse '" + money + "'. Fractional part is missing.");
 					else if(fraction.length == 1) fraction = fraction + '0';
 					else if(fraction.length > 2) throw new Error("Can not parse '" + money + "'. Fractional part is longer than two dights.");
-					return parseInt(integer + fraction);
+					var result = parseInt(integer + fraction);
+					if(isNaN(result)) throw new Error("Can not parse '" + money + "'. Invalid money string.");
+					return result;
 				}
 			}
 		}

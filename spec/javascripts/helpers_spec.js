@@ -59,4 +59,36 @@ describe("ledgerHelpers", function() {
 			});
 		});
 	});
+	
+	describe('search', function() {
+		var subject;
+		var t1, t2, t3;
+		beforeEach(function() {
+			module('tagsProvider');
+			angular.module('tagsProvider').config(['tagsProvider', function(tagsProvider) {
+				tagsProvider.assignTags([
+					t1 = {tag_id: 100, name: 'Tag 100'}, t2 = {tag_id: 110, name: 'Tag 110'}, t3 = {tag_id: 120, name: 'Tag 120'},
+				]);
+			}]);
+		
+			inject(function(search) {subject = search;})
+		});
+		
+		describe("parseExpression", function() {
+			it('should recognize money string as an amount', function() {
+				expect(subject.parseExpression('3321.32')).toEqual({amount: 332132});
+			});
+			
+			it('should recognize comma separated tags as tags', function() {
+				expect(subject.parseExpression('Tag 100')).toEqual({tag_ids: [100]});
+				expect(subject.parseExpression('Tag 100,Tag 110')).toEqual({tag_ids: [100, 110]});
+				expect(subject.parseExpression('Tag 100, Tag 110, Tag 120')).toEqual({tag_ids: [100, 110, 120]});
+			});
+			
+			it('should recognize regular text as comment', function() {
+				expect(subject.parseExpression('Buying milk')).toEqual({comment: 'Buying milk'});
+			});
+		});
+		
+	});
 });
