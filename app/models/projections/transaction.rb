@@ -48,14 +48,9 @@ class Projections::Transaction < ActiveRecord::Base
     }
   end
   
-  def self.get_range(user, account_id, offset: 0, limit: 25)
+  def self.get_range(user, account_id, criteria: {}, offset: 0, limit: 25)
     account = Account.ensure_authorized! account_id, user
-    Transaction.
-      where('account_id = :account_id', account_id: account.aggregate_id).
-      select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
-        :is_transfer, :sending_account_id, :sending_transaction_id, 
-        :receiving_account_id, :receiving_transaction_id).
-        order(date: :desc).offset(offset).take(limit)
+    build_search_query(account_id, criteria: criteria).offset(offset).take(limit)
   end
   
   # criteria is a hash that accepts following keys
