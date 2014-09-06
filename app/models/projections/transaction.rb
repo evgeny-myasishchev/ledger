@@ -64,8 +64,7 @@ class Projections::Transaction < ActiveRecord::Base
   # * amount - exact amount to find
   # * from - date from
   # * to - date to
-  def self.search user, account_id, criteria: {}
-    account = Account.ensure_authorized! account_id, user
+  def self.build_search_query account_id, criteria: {}
     query = Transaction.where(account_id: account_id).select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
         :is_transfer, :sending_account_id, :sending_transaction_id, 
         :receiving_account_id, :receiving_transaction_id)

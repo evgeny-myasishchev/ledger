@@ -205,7 +205,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
   
-  describe 'self.search' do
+  describe 'self.build_search_query' do
     let(:date) { DateTime.now }
     let(:user) { User.new id: 2233 }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
@@ -218,25 +218,20 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 0, date - 100, ['tag-2'], ''
     end
     
-    it "should check if the user is authorized" do
-      described_class.search user, account.aggregate_id
-      expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
-    end
-    
     it 'should have required attributes' do
-      result = described_class.search user, account.aggregate_id
+      result = described_class.build_search_query account.aggregate_id
       expect_required_attributes result.first
     end
     
     it 'should order transactions by date descending' do
-      transactions = described_class.search user, account.aggregate_id
+      transactions = described_class.build_search_query account.aggregate_id
       expect(transactions[0].transaction_id).to eql 't-1'
       expect(transactions[1].transaction_id).to eql 't-2'
       expect(transactions[2].transaction_id).to eql 't-3'
     end
     
     it 'should filter by tag_ids' do
-      result = described_class.search user, account.aggregate_id, criteria: {tag_ids: ['tag-1', 'tag-2']}
+      result = described_class.build_search_query account.aggregate_id, criteria: {tag_ids: ['tag-1', 'tag-2']}
       expect(result.length).to eql 2
       expect(result[0]).to eql described_class.find_by transaction_id: 't-1'
       expect(result[1]).to eql described_class.find_by transaction_id: 't-2'
@@ -251,11 +246,11 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.comment = 'This is t-2 comment'
       t2.save!
       
-      result = described_class.search user, account.aggregate_id, criteria: {comment: 'is t-1'}
+      result = described_class.build_search_query account.aggregate_id, criteria: {comment: 'is t-1'}
       expect(result.length).to eql 1
       expect(result[0]).to eql t1
       
-      result = described_class.search user, account.aggregate_id, criteria: {comment: 'This is'}
+      result = described_class.build_search_query account.aggregate_id, criteria: {comment: 'This is'}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
@@ -270,7 +265,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.ammount = 10023
       t2.save!
       
-      result = described_class.search user, account.aggregate_id, criteria: {amount: 10023}
+      result = described_class.build_search_query account.aggregate_id, criteria: {amount: 10023}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
@@ -285,12 +280,12 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.date = date - 20
       t2.save!
       
-      result = described_class.search user, account.aggregate_id, criteria: {from: t2.date}
+      result = described_class.build_search_query account.aggregate_id, criteria: {from: t2.date}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
       
-      result = described_class.search user, account.aggregate_id, criteria: {from: t1.date}
+      result = described_class.build_search_query account.aggregate_id, criteria: {from: t1.date}
       expect(result.length).to eql 1
       expect(result[0]).to eql t1
     end
@@ -308,7 +303,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t3.date = date - 30
       t3.save!
       
-      result = described_class.search user, account.aggregate_id, criteria: {to: t2.date}
+      result = described_class.build_search_query account.aggregate_id, criteria: {to: t2.date}
       expect(result.length).to eql 2
       expect(result[0]).to eql t2
       expect(result[1]).to eql t3
