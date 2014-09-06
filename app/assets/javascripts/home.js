@@ -94,6 +94,12 @@ var homeApp = (function() {
 			});
 		};
 		
+		$scope.searchCriteria = {
+			expression: null
+		};
+		$scope.search = function() {
+		};
+		
 		$scope.adjustAmmount = function(transaction, ammount) {
 			ammount = money.parse(ammount);
 			return $http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {

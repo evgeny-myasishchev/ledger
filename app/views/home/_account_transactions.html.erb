@@ -45,8 +45,20 @@
 
 </div>
 <div class="panel panel-default">
-	<div class="panel-heading">
-		Transactions
+	<div class="panel-heading clearfix">
+		<div class='pull-left' style='margin-right: 20px;'>
+			Transactions
+		</div>
+		<form style='margin-top: -3px; margin-bottom: -4px;' class="form-inline pull-left" ng-submit='search()'>
+			<div class="input-group">
+				<input autofocus='activeAccount' type="text" name='searchExpression' class="form-control input-sm" ng-model='searchCriteria.expression' placeholder="Search transactions">
+				<span class="input-group-btn">
+					<button class="btn btn-sm btn-default" type="submit">
+						<i class='glyphicon glyphicon-search'></i>
+					</button>
+				</span>
+			</div>
+		</form>
 		<div class="pull-right" ng-show="transactionsInfo.total > transactionsInfo.limit">
 			<strong>{{transactionsInfo.offset + 1}}-{{currentRangeUpperBound}}</strong> of <strong>{{transactionsInfo.total}}</strong>
 			<div class="btn-group btn-group-xs">
