@@ -66,11 +66,17 @@ describe TransactionsController do
   describe "GET 'range'" do
     authenticate_user
     it "should get transactions range" do
-      transactions = double(:transactions)
-      expect(Projections::Transaction).to receive(:get_range).with(user, 'a-100', offset: 10, limit: 15).and_return(transactions)
-      get 'range', account_id: 'a-100', from: '10', to: '25', format: :json
+      result = { 'transactions' => [{'t1' => true}, {'t2' => true}] }
+      expect(Projections::Transaction).to receive(:get_range).with(user, 'a-100', 
+        criteria: {key1: 'value-1', key2: 'value-2'}, offset: 10, limit: 15, with_total: true
+      ).and_return(result)
+      
+      get 'range', { account_id: 'a-100', from: '10', to: '25', format: :json, 
+        criteria: { key1: 'value-1', key2: 'value-2' }, 'with-total' => true
+      }
       expect(response.status).to eql 200
-      expect(assigns(:transactions)).to be transactions
+      actual_result = JSON.parse(response.body)
+      expect(actual_result).to eql result
     end
   end
   

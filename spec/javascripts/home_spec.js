@@ -256,7 +256,7 @@ describe("homeApp", function() {
 						{transaction1: true, date: date.toJSON()},
 						{transaction2: true, date: date.toJSON()}
 					];
-					$httpBackend.expectGET('accounts/a-1/transactions/10-20.json').respond(transactions);
+					$httpBackend.expectGET('accounts/a-1/transactions/10-20.json').respond({transactions: transactions});
 					spyOn(scope, 'refreshRangeState');
 					scope.transactionsInfo.limit = 10;
 					scope.fetch(10);

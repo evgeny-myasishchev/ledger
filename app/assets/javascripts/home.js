@@ -83,7 +83,8 @@ var homeApp = (function() {
 		
 		$scope.fetch = function(offset) {
 			var to = offset + $scope.transactionsInfo.limit;
-			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json').success(function(transactions) {
+			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json').success(function(data) {
+				var transactions = data['transactions'];
 				jQuery.each(transactions, function(i, t) {
 					t.date = new Date(t.date);
 				});

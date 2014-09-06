@@ -98,12 +98,17 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:user) { User.new id: 2233 }
     let(:date) { DateTime.now }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    let(:query) { double(:query) }
     before(:each) do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
       
       allow(p::Account).to receive(:ensure_authorized!) { account }
+      
+      allow(query).to receive(:offset) { query }
+      allow(query).to receive(:take) { query }
+      allow(described_class).to receive(:build_search_query) { query }
     end
     
     it "should check if the user is authorized" do
@@ -112,20 +117,21 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it 'should build serach query for given account and criteria' do
-      query = double(:query)
-      allow(query).to receive(:offset) { query }
-      allow(query).to receive(:take) { query }
       criteria = double(:criteria)
       expect(described_class).to receive(:build_search_query).with(account.aggregate_id, criteria: criteria) { query }
-      expect(described_class.get_range(user, account.aggregate_id, criteria: criteria)).to be query
+      expect(described_class.get_range(user, account.aggregate_id, criteria: criteria)).to eql(transactions: query)
     end
     
     it 'should use limit and offset' do
-      query = double(:query)
       expect(query).to receive(:offset).with(200) { query }
       expect(query).to receive(:take).with(23) { query }
-      allow(described_class).to receive(:build_search_query) { query }
       described_class.get_range(user, account.aggregate_id, offset: 200, limit: 23)
+    end
+    
+    it 'should include total if required' do
+      expect(query).to receive(:count).with(:id) { 23321 }
+      result = described_class.get_range(user, account.aggregate_id, criteria: {}, with_total: true)
+      expect(result[:transactions_total]).to eql 23321
     end
   end
   
@@ -145,6 +151,10 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should have required attributes' do
       result = described_class.build_search_query account.aggregate_id
       expect_required_attributes result.first
+    end
+    
+    it 'should treat null criteria as empty' do
+      expect(described_class.build_search_query(account.aggregate_id, criteria: nil).length).to eql 3
     end
     
     it 'should order transactions by date descending' do
