@@ -11,7 +11,7 @@ class Domain::Account < CommonDomain::Aggregate
     initial_balance = Money.parse(initial_data.initial_balance, initial_data.currency)
     unit = initial_data.unit || initial_data.currency.unit
     raise_event AccountCreated.new account_id.aggregate_id, ledger_id, account_id.sequential_number, 
-      initial_data.name, initial_balance.integer_ammount, initial_data.currency.code, unit
+      initial_data.name, initial_balance.integer_amount, initial_data.currency.code, unit
   end
   
   def rename new_name
@@ -42,76 +42,76 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountRemoved.new aggregate_id
   end
   
-  def report_income ammount, date, tag_ids = nil, comment = nil
-    log.debug "Reporting #{ammount} of income for account aggregate_id='#{aggregate_id}'"
-    ammount = Money.parse(ammount, @currency)
-    balance = @balance + ammount.integer_ammount
+  def report_income amount, date, tag_ids = nil, comment = nil
+    log.debug "Reporting #{amount} of income for account aggregate_id='#{aggregate_id}'"
+    amount = Money.parse(amount, @currency)
+    balance = @balance + amount.integer_amount
     tag_ids = normalize_tag_ids tag_ids
     transaction_id = AggregateId.new_id
-    raise_transaction_reported transaction_id, Transaction::IncomeTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_transaction_reported transaction_id, Transaction::IncomeTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
   
-  def report_expence ammount, date, tag_ids = [], comment = nil
-    ammount = Money.parse(ammount, @currency)
-    log.debug "Reporting #{ammount} of expence for account aggregate_id='#{aggregate_id}'"
+  def report_expence amount, date, tag_ids = [], comment = nil
+    amount = Money.parse(amount, @currency)
+    log.debug "Reporting #{amount} of expence for account aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
-    balance = @balance - ammount.integer_ammount
+    balance = @balance - amount.integer_amount
     transaction_id = AggregateId.new_id
-    raise_transaction_reported transaction_id, Transaction::ExpenceTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_transaction_reported transaction_id, Transaction::ExpenceTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
 
-  def report_refund ammount, date, tag_ids = [], comment = nil
-    ammount = Money.parse(ammount, @currency)
-    log.debug "Reporting #{ammount} of refund for account aggregate_id='#{aggregate_id}'"
+  def report_refund amount, date, tag_ids = [], comment = nil
+    amount = Money.parse(amount, @currency)
+    log.debug "Reporting #{amount} of refund for account aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
-    balance = @balance + ammount.integer_ammount
+    balance = @balance + amount.integer_amount
     transaction_id = AggregateId.new_id
-    raise_transaction_reported transaction_id, Transaction::RefundTypeId, ammount.integer_ammount, date, tag_ids, comment
+    raise_transaction_reported transaction_id, Transaction::RefundTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
 
-  def send_transfer(receiving_account_id, ammount, date, tag_ids = [], comment = nil)
-    ammount = Money.parse(ammount, @currency)
-    log.debug "Sending #{ammount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
+  def send_transfer(receiving_account_id, amount, date, tag_ids = [], comment = nil)
+    amount = Money.parse(amount, @currency)
+    log.debug "Sending #{amount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
     tag_ids = normalize_tag_ids tag_ids
-    balance = @balance - ammount.integer_ammount
+    balance = @balance - amount.integer_amount
     transaction_id = AggregateId.new_id
-    raise_event TransferSent.new aggregate_id, transaction_id, receiving_account_id, ammount.integer_ammount, date, tag_ids, comment
+    raise_event TransferSent.new aggregate_id, transaction_id, receiving_account_id, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
     transaction_id
   end
 
-  def receive_transfer(sending_account_id, sending_transaction_id, ammount, date, tag_ids = [], comment = nil)
-    ammount = Money.parse(ammount, @currency)
-    log.debug "Receiving #{ammount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
+  def receive_transfer(sending_account_id, sending_transaction_id, amount, date, tag_ids = [], comment = nil)
+    amount = Money.parse(amount, @currency)
+    log.debug "Receiving #{amount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
     tag_ids = normalize_tag_ids tag_ids
-    balance = @balance + ammount.integer_ammount
+    balance = @balance + amount.integer_amount
     transaction_id = AggregateId.new_id
-    raise_event TransferReceived.new aggregate_id, transaction_id, sending_account_id, sending_transaction_id, ammount.integer_ammount, date, tag_ids, comment
+    raise_event TransferReceived.new aggregate_id, transaction_id, sending_account_id, sending_transaction_id, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
   
-  def adjust_ammount transaction_id, ammount
-    new_ammount = Money.parse(ammount, @currency)
+  def adjust_amount transaction_id, amount
+    new_amount = Money.parse(amount, @currency)
     transaction = get_transaction! transaction_id
-    original_integer_ammount = transaction[:ammount]
-    log.debug "Adjusting ammount of transaction_id='#{transaction_id}' to #{new_ammount} of account aggregate_id='#{aggregate_id}'."
-    if(original_integer_ammount == new_ammount.integer_ammount)
-      log.debug "The ammount is the same. Further processing skipped."
+    original_integer_amount = transaction[:amount]
+    log.debug "Adjusting amount of transaction_id='#{transaction_id}' to #{new_amount} of account aggregate_id='#{aggregate_id}'."
+    if(original_integer_amount == new_amount.integer_amount)
+      log.debug "The amount is the same. Further processing skipped."
       return 
     end
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
-      new_balance = @balance - original_integer_ammount + new_ammount.integer_ammount
+      new_balance = @balance - original_integer_amount + new_amount.integer_amount
     elsif transaction[:type_id] == Transaction::ExpenceTypeId
-      new_balance = @balance + original_integer_ammount - new_ammount.integer_ammount
+      new_balance = @balance + original_integer_amount - new_amount.integer_amount
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
     end
     log.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
-    raise_event TransactionAmmountAdjusted.new aggregate_id, transaction_id, new_ammount.integer_ammount
+    raise_event TransactionAmountAdjusted.new aggregate_id, transaction_id, new_amount.integer_amount
     raise_balance_changed transaction_id, new_balance
   end
   
@@ -140,12 +140,12 @@ class Domain::Account < CommonDomain::Aggregate
     return unless @transactions.key?(transaction_id)
     log.debug "Removing transaction id='#{transaction_id}' from account aggregate_id='#{aggregate_id}'"
     transaction = @transactions[transaction_id]
-    ammount = transaction[:ammount]
+    amount = transaction[:amount]
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
-      new_balance = @balance - ammount
+      new_balance = @balance - amount
     elsif transaction[:type_id] == Transaction::ExpenceTypeId
-      new_balance = @balance + ammount
+      new_balance = @balance + amount
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
     end
@@ -154,8 +154,8 @@ class Domain::Account < CommonDomain::Aggregate
     raise_balance_changed transaction_id, new_balance
   end
 
-  private def raise_transaction_reported transaction_id, type_id, integer_ammount, date, tag_ids, comment
-    raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_ammount, date, tag_ids, comment
+  private def raise_transaction_reported transaction_id, type_id, integer_amount, date, tag_ids, comment
+    raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_amount, date, tag_ids, comment
   end
 
   private def raise_balance_changed transaction_id, balance
@@ -227,8 +227,8 @@ class Domain::Account < CommonDomain::Aggregate
     @balance = event.balance
   end
   
-  on TransactionAmmountAdjusted do |event|
-    @transactions[event.transaction_id][:ammount] = event.ammount
+  on TransactionAmountAdjusted do |event|
+    @transactions[event.transaction_id][:amount] = event.amount
   end  
   
   on TransactionCommentAdjusted do |event|
@@ -252,9 +252,9 @@ class Domain::Account < CommonDomain::Aggregate
     def index_transaction transaction_id, type_id, event
       @transactions[transaction_id] = {
         type_id: type_id,
-        ammount: event.ammount,
+        amount: event.amount,
         tag_ids: event.tag_ids,
-        ammount: event.ammount,
+        amount: event.amount,
         date: event.date,
         comment: event.comment
       }

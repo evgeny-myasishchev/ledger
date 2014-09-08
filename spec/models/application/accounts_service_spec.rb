@@ -41,7 +41,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
       expect(account).to receive(:report_income).with('34632.30', date, ['t-1', 't-2'], 'Monthly income')
-      cmd = c::ReportIncome.new('account-112', ammount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income')
+      cmd = c::ReportIncome.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income')
       subject.handle_message cmd
     end
   end
@@ -51,7 +51,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
       expect(account).to receive(:report_expence).with('34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportExpence.new('account-112', ammount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food')
+      subject.handle_message c::ReportExpence.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food')
     end
   end
   
@@ -60,7 +60,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(work).to get_and_return_aggregate Domain::Account, 'account-112', account
       date = DateTime.now
       expect(account).to receive(:report_refund).with('34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportRefund.new('account-112', ammount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food')
+      subject.handle_message c::ReportRefund.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food')
     end
   end
     
@@ -74,8 +74,8 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use source and target accounts to perform transfer" do
       command = c::ReportTransfer.new('src-110', 
         receiving_account_id: 'dst-210',
-        ammount_sent: '44322.10',
-        ammount_received: '3693.50',
+        amount_sent: '44322.10',
+        amount_received: '3693.50',
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Food')
@@ -85,12 +85,12 @@ RSpec.describe Application::AccountsService, :type => :model do
     end
   end
   
-  describe "AdjustAmmount" do
-    it "should use the account to adjust the ammount of the transaction" do
+  describe "AdjustAmount" do
+    it "should use the account to adjust the amount of the transaction" do
       expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
       expect(work).to get_and_return_aggregate Domain::Account, 'a-1', account
-      expect(account).to receive(:adjust_ammount).with('t-1', 221190)
-      subject.handle_message c::AdjustAmmount.new transaction_id: 't-1', command: {ammount: 221190}
+      expect(account).to receive(:adjust_amount).with('t-1', 221190)
+      subject.handle_message c::AdjustAmount.new transaction_id: 't-1', command: {amount: 221190}
     end
   end
   

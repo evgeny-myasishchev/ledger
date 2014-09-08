@@ -7,24 +7,24 @@
 		$scope.reportedTransactions = [];
 		//For testing purposes
 		// $scope.reportedTransactions = [
-		// 	{"type":"income","ammount":90,"tag_ids":'{1},{2}',"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
-		// 	{"type":"expence","ammount":2010,"tag_ids":'{2}',"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
-		// 	{"type":"expence","ammount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
-		// 	{"type":"refund","ammount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
-		// 	{"type":"expence","ammount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
-		// 	{"type":"transfer","ammount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
+		// 	{"type":"income","amount":90,"tag_ids":'{1},{2}',"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
+		// 	{"type":"expence","amount":2010,"tag_ids":'{2}',"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
+		// 	{"type":"expence","amount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"refund","amount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"expence","amount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
+		// 	{"type":"transfer","amount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 	
 		var processReportedTransaction = function(transaction) {
 			if(transaction.type == Transaction.incomeKey || transaction.type == Transaction.refundKey) {
-				activeAccount.balance += transaction.ammount;
+				activeAccount.balance += transaction.amount;
 			} else if(transaction.type == Transaction.expenceKey) {
-				activeAccount.balance -= transaction.ammount;
+				activeAccount.balance -= transaction.amount;
 			} else if(transaction.type == Transaction.transferKey) {
-				activeAccount.balance -= transaction.ammount;
+				activeAccount.balance -= transaction.amount;
 				$.each(accounts.getAll(), function(index, account) {
 					if(account.aggregate_id == transaction.receivingAccountId) {
-						account.balance += money.parse(transaction.ammountReceived);
+						account.balance += money.parse(transaction.amountReceived);
 						return false;
 					}
 				});
@@ -38,7 +38,7 @@
 	
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
-				ammount: null,
+				amount: null,
 				tag_ids: [],
 				type: Transaction.expenceKey,
 				date: new Date(),
@@ -52,20 +52,20 @@
 				date: $scope.newTransaction.date.toJSON(),
 				comment: $scope.newTransaction.comment
 			};
-			var ammount = money.parse($scope.newTransaction.ammount);
+			var amount = money.parse($scope.newTransaction.amount);
 			if($scope.newTransaction.type == 'transfer') {
 				command.receiving_account_id = $scope.newTransaction.receivingAccountId;
-				command.ammount_sent = ammount;
-				command.ammount_received = money.parse($scope.newTransaction.ammountReceived);
+				command.amount_sent = amount;
+				command.amount_received = money.parse($scope.newTransaction.amountReceived);
 			} else {
-				command.ammount = ammount;
+				command.amount = amount;
 			}
 			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
 				command: command
 			}).success(function() {
 				var reported = $scope.newTransaction;
 				resetNewTransaction();
-				reported.ammount = ammount;
+				reported.amount = amount;
 				processReportedTransaction(reported);
 			});
 		};

@@ -143,7 +143,7 @@ describe Domain::Account do
         aggregate_id: subject.aggregate_id,
         transaction_id: 'transaction-100',
         type_id: income_id,
-        ammount: 1040,
+        amount: 1040,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Monthly income'
@@ -179,7 +179,7 @@ describe Domain::Account do
         aggregate_id: subject.aggregate_id, 
         transaction_id: 'transaction-100',
         type_id: Domain::Transaction::ExpenceTypeId,
-        ammount: 2023,
+        amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Monthly income'}, at_index: 0
@@ -211,7 +211,7 @@ describe Domain::Account do
         aggregate_id: subject.aggregate_id, 
         transaction_id: 'transaction-100',
         type_id: Domain::Transaction::RefundTypeId,
-        ammount: 2023,
+        amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Coworker gave back'}, at_index: 0
@@ -245,7 +245,7 @@ describe Domain::Account do
         aggregate_id: subject.aggregate_id, 
         transaction_id: 'transaction-110',
         receiving_account_id: 'receiver-account-332',
-        ammount: 2023,
+        amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Getting cache'}, at_index: 0
@@ -282,7 +282,7 @@ describe Domain::Account do
         transaction_id: 'transaction-110',
         sending_account_id: 'sending-account-332',
         sending_transaction_id: 'sending-transaction-221',
-        ammount: 2023,
+        amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Getting cache'}, at_index: 0
@@ -309,75 +309,75 @@ describe Domain::Account do
       subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 11000, DateTime.new, [], ''
     end
     
-    describe "adjust_ammount" do
+    describe "adjust_amount" do
       before(:each) do
-        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-1', 10000
+        subject.apply_event I::TransactionAmountAdjusted.new subject.aggregate_id, 't-1', 10000
         
         subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-2', 's-a-1', 's-t-1', 12000, DateTime.new, [], ''
-        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-2', 10000
+        subject.apply_event I::TransactionAmountAdjusted.new subject.aggregate_id, 't-2', 10000
         
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expence_id, 10000, DateTime.new, [], ''
         
         subject.apply_event I::TransferSent.new subject.aggregate_id, 't-4', 'r-a-1', 13000, DateTime.new, [], ''
-        subject.apply_event I::TransactionAmmountAdjusted.new subject.aggregate_id, 't-4', 10000
+        subject.apply_event I::TransactionAmountAdjusted.new subject.aggregate_id, 't-4', 10000
         
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-5', refund_id, 10000, DateTime.new, [], ''
         subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 't-5', 50000
       end
       
       describe "income transactions" do
-        it "should raise balance change and ammount adjustments related events for regular income transaction" do
-          subject.adjust_ammount 't-1', '50.00'
-          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
-            aggregate_id: subject.aggregate_id, transaction_id: 't-1', ammount: 5000}, at_index: 0
+        it "should raise balance change and amount adjustments related events for regular income transaction" do
+          subject.adjust_amount 't-1', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-1', amount: 5000}, at_index: 0
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-1', balance: 45000}, at_index: 1
         end
         
-        it "should raise balance change and ammount adjustments related events for transfer transaction" do
-          subject.adjust_ammount 't-2', '50.00'
-          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
-            aggregate_id: subject.aggregate_id, transaction_id: 't-2', ammount: 5000}, at_index: 0
+        it "should raise balance change and amount adjustments related events for transfer transaction" do
+          subject.adjust_amount 't-2', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-2', amount: 5000}, at_index: 0
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-2', balance: 45000}, at_index: 1
         end
         
-        it "should raise balance change and ammount adjustments related events for refund transaction" do
-          subject.adjust_ammount 't-5', '50.00'
-          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
-            aggregate_id: subject.aggregate_id, transaction_id: 't-5', ammount: 5000}, at_index: 0
+        it "should raise balance change and amount adjustments related events for refund transaction" do
+          subject.adjust_amount 't-5', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-5', amount: 5000}, at_index: 0
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-5', balance: 45000}, at_index: 1
         end
         
-        it "should raise nothing if the ammount didn't change" do
-          subject.adjust_ammount 't-1', 10000
-          subject.adjust_ammount 't-2', 10000
-          subject.adjust_ammount 't-5', 10000
+        it "should raise nothing if the amount didn't change" do
+          subject.adjust_amount 't-1', 10000
+          subject.adjust_amount 't-2', 10000
+          subject.adjust_amount 't-5', 10000
           expect(subject).not_to have_uncommitted_events
         end
       end
       
       describe "expence transactions" do
-        it "should raise balance cahnge and ammount adjustments related events for regular expence transaction" do
-          subject.adjust_ammount 't-3', '50.00'
-          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
-            aggregate_id: subject.aggregate_id, transaction_id: 't-3', ammount: 5000}, at_index: 0
+        it "should raise balance cahnge and amount adjustments related events for regular expence transaction" do
+          subject.adjust_amount 't-3', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-3', amount: 5000}, at_index: 0
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-3', balance: 55000}, at_index: 1
         end
         
-        it "should raise balance cahnge and ammount adjustments related events for transfer transaction" do
-          subject.adjust_ammount 't-4', '50.00'
-          expect(subject).to have_one_uncommitted_event I::TransactionAmmountAdjusted, {
-            aggregate_id: subject.aggregate_id, transaction_id: 't-4', ammount: 5000}, at_index: 0
+        it "should raise balance cahnge and amount adjustments related events for transfer transaction" do
+          subject.adjust_amount 't-4', '50.00'
+          expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
+            aggregate_id: subject.aggregate_id, transaction_id: 't-4', amount: 5000}, at_index: 0
           expect(subject).to have_one_uncommitted_event I::AccountBalanceChanged, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-4', balance: 55000}, at_index: 1
         end
         
-        it "should raise nothing if the ammount didn't change" do
-          subject.adjust_ammount 't-3', 10000
-          subject.adjust_ammount 't-4', 10000
+        it "should raise nothing if the amount didn't change" do
+          subject.adjust_amount 't-3', 10000
+          subject.adjust_amount 't-4', 10000
           expect(subject).not_to have_uncommitted_events
         end
 

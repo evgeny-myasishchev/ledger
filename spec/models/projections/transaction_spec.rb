@@ -10,7 +10,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   
   describe "get_transfer_counterpart" do
     def new_transfer id, &block
-      t = p::Transaction.new transaction_id: id, account_id: 'a-10', type_id: 1, ammount: 10, is_transfer: true
+      t = p::Transaction.new transaction_id: id, account_id: 'a-10', type_id: 1, amount: 10, is_transfer: true
       yield(t)
       t.save!
       t
@@ -31,7 +31,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should fail if the transaction is not transfer" do
-      t = p::Transaction.create! transaction_id: 't-3', account_id: 'a-10', type_id: 1, ammount: 10
+      t = p::Transaction.create! transaction_id: 't-3', account_id: 'a-10', type_id: 1, amount: 10
       expect { t.get_transfer_counterpart }.to raise_error "Transaction 't-3' is not involved in transfer."
     end
     
@@ -192,11 +192,11 @@ RSpec.describe Projections::Transaction, :type => :model do
     
     it 'should filter by exact amount' do
       t1 = described_class.find_by transaction_id: 't-1'
-      t1.ammount = 10023
+      t1.amount = 10023
       t1.save!
       
       t2 = described_class.find_by transaction_id: 't-2'
-      t2.ammount = 10023
+      t2.amount = 10023
       t2.save!
       
       result = described_class.build_search_query account.aggregate_id, criteria: {amount: 10023}
@@ -246,7 +246,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   
   def expect_required_attributes transaction
     expect(transaction.attributes.keys).to eql ["id", "transaction_id",
-      "type_id", "ammount", "tag_ids",
+      "type_id", "amount", "tag_ids",
       "comment", "date", "is_transfer", "sending_account_id",
       "sending_transaction_id", "receiving_account_id", "receiving_transaction_id"]
   end
@@ -316,7 +316,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t1 = described_class.find_by_transaction_id 't-1'
       expect(t1.account_id).to eql('account-1')
       expect(t1.type_id).to eql(income_id)
-      expect(t1.ammount).to eql(10523)
+      expect(t1.amount).to eql(10523)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
       expect(t1.comment).to eql 'Comment 100'
       expect(t1.date.to_datetime).to eql date1.utc
@@ -324,7 +324,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2 = described_class.find_by_transaction_id 't-2'
       expect(t2.account_id).to eql('account-1')
       expect(t2.type_id).to eql(expence_id)
-      expect(t2.ammount).to eql(2000)
+      expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
       expect(t2.comment).to eql 'Comment 101'
       expect(t2.date.to_datetime).to eql date2.utc
@@ -345,7 +345,7 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t1.account_id).to eql('account-1')
         expect(t1.transaction_id).to eql('t-1')
         expect(t1.type_id).to eql(expence_id)
-        expect(t1.ammount).to eql(10523)
+        expect(t1.amount).to eql(10523)
         expect(t1.tag_ids).to eql '{t-1},{t-2}'
         expect(t1.comment).to eql 'Comment 100'
         expect(t1.date.to_datetime).to eql date.utc
@@ -364,7 +364,7 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t2.account_id).to eql('account-2')
         expect(t2.transaction_id).to eql('t-2')
         expect(t2.type_id).to eql(income_id)
-        expect(t2.ammount).to eql(10523)
+        expect(t2.amount).to eql(10523)
         expect(t2.tag_ids).to eql '{t-1},{t-2}'
         expect(t2.comment).to eql 'Comment 100'
         expect(t2.date.to_datetime).to eql date.utc
@@ -387,9 +387,9 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, [100, 200], 'Comment 1'
     end
     
-    it "should update ammount on TransactionAmmountAdjusted" do
-      subject.handle_message e::TransactionAmmountAdjusted.new 'account-1', 't-1', 1900
-      expect(t1.ammount).to eql 1900
+    it "should update amount on TransactionAmountAdjusted" do
+      subject.handle_message e::TransactionAmountAdjusted.new 'account-1', 't-1', 1900
+      expect(t1.amount).to eql 1900
     end
     
     it "should update comment on TransactionCommentAdjusted" do

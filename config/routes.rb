@@ -24,7 +24,7 @@ Rails.application.routes.draw do
   end
   
   resources :transactions, only: [:destroy] do
-    post 'adjust-ammount', 'adjust-tags', 'adjust-date', 'adjust-comment'
+    post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
   end
   
   devise_for :users

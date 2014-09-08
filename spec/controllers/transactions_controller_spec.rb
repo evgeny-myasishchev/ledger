@@ -32,7 +32,7 @@ describe TransactionsController do
     end
     
     it "routes POST 'adjust-[field]'" do
-      expect({post: 'transactions/t-100/adjust-ammount'}).to route_to controller: 'transactions', action: 'adjust_ammount', transaction_id: 't-100'
+      expect({post: 'transactions/t-100/adjust-amount'}).to route_to controller: 'transactions', action: 'adjust_amount', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-tags'}).to route_to controller: 'transactions', action: 'adjust_tags', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-date'}).to route_to controller: 'transactions', action: 'adjust_date', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-comment'}).to route_to controller: 'transactions', action: 'adjust_comment', transaction_id: 't-100'
@@ -140,8 +140,8 @@ describe TransactionsController do
   describe "adjusting actions" do
     authenticate_user
     
-    it "should build dispatch adjust ammount command on POST 'adjust_ammount'" do
-      should_dispatch 'adjust_ammount', cmd::AdjustAmmount
+    it "should build dispatch adjust amount command on POST 'adjust_amount'" do
+      should_dispatch 'adjust_amount', cmd::AdjustAmount
     end
     
     it "should build dispatch adjust tags command on POST 'adjust_tags'" do

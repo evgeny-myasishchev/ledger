@@ -79,7 +79,7 @@ ActiveRecord::Schema.define(version: 20140829122418) do
     t.string   "transaction_id",                           null: false
     t.string   "account_id",                               null: false
     t.integer  "type_id",                                  null: false
-    t.integer  "ammount",                                  null: false
+    t.integer  "amount",                                  null: false
     t.string   "tag_ids"
     t.text     "comment"
     t.datetime "date"

@@ -5,7 +5,7 @@ describe Application::Commands do
     let(:described_class) {
       Class.new(CommonDomain::Command) do
         include Application::Commands::IncomeExpenceCommandFactory
-        attr_reader :ammount, :date, :tag_ids, :comment
+        attr_reader :amount, :date, :tag_ids, :comment
       end
     }
   
@@ -19,7 +19,7 @@ describe Application::Commands do
       before(:each) do
         params[:account_id] = 'account-993'
         params[:command] = {
-          ammount: '22110',
+          amount: '22110',
           date: date.iso8601
         }
       end
@@ -38,7 +38,7 @@ describe Application::Commands do
       it "should assign command attributes" do
         params[:command][:tag_ids] = ['t-1', 't-2']
         params[:command][:comment] = 'Command comment 201120'
-        expect(subject.ammount).to eql '22110'
+        expect(subject.amount).to eql '22110'
         expect(subject.date).not_to be_nil
         expect(subject.tag_ids).to eql ['t-1', 't-2']
         expect(subject.comment).to eql 'Command comment 201120'
@@ -48,9 +48,9 @@ describe Application::Commands do
         expect(subject.date).to eql date
       end
     
-      it "should fail if ammount is not specified" do
-        params[:command][:ammount] = nil
-        expect{subject}.to raise_error ArgumentError, 'ammount is missing'
+      it "should fail if amount is not specified" do
+        params[:command][:amount] = nil
+        expect{subject}.to raise_error ArgumentError, 'amount is missing'
       end
     
       it "should fail if date is not specified" do
@@ -77,7 +77,7 @@ describe Application::Commands do
     let(:described_class) {
       Class.new(CommonDomain::Command) do
         include Application::Commands::TransferCommandFactory
-        attr_reader :receiving_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment
+        attr_reader :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment
       end
     }
   
@@ -92,8 +92,8 @@ describe Application::Commands do
         params[:account_id] = 'sending-993'
         params[:command] = {
           receiving_account_id: 'receiving-2291',
-          ammount_sent: '22110',
-          ammount_received: '100110',
+          amount_sent: '22110',
+          amount_received: '100110',
           date: date.iso8601
         }
       end
@@ -105,8 +105,8 @@ describe Application::Commands do
         params[:command][:comment] = 'Command comment 201120'
         expect(subject.aggregate_id).to eql 'sending-993'
         expect(subject.receiving_account_id).to eql 'receiving-2291'
-        expect(subject.ammount_sent).to eql '22110'
-        expect(subject.ammount_received).to eql '100110'
+        expect(subject.amount_sent).to eql '22110'
+        expect(subject.amount_received).to eql '100110'
         expect(subject.date).to eql date
         expect(subject.tag_ids).to eql ['t-1', 't-2']
         expect(subject.comment).to eql 'Command comment 201120'
@@ -122,14 +122,14 @@ describe Application::Commands do
         expect{subject}.to raise_error ArgumentError, 'receiving_account_id is missing'
       end
     
-      it "should fail if ammount_sent is not specified" do
-        params[:command][:ammount_sent] = nil
-        expect{subject}.to raise_error ArgumentError, 'ammount_sent is missing'
+      it "should fail if amount_sent is not specified" do
+        params[:command][:amount_sent] = nil
+        expect{subject}.to raise_error ArgumentError, 'amount_sent is missing'
       end
     
-      it "should fail if ammount_received is not specified" do
-        params[:command][:ammount_received] = nil
-        expect{subject}.to raise_error ArgumentError, 'ammount_received is missing'
+      it "should fail if amount_received is not specified" do
+        params[:command][:amount_received] = nil
+        expect{subject}.to raise_error ArgumentError, 'amount_received is missing'
       end
     
       it "should fail if date is not specified" do
@@ -164,18 +164,18 @@ describe Application::Commands do
       end
     end
   
-    describe described_class::AdjustAmmount do
+    describe described_class::AdjustAmount do
       it "should initialize the command from params" do
-        subject = described_class.new transaction_id: 't-100', command: {ammount: '100.5'}
+        subject = described_class.new transaction_id: 't-100', command: {amount: '100.5'}
         expect(subject.transaction_id).to eql('t-100')
-        expect(subject.ammount).to eql('100.5')
+        expect(subject.amount).to eql('100.5')
       end
     
-      it "should validate presentce of transaction_id and ammount" do
+      it "should validate presentce of transaction_id and amount" do
         subject = described_class.new command: {}
         expect(subject.valid?).to be_falsey
         expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
-        expect(subject.errors[:ammount]).to eql ["can't be blank"]
+        expect(subject.errors[:amount]).to eql ["can't be blank"]
       end
     end
   
