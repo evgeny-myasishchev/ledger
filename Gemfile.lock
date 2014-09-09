@@ -6,16 +6,16 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: 1a355794c47bf4ccc468ee3e26d29ace4ff25c20
+  revision: 424558ff51c5b8ed22e44d9dfbec2a0eb6ba19d4
   specs:
-    common-domain (1.0.2.a)
-      event-store (~> 1.0)
+    common-domain (1.1.0.a)
+      event-store (~> 1.1)
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 436d0b304a9e68c4446dd4326d27e270d99caaa9
+  revision: fa53362714ea567b999f1c2e6ae2c80374802038
   specs:
-    event-store (1.0.1.a)
+    event-store (1.1.2)
       sequel
 
 GEM
@@ -130,7 +130,7 @@ GEM
       sass (~> 3.2.0)
       sprockets (~> 2.8, <= 2.11.0)
       sprockets-rails (~> 2.0)
-    sequel (4.12.0)
+    sequel (4.14.0)
     spring (1.1.3)
     spring-commands-rspec (1.0.2)
       spring (>= 0.9.1)
