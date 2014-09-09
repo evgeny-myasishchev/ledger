@@ -319,7 +319,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.amount).to eql(10523)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
       expect(t1.comment).to eql 'Comment 100'
-      expect(t1.date.to_datetime).to eql date1.utc
+      expect(t1.date.to_datetime.to_json).to eql date1.utc.to_json
       
       t2 = described_class.find_by_transaction_id 't-2'
       expect(t2.account_id).to eql('account-1')
@@ -327,7 +327,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
       expect(t2.comment).to eql 'Comment 101'
-      expect(t2.date.to_datetime).to eql date2.utc
+      expect(t2.date.to_datetime.to_json).to eql date2.utc.to_json
     end
   end
   
@@ -348,7 +348,7 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t1.amount).to eql(10523)
         expect(t1.tag_ids).to eql '{t-1},{t-2}'
         expect(t1.comment).to eql 'Comment 100'
-        expect(t1.date.to_datetime).to eql date.utc
+        expect(t1.date.to_datetime.to_json).to eql date.utc.to_json
       end
     
       it "should record transfer related attributes" do
@@ -367,7 +367,7 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t2.amount).to eql(10523)
         expect(t2.tag_ids).to eql '{t-1},{t-2}'
         expect(t2.comment).to eql 'Comment 100'
-        expect(t2.date.to_datetime).to eql date.utc
+        expect(t2.date.to_datetime.to_json).to eql date.utc.to_json
       end
     
       it "should record transfer related attributes" do
@@ -400,7 +400,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     it "should update date on TransactionDateAdjusted" do
       updated_date = date - 110
       subject.handle_message e::TransactionDateAdjusted.new 'account-1', 't-1', updated_date
-      expect(t1.date.to_datetime).to eql updated_date.utc
+      expect(t1.date.to_datetime.to_json).to eql updated_date.utc.to_json
     end
     
     it "should add new tag on TransactionTagged" do
