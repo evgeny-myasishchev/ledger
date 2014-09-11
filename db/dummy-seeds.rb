@@ -107,3 +107,4 @@ dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_acc
 dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
   ammount_sent: '5000.00', ammount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
+@context.event_store.dispatcher.wait_pending
