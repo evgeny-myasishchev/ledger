@@ -13,9 +13,9 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: fa53362714ea567b999f1c2e6ae2c80374802038
+  revision: 02a7d3ef8efad7fedcdc08b0a10f51f2091758b9
   specs:
-    event-store (1.1.2)
+    event-store (1.2.1)
       sequel
 
 GEM
