@@ -7,7 +7,7 @@
 	<div class="panel-body">
 		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
 			<div class="form-group">
-				<input tabindex="1" autofocus='newTransaction.ammount == null' type="text" class="form-control" placeholder="Ammount" ng-model='newTransaction.ammount' required>
+				<input tabindex="1" autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
 			</div>
 			<div class="form-group">
 				<label class='control-label' for="type">Type</label>
@@ -24,7 +24,7 @@
 			</div>
 			<div style='margin-top: 15px;' ng-if='newTransaction.type == "transfer"'>
 				<div class='form-group'>
-					<input tabindex="2" type="text" class="form-control" placeholder="Target ammount" ng-model='newTransaction.ammountReceived' required>
+					<input tabindex="2" type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amountReceived' required>
 				</div>
 				<div class='form-group'>
 					<label class='control-label' for="type">Target account</label>
@@ -53,7 +53,7 @@
 	<legend>Reported transactions</fieldset>
 	<ul class="list-group">
 		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
-			<strong>{{transaction.ammount | money}} ({{transaction.type}})</strong> 
+			<strong>{{transaction.amount | money}} ({{transaction.type}})</strong> 
 			<ledger-tags ng-model='transaction.tag_ids'></ledger-tags>
 			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
 			{{transaction.comment}}

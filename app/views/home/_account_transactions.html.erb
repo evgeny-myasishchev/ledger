@@ -71,7 +71,7 @@
 		<thead>
 			<tr>
 				<th></th>
-				<th>Ammount</th>
+				<th>Amount</th>
 				<th>Tags</th>
 				<th>Date</th>
 				<th>Description</th>
@@ -81,7 +81,7 @@
 		<tbody>
 			<tr ng-repeat="transaction in transactions">
 				<td><i class='{{transaction | tti}}'></i></td>
-				<td ldr-bubble-editor format='money' submit='adjustAmmount(transaction, newValue)' value="transaction.ammount">{{getTransferAmmountSign(transaction)}}{{transaction.ammount | money}}</td>
+				<td ldr-bubble-editor format='money' submit='adjustAmount(transaction, newValue)' value="transaction.amount">{{getTransferAmountSign(transaction)}}{{transaction.amount | money}}</td>
 				<td ldr-bubble-editor='tags' value='transaction.tag_ids' submit='adjustTags(transaction, newValue)'><ledger-tags ng-model="transaction.tag_ids" /></td>
 				<td ldr-bubble-editor='date' value='transaction.date' submit='adjustDate(transaction, newValue)'>{{transaction.date.toLocaleDateString()}}</td>
 				<td ldr-bubble-editor submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>

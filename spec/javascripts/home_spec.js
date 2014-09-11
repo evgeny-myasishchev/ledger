@@ -343,7 +343,7 @@ describe("homeApp", function() {
 			});
 		});
 		
-		describe("getTransferAmmountSign", function() {
+		describe("getTransferAmountSign", function() {
 			var transaction;
 			beforeEach(function() {
 				transaction = {type_id: -100, is_transfer: true};
@@ -352,18 +352,18 @@ describe("homeApp", function() {
 
 			it("should return + sign for transfer income", function() {
 				transaction.type_id = 1;
-				expect(scope.getTransferAmmountSign(transaction)).toEqual('+');
+				expect(scope.getTransferAmountSign(transaction)).toEqual('+');
 			});
 
 			it("should return - sign for transfer expence", function() {
 				transaction.type_id = 2;
-				expect(scope.getTransferAmmountSign(transaction)).toEqual('-');
+				expect(scope.getTransferAmountSign(transaction)).toEqual('-');
 			});
 			
 			it("should return empty for other transactions", function() {
 				transaction.type_id = 2;
 				transaction.is_transfer = false;
-				expect(scope.getTransferAmmountSign(transaction)).toBeNull();
+				expect(scope.getTransferAmountSign(transaction)).toBeNull();
 			});
 		});
 		
@@ -374,7 +374,7 @@ describe("homeApp", function() {
 				date.setHours(date.getHours() -  10);
 				transaction = {
 					transaction_id: 't-223', 
-					ammount: '100.23',
+					amount: '100.23',
 					tag_ids: [20],
 					date: date.toJSON(),
 					comment: 'Original comment'
@@ -399,54 +399,54 @@ describe("homeApp", function() {
 					expect(result.then).toBeDefined();
 				});
 			});
-			describe('adjustAmmount', function() {
-				it('should post adjust-ammount for given transaction', function() {
-					$httpBackend.expectPOST('transactions/t-223/adjust-ammount', function(data) {
+			describe('adjustAmount', function() {
+				it('should post adjust-amount for given transaction', function() {
+					$httpBackend.expectPOST('transactions/t-223/adjust-amount', function(data) {
 						var command = JSON.parse(data).command;
-						expect(command.ammount).toEqual(20043);
+						expect(command.amount).toEqual(20043);
 						return true;
 					}).respond(200);
-					var result = scope.adjustAmmount(transaction, 20043);
+					var result = scope.adjustAmount(transaction, 20043);
 					$httpBackend.flush();
-					expect(transaction.ammount).toEqual(20043);
+					expect(transaction.amount).toEqual(20043);
 					expect(result.then).toBeDefined();
 				});
 				
 				it('should parse money string', function() {
-					$httpBackend.expectPOST('transactions/t-223/adjust-ammount', function(data) {
+					$httpBackend.expectPOST('transactions/t-223/adjust-amount', function(data) {
 						var command = JSON.parse(data).command;
-						expect(command.ammount).toEqual(20043);
+						expect(command.amount).toEqual(20043);
 						return true;
 					}).respond(200);
-					var result = scope.adjustAmmount(transaction, '200.43');
+					var result = scope.adjustAmount(transaction, '200.43');
 					$httpBackend.flush();
-					expect(transaction.ammount).toEqual(20043);
+					expect(transaction.amount).toEqual(20043);
 				});
 				
 				describe('update activeAccount balance', function() {
 					beforeEach(function() {
-						$httpBackend.expectPOST('transactions/t-223/adjust-ammount').respond(200);
+						$httpBackend.expectPOST('transactions/t-223/adjust-amount').respond(200);
 						activeAccount.balance = 250;
-						transaction.ammount = 50;
+						transaction.amount = 50;
 					});
 					
 					it('should update the balance for income transaction', function() {
 						transaction.type_id = Transaction.incomeId;
-						scope.adjustAmmount(transaction, 100);
+						scope.adjustAmount(transaction, 100);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(300);
 					});
 					
 					it('should update the balance for refund transaction', function() {
 						transaction.type_id = Transaction.refundId;
-						scope.adjustAmmount(transaction, 100);
+						scope.adjustAmount(transaction, 100);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(300);
 					});
 					
 					it('should update the balance for expence transaction', function() {
 						transaction.type_id = Transaction.expenceId;
-						scope.adjustAmmount(transaction, 100);
+						scope.adjustAmount(transaction, 100);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(200);
 					});
@@ -495,7 +495,7 @@ describe("homeApp", function() {
 				describe('activeAccount.balance', function() {
 					beforeEach(function() {
 						activeAccount.balance = 5000;
-						transaction.ammount = 1000;
+						transaction.amount = 1000;
 					});
 					
 					it('should subtract for income or refund', function() {

@@ -77,21 +77,21 @@ module Application::Commands
     end
     
     # TODO: Rework other commands to use ActiveModel::Validations instead of custom factories
-    command :ReportIncome, :ammount, :date, :tag_ids, :comment do
+    command :ReportIncome, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportExpence, :ammount, :date, :tag_ids, :comment do
+    command :ReportExpence, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportRefund, :ammount, :date, :tag_ids, :comment do
+    command :ReportRefund, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportTransfer, :receiving_account_id, :ammount_sent, :ammount_received, :date, :tag_ids, :comment do
+    command :ReportTransfer, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
       include TransferCommandFactory
     end
-    command :AdjustAmmount, :transaction_id, :ammount do
+    command :AdjustAmount, :transaction_id, :amount do
       include AdjustTransactionBase
-      validates :ammount, presence: true
+      validates :amount, presence: true
     end
     command :AdjustTags, :transaction_id, :tag_ids do
       include AdjustTransactionBase

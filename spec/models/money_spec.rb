@@ -20,8 +20,8 @@ describe Money do
       data = YAML.dump subject
       doc = YAML.parse data
       nodes = doc.root.to_a
-      expect(nodes[0].to_ruby).to eql :integer_ammount
-      expect(nodes[1].to_ruby).to eql subject.integer_ammount
+      expect(nodes[0].to_ruby).to eql :integer_amount
+      expect(nodes[1].to_ruby).to eql subject.integer_amount
       expect(nodes[2].to_ruby).to eql :currency
       expect(nodes[3].to_ruby).to eql uah.code
     end
@@ -31,7 +31,7 @@ describe Money do
       data = YAML.dump subject
       actual = YAML.load data
       expect(actual).to be_instance_of(Money)
-      expect(actual.integer_ammount).to equal(subject.integer_ammount)
+      expect(actual.integer_amount).to equal(subject.integer_amount)
       expect(actual.currency).to be uah
     end
   end
@@ -53,22 +53,22 @@ describe Money do
     describe "from string using current locale" do
       it "should parse integer string" do
         money = Money.parse('9932', uah)
-        expect(money.integer_ammount).to eql 993200
+        expect(money.integer_amount).to eql 993200
         expect(money.currency).to be uah
       end
       
       it "should parse with separator" do
         money = Money.parse('10,05', uah)
-        expect(money.integer_ammount).to eql 1005
+        expect(money.integer_amount).to eql 1005
         expect(money.currency).to be uah
         
         money = Money.parse('10,5', uah)
-        expect(money.integer_ammount).to eql 1050
+        expect(money.integer_amount).to eql 1050
       end
       
       it "should parse with thousands delimiter" do
         money = Money.parse('100.110,05', uah)
-        expect(money.integer_ammount).to eql 10011005
+        expect(money.integer_amount).to eql 10011005
       end
       
       it "should fail if fractional part takes more than 2 dights" do
@@ -82,16 +82,16 @@ describe Money do
     
     it "should parse from floats" do
       money = Money.parse(10.05, uah)
-      expect(money.integer_ammount).to eql 1005
+      expect(money.integer_amount).to eql 1005
       expect(money.currency).to be uah
       
       money = Money.parse(10.5, uah)
-      expect(money.integer_ammount).to eql 1050
+      expect(money.integer_amount).to eql 1050
     end
     
     it "should parse integers" do
       money = Money.parse(1005, uah)
-      expect(money.integer_ammount).to eql 1005
+      expect(money.integer_amount).to eql 1005
       expect(money.currency).to be uah
     end
   end

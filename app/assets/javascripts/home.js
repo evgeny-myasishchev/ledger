@@ -116,17 +116,17 @@ var homeApp = (function() {
 			$scope.fetch(0, {updateTotal: true});
 		};
 		
-		$scope.adjustAmmount = function(transaction, ammount) {
-			ammount = money.parse(ammount);
-			return $http.post('transactions/' + transaction.transaction_id + '/adjust-ammount', {
-				command: {ammount: ammount}
+		$scope.adjustAmount = function(transaction, amount) {
+			amount = money.parse(amount);
+			return $http.post('transactions/'+ transaction.transaction_id + '/adjust-amount', {
+				command: {amount: amount}
 			}).success(function() {
-				var oldAmmount = transaction.ammount;
-				transaction.ammount = ammount;
+				var oldAmount = transaction.amount;
+				transaction.amount = amount;
 				if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
-					activeAccount.balance = activeAccount.balance - oldAmmount + ammount;
+					activeAccount.balance = activeAccount.balance - oldAmount + amount;
 				} else if (transaction.type_id == Transaction.expenceId) {
-					activeAccount.balance = activeAccount.balance + oldAmmount - ammount;
+					activeAccount.balance = activeAccount.balance + oldAmount- amount;
 				}
 			});
 		};
@@ -160,9 +160,9 @@ var homeApp = (function() {
 			return $http.delete('transactions/' + transaction.transaction_id).success(function() {
 				$scope.transactions.splice($scope.transactions.indexOf(transaction), 1);
 				if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
-					activeAccount.balance -= transaction.ammount;
+					activeAccount.balance -= transaction.amount;
 				} else if (transaction.type_id == Transaction.expenceId) {
-					activeAccount.balance += transaction.ammount;
+					activeAccount.balance += transaction.amount;
 				}
 			});
 		};
@@ -174,7 +174,7 @@ var homeApp = (function() {
 			if(transaction.type_id == 3) return 'glyphicon-share-alt';
 		};
 		
-		$scope.getTransferAmmountSign = function(transaction) {
+		$scope.getTransferAmountSign = function(transaction) {
 			if(transaction.is_transfer) {
 				return transaction.type_id == 2 ? '-' : '+';
 			} else {

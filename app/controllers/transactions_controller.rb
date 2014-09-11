@@ -36,8 +36,8 @@ class TransactionsController < ApplicationController
     dispatch_transaction_command ReportTransfer
   end
   
-  def adjust_ammount
-    dispatch_command AdjustAmmount.new params
+  def adjust_amount
+    dispatch_command AdjustAmount.new params
     render nothing: true
   end
   

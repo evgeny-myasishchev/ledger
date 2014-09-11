@@ -37,11 +37,11 @@ end
 
 date = DateTime.now
 fake_transactions_data = [
-  {ammount: '223.43', tags: tag_ids_by_name['food'], comment: 'Food for a week'},
-  {ammount: '325.01', tags: [tag_ids_by_name['food'], tag_ids_by_name['lunch']], comment: 'Food in class and some pizza'},
-  {ammount: '163.22', tags: [tag_ids_by_name['food'], tag_ids_by_name['lunch']], comment: 'Food for roman'},
-  {ammount: '23.91', tags: [tag_ids_by_name['food'], tag_ids_by_name['entertainment']], comment: 'Some junk food'},
-  {ammount: '620.32', tags: [tag_ids_by_name['gas'], tag_ids_by_name['car']], comment: 'Gas and washing liquid'},
+  {amount: '223.43', tags: tag_ids_by_name['food'], comment: 'Food for a week'},
+  {amount: '325.01', tags: [tag_ids_by_name['food'], tag_ids_by_name['lunch']], comment: 'Food in class and some pizza'},
+  {amount: '163.22', tags: [tag_ids_by_name['food'], tag_ids_by_name['lunch']], comment: 'Food for roman'},
+  {amount: '23.91', tags: [tag_ids_by_name['food'], tag_ids_by_name['entertainment']], comment: 'Some junk food'},
+  {amount: '620.32', tags: [tag_ids_by_name['gas'], tag_ids_by_name['car']], comment: 'Gas and washing liquid'},
 ]
 
 include Application::Commands
@@ -57,12 +57,12 @@ def create_account(ledger, name, currency, &block)
   end
 end
 
-def report_income account_id, ammount, date, tags, comment
-  dispatch AccountCommands::ReportIncome.new account_id, ammount: ammount, date: date, tag_ids: tags, comment: comment
+def report_income account_id, amount, date, tags, comment
+  dispatch AccountCommands::ReportIncome.new account_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
-def report_expence account_id, ammount, date, tags, comment
-  dispatch AccountCommands::ReportExpence.new account_id, ammount: ammount, date: date, tag_ids: tags, comment: comment
+def report_expence account_id, amount, date, tags, comment
+  dispatch AccountCommands::ReportExpence.new account_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
 cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
@@ -74,11 +74,11 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
+      account.report_expence data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
   dispatch AccountCommands::ReportRefund.new account_id,
-    ammount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
+    amount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
   account_id
 end
 
@@ -91,20 +91,20 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence data[:ammount], date - rand(100), data[:tags], data[:comment]
+      account.report_expence data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
   dispatch AccountCommands::ReportRefund.new account_id,
-    ammount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
+    amount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
   account_id
 end
 
 pb_deposit_id = create_account ledger, 'PB Deposit', uah
 
 dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: cache_uah_account_id,
-  ammount_sent: '15000.00', ammount_received: '15000.00', date: DateTime.now, tag_ids: [], comment: 'Getting cache'
+  amount_sent: '15000.00', amount_received: '15000.00', date: DateTime.now, tag_ids: [], comment: 'Getting cache'
 
 dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
-  ammount_sent: '5000.00', ammount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
+  amount_sent: '5000.00', amount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
 @context.event_store.dispatcher.wait_pending

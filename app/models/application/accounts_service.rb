@@ -13,38 +13,38 @@ class Application::AccountsService < CommonDomain::CommandHandler
   
   on AccountCommands::ReportIncome, begin_work: true do |work, command|
     account = work.get_by_id Domain::Account, command.aggregate_id
-    account.report_income command.ammount, command.date, command.tag_ids, command.comment
+    account.report_income command.amount, command.date, command.tag_ids, command.comment
   end
   
   on AccountCommands::ReportExpence, begin_work: true do |work, command|
     account = work.get_by_id Domain::Account, command.aggregate_id
-    account.report_expence command.ammount, command.date, command.tag_ids, command.comment
+    account.report_expence command.amount, command.date, command.tag_ids, command.comment
   end
 
   on AccountCommands::ReportRefund, begin_work: true do |work, command|
     account = work.get_by_id Domain::Account, command.aggregate_id
-    account.report_refund command.ammount, command.date, command.tag_ids, command.comment
+    account.report_refund command.amount, command.date, command.tag_ids, command.comment
   end
 
   on AccountCommands::ReportTransfer, begin_work: true do |work, command|
     sending_account = work.get_by_id Domain::Account, command.aggregate_id
     receiving_account = work.get_by_id Domain::Account, command.receiving_account_id
     sending_transaction_id = sending_account.send_transfer receiving_account.aggregate_id,
-      command.ammount_sent,
+      command.amount_sent,
       command.date,
       command.tag_ids,
       command.comment
     receiving_account.receive_transfer sending_account.aggregate_id, sending_transaction_id,
-      command.ammount_received,
+      command.amount_received,
       command.date,
       command.tag_ids,
       command.comment
   end
   
-  on AccountCommands::AdjustAmmount, begin_work: true do |work, command|
+  on AccountCommands::AdjustAmount, begin_work: true do |work, command|
     transaction = Projections::Transaction.find_by_transaction_id command.transaction_id
     account = work.get_by_id Domain::Account, transaction.account_id
-    account.adjust_ammount command.transaction_id, command.ammount
+    account.adjust_amount command.transaction_id, command.amount
   end
     
   on AccountCommands::AdjustComment do |command|

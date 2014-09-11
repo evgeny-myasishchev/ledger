@@ -61,7 +61,7 @@ class Projections::Transaction < ActiveRecord::Base
   # * to - date to
   def self.build_search_query account_id, criteria: {}
     criteria = criteria || {}
-    query = Transaction.where(account_id: account_id).select(:id, :transaction_id, :type_id, :ammount, :tag_ids, :comment, :date, 
+    query = Transaction.where(account_id: account_id).select(:id, :transaction_id, :type_id, :amount, :tag_ids, :comment, :date, 
         :is_transfer, :sending_account_id, :sending_transaction_id, 
         :receiving_account_id, :receiving_transaction_id)
     query = query.order(date: :desc)
@@ -74,7 +74,7 @@ class Projections::Transaction < ActiveRecord::Base
       query = query.where [tag_ids_serach_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
     end
     query = query.where 'comment like ?', "%#{criteria[:comment]}%" if criteria[:comment]
-    query = query.where ammount: criteria[:amount] if criteria[:amount]
+    query = query.where amount: criteria[:amount] if criteria[:amount]
     query = query.where 'date >= ?', criteria[:from] if criteria[:from]
     query = query.where 'date <= ?', criteria[:to] if criteria[:to]
     query
@@ -112,8 +112,8 @@ class Projections::Transaction < ActiveRecord::Base
       t.save!
     end
     
-    on TransactionAmmountAdjusted do |event|
-      Transaction.where(transaction_id: event.transaction_id).update_all ammount: event.ammount
+    on TransactionAmountAdjusted do |event|
+      Transaction.where(transaction_id: event.transaction_id).update_all amount: event.amount
     end
     
     on TransactionCommentAdjusted do |event|
@@ -144,7 +144,7 @@ class Projections::Transaction < ActiveRecord::Base
     private def build_transaction event
       t = Transaction.new account_id: event.aggregate_id,
         transaction_id: event.transaction_id,
-        ammount: event.ammount,
+        amount: event.amount,
         comment: event.comment,
         date: event.date
       assign_tags event, t
