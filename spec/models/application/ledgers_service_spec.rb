@@ -75,6 +75,15 @@ RSpec.describe Application::LedgersService, :type => :model do
     end
   end
   
+  describe "ImportTagWithId" do
+    it "use the ledger to import the tag with id" do
+      cmd = i::LedgerCommands::ImportTagWithId.new 'ledger-1', tag_id: 332, name: 'tag-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:import_tag_with_id).with(332, 'tag-1')
+      subject.handle_message cmd
+    end
+  end
+  
   describe "RenameTag" do
     it "use the ledger to rename tag" do
       cmd = i::LedgerCommands::RenameTag.new 'ledger-1', tag_id: 't-1', name: 'tag-1'

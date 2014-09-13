@@ -68,6 +68,11 @@ class Domain::Ledger < CommonDomain::Aggregate
     tag_id
   end
   
+  def import_tag_with_id tag_id, name
+    log.debug "Importing tag '#{name}' with tag_id='#{tag_id}'"
+    raise_event TagCreated.new aggregate_id, tag_id, name
+  end
+  
   def rename_tag tag_id, name
     log.debug "Renaming the tag with tag_id='#{tag_id}' to '#{name}"
     raise_event TagRenamed.new aggregate_id, tag_id, name

@@ -225,6 +225,30 @@ describe Domain::Ledger do
         expect(tag_id).to eql 6
       end
     end
+      
+    describe "import_tag_with_id" do
+      before(:each) do
+        subject.make_created
+      end
+    
+      it "should raise TagCreatedEvent" do
+        subject.import_tag_with_id 22, 'Food'
+        expect(subject).to have_one_uncommitted_event I::TagCreated, aggregate_id: subject.aggregate_id, tag_id: 22, name: 'Food'
+      end
+    
+      it "should remember tag_id as last if it has last value" do
+        subject.import_tag_with_id 22, 'Food'
+        tag_id = subject.create_tag 'Lunch'
+        expect(tag_id).to eql 23
+      end
+        
+      it "should not remember tag_id as last if it has it has lower value" do
+        subject.import_tag_with_id 22, 'Food'
+        subject.import_tag_with_id 18, 'Food'
+        tag_id = subject.create_tag 'Lunch'
+        expect(tag_id).to eql 23
+      end
+    end
   
     describe "rename_tag" do
       it "should raise TagRenamedEvent" do

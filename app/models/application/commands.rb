@@ -34,7 +34,10 @@ module Application::Commands
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
     end
-    
+    command :ImportTagWithId, :tag_id, :name do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :tag_id, :name
+    end
     command :RenameTag, :tag_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :tag_id, :name

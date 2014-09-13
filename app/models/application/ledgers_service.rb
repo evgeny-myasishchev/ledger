@@ -30,6 +30,11 @@ class Application::LedgersService < CommonDomain::CommandHandler
     ledger.create_tag command.name
   end
   
+  on LedgerCommands::ImportTagWithId, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.import_tag_with_id command.tag_id, command.name
+  end
+  
   on LedgerCommands::RenameTag, begin_work: true do |work, command|
     ledger = work.get_by_id Domain::Ledger, command.aggregate_id
     ledger.rename_tag command.tag_id, command.name
