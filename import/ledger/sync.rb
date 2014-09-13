@@ -3,7 +3,7 @@ gem 'rest_client'
 # Has to be like this. Otherwise rails boot will reset gem search path.
 require 'rest_client'
 
-ledger_app_path = File.expand_path('../../../ledger', __FILE__)
+ledger_app_path = File.expand_path('../../..', __FILE__)
 require File.expand_path('config/application', ledger_app_path)
 
 Dir.chdir ledger_app_path do
