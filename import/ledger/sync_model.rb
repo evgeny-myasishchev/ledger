@@ -38,13 +38,11 @@ class SyncModel
   
   def create_categories categories
     log.info 'Creating categories'
-    @context.repository.begin_work do |work|
-      ledger = work.get_by_id Domain::Ledger, @ledger_id
-      categories.each { |category|
-        log.debug "Creating category: #{category}"
-        ledger.send :raise_event, CategoryCreated.new(ledger.aggregate_id, category['id'], category['display_order'], category['name'])
-      }
-    end
+    categories.each { |category|
+      log.debug "Creating category: #{category}"
+      dispatch LedgerCommands::ImportCategory.new(@ledger_id, category_id: category['id'], 
+        display_order: category['display_order'], name: category['name']), user_id: category['user_id']
+    }
   end
   
   def create_accounts accounts
@@ -110,7 +108,7 @@ class SyncModel
   
   private 
     def log
-      @log ||= LogFactory.logger 'ledger::thebablo'
+      @log ||= LogFactory.logger 'ledger::booker-import'
     end
     
     def dispatch command, user_id: @user_2.id
