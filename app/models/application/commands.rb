@@ -47,22 +47,22 @@ module Application::Commands
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :tag_id
     end
-    
     command :CreateCategory, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
     end
-    
+    command :ImportCategory, :category_id, :display_order, :name do
+      include ActiveModel::Validations
+      validates_presence_of :aggregate_id, :category_id, :name
+    end
     command :RenameCategory, :category_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :category_id, :name
     end
-    
     command :RemoveCategory, :category_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :category_id
     end
-    
     command :SetAccountCategory, :account_id, :category_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id, :category_id

@@ -298,6 +298,43 @@ describe Domain::Ledger do
           category_id: 4, display_order: 3, name: 'Lunch'
       end
     end
+    describe "import_category" do
+      before(:each) do
+        subject.make_created
+      end
+    
+      it "should raise CategoryCreatedEvent" do
+        subject.import_category 223, 200, 'Food'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, 
+          category_id: 223, display_order: 200, name: 'Food'
+      end
+    
+      it "should remember last category id if it was last" do
+        subject.import_category 223, 200, 'Food'
+        category_id = subject.create_category 'Lunch'
+        expect(category_id).to eql 224
+      end
+      
+      it "should not remember last category id if it was not the latest" do
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 224, 0, 'c 1'
+        subject.import_category 223, 200, 'Food'
+        category_id = subject.create_category 'Lunch'
+        expect(category_id).to eql 225
+      end
+      
+      it "should set remember display_order" do
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 1, 0, 'c 1'
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 2, 1, 'c 2'
+        subject.apply_event I::CategoryCreated.new subject.aggregate_id, 3, 2, 'c 3'
+        subject.import_category 223, 200, 'Lunch'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, 
+          category_id: 223, display_order: 200, name: 'Lunch'
+        subject.clear_uncommitted_events
+        subject.create_category 'Car'
+        expect(subject).to have_one_uncommitted_event I::CategoryCreated, aggregate_id: subject.aggregate_id, 
+          category_id: 224, display_order: 201, name: 'Car'
+      end
+    end
   
     describe "rename_category" do
       it "should raise CategoryRenamedEvent" do

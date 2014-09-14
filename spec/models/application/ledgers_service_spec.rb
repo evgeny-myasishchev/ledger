@@ -111,6 +111,15 @@ RSpec.describe Application::LedgersService, :type => :model do
     end
   end
   
+  describe "ImportCategory" do
+    it "use the ledger to create category and return it's id" do
+      cmd = i::LedgerCommands::ImportCategory.new 'ledger-1', category_id: 22332, display_order: 200, name: 'category-1'
+      expect(work).to get_and_return_aggregate Domain::Ledger, 'ledger-1', ledger1
+      expect(ledger1).to receive(:import_category).with(22332, 200, 'category-1')
+      subject.handle_message cmd
+    end
+  end
+  
   describe "RenameCategory" do
     it "use the ledger to rename category" do
       cmd = i::LedgerCommands::RenameCategory.new 'ledger-1', category_id: 'c-1', name: 'category-1'

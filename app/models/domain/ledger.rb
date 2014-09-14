@@ -89,6 +89,11 @@ class Domain::Ledger < CommonDomain::Aggregate
     raise_event CategoryCreated.new aggregate_id, category_id, @max_category_display_order + 1, name
     category_id
   end
+      
+  def import_category category_id, display_order, name
+    log.debug "Importing category '#{name}', category_id='#{category_id}', display_order='#{display_order}"
+    raise_event CategoryCreated.new aggregate_id, category_id, display_order, name
+  end
   
   def rename_category category_id, name
     log.debug "Renaming the category with category_id='#{category_id}' to '#{name}"

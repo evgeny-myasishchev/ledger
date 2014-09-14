@@ -50,6 +50,11 @@ class Application::LedgersService < CommonDomain::CommandHandler
     ledger.create_category command.name
   end
   
+  on LedgerCommands::ImportCategory, begin_work: true do |work, command|
+    ledger = work.get_by_id Domain::Ledger, command.aggregate_id
+    ledger.import_category command.category_id, command.display_order, command.name
+  end
+  
   on LedgerCommands::RenameCategory, begin_work: true do |work, command|
     ledger = work.get_by_id Domain::Ledger, command.aggregate_id
     ledger.rename_category command.category_id, command.name
