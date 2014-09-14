@@ -48,23 +48,23 @@ class SyncModel
   def create_accounts accounts
     log.info 'Creating accounts'
     @accounts_map = {} #key - old integer id, value - new account aggregate_id
-    @context.repository.begin_work do |work|
-      ledger = work.get_by_id Domain::Ledger, @ledger_id
-      accounts.each { |account_data|
-        account = account_data['account']
-        log.debug "Creating account: #{account}"
-        currency = detect_account_currency account
-        unit = currency.unit && currency.unit == 'ozt' ? 'g' : nil
-        new_account_id = CommonDomain::Infrastructure::AggregateId.new_id
-        @accounts_map[account['id']] = new_account_id
-        domain_account = ledger.create_new_account new_account_id, Domain::Account::InitialData.new(account['name'], 0, currency, unit)
-        @deferred_commands << LedgerCommands::CloseAccount.new(ledger.aggregate_id, account_id: domain_account.aggregate_id) if account['is_closed']
-        if account['category_id']
-          @deferred_commands << LedgerCommands::SetAccountCategory.new(ledger.aggregate_id, account_id: domain_account.aggregate_id, category_id: account['category_id'])
-        end
-        work.add_new domain_account
-      }
-    end
+    accounts.each { |account_data|
+      account = account_data['account']
+      log.debug "Creating account: #{account}"
+      currency = detect_account_currency account
+      unit = currency.unit && currency.unit == 'ozt' ? 'g' : nil
+      new_account_id = CommonDomain::Infrastructure::AggregateId.new_id
+      @accounts_map[account['id']] = new_account_id
+      
+      dispatch LedgerCommands::CreateNewAccount.new(@ledger_id, account_id: new_account_id,
+        name: account['name'], initial_balance: 0, currency_code: currency.code, unit: unit), user_id: account['user_id']
+      if account['is_closed']
+        dispatch LedgerCommands::CloseAccount.new(@ledger_id, account_id: new_account_id), user_id: account['user_id']
+      end
+      if account['category_id']
+        dispatch LedgerCommands::SetAccountCategory.new(@ledger_id, account_id: new_account_id, category_id: account['category_id']), user_id: account['user_id']
+      end
+    }
   end
   
   
