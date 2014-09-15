@@ -70,25 +70,36 @@ class SyncModel
   
   def create_transactions account, transactions
     aggregate_id = @accounts_map[account['account']['id']]
-    @context.repository.begin_work do |work|
-      account = work.get_by_id Domain::Account, aggregate_id
-      transactions.each { |data|
-        transaction = data['transaction']
-        type_id = transaction['transaction_type_id']
-        spec_id = transaction['specification_id']
-        tag_ids = transaction['tags'].map { |t| t['id'] }
-        
-        if type_id == 1 #Income
-          if spec_id == 1 #Refund
-            account.report_refund transaction['ammount'], DateTime.iso8601(transaction['date']), tag_ids, transaction['name']
-          else
-            account.report_income transaction['ammount'], DateTime.iso8601(transaction['date']), tag_ids, transaction['name']
-          end
+    transactions.each { |data|
+      transaction = data['transaction']
+      type_id = transaction['transaction_type_id']
+      spec_id = transaction['specification_id']
+      tag_ids = transaction['tags'].map { |t| t['id'] }
+      
+      cmd = nil
+      if type_id == 1 #Income
+        if spec_id == 1 #Refund
+          cmd = AccountCommands::ReportRefund.new aggregate_id,
+           amount: transaction['ammount'], 
+           date: DateTime.iso8601(transaction['date']), 
+           tag_ids: tag_ids,
+           comment: transaction['name']
         else
-          account.report_expence transaction['ammount'], DateTime.iso8601(transaction['date']), tag_ids, transaction['name']
+          cmd = AccountCommands::ReportIncome.new aggregate_id,
+           amount: transaction['ammount'], 
+           date: DateTime.iso8601(transaction['date']), 
+           tag_ids: tag_ids,
+           comment: transaction['name']
         end
-      }
-    end
+      else
+        cmd = AccountCommands::ReportExpence.new aggregate_id,
+         amount: transaction['ammount'], 
+         date: DateTime.iso8601(transaction['date']), 
+         tag_ids: tag_ids,
+         comment: transaction['name']
+      end
+      dispatch cmd, user_id: transaction['user_id']
+    }
   end
   
   def set_account_balance account
@@ -96,7 +107,7 @@ class SyncModel
     currency = detect_account_currency account['account']
     @context.repository.begin_work do |work|
       domain_account = work.get_by_id Domain::Account, aggregate_id
-      balance = Money.parse(account['account']['balance'], currency).integer_ammount
+      balance = Money.parse(account['account']['balance'], currency).integer_amount
       domain_account.send :raise_event, AccountBalanceChanged.new(aggregate_id, nil, balance)
     end
   end
