@@ -28,7 +28,12 @@ namespace :ledger do
     end
   end
   
-  desc "Purge events and projections"
+  task :purge do
+    Rake::Task["ledger:purge_events_and_projections"].invoke
+    CurrencyRate.delete_all
+    User.delete_all
+  end
+  
   task :purge_events_and_projections do
     app = init_app_skiping_domain_context
     context = DomainContext.new do |c|
