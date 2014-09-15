@@ -39,6 +39,7 @@ gem 'bootstrap3-datetimepicker-rails', '~> 3.0.0'
 
 # Handle authentication with devise
 gem 'devise'
+gem 'omniauth-google-oauth2'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -62,11 +63,13 @@ gem 'bootstrap-sass', '>= 3.1.1'
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
 
+gem 'dotenv-rails' #Store ENV in .env
+
 group :development, :test do
   gem 'rspec-core', '>= 3.0'
   gem 'rspec-rails', '>= 3.0'
   gem 'puma'
   gem "spring"
   gem "spring-commands-rspec"
-  gem 'jasmine-rails'
+  gem 'jasmine-rails'  
 end
