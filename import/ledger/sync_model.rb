@@ -5,6 +5,8 @@ class SyncModel
   def initialize(context)
     @context = context
     @deferred_commands = []
+    activate_wal_for_sqlite @context.event_store_database_config
+    activate_wal_for_sqlite @context.read_store_database_config
   end
   
   def do_initial_cleanup
@@ -132,5 +134,14 @@ class SyncModel
       currency_code = 'XAU' if currency_code == 'GOLD'
       currency_code = 'XXX' if currency_code == 'Fuel'
       Currency[currency_code]
+    end
+    
+    def activate_wal_for_sqlite config
+      if config['adapter'] == 'sqlite'
+        connection = Sequel.connect config
+        log.info "Activating WAL mode for: #{config}"
+        connection.loggers << log
+        connection.execute 'PRAGMA journal_mode=WAL;'
+      end
     end
 end
