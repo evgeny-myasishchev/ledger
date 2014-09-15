@@ -6,6 +6,7 @@ describe User do
     let(:auth) { double(:auth, info: double(:info, email: email))}
 
     it 'should find the user by email from auth.info' do
+      User.create! email: 'fake-1@mail.com', password: 'fake-test-password'
       u = User.create! email: email, password: 'fake-test-password'
       expect(described_class.from_omniauth(auth)).to eql u
     end

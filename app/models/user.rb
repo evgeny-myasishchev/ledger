@@ -6,8 +6,7 @@ class User < ActiveRecord::Base
          :omniauthable, :omniauth_providers => [:google_oauth2]
 
   def self.from_omniauth(auth)
-    first_or_create do |user|
-      user.email = auth.info.email
+    find_or_create_by(email: auth.info.email) do |user|
       user.password = Devise.friendly_token[0,20]
     end
   end
