@@ -31,24 +31,29 @@ class SyncModel
   
   def create_tags tags
     log.info 'Creating tags'
+    pause_dispatching
     tags.each { |tag|
       tag = tag['tag']
       log.debug "Creating tag: #{tag}"
       dispatch LedgerCommands::ImportTagWithId.new(@ledger_id, tag_id: tag['id'], name: tag['name']), user_id: tag['user_id']
     }
+    resume_dispatching_and_wait
   end
   
   def create_categories categories
     log.info 'Creating categories'
+    pause_dispatching
     categories.each { |category|
       log.debug "Creating category: #{category}"
       dispatch LedgerCommands::ImportCategory.new(@ledger_id, category_id: category['id'], 
         display_order: category['display_order'], name: category['name']), user_id: category['user_id']
     }
+    resume_dispatching_and_wait
   end
   
   def create_accounts accounts
     log.info 'Creating accounts'
+    pause_dispatching
     @accounts_map = {} #key - old integer id, value - new account aggregate_id
     accounts.each { |account_data|
       account = account_data['account']
@@ -67,11 +72,13 @@ class SyncModel
         dispatch LedgerCommands::SetAccountCategory.new(@ledger_id, account_id: new_account_id, category_id: account['category_id']), user_id: account['user_id']
       end
     }
+    resume_dispatching_and_wait
   end
   
   
   def create_transactions account, transactions
     aggregate_id = @accounts_map[account['account']['id']]
+    pause_dispatching
     transactions.each { |data|
       transaction = data['transaction']
       type_id = transaction['transaction_type_id']
@@ -102,6 +109,7 @@ class SyncModel
       end
       dispatch cmd, user_id: transaction['user_id']
     }
+    resume_dispatching_and_wait
   end
   
   def set_account_balance account
@@ -120,6 +128,16 @@ class SyncModel
   end
   
   private 
+    def pause_dispatching
+      @context.event_store.dispatcher.stop
+    end
+  
+    def resume_dispatching_and_wait
+      ActiveRecord::Base.establish_connection
+      @context.event_store.dispatcher.restart
+      @context.event_store.dispatcher.wait_pending
+    end
+  
     def log
       @log ||= LogFactory.logger 'ledger::booker-import'
     end
