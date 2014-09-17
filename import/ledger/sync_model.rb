@@ -17,8 +17,8 @@ class SyncModel
   
   def setup_users
     log.info 'Creating users...'
-    @user_2 = User.create_with(id: 2, password: 'password').find_or_create_by! email: 'evgeny.myasishchev@gmail.com'
-    @user_4 = User.create_with(id: 4, password: 'password').find_or_create_by! email: 'makova.nata@gmail.com'
+    @user_2 = User.create_with(id: 2, password: Devise.friendly_token[0,20]).find_or_create_by! email: 'evgenymyasishchev@gmail.com'
+    @user_4 = User.create_with(id: 4, password: Devise.friendly_token[0,20]).find_or_create_by! email: 'makovanata@gmail.com'
   end
   
   def create_ledger
