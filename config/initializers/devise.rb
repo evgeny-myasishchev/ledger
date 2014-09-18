@@ -230,8 +230,14 @@ Devise.setup do |config|
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
   # config.omniauth :github, 'APP_ID', 'APP_SECRET', scope: 'user,public_repo'
-  raise 'Please define GOAUTH_CLIENT_ID in .env file' unless ENV.key?('GOAUTH_CLIENT_ID')
-  raise 'Please define GOAUTH_CLIENT_SECRET in .env file' unless ENV.key?('GOAUTH_CLIENT_SECRET')
+  
+  have_goauth_vars = ENV.key?('GOAUTH_CLIENT_ID') && ENV.key?('GOAUTH_CLIENT_SECRET')
+  if Rails.env.production?
+    raise 'Please define GOAUTH_CLIENT_ID and GOAUTH_CLIENT_SECRET in .env file' unless have_goauth_vars
+  else
+    Rails.logger.warn 'Google authentication will not work. Please define GOAUTH_CLIENT_ID and GOAUTH_CLIENT_SECRET in .env file.'
+  end
+  
   config.omniauth :google_oauth2, ENV['GOAUTH_CLIENT_ID'], ENV['GOAUTH_CLIENT_SECRET']
 
   # ==> Warden configuration
