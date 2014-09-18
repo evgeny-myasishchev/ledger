@@ -1,0 +1,66 @@
+<style type="text/css">
+  body {
+    background-color: #eee;
+    padding-bottom: 40px;
+    padding-top: 40px;
+  }
+  .form-signin {
+    margin: 0 auto;
+    max-width: 330px;
+    padding: 15px;
+  }
+  .form-signin .form-signin-heading, .form-signin .checkbox {
+    margin-bottom: 10px;
+  }
+  .form-signin .checkbox {
+    font-weight: normal;
+  }
+  .form-signin .form-control {
+    box-sizing: border-box;
+    font-size: 16px;
+    height: auto;
+    padding: 10px;
+    position: relative;
+  }
+  .form-signin .form-control:focus {
+    z-index: 2;
+  }
+  .form-signin input[type="email"] {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: -1px;
+  }
+  .form-signin input[type="password"] {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    margin-bottom: 10px;
+  }
+
+  .form-signin a.signin-google {
+    background-color: #d34730;
+    color: #ffffff;
+    border-color: #d34730;
+  }
+
+  .form-signin a.signin-google:hover {
+    background-color: #b73e2a !important;
+  }
+</style>
+
+<div class="container">
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: {class: 'form-signin'}) do |f| %>
+    <h2 class="form-signin-heading">Please sign in</h2>
+    <%= f.email_field :email, autofocus: true, placeholder: 'Email address', class: 'form-control' %>
+    <%= f.password_field :password, autocomplete: "off", placeholder: 'Password', class: 'form-control' %>
+
+    <% if devise_mapping.rememberable? -%>
+      <div><%= f.check_box :remember_me %> <%= f.label :remember_me %></div>
+    <% end -%>
+
+    <div class="form-group"><%= f.submit "Sign in", class: 'btn btn-lg btn-primary btn-block' %></div>
+    
+    <div class="form-group">
+      <a href='<%=  omniauth_authorize_path(:user, :google_oauth2) %>' class='btn btn-lg btn-default btn-block signin-google'>Sign in with Google</a>
+    </div>
+  <% end %>
+</div>
