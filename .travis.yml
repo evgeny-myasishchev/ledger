@@ -2,7 +2,11 @@ language: ruby
 cache: bundler
 rvm:
 - 2.1.1
+addons:
+  postgresql: "9.3"
+env: DB_CONFIG=config/database_postgres.yml
 before_script:
+- psql -c 'create database ledger_dev;' -U postgres 
+- psql -c 'create database ledger_test;' -U postgres 
 - bundle exec rake db:setup
-- bundle exec rake db:test:prepare
 script: bundle exec rspec spec
