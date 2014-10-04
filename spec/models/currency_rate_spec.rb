@@ -18,9 +18,15 @@ RSpec.describe CurrencyRate, :type => :model do
       @usduah.delete
       @euruah.delete
       
-      expect(described_class).to receive(:fetch).with(from: ['USD', 'EUR'], to: 'UAH').and_return(
-        [{from: 'USD', to: 'UAH', rate: 13.6107}, {from: 'EUR', to: 'UAH', rate: 17.8889}]
-      )
+      from_rates = lambda { |from_rates| 
+        expect(from_rates.length).to eql 2
+        expect(from_rates).to include 'USD'
+        expect(from_rates).to include 'EUR'
+        true
+      }
+      
+      expect(described_class).to receive(:fetch).with(from: from_rates, to: 'UAH')
+        .and_return([{from: 'USD', to: 'UAH', rate: 13.6107}, {from: 'EUR', to: 'UAH', rate: 17.8889}])
       result = described_class.get(from: ['USD', 'EUR'], to: 'UAH')
       expect(result.count).to eql 2
       expect(result).to include CurrencyRate.find_by(from: 'USD', to: 'UAH')
@@ -33,7 +39,13 @@ RSpec.describe CurrencyRate, :type => :model do
       @euruah.updated_at = @usduah.updated_at.yesterday
       @euruah.save!
       
-      expect(described_class).to receive(:fetch).with(from: ['EUR', 'USD'], to: 'UAH').and_return(
+      from_rates = lambda { |from_rates| 
+        expect(from_rates.length).to eql 2
+        expect(from_rates).to include 'USD'
+        expect(from_rates).to include 'EUR'
+        true
+      }
+      expect(described_class).to receive(:fetch).with(from: from_rates, to: 'UAH').and_return(
         [{from: 'USD', to: 'UAH', rate: 13.5012}, {from: 'EUR', to: 'UAH', rate: 17.7993}]
       )
       

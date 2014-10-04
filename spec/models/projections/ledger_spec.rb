@@ -46,8 +46,15 @@ RSpec.describe Projections::Ledger, :type => :model do
       a2 = create_account_projection! 'a2', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'USD'
       a3 = create_account_projection! 'a3', ledger_1.aggregate_id, ledger_1.owner_user_id, currency_code: 'EUR'
       
+      from_rates = lambda { |from_rates| 
+        expect(from_rates.length).to eql 2
+        expect(from_rates).to include 'USD'
+        expect(from_rates).to include 'EUR'
+        true
+      }
+      
       rates = double(:rates)
-      expect(CurrencyRate).to receive(:get).with(from: ['USD', 'EUR'], to: 'UAH').and_return rates
+      expect(CurrencyRate).to receive(:get).with(from: from_rates, to: 'UAH').and_return rates
       expect(described_class.get_rates(user, ledger_1.aggregate_id)).to eql rates
     end
     
