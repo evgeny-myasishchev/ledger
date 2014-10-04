@@ -23,6 +23,8 @@ module Ledger
     # config.i18n.load_path += Dir[Rails.root.join('my', 'locales', '*.{rb,yml}').to_s]
     # config.i18n.default_locale = :de
     
+    self.paths['config/database'] = ENV['DB_CONFIG'] if ENV.key?('DB_CONFIG')
+    
     config.autoload_paths += %W(#{config.root}/lib)
     
     config.log_config_path = File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
