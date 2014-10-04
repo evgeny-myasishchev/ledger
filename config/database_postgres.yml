@@ -1,0 +1,20 @@
+# To use this config set env DB_CONFIG=config/database_postgres.yml
+
+development: 
+  adapter: postgresql
+  encoding: unicode
+  database: ledger_dev
+  pool: 5
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: ledger_test
+  pool: 5
+  
+# Using independent event store database to avoid schema polution in dev env
+event-store:
+    adapter: sqlite
+    database: db/event-store.sqlite3
+    pool: 5
+    timeout: 5000
