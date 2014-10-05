@@ -3,6 +3,9 @@ require 'rails_helper'
 describe Money do
   let(:uah) { Currency['UAH'] }
   before(:all) do
+    unless I18n.available_locales.include?(:money_spec_locale)
+      I18n.available_locales = I18n.available_locales + [:money_spec_locale]
+    end
     I18n.backend.store_translations :money_spec_locale, {number: {currency: {
       format: {
         separator: ',',
