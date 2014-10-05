@@ -234,10 +234,10 @@ Devise.setup do |config|
   
   have_goauth_vars = ENV.key?('GOAUTH_CLIENT_ID') && ENV.key?('GOAUTH_CLIENT_SECRET')
   if Rails.env.production?
-    raise 'Please define GOAUTH_CLIENT_ID and GOAUTH_CLIENT_SECRET in .env file' unless have_goauth_vars
+    raise 'Please define GOAUTH_CLIENT_ID and GOAUTH_CLIENT_SECRET in .env file'
   else
     Rails.logger.warn 'Google authentication will not work. Please define GOAUTH_CLIENT_ID and GOAUTH_CLIENT_SECRET in .env file.'
-  end
+  end unless have_goauth_vars
   
   config.omniauth :google_oauth2, ENV['GOAUTH_CLIENT_ID'], ENV['GOAUTH_CLIENT_SECRET']
 
