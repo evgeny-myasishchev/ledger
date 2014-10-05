@@ -19,7 +19,7 @@ GIT
       sequel
 
 GIT
-  remote: git@github.com:evgeny-myasishchev/twitter-bootstrap-rails.git
+  remote: https://github.com/evgeny-myasishchev/twitter-bootstrap-rails.git
   revision: 9b0017ace47a2d36b452c726b5dee6703ac10d4e
   branch: move-flyphicons-to-twitter
   specs:
