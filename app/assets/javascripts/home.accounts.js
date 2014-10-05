@@ -116,7 +116,7 @@
 		return function(account) {
 			var activeAccount = accounts.getActive();
 			if(activeAccount) return account;
-			else if($location.$$path.startsWith('/accounts/')) return account;
+			else if($location.$$path.indexOf('/accounts/') == 0) return account;
 			accounts.makeActive(account);
 			return account;
 		}

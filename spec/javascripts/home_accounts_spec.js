@@ -201,6 +201,43 @@ describe('home.acounts', function() {
 		});
 	});
 	
+	describe('activateFirstAccountFilter', function() {
+		var a1, a2;
+		var location, accounts;
+		var subject;
+		beforeEach(function() {
+			module('homeApp');
+			a1 = {balance: 10000, currency_code: 'UAH'};
+			a2 = {balance: 20000, currency_code: 'UAH'};
+			
+			inject(['$location', 'activateFirstAccountFilter', 'accounts', function(theLocation, filter, theAccounts) {
+				location = theLocation;
+				accounts = theAccounts;
+				subject = filter;
+			}]);
+			spyOn(accounts, 'getActive').and.returnValue(null);
+			spyOn(accounts, 'makeActive').and.throwError('makeActive should not be called');
+		});
+		
+		it('should return the account if there is active account', function() {
+			accounts.getActive.and.returnValue(a2);
+			expect(subject(a1)).toBe(a1);
+		});
+		
+		it('should return the account if the path corresponds to actual path of some account', function() {
+			location.$$path = '/accounts/100';
+			expect(subject(a1)).toBe(a1);
+			location.$$path = '/accounts/100/report';
+			expect(subject(a1)).toBe(a1);
+		});
+		
+		it('should make the account active and return it', function() {
+			accounts.makeActive.and.returnValue(null);
+			expect(subject(a1)).toBe(a1);
+			expect(accounts.makeActive).toHaveBeenCalledWith(a1);
+		});
+	});
+	
 	describe("NewAccountController", function() {
 		var controller, scope,  $httpBackend;
 		beforeEach(function() {
