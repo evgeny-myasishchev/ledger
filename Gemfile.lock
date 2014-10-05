@@ -18,6 +18,17 @@ GIT
     event-store (1.2.1)
       sequel
 
+GIT
+  remote: git@github.com:evgeny-myasishchev/twitter-bootstrap-rails.git
+  revision: 9b0017ace47a2d36b452c726b5dee6703ac10d4e
+  branch: move-flyphicons-to-twitter
+  specs:
+    twitter-bootstrap-rails (3.2.0)
+      actionpack (>= 3.1)
+      execjs
+      rails (>= 3.1)
+      railties (>= 3.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -185,11 +196,6 @@ GEM
     thor (0.19.1)
     thread_safe (0.3.4)
     tilt (1.4.1)
-    twitter-bootstrap-rails (3.2.0)
-      actionpack (~> 4.1)
-      execjs (~> 2.2)
-      rails (~> 4.1)
-      railties (~> 4.1)
     tzinfo (1.2.2)
       thread_safe (~> 0.1)
     uglifier (2.5.3)
@@ -223,5 +229,5 @@ DEPENDENCIES
   spring
   spring-commands-rspec
   sqlite3
-  twitter-bootstrap-rails
+  twitter-bootstrap-rails!
   uglifier
