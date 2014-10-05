@@ -1,0 +1,26 @@
+<!-- the config file for default environment -->
+<log4r_config>
+	<pre_config>
+		<global level="INFO"/>
+		<!--
+		log_file_path - set runtime in LogFactory.configure
+		-->
+		<!--<parameter name="log_file_path" value="#{log_file_path}"/>-->
+	</pre_config>
+
+	<!--1 MB file is enough for development-->
+	<outputter type="FileOutputter" maxsize="1048576" name="log_file" filename="#{log_file_path}">
+		<formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
+	<outputter type="StdoutOutputter" name="console">
+		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
+	<outputter type="StderrOutputter" name="console">
+		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
+	
+	<logger name="ledger" outputters="log_file" level='INFO' />
+	<logger name="event-store" outputters="log_file" level='INFO'/>
+	<logger name="common-domain" outputters="log_file" level='INFO'/>
+	<logger name="common-domain::persistence" level='INFO'/>
+</log4r_config> 

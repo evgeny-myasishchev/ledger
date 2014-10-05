@@ -1,4 +1,6 @@
-class TheBabloProxy
+class Ledger::Import::BookerProxy
+  include Loggable
+  
   def initialize(url)
     @url = url
   end
@@ -37,21 +39,18 @@ class TheBabloProxy
     limit = 200
     offset = 0
     has_more = false
-    log.debug "Fetching transactions for account: #{account_id}"
+    log.info "Fetching transactions for account: #{account_id}"
     begin
       data = JSON.parse(RestClient.get("#{@url}/transactions.json", session_cookies.merge(params: {account_id: account_id, limit: limit, offset: offset})))
       transactions = data['transactions']
-      log.debug "Fetched: #{offset + transactions.length} of #{data['total']}"
+      log.info "Fetched: #{offset + transactions.length} of #{data['total']}"
       yield(transactions)
       has_more = transactions.length == limit && data['total'] > (limit + offset)
       offset += limit
     end while has_more
   end
   
-  private 
-    def log
-      @log ||= LogFactory.logger 'ledger::thebablo'
-    end
+  private
     
     def session_cookies
       {cookies: {'_thebablo_session' => @session_cookie}}

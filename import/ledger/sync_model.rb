@@ -1,4 +1,4 @@
-class SyncModel
+class Ledger::Import::SyncModel
   include ::Domain::Events
   include Application::Commands
   
