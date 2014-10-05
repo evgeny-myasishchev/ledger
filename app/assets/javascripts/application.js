@@ -12,7 +12,7 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require bootstrap
+//= require twitter/bootstrap
 //= require angular
 //= require angular-route
 //= require ledger
