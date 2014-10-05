@@ -36,7 +36,7 @@ class Ledger::Import::BookerProxy
   end
   
   def fetch_transactions(account_id, &block)
-    limit = 200
+    limit = 20
     offset = 0
     has_more = false
     log.info "Fetching transactions for account: #{account_id}"
