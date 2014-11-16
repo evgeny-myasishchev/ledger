@@ -4,7 +4,9 @@ module Application::Commands
   
   module AdjustTransactionBase
     def initialize(params)
-      super(nil, {transaction_id: params[:transaction_id]}.merge!(params[:command]))
+      p = {transaction_id: params[:transaction_id]}.merge!(params[:command])
+      p[:headers] = params[:headers] if params.key?(:headers)
+      super(nil, p)
     end
     
     def self.included(receiver)
@@ -110,7 +112,7 @@ module Application::Commands
       include ActiveModel::Validations
       validates :transaction_id, presence: true
       def initialize(params)
-        super(nil, transaction_id: params[:id])
+        super(nil, transaction_id: params[:id], headers: params[:headers])
       end
     end
   end

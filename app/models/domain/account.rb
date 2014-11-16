@@ -14,16 +14,16 @@ class Domain::Account < CommonDomain::Aggregate
       initial_data.name, initial_balance.integer_amount, initial_data.currency.code, unit
   end
   
-  def rename new_name
-    return if @name == new_name
-    log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{new_name}'"
-    raise_event AccountRenamed.new aggregate_id, new_name
+  def rename name
+    return if @name == name
+    log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{name}'"
+    raise_event AccountRenamed.new aggregate_id, name
   end
   
-  def set_unit new_unit
-    return if @unit == new_unit
-    log.debug "Assigning account unit aggregate_id='#{aggregate_id}. New unit: #{new_unit}'"
-    raise_event AccountUnitAdjusted.new aggregate_id, new_unit
+  def set_unit unit
+    return if @unit == unit
+    log.debug "Assigning account unit aggregate_id='#{aggregate_id}. New unit: #{unit}'"
+    raise_event AccountUnitAdjusted.new aggregate_id, unit
   end
   
   def close

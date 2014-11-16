@@ -1,7 +1,13 @@
 # This file contains initialization of the dummy data that is used for development purposes
+
+include CommonDomain::NonAtomicUnitOfWork
+
 log = Rails.logger
 @log = log
 @context = Rails.application.domain_context
+def repository
+  @context.repository
+end
 
 log.info 'Loadding dummy seeds...'
 
@@ -22,7 +28,7 @@ uah = Currency['UAH']
 
 log.info 'Creating ledger for the user'
 tag_ids_by_name = {}
-ledger = @context.repository.begin_work do |work|
+ledger = begin_unit_of_work({}) do |work|
   l = work.add_new Domain::Ledger.new.create user.id, 'Family', uah
   tag_ids_by_name['food'] = l.create_tag 'Food'
   tag_ids_by_name['lunch'] = l.create_tag 'Lunch'
@@ -70,7 +76,7 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
   report_expence account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
   
   # Reporting in bulk directly. It just works faster.
-  @context.repository.begin_work do |work|
+  begin_unit_of_work({}) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
@@ -87,7 +93,7 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
   report_income account_id, '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
   report_income account_id, '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
   
-  @context.repository.begin_work do |work|
+  begin_unit_of_work({}) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
