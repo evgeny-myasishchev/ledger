@@ -86,30 +86,36 @@ class Projections::Transaction < ActiveRecord::Base
     end
     
     on TransactionReported do |event|
-      t = build_transaction(event)
-      t.type_id = event.type_id
-      t.save!
+      unless Transaction.exists?(transaction_id: event.transaction_id)
+        t = build_transaction(event)
+        t.type_id = event.type_id
+        t.save!
+      end
     end
     
     on TransferSent do |event|
-      t = build_transaction(event)
-      t.is_transfer = true
-      t.type_id = Domain::Transaction::ExpenceTypeId
-      t.sending_account_id = event.aggregate_id
-      t.sending_transaction_id = event.transaction_id
-      t.receiving_account_id = event.receiving_account_id
-      t.save!
+      unless Transaction.exists?(transaction_id: event.transaction_id)
+        t = build_transaction(event)
+        t.is_transfer = true
+        t.type_id = Domain::Transaction::ExpenceTypeId
+        t.sending_account_id = event.aggregate_id
+        t.sending_transaction_id = event.transaction_id
+        t.receiving_account_id = event.receiving_account_id
+        t.save!
+      end
     end
         
     on TransferReceived do |event|
-      t = build_transaction(event)
-      t.is_transfer = true
-      t.type_id = Domain::Transaction::IncomeTypeId
-      t.receiving_account_id = event.aggregate_id
-      t.receiving_transaction_id = event.transaction_id
-      t.sending_transaction_id = event.sending_transaction_id
-      t.sending_account_id = event.sending_account_id
-      t.save!
+      unless Transaction.exists?(transaction_id: event.transaction_id)
+        t = build_transaction(event)
+        t.is_transfer = true
+        t.type_id = Domain::Transaction::IncomeTypeId
+        t.receiving_account_id = event.aggregate_id
+        t.receiving_transaction_id = event.transaction_id
+        t.sending_transaction_id = event.sending_transaction_id
+        t.sending_account_id = event.sending_account_id
+        t.save!
+      end
     end
     
     on TransactionAmountAdjusted do |event|
@@ -137,8 +143,10 @@ class Projections::Transaction < ActiveRecord::Base
     end
         
     on TransactionRemoved do |event|
-      transaction = Transaction.find_by_transaction_id(event.transaction_id)
-      transaction.delete
+      if Transaction.exists?(transaction_id: event.transaction_id)
+        transaction = Transaction.find_by_transaction_id(event.transaction_id)
+        transaction.delete
+      end
     end
     
     private def build_transaction event

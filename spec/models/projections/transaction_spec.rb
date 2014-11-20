@@ -329,6 +329,13 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.comment).to eql 'Comment 101'
       expect(t2.date.to_datetime.to_json).to eql date2.utc.to_json
     end
+    
+    it 'should be idempotent' do
+      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, DateTime.now, [], nil
+      expect {
+        subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, DateTime.now, [], nil
+      }.not_to change { described_class.count }
+    end
   end
   
   describe "transfer" do
@@ -357,6 +364,12 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t1.sending_transaction_id).to eql('t-1')
         expect(t1.receiving_account_id).to eql('account-2')
       end
+      
+      it 'should be idempotent' do
+        expect {
+          subject.handle_message e::TransferSent.new 'account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'
+        }.not_to change { described_class.count }
+      end
     end
     
     describe "on TransferReceived" do
@@ -376,6 +389,12 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t2.sending_transaction_id).to eql('t-1')
         expect(t2.receiving_account_id).to eql('account-2')
         expect(t2.receiving_transaction_id).to eql('t-2')
+      end
+      
+      it 'should be idempotent' do
+        expect {
+          subject.handle_message e::TransferReceived.new 'account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'
+        }.not_to change { described_class.count }
       end
     end
   end
@@ -414,11 +433,20 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 200
       t1.reload
       expect(t1.tag_ids).to eql ''
-    end   
-     
-    it "should remove on TransactionRemoved" do
-      subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
-      expect(t1).to be_nil
+    end
+    
+    describe 'on TransactionRemoved' do
+      it "should remove the transaction" do
+        subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+        expect(t1).to be_nil
+      end
+      
+      it "should be idempotent" do
+        subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+        expect { 
+          subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+        }.not_to change { described_class.count }
+      end
     end
   end
   
