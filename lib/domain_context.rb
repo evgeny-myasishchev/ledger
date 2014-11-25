@@ -10,6 +10,7 @@ class DomainContext < CommonDomain::DomainContext
   def with_event_store
     bootstrap_event_store do |with|
       with.log4r_logging
+      with.sql_persistence(event_store_database_config, orm_log_level: :debug).compress
     end
   end
   
