@@ -40,11 +40,25 @@ describe Domain::Account do
         currency_code: currency.code,
         unit: currency.unit
     end
-    
-    it "should assign the aggregate_id on created event" do
-      subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 1, 'Account 332', 100, 'UAH', nil
-      expect(subject.aggregate_id).to eql 'account-332'
-    end
+
+    describe 'on AccountCreated' do
+      before do
+        subject.apply_event I::AccountCreated.new 'account-332', 'ledger-100', 432, 'Account 332', 100, 'UAH', 'uz'
+      end
+
+      it "should assign the aggregate_id on created event" do        
+        expect(subject.aggregate_id).to eql 'account-332'
+      end
+
+      it "should assign initial attributes on created event" do
+        expect(subject.ledger_id).to eql 'ledger-100'
+        expect(subject.sequential_number).to eql 432
+        expect(subject.name).to eql 'Account 332'
+        expect(subject.balance).to eql 100
+        expect(subject.currency).to eql Currency['UAH']
+        expect(subject.unit).to eql 'uz'
+      end      
+    end    
   end
   
   describe "rename" do
@@ -59,6 +73,11 @@ describe Domain::Account do
       subject.rename 'New name 9932'
       expect(subject).not_to have_uncommitted_events
     end
+
+    it 'should update name on AccountRenamed' do
+      subject.make_created.apply_event I::AccountRenamed.new subject.aggregate_id, 'Account 332 renamed'
+      expect(subject.name).to eql 'Account 332 renamed'
+    end
   end
   
   describe "set_unit" do
@@ -72,6 +91,11 @@ describe Domain::Account do
       subject.set_unit 'g'
       expect(subject).not_to have_uncommitted_events
     end
+
+    it 'should set unit attribute' do
+      subject.make_created.apply_event I::AccountUnitAdjusted.new subject.aggregate_id, 'oz'
+      expect(subject.unit).to eql 'oz'
+    end
   end
   
   describe "close" do
@@ -83,11 +107,21 @@ describe Domain::Account do
       subject.close
       expect(subject).to have_one_uncommitted_event I::AccountClosed, aggregate_id: subject.aggregate_id
     end
-    
-    it "should raise nothing if already closed" do
-      subject.apply_event I::AccountClosed.new 'account-332'
-      expect(subject).not_to have_uncommitted_events
-    end
+
+    describe 'on AccountClosed' do
+      before do
+        subject.apply_event I::AccountClosed.new 'account-332'
+      end
+
+      it "should raise nothing if already closed" do        
+        subject.apply_event I::AccountClosed.new 'account-332'
+        expect(subject).not_to have_uncommitted_events
+      end
+
+      it 'should set is_open to false' do
+        expect(subject.is_open).to be_falsy
+      end      
+    end    
   end
   
   describe "reopen" do
@@ -104,6 +138,11 @@ describe Domain::Account do
     it "should raise error if not closed" do
       subject.apply_event I::AccountReopened.new subject.aggregate_id
       expect { subject.reopen }.to raise_error "Account '#{subject.aggregate_id}' is not closed."
+    end
+
+    it 'should set is_open to true on reopen' do
+      subject.apply_event I::AccountReopened.new subject.aggregate_id
+      expect(subject.is_open).to be_truthy
     end
   end
   
@@ -127,6 +166,18 @@ describe Domain::Account do
       subject.apply_event I::AccountRemoved.new subject.aggregate_id
       subject.remove
       expect(subject).not_to have_uncommitted_events
+    end
+
+    it 'should set is_removed flag on AccountRemoved' do
+      subject.apply_event I::AccountRemoved.new subject.aggregate_id
+      expect(subject.is_removed).to be_truthy
+    end
+  end
+
+  describe 'on AccountBalanceChanged' do
+    it 'should update the balance' do
+      subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 1060332
+      expect(subject.balance).to eql 1060332
     end
   end
   
@@ -166,6 +217,19 @@ describe Domain::Account do
       subject.make_created.report_income '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
+
+    it 'should add transaction to transactions on TransactionReported' do
+      date = DateTime.now
+      subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
+        'transaction-100', income_id, 1040, date, ['t-1', 't-2'], 'Monthly income')
+      expect(subject.transactions['transaction-100']).to eql({
+        type_id: income_id,
+        amount: 1040,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Monthly income'
+      })
+    end
   end
     
   describe "report_expence" do
@@ -198,6 +262,19 @@ describe Domain::Account do
       subject.make_created.report_expence '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
+
+    it 'should add transaction to transactions on TransactionReported' do
+      date = DateTime.now
+      subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
+        'transaction-100', Domain::Transaction::ExpenceTypeId, 2023, date, ['t-1', 't-2'], 'Monthly income')
+      expect(subject.transactions['transaction-100']).to eql({
+        type_id: Domain::Transaction::ExpenceTypeId,
+        amount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Monthly income'
+      })
+    end
   end
 
   describe "report_refund" do
@@ -229,6 +306,19 @@ describe Domain::Account do
     it "should treat null tags as empty" do
       subject.make_created.report_refund '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
+
+    it 'should add transaction to transactions on TransactionReported' do
+      date = DateTime.now
+      subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
+        'transaction-100', Domain::Transaction::RefundTypeId, 2023, date, ['t-1', 't-2'], 'Coworker gave back')
+      expect(subject.transactions['transaction-100']).to eql({
+        type_id: Domain::Transaction::RefundTypeId,
+        amount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Coworker gave back'
+      })
     end
   end
 
@@ -263,18 +353,32 @@ describe Domain::Account do
       subject.send_transfer('receiver-account-332', '20.23', DateTime.now, 't-1')
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
+
     it "should treat null tags as empty" do
       subject.send_transfer('receiver-account-332', '20.23', DateTime.now, nil)
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
+    end
+
+    it 'should add transaction to transactions on TransferSent' do
+      date = DateTime.now
+      subject.make_created.apply_event I::TransferSent.new(subject.aggregate_id, 
+        'transaction-110', 'receiver-account-332', 2023, date, ['t-1', 't-2'], 'Getting cache')
+      expect(subject.transactions['transaction-110']).to eql({
+        type_id: Domain::Transaction::ExpenceTypeId,
+        amount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Getting cache'      
+      })
     end
   end
 
   describe "receive_transfer" do
     before(:each) { subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073 }
-    before(:each) { expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
+    before(:each) { allow(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
     let(:date) { DateTime.now }
-    it "should raise TransferReceived and AccountBalanceChanged events" do
-      
+
+    it "should raise TransferReceived and AccountBalanceChanged events" do      
       subject.receive_transfer 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1', 't-2'], 'Getting cache'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransferReceived, {
@@ -301,6 +405,19 @@ describe Domain::Account do
       subject.receive_transfer 'sending-account-332', 'sending-transaction-221', '20.23', date, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
+
+    it 'should add transaction to transactions on TransferSent' do
+      date = DateTime.now
+      subject.make_created.apply_event I::TransferReceived.new(
+        subject.aggregate_id, 'transaction-110', 'sending-account-332', 'sending-transaction-221', 2023, date, ['t-1', 't-2'], 'Getting cache')
+      expect(subject.transactions['transaction-110']).to eql({
+        type_id: Domain::Transaction::IncomeTypeId,
+        amount: 2023,
+        date: date,
+        tag_ids: ['t-1', 't-2'],
+        comment: 'Getting cache'
+      })
+    end
   end
   
   describe "transaction adjustments" do
@@ -323,6 +440,10 @@ describe Domain::Account do
         
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-5', refund_id, 10000, DateTime.new, [], ''
         subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 't-5', 50000
+      end
+
+      it 'should update transaction ammount on TransactionAmountAdjusted' do
+        expect(subject.transactions['t-1'][:amount]).to eql 10000
       end
       
       describe "income transactions" do
@@ -397,6 +518,11 @@ describe Domain::Account do
         subject.adjust_comment 't-1', 'Comment t1'
         expect(subject).not_to have_uncommitted_events
       end
+
+      it 'should update transaction comment on TransactionCommentAdjusted' do
+        subject.apply_event I::TransactionCommentAdjusted.new subject.aggregate_id, 't-1', 'Comment t1'
+        expect(subject.transactions['t-1'][:comment]).to eql 'Comment t1'
+      end
     end
     
     describe "adjust_date" do
@@ -413,6 +539,12 @@ describe Domain::Account do
         subject.apply_event I::TransactionDateAdjusted.new subject.aggregate_id, 't-1', date
         subject.adjust_date 't-1', date
         expect(subject).not_to have_uncommitted_events
+      end
+
+      it 'should update transaction date on TransactionDateAdjusted' do
+        date = DateTime.new
+        subject.apply_event I::TransactionDateAdjusted.new subject.aggregate_id, 't-1', date
+        expect(subject.transactions['t-1'][:date]).to eql date
       end
     end
   
@@ -448,6 +580,11 @@ describe Domain::Account do
         expect(subject).to have_one_uncommitted_event I::TransactionTagged, {
           aggregate_id: subject.aggregate_id, transaction_id: 't-1', tag_id: 300
         }, at_index: 1
+      end
+
+      it 'should add transaction tag on TransactionTagged/Untagged' do
+        expect(subject.transactions['t-1'][:tag_ids]).to eql [100, 200, 300]
+        expect(subject.transactions['t-2'][:tag_ids]).to eql [200]
       end
       
       it "it should raise TransactionUntagged for each removed tag" do
@@ -540,6 +677,11 @@ describe Domain::Account do
       subject.apply_event I::TransactionRemoved.new subject.aggregate_id, 't-1'
       subject.remove_transaction 't-1'
       expect(subject).not_to have_uncommitted_events
+    end
+
+    it 'should remove the transaction on TransactionRemoved' do
+      subject.apply_event I::TransactionRemoved.new subject.aggregate_id, 't-1'
+      expect(subject.transactions['t-1']).to be_nil
     end
   end
 end

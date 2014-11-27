@@ -6,6 +6,9 @@ class Domain::Account < CommonDomain::Aggregate
   
   AccountId = Struct.new(:aggregate_id, :sequential_number)
   InitialData = Struct.new(:name, :initial_balance, :currency, :unit)
+
+  attr_reader :ledger_id, :sequential_number, :name, :currency, :unit,
+    :is_open, :is_removed, :balance, :transactions
   
   def create ledger_id, account_id, initial_data
     initial_balance = Money.parse(initial_data.initial_balance, initial_data.currency)
@@ -174,12 +177,14 @@ class Domain::Account < CommonDomain::Aggregate
   
   on AccountCreated do |event|
     @aggregate_id = event.aggregate_id
+    @ledger_id = event.ledger_id
+    @sequential_number = event.sequential_number
     @name = event.name
     @unit = event.unit
     @is_open = true
     @is_removed = false
     @currency = Currency[event.currency_code]
-    @balance = 0
+    @balance = event.initial_balance
     @transactions = {}
   end
   
@@ -254,7 +259,6 @@ class Domain::Account < CommonDomain::Aggregate
         type_id: type_id,
         amount: event.amount,
         tag_ids: event.tag_ids,
-        amount: event.amount,
         date: event.date,
         comment: event.comment
       }
