@@ -700,17 +700,64 @@ describe Domain::Account do
           unit: 'uz',
           is_open: true,
           is_removed: false,
-          balance: 100100
+          balance: 100100,
+          transactions: subject.transactions
         })
-        expect(snapshot[:transactions]).not_to be_nil
-        expect(snapshot[:transactions].length).to eql 1
-        transaction_id = snapshot[:transactions].keys.first
-        expect(snapshot[:transactions][transaction_id]).to eql({
-          type_id: income_id,
-          amount: 100,
-          tag_ids: ['t1', 't2'],
-          date: date,
-          comment: 'Transaction 100'
+      end
+    end
+    
+    describe 'apply_snapshot' do
+      it 'should restore the state from the snapshot' do
+        date = DateTime.now
+        subject.apply_snapshot({
+          ledger_id: 'ledger-1',
+          sequential_number: 1,
+          name: 'Account 1',
+          currency_code: 'UAH',
+          unit: 'uz',
+          is_open: true,
+          is_removed: false,
+          balance: 100100,
+          transactions: {
+            't-100' => {
+              type_id: income_id,
+              amount: 100,
+              tag_ids: ['t1', 't2'],
+              date: date,
+              comment: 'Transaction 100'
+            },
+            't-101' => {
+              type_id: income_id,
+              amount: 110,
+              tag_ids: ['t3', 't4'],
+              date: date,
+              comment: 'Transaction 110'
+            }
+          }
+        })
+        expect(subject.ledger_id).to eql 'ledger-1'
+        expect(subject.sequential_number).to eql 1
+        expect(subject.name).to eql 'Account 1'
+        expect(subject.currency).to eql Currency['UAH']
+        expect(subject.unit).to eql 'uz'
+        expect(subject.is_open).to be_truthy
+        expect(subject.is_removed).to be_falsy
+        expect(subject.balance).to eql 100100
+        expect(subject.transactions).to eql({
+          't-100' => {
+            type_id: income_id,
+            amount: 100,
+            tag_ids: ['t1', 't2'],
+            date: date,
+            comment: 'Transaction 100'
+          },
+          't-101' => {
+            type_id: income_id,
+            amount: 110,
+            tag_ids: ['t3', 't4'],
+            date: date,
+            comment: 'Transaction 110'
+          }
         })
       end
     end

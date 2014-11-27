@@ -170,6 +170,18 @@ class Domain::Account < CommonDomain::Aggregate
       transactions: @transactions
     }
   end
+  
+  def apply_snapshot(snapshot)
+    @ledger_id = snapshot[:ledger_id]
+    @sequential_number = snapshot[:sequential_number]
+    @name = snapshot[:name]
+    @currency = Currency[snapshot[:currency_code]]
+    @unit = snapshot[:unit]
+    @is_open = snapshot[:is_open]
+    @is_removed = snapshot[:is_removed]
+    @balance = snapshot[:balance]
+    @transactions = snapshot[:transactions]
+  end
 
   private def raise_transaction_reported transaction_id, type_id, integer_amount, date, tag_ids, comment
     raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_amount, date, tag_ids, comment
