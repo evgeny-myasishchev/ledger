@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140829122418) do
+ActiveRecord::Schema.define(version: 20141127215131) do
 
   create_table "currency_rates", force: true do |t|
     t.string   "from",       null: false
@@ -79,7 +79,7 @@ ActiveRecord::Schema.define(version: 20140829122418) do
     t.string   "transaction_id",                           null: false
     t.string   "account_id",                               null: false
     t.integer  "type_id",                                  null: false
-    t.integer  "amount",                                  null: false
+    t.integer  "amount",                                   null: false
     t.string   "tag_ids"
     t.text     "comment"
     t.datetime "date"
@@ -92,6 +92,14 @@ ActiveRecord::Schema.define(version: 20140829122418) do
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
   add_index "projections_transactions", ["transaction_id"], name: "index_projections_transactions_on_transaction_id", unique: true
+
+  create_table "snapshots", force: true do |t|
+    t.string  "aggregate_id", null: false
+    t.integer "version",      null: false
+    t.binary  "data",         null: false
+  end
+
+  add_index "snapshots", ["aggregate_id"], name: "index_snapshots_on_aggregate_id", unique: true
 
   create_table "users", force: true do |t|
     t.string   "email",                  default: "", null: false
