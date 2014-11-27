@@ -156,6 +156,20 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event TransactionRemoved.new aggregate_id, transaction_id
     raise_balance_changed transaction_id, new_balance
   end
+  
+  def get_snapshot
+    {
+      ledger_id: ledger_id,
+      sequential_number: sequential_number,
+      name: name,
+      currency_code: currency.code,
+      unit: unit,
+      is_open: is_open,
+      is_removed: is_removed,
+      balance: balance,
+      transactions: @transactions
+    }
+  end
 
   private def raise_transaction_reported transaction_id, type_id, integer_amount, date, tag_ids, comment
     raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_amount, date, tag_ids, comment

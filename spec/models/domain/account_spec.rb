@@ -684,4 +684,35 @@ describe Domain::Account do
       expect(subject.transactions['t-1']).to be_nil
     end
   end
+  
+  describe 'snapshots' do
+    describe 'get_snapshot' do
+      it 'should return the entire state of the account' do
+        date = DateTime.now
+        subject.make_created 'account-1', 'ledger-1', 'Account 1', 100000, 'UAH', unit: 'uz'
+        subject.report_income 100, date, ['t1', 't2'], 'Transaction 100'
+        snapshot = subject.get_snapshot
+        expect(snapshot).to include({
+          ledger_id: 'ledger-1',
+          sequential_number: 1,
+          name: 'Account 1',
+          currency_code: 'UAH',
+          unit: 'uz',
+          is_open: true,
+          is_removed: false,
+          balance: 100100
+        })
+        expect(snapshot[:transactions]).not_to be_nil
+        expect(snapshot[:transactions].length).to eql 1
+        transaction_id = snapshot[:transactions].keys.first
+        expect(snapshot[:transactions][transaction_id]).to eql({
+          type_id: income_id,
+          amount: 100,
+          tag_ids: ['t1', 't2'],
+          date: date,
+          comment: 'Transaction 100'
+        })
+      end
+    end
+  end
 end
