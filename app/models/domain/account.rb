@@ -182,6 +182,10 @@ class Domain::Account < CommonDomain::Aggregate
     @balance = snapshot[:balance]
     @transactions = snapshot[:transactions]
   end
+  
+  def self.add_snapshot?(aggregate)
+    aggregate.applied_events_number > 10
+  end
 
   private def raise_transaction_reported transaction_id, type_id, integer_amount, date, tag_ids, comment
     raise_event TransactionReported.new aggregate_id, transaction_id, type_id,integer_amount, date, tag_ids, comment

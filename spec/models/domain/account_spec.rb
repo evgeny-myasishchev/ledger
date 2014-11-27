@@ -761,5 +761,14 @@ describe Domain::Account do
         })
       end
     end
+    
+    describe 'self.add_snapshot?' do
+      it 'should be true if the aggregate has more than 10 applied events' do
+        allow(subject).to receive(:applied_events_number) { 10 }
+        expect(described_class.add_snapshot?(subject)).to be_falsy
+        allow(subject).to receive(:applied_events_number) { 11 }
+        expect(described_class.add_snapshot?(subject)).to be_truthy
+      end
+    end
   end
 end
