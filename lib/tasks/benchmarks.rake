@@ -16,7 +16,7 @@ namespace :bm do
     def initialize(app, options)
       @options = options
       @context = bootstrap app, with_snapshots: @options[:with_snapshots] || false
-      @repository = @context.repository
+      @write_repo = @context.create_repository
       @log = LogFactory.logger "ledger"
     end
     
@@ -29,44 +29,26 @@ namespace :bm do
     
       bm = Benchmark.measure {
         account.create 'ledger-1', account_id, initial_data
-        @repository.save account
+        @write_repo.save account
       }
       log.info "Account created and saved: #{bm.real}"
     
       new_bm = bm_get_by_id
-      5.times do
+      4.times do
         report_transactions_and_bm number: 1
         bm_get_by_id original_bm_real: new_bm
       end
-      report_transactions_and_bm number: 5
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 5
       
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 9
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 2
+      report_transactions_and_bm number: 1
       bm_get_by_id original_bm_real: new_bm
       
-      report_transactions_and_bm number: 9
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 2
-      bm_get_by_id original_bm_real: new_bm
+      10.times do
+        report_transactions_and_bm number: 50
+        bm_get_by_id original_bm_real: new_bm
       
-      report_transactions_and_bm number: 9
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 2
-      bm_get_by_id original_bm_real: new_bm
-      
-      report_transactions_and_bm number: 9
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 2
-      bm_get_by_id original_bm_real: new_bm
-      
-      report_transactions_and_bm number: 29
-      bm_get_by_id original_bm_real: new_bm
-      report_transactions_and_bm number: 2
-      bm_get_by_id original_bm_real: new_bm
+        report_transactions_and_bm number: 5
+        bm_get_by_id original_bm_real: new_bm
+      end
       
       log.info 'Done.'
     end
@@ -74,9 +56,10 @@ namespace :bm do
     private
       def bm_get_by_id original_bm_real: nil
         account = nil
-        bm1 = Benchmark.measure { account = @repository.get_by_id Domain::Account, 'account-1' }
-        bm2 = Benchmark.measure { account = @repository.get_by_id Domain::Account, 'account-1' }
-        bm3 = Benchmark.measure { account = @repository.get_by_id Domain::Account, 'account-1' }
+        @context.create_repository.get_by_id Domain::Account, 'account-1' #warmup
+        bm1 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
+        bm2 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
+        bm3 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
         
         bm_real = (bm1.real + bm2.real + bm3.real) / 3
         degradation = original_bm_real.nil? ? nil : (", degradation: " + ((bm_real - original_bm_real) / bm_real * 100).round(2).to_s + "%")
@@ -86,11 +69,12 @@ namespace :bm do
       
       def report_transactions_and_bm number: 0
         log.debug "Reporting #{number} transactions (saving each individually)..."
-        account = @repository.get_by_id Domain::Account, 'account-1'
+        repo = @context.create_repository
+        account = repo.get_by_id Domain::Account, 'account-1'
         bm = Benchmark.measure {
           number.times do
             account.report_expence 100, DateTime.now, [], 'Benchmark test expence'
-            @repository.save account
+            repo.save account
           end
         }
         log.debug "#{number} transactions generated: #{bm.real}"

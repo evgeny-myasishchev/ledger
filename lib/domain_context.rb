@@ -3,10 +3,6 @@ class DomainContext < CommonDomain::DomainContext
   
   attr_reader :command_dispatch_middleware
   
-  def initialize(&block)
-    yield(self)
-  end
-  
   def with_event_store
     bootstrap_event_store do |with|
       with.log4r_logging
