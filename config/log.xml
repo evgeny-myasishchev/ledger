@@ -15,6 +15,9 @@
 	<outputter type="StdoutOutputter" name="console" level='INFO'>
 		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
 	</outputter>
+	<outputter type="StderrOutputter" name="console" level='INFO'>
+		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
 	<logger name="ledger" outputters="log_file, console"/>
 	<logger name="event-store" outputters="log_file" level='DEBUG'/>
 	<logger name="common-domain" outputters="log_file" level='DEBUG'/>
