@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: 5b820c4f373824b3f630f986bf340131e1432bb8
+  revision: 8a5f1752bf669f2a3e9dec8185271cd4aa70b3b1
   specs:
     common-domain (2.0.1.rc2)
       event-store (~> 2)
