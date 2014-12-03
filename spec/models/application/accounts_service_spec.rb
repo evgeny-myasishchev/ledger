@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe Application::AccountsService, :type => :model do
   let(:repository) { double(:repository) }
-  subject { described_class.new repository }
+  let(:repository_factory) { double(:repository_factory, create_repository: repository) }
+  subject { described_class.new repository_factory }
   let(:p) { Projections }
   let(:c) { Module.new do
     include Application::Commands::AccountCommands

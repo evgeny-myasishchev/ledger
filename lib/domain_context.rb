@@ -12,8 +12,8 @@ class DomainContext < CommonDomain::DomainContext
   
   def with_command_handlers
     bootstrap_command_handlers do |dispatcher|
-      dispatcher.register Application::LedgersService.new(@repository)
-      dispatcher.register Application::AccountsService.new(@repository)
+      dispatcher.register Application::LedgersService.new(repository_factory)
+      dispatcher.register Application::AccountsService.new(repository_factory)
     end
   end
   

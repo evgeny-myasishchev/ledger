@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe Application::LedgersService, :type => :model do
   let(:repository) { double(:repository) }
-  subject { described_class.new repository }
+  let(:repository_factory) { double(:repository_factory, create_repository: repository) }
+  subject { described_class.new repository_factory }
   let(:i) {
     Module.new do
       include Projections

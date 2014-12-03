@@ -5,8 +5,8 @@ include CommonDomain::NonAtomicUnitOfWork
 log = Rails.logger
 @log = log
 @context = Rails.application.domain_context
-def repository
-  @context.repository
+def repository_factory
+  @context.repository_factory
 end
 
 log.info 'Loadding dummy seeds...'
