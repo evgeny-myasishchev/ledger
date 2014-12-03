@@ -1,6 +1,7 @@
 class Ledger::Import::SyncModel
   include ::Domain::Events
   include Application::Commands
+  include CommonDomain::NonAtomicUnitOfWork
   
   def initialize(context)
     @context = context
@@ -13,6 +14,8 @@ class Ledger::Import::SyncModel
     log.debug 'Doing existing data clenup...'
     @context.event_store.purge
     @context.projections.for_each { |projection| projection.cleanup! }
+    User.delete_all
+    Snapshot.delete_all
   end
   
   def setup_users
@@ -23,8 +26,9 @@ class Ledger::Import::SyncModel
   
   def create_ledger
     log.info 'Creating ledger for the user'
-    @ledger_id = @context.repository.begin_work do |work|
+    @ledger_id = begin_unit_of_work({}) do |work|
       l = work.add_new Domain::Ledger.new.create @user_2.id, 'Family', Currency['UAH']
+      l.share @user_4.id
       l.aggregate_id
     end
   end
@@ -78,7 +82,7 @@ class Ledger::Import::SyncModel
   
   def create_transactions account, transactions
     aggregate_id = @accounts_map[account['account']['id']]
-    pause_dispatching
+    # pause_dispatching
     transactions.each { |data|
       transaction = data['transaction']
       type_id = transaction['transaction_type_id']
@@ -109,13 +113,13 @@ class Ledger::Import::SyncModel
       end
       dispatch cmd, user_id: transaction['user_id']
     }
-    resume_dispatching_and_wait
+    # resume_dispatching_and_wait
   end
   
   def set_account_balance account
     aggregate_id = @accounts_map[account['account']['id']]
     currency = detect_account_currency account['account']
-    @context.repository.begin_work do |work|
+    begin_unit_of_work({}) do |work|
       domain_account = work.get_by_id Domain::Account, aggregate_id
       balance = Money.parse(account['account']['balance'], currency).integer_amount
       domain_account.send :raise_event, AccountBalanceChanged.new(aggregate_id, nil, balance)
@@ -128,6 +132,10 @@ class Ledger::Import::SyncModel
   end
   
   private 
+    def repository_factory
+      @context.repository_factory
+    end
+  
     def pause_dispatching
       @context.event_store.dispatcher.stop
     end
