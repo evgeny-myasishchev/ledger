@@ -8,6 +8,7 @@ class DomainContext < CommonDomain::DomainContext
       with.log4r_logging
       with.sql_persistence(event_store_database_config, orm_log_level: :debug).compress
     end
+    with_snapshots Snapshot
   end
   
   def with_command_handlers
