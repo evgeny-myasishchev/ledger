@@ -48,6 +48,20 @@ namespace :ledger do
     end
   end
   
+  task :rebuild_projections do
+    app = init_app_skiping_domain_context
+    context = DomainContext.new do |c|
+      c.with_database_configs app.config.database_configuration, Rails.env
+      c.with_event_bus
+      c.with_projections
+      c.with_event_store
+    end
+    context.projections.for_each do |p|
+      p.cleanup!
+    end
+    context.with_projections_initialization
+  end
+  
   # To be used for mostly for testing purposes.
   desc "Get currency rates for given ledger.aggregate_id"
   task :get_currency_rates, [:aggregate_id] do |t, a|
