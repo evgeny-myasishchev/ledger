@@ -19,9 +19,11 @@ class Projections::Category < ActiveRecord::Base
     on CategoryCreated do |event|
       unless Category.exists? ledger_id: event.aggregate_id, category_id: event.category_id
         ledger = Ledger.find_by_aggregate_id event.aggregate_id
-        tag = Category.new ledger_id: event.aggregate_id, category_id: event.category_id, display_order: event.display_order, name: event.name
-        tag.set_authorized_users ledger.authorized_user_ids
-        tag.save!
+        Category.create! ledger_id: event.aggregate_id, 
+          category_id: event.category_id, 
+          display_order: event.display_order, 
+          name: event.name,
+          authorized_user_ids: ledger.authorized_user_ids
       end
     end
 

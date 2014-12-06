@@ -31,5 +31,12 @@ RSpec.describe Projections::UserAuthorizable do
       subject.authorize_user 31
       expect(subject.authorized_user_ids).to eql '{22},{23},{25},{31}'
     end
+    
+    it 'should not insert same user twice' do
+      subject.authorized_user_ids = '';
+      subject.authorize_user 10
+      subject.authorize_user 10
+      expect(subject.authorized_user_ids).to eql('{10}')
+    end
   end
 end

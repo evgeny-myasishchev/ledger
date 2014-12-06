@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141127215131) do
+ActiveRecord::Schema.define(version: 20141206094249) do
 
   create_table "currency_rates", force: true do |t|
     t.string   "from",       null: false
@@ -52,11 +52,11 @@ ActiveRecord::Schema.define(version: 20141127215131) do
   add_index "projections_categories", ["ledger_id", "category_id"], name: "index_projections_categories_on_ledger_id_and_category_id", unique: true
 
   create_table "projections_ledgers", force: true do |t|
-    t.string  "aggregate_id",         null: false
-    t.integer "owner_user_id",        null: false
-    t.string  "shared_with_user_ids"
-    t.string  "name",                 null: false
-    t.string  "currency_code",        null: false
+    t.string  "aggregate_id",        null: false
+    t.integer "owner_user_id",       null: false
+    t.string  "name",                null: false
+    t.string  "currency_code",       null: false
+    t.string  "authorized_user_ids"
   end
 
   add_index "projections_ledgers", ["aggregate_id"], name: "index_projections_ledgers_on_aggregate_id", unique: true

@@ -1,5 +1,6 @@
 module Projections::UserAuthorizable
   def authorize_user(user_id)  
+    return if authorized_user_ids.include?("{#{user_id}}")
     authorized_user_ids_will_change!
     authorized_user_ids << ',' unless authorized_user_ids.empty?
     authorized_user_ids << '{' 

@@ -16,15 +16,15 @@ RSpec.describe Projections::Ledger, :type => :model do
   
   describe "self.get_user_ledgers" do
     it "should return ledgers owed by the user" do
-      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil, currency_code: currency.code
-      l2 = p::Ledger.create! aggregate_id: 'l-2', owner_user_id: 11222, name: 'Ledger 2', shared_with_user_ids: nil, currency_code: currency.code
-      l3 = p::Ledger.create! aggregate_id: 'l-3', owner_user_id: 11223, name: 'Ledger 3', shared_with_user_ids: nil, currency_code: currency.code
-      expect(p::Ledger.get_user_ledgers(User.new id: 11222)).to eql([l1, l2])
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', authorized_user_ids: '{11222}', currency_code: currency.code
+      l2 = p::Ledger.create! aggregate_id: 'l-2', owner_user_id: 11222, name: 'Ledger 2', authorized_user_ids: '{11222}', currency_code: currency.code
+      l3 = p::Ledger.create! aggregate_id: 'l-3', owner_user_id: 11223, name: 'Ledger 3', authorized_user_ids: '{11223},{11222}', currency_code: currency.code
+      expect(p::Ledger.get_user_ledgers(User.new id: 11222)).to eql([l1, l2, l3])
       expect(p::Ledger.get_user_ledgers(User.new id: 11223)).to eql([l3])
     end
     
     it "should load limited set of attributes only" do
-      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, name: 'Ledger 1', shared_with_user_ids: nil, currency_code: currency.code
+      l1 = p::Ledger.create! aggregate_id: 'l-1', owner_user_id: 11222, authorized_user_ids: '{11222}', name: 'Ledger 1', currency_code: currency.code
       actual_l1 = p::Ledger.get_user_ledgers(User.new id: 11222).first
       expect(actual_l1.attribute_names).to eql ['id', 'aggregate_id', 'name', 'currency_code']
     end
@@ -80,25 +80,14 @@ RSpec.describe Projections::Ledger, :type => :model do
   end
   
   describe 'ensure_authorized!' do
-    it 'should do nothing if the user is owner' do
-      expect { ledger_1.ensure_authorized! User.new id: 100 }.not_to raise_error
-    end
-    
-    it 'should do nothing if the ledger is shared with the user' do
-      ledger_1.shared_with_user_ids.add 110
+    it 'should do nothing if the user is authorized' do
+      ledger_1.authorized_user_ids = '{100},{110}'
       expect { ledger_1.ensure_authorized! User.new id: 100 }.not_to raise_error
     end
     
     it 'should raise AuthorizationFailedError if the user is not owner or not shared' do
-      ledger_1.shared_with_user_ids.add 110
+      ledger_1.authorized_user_ids = '{100},{110}'
       expect { ledger_1.ensure_authorized! User.new id: 120 }.to raise_error Errors::AuthorizationFailedError
-    end
-  end
-  
-  describe "authorized_user_ids" do
-    it "should return an array of all users that are authorized to access the ledger" do
-      ledger = p::Ledger.create!(aggregate_id: 'ledger-2', owner_user_id: 22331, shared_with_user_ids: Set.new([22332, 22333]), name: 'ledger 1', currency_code: currency.code)
-      expect(ledger.authorized_user_ids).to eql([22332, 22333, 22331])
     end
   end
   
@@ -107,6 +96,7 @@ RSpec.describe Projections::Ledger, :type => :model do
       ledger_1 = described_class.find_by aggregate_id: 'ledger-1'
       expect(ledger_1.name).to eql 'Ledger 1'
       expect(ledger_1.owner_user_id).to eql 100
+      expect(ledger_1.authorized_user_ids).to eql '{100}'
     end
     
     it "should be idempotent" do
@@ -127,12 +117,12 @@ RSpec.describe Projections::Ledger, :type => :model do
     end
     
     it "should record corresponding user_id" do
-      expect(ledger_1.shared_with_user_ids).to eql Set.new([120, 130])
+      expect(ledger_1.authorized_user_ids).to eql '{100},{120},{130}'
     end
     
     it "should be idempotent" do
       subject.handle_message e::LedgerShared.new 'ledger-1', 120
-      expect(ledger_1.shared_with_user_ids).to eql Set.new([120, 130])
+      expect(ledger_1.authorized_user_ids).to eql '{100},{120},{130}'
     end
   end
 

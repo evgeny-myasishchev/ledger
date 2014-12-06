@@ -2,7 +2,7 @@ class Projections::Account < ActiveRecord::Base
   include CommonDomain::Projections::ActiveRecord
   include Domain::Events
   include Projections
-  include UserAuthorizable
+  include Projections::UserAuthorizable
   
   def self.get_user_accounts(user)
     Account.
@@ -36,7 +36,7 @@ class Projections::Account < ActiveRecord::Base
     on AccountCreated do |event|
       unless Account.exists? aggregate_id: event.aggregate_id
         ledger = Ledger.find_by_aggregate_id event.ledger_id
-        account = Account.new(aggregate_id: event.aggregate_id, 
+        Account.create!(aggregate_id: event.aggregate_id, 
           ledger_id: event.ledger_id, 
           sequential_number: event.sequential_number,
           owner_user_id: ledger.owner_user_id,
@@ -44,9 +44,8 @@ class Projections::Account < ActiveRecord::Base
           currency_code: event.currency_code,
           unit: event.unit,
           balance: event.initial_balance,
-          is_closed: false) 
-        account.set_authorized_users ledger.authorized_user_ids
-        account.save!
+          is_closed: false,
+          authorized_user_ids: ledger.authorized_user_ids)
       end
     end
     

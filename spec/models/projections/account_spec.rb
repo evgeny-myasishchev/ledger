@@ -6,7 +6,7 @@ RSpec.describe Projections::Account, :type => :model do
   let(:ledger) {
     p::Ledger.create!(aggregate_id: 'ledger-1', 
       owner_user_id: 22331, 
-      shared_with_user_ids: Set.new([22332, 22333]), 
+      authorized_user_ids: '{22332},{22333},{22331}', 
       name: 'ledger 1',
       currency_code: 'UAH')
   }
