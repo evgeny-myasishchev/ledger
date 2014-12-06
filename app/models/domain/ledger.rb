@@ -13,10 +13,10 @@ class Domain::Ledger < CommonDomain::Aggregate
     raise_event LedgerRenamed.new aggregate_id, name
   end
   
-  def share user_id
-    return if @shared_with.include?(user_id)
-    log.debug "Sharing account '#{aggregate_id}' with user id=#{user_id}"
-    raise_event LedgerShared.new aggregate_id, user_id
+  def share user
+    return if @shared_with.include?(user.id)
+    log.debug "Sharing account '#{aggregate_id}' with user id=#{user.id}"
+    raise_event LedgerShared.new aggregate_id, user.id
   end
   
   def create_new_account id, initial_data

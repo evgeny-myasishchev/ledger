@@ -51,13 +51,13 @@ describe Domain::Ledger do
     end
     
     it "should share LedgerShared event" do
-      subject.share 200
+      subject.share User.new id: 200
       expect(subject).to have_one_uncommitted_event I::LedgerShared, aggregate_id: subject.aggregate_id, user_id: 200
     end
         
     it "should not share if already shared" do
       subject.apply_event I::LedgerShared.new 'ledger-1', 200
-      subject.share 200
+      subject.share User.new id: 200
       expect(subject).not_to have_uncommitted_events
     end
   end
