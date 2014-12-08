@@ -62,6 +62,10 @@ namespace :ledger do
     context.with_projections_initialization
   end
   
+  task :discard_snapshots => :environment do
+    Snapshot.delete_all
+  end
+  
   # To be used for mostly for testing purposes.
   desc "Get currency rates for given ledger.aggregate_id"
   task :get_currency_rates, [:aggregate_id] do |t, a|
