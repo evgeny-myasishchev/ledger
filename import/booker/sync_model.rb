@@ -28,7 +28,7 @@ class Ledger::Import::SyncModel
     log.info 'Creating ledger for the user'
     @ledger_id = begin_unit_of_work({}) do |work|
       l = work.add_new Domain::Ledger.new.create @user_2.id, 'Family', Currency['UAH']
-      l.share @user_4.id
+      l.share @user_4
       l.aggregate_id
     end
   end
