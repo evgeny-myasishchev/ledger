@@ -43,6 +43,7 @@ module Ledger
         c.with_event_bus
         c.with_projections
         c.with_event_store
+        c.with_snapshots Snapshot
         c.with_services
         c.with_command_handlers
         c.with_command_dispatch_middleware

@@ -1,6 +1,34 @@
 namespace :bm do
+  task :get_snapshot, [:account_id] do |t, a|
+    require 'benchmark'
+    
+    account_id = a.account_id
+    raise 'Please provide account_id' unless account_id
+    times = 10
+    
+    Rails.application.initialize!
+    log = LogFactory.logger "ledger"
+    
+    # log.info 'Starting Snapshot.get (with ar) benchmark'
+    # bm = Benchmark.measure {
+    #   times.times do
+    #     Snapshot.get account_id
+    #   end
+    # }
+    # log.info "Snapshot.get (with ar): #{bm.real / times}"
+    
+    log.info 'Starting Snapshot.get (with sequel) benchmark'
+    sequel_repo = Snapshot::SequelRepo.new Rails.application.config.database_configuration['snapshots']
+    bm = Benchmark.measure {
+      times.times do
+        sequel_repo.get account_id
+      end
+    }
+    log.info "Snapshot.get (with sequel): #{bm.real / times}"
+  end
+  
   task :account_get_by_id, [:with_snapshots] do |t, a|
-    with_snapshots = a.with_snapshots ? true : false
+    with_snapshots = a.with_snapshots == 'true' ? true : false
     LedgerBenchmarks.run Rails.application, with_snapshots: with_snapshots
   end
 
@@ -16,8 +44,7 @@ namespace :bm do
     def initialize(app, options)
       @options = options
       @context = bootstrap app, with_snapshots: @options[:with_snapshots] || false
-      @write_repo = @context.create_repository
-      @log = LogFactory.logger "ledger"
+      @write_repo = @context.repository_factory.create_repository
     end
     
     def run
@@ -56,20 +83,20 @@ namespace :bm do
     private
       def bm_get_by_id original_bm_real: nil
         account = nil
-        @context.create_repository.get_by_id Domain::Account, 'account-1' #warmup
-        bm1 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
-        bm2 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
-        bm3 = Benchmark.measure { account = @context.create_repository.get_by_id Domain::Account, 'account-1' }
+        @context.repository_factory.create_repository.get_by_id Domain::Account, 'account-1' #warmup
+        bm1 = Benchmark.measure { account = @context.repository_factory.create_repository.get_by_id Domain::Account, 'account-1' }
+        bm2 = Benchmark.measure { account = @context.repository_factory.create_repository.get_by_id Domain::Account, 'account-1' }
+        bm3 = Benchmark.measure { account = @context.repository_factory.create_repository.get_by_id Domain::Account, 'account-1' }
         
         bm_real = (bm1.real + bm2.real + bm3.real) / 3
-        degradation = original_bm_real.nil? ? nil : (", degradation: " + ((bm_real - original_bm_real) / bm_real * 100).round(2).to_s + "%")
+        degradation = original_bm_real.nil? ? nil : (", degradation: " + ((bm_real  * 100) / original_bm_real - 100).round(2).to_s + "%")
         log.info "Account (version=#{account.version}) with '#{account.applied_events_number}' events loaded: #{bm_real.round(5)}#{degradation}"
         bm_real
       end
       
       def report_transactions_and_bm number: 0
         log.debug "Reporting #{number} transactions (saving each individually)..."
-        repo = @context.create_repository
+        repo = @context.repository_factory.create_repository
         account = repo.get_by_id Domain::Account, 'account-1'
         bm = Benchmark.measure {
           number.times do
@@ -82,17 +109,17 @@ namespace :bm do
     
       def bootstrap app, with_snapshots: false
         init_app_skiping_domain_context app
-
+        log.debug "Bootstrapping domain context. with_snapshots: #{with_snapshots}"
         context = DomainContext.new do |c|
           c.with_database_configs app.config.database_configuration
           c.with_event_bus CommonDomain::EventBus.new
           if with_snapshots
+            log.info 'Discarding snapshots...'
             Snapshot.delete_all
             c.with_snapshots Snapshot 
           end
           c.with_event_store
         end
-
         context.event_store.purge
         context
       end
@@ -101,6 +128,7 @@ namespace :bm do
         return if app.initialized?
         app.skip_domain_context = true
         app.initialize!
+        @log = LogFactory.logger "ledger"
       end
   end
 end
