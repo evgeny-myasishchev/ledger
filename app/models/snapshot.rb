@@ -24,7 +24,7 @@ class Snapshot < ActiveRecord::Base
     end
     
     private def serializer
-      @serializer ||= EventStore::Persistence::Serializers::GzipSerializer.new(EventStore::Persistence::Serializers::YamlSerializer.new)
+      @serializer ||= EventStore::Persistence::Serializers::GzipSerializer.new(EventStore::Persistence::Serializers::MarshalSerializer.new)
     end
   end
 end
