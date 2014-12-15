@@ -5,11 +5,41 @@ var Transaction = {
 	transferKey: 'transfer'
 };
 
-angular.module('ErrorLogger', []).factory('$exceptionHandler', function () {
+angular.module('ErrorHandler', [])
+.config(['$httpProvider', function($httpProvider) {
+	$httpProvider.interceptors.push(['$q', '$rootScope', function($q, $rootScope) {
+		return {
+			'responseError': function(rejection) {
+				$rootScope.$broadcast('http.unhandled-server-error', {
+					status: rejection.status,
+					statusText: rejection.statusText
+				});
+				return $q.reject(rejection);
+			}
+		};
+	}]);
+}])
+.factory('$exceptionHandler', function () {
 	return function errorCatcherHandler(exception, cause) {
 		console.error(exception);
 	};
-});
+}).directive('ldrErrorsNotifier', [function() {
+	return {
+		restrict: 'E',
+		scope: {},
+		templateUrl: 'application-error.html',
+		link: function(scope, element, attrs) {
+			var modal = element.find('div.modal');
+			modal.modal({
+				show:true
+			});
+			scope.$on('http.unhandled-server-error', function(evt, data) {
+				scope.title = data.status + ' ' + data.statusText;
+				modal.modal('show');
+			});
+		}
+	};
+}]);
 
 var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tagsProvider'])
 .directive('autofocus', function() {

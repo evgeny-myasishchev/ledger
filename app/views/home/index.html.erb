@@ -1,4 +1,7 @@
 <div class='container-fluid' ng-app="homeApp">
+	<script type="text/ng-template" id='application-error.html'>
+	<%= render template: 'application-error' %>
+	</script>
 	<script type="text/ng-template" id='accounts.html'>
 	<%= render partial: 'accounts' %>
 	</script>
@@ -25,6 +28,7 @@
 			tagsProvider.assignTags(<%= raw @tags.to_json %>);
 		}]);
 	</script>
+	<ldr-errors-notifier></ldr-errors-notifier>
 	<div ng-view class='row'>
 	</div>
 </div>
