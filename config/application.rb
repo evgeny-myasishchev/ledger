@@ -30,9 +30,7 @@ module Ledger
     config.log_config_path = File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
     
     initializer :initialize_log4r, {:before => :initialize_logger} do
-      LogFactory.configure(log_file_path: config.paths['log'].first, app_root: config.root, config_file: config.log_config_path)
-      config.logger = LogFactory.logger "ledger"
-      CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
+      initialize_logging
     end
     
     attr_accessor :skip_domain_context
@@ -53,5 +51,11 @@ module Ledger
     
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }
+    
+    def initialize_logging
+      LogFactory.configure(log_file_path: config.paths['log'].first, app_root: config.root, config_file: config.log_config_path)
+      config.logger = LogFactory.logger "ledger"
+      CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
+    end
   end
 end
