@@ -31,7 +31,7 @@ angular.module('ErrorHandler', [])
 		link: function(scope, element, attrs) {
 			var modal = element.find('div.modal');
 			modal.modal({
-				show:true
+				show:false
 			});
 			scope.$on('http.unhandled-server-error', function(evt, data) {
 				scope.title = data.status + ' ' + data.statusText;
