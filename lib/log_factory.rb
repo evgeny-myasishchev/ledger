@@ -1,5 +1,6 @@
 require 'log4r'
 require 'log4r/configurator'
+require 'log4r/outputter/emailoutputter'
 
 class LogFactory
   def self.root_logger
