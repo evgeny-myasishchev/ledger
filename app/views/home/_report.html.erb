@@ -30,7 +30,7 @@
 					<label class='control-label' for="type">Target account</label>
 					<select tabindex="3" class='form-control' ng-model='newTransaction.receivingAccountId' required>
 						<option value="">--Chose account--</option>
-						<option ng-repeat="account in accounts" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
+						<option ng-repeat="account in accounts | orderBy:'name'" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
 					</select>
 				</div>
 			</div>
