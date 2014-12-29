@@ -55,7 +55,7 @@ class Money
       def parse_string amount, currency
         separator = I18n.t :'number.currency.format.separator'
         delimiter = I18n.t :'number.currency.format.delimiter'
-        parts = amount.split(separator)
+        parts = amount.gsub(/\s+/, '').split(separator)
         raise MoneyParseError.new("Can not parse #{amount}. Unexpected number of parts.") if parts.length > 2
         integer = parts[0]
         integer.delete! delimiter

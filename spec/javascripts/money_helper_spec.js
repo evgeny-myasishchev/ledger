@@ -78,6 +78,9 @@ describe("money", function() {
 			it('should return an integer removing separator and delimiter', function() {
 				expect(subject.parse('9-888-777-666|55')).toEqual(988877766655);
 			});
+			it('should ignore white spacess', function() {
+				expect(subject.parse('9-8 88-7 77-6 66|55')).toEqual(988877766655);
+			});
 			it('should add decimal part', function() {
 				expect(subject.parse('100')).toEqual(10000);
 			});

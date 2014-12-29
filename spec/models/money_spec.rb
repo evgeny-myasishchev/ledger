@@ -73,6 +73,11 @@ describe Money do
         money = Money.parse('100.110,05', uah)
         expect(money.integer_amount).to eql 10011005
       end
+
+      it "should parse stripping white spaces" do
+        money = Money.parse('10 0.1 10,05', uah)
+        expect(money.integer_amount).to eql 10011005
+      end
       
       it "should fail if fractional part takes more than 2 dights" do
         expect(lambda { Money.parse('0,003', uah) }).to raise_error(Money::MoneyParseError, "Can not parse 0,003. Fractional part is longer than two dights.")
