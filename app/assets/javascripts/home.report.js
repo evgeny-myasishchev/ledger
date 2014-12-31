@@ -2,7 +2,7 @@
 	var homeApp = angular.module('homeApp');
 	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
 	function ($scope, $http, accounts, money) {
-		var activeAccount = $scope.account = accounts.getActive();
+		$scope.account = accounts.getActive();
 		$scope.accounts = accounts.getAll();
 		$scope.reportedTransactions = [];
 		//For testing purposes
@@ -17,11 +17,11 @@
 	
 		var processReportedTransaction = function(transaction) {
 			if(transaction.type == Transaction.incomeKey || transaction.type == Transaction.refundKey) {
-				activeAccount.balance += transaction.amount;
+				$scope.account.balance += transaction.amount;
 			} else if(transaction.type == Transaction.expenceKey) {
-				activeAccount.balance -= transaction.amount;
+				$scope.account.balance -= transaction.amount;
 			} else if(transaction.type == Transaction.transferKey) {
-				activeAccount.balance -= transaction.amount;
+				$scope.account.balance -= transaction.amount;
 				$.each(accounts.getAll(), function(index, account) {
 					if(account.aggregate_id == transaction.receivingAccountId) {
 						account.balance += money.parse(transaction.amountReceived);
@@ -60,7 +60,7 @@
 			} else {
 				command.amount = amount;
 			}
-			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
+			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
 				command: command
 			}).success(function() {
 				var reported = $scope.newTransaction;

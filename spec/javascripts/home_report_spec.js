@@ -139,13 +139,14 @@ describe("ReportTransactionsController", function() {
 			});
 		});
 	
-		describe('on success update activeAccount balance', function() {
+		describe('on success update account balance', function() {
 			beforeEach(function() {
+				scope.account = account1;
 				scope.account.balance = 500;
 			});
 		
 			function doReport(amount, typeKey) {
-				$httpBackend.expectPOST('accounts/a-2/transactions/report-' + typeKey).respond();
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-' + typeKey).respond();
 				scope.newTransaction.amount = amount;
 				scope.newTransaction.type = typeKey;
 				scope.report();
@@ -168,7 +169,7 @@ describe("ReportTransactionsController", function() {
 			});
 		
 			it('should update the balance on on transfer', function() {
-				var receivingAccount = scope.accounts[0];
+				var receivingAccount = scope.accounts[1];
 				receivingAccount.balance = 10000;
 				scope.newTransaction.receivingAccountId = receivingAccount.aggregate_id;
 				scope.newTransaction.amountReceived = '50';

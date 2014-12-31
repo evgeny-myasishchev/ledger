@@ -1,28 +1,31 @@
-<div class="page-header" style='margin-top: 0;'>
-	<h1 style='margin-top: 0;'>{{account.name}} <small>{{account.balance | money}}</small></h1>
-</div>
-
 <div class="panel panel-default" id='report-new-transaction-container'>
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
-		<form name='newTransactionForm' role="form" class='form-inline' ng-submit='report()'>
-			<div class="form-group">
-				<input tabindex="1" autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
-			</div>
-			<div class="form-group">
-				<label class='control-label' for="type">Type</label>
-				<select name="type" id="type" class='form-control' ng-model='newTransaction.type'>
-					<option value="income">Income</option>
-					<option value="expence">Expence</option>
-					<option value="refund">Refund</option>
-					<option value="transfer">Transfer</option>
+		<form name='newTransactionForm' role="form" ng-submit='report()'>
+			<div class='form-group'>
+				<label class='control-label' for="type">Account</label>
+				<select ng-options='account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='account' required>
 				</select>
 			</div>
-			<div class="form-group">
-				<label class='control-label' for="date">Date</label>
-				<ldr-datepicker ng-model='newTransaction.date' />
+			<div class='form-group form-inline'>
+				<div class="form-group">
+					<input tabindex="1" autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
+				</div>
+				<div class="form-group">
+					<label class='control-label' for="type">Type</label>
+					<select name="type" id="type" class='form-control' ng-model='newTransaction.type'>
+						<option value="income">Income</option>
+						<option value="expence">Expence</option>
+						<option value="refund">Refund</option>
+						<option value="transfer">Transfer</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class='control-label' for="date">Date</label>
+					<ldr-datepicker ng-model='newTransaction.date' />
+				</div>
 			</div>
-			<div style='margin-top: 15px;' ng-if='newTransaction.type == "transfer"'>
+			<div ng-if='newTransaction.type == "transfer"' class='form-group form-inline'>
 				<div class='form-group'>
 					<input tabindex="2" type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amountReceived' required>
 				</div>
@@ -34,13 +37,13 @@
 					</select>
 				</div>
 			</div>
-			<div class="form-group" style='display: block; margin-top: 15px;'>
+			<div class="form-group">
 				<ledger-tags-input tabindex="4" ng-model='newTransaction.tag_ids' />
 			</div>
-			<div class="form-group" style='display: block; margin-top: 15px;'>
-				<input tabindex="5" type="text" class="form-control" placeholder="Comment" style='width: 100%' ng-model='newTransaction.comment'>
+			<div class="form-group">
+				<input tabindex="5" type="text" class="form-control" placeholder="Comment" ng-model='newTransaction.comment'>
 			</div>
-			<div class="form-group" style='display: block; margin-top: 15px;'>
+			<div class="form-group">
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
 				or 
 				<a href='#/accounts/{{account.sequential_number}}'>I'm done reporting</a>
