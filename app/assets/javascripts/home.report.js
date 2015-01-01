@@ -3,7 +3,7 @@
 	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
 	function ($scope, $http, accounts, money) {
 		$scope.account = accounts.getActive();
-		$scope.accounts = accounts.getAll();
+		$scope.accounts = accounts.getAllOpen();
 		$scope.reportedTransactions = [];
 		//For testing purposes
 		// $scope.reportedTransactions = [

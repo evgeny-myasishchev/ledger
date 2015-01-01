@@ -8,10 +8,10 @@ describe('home.acounts', function() {
 			module('homeApp');
 			homeApp.config(['accountsProvider', function(accountsProvider) {
 				accountsProvider.assignAccounts([
-					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1},
-					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2},
-					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, category_id: null},
-					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, category_id: null}
+					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1, is_closed: false},
+					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2, is_closed: false},
+					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, category_id: null, is_closed: false},
+					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, category_id: null, is_closed: false}
 				]);
 				accountsProvider.assignCategories([
 					category1 = {id: 1, display_order: 1, name: 'Category 1'},
@@ -33,6 +33,13 @@ describe('home.acounts', function() {
 		it('should return all accounts on getAll', function() {
 			initProvider();
 			expect(subject.getAll()).toEqual([account1, account2, account3, account4]);
+		});
+		
+		it('should return all open accounts on getAllOpen', function() {
+			account3.is_closed = true;
+			account4.is_closed = true;
+			initProvider();
+			expect(subject.getAllOpen()).toEqual([account1, account2]);
 		});
 
 		it("should set active account from route params", function() {

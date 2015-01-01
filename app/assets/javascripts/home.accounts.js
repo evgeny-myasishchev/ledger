@@ -18,6 +18,11 @@
 				getAll: function() {
 					return accounts;
 				},
+				getAllOpen: function() {
+					return $.grep(accounts, function(account) { 
+						return !account.is_closed;
+					});
+				},
 				getAllCategories: function() {
 					return categories;
 				},

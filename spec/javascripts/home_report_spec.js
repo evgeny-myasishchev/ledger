@@ -5,9 +5,9 @@ describe("ReportTransactionsController", function() {
 		module('homeApp');
 		homeApp.config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
-				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
-				account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},
-				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200}
+				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, is_closed: false},
+				account2 = {id: 2, aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, is_closed: false},
+				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, is_closed: false}
 			]);
 		}]);
 		inject(function(_$httpBackend_) {
@@ -29,6 +29,12 @@ describe("ReportTransactionsController", function() {
 		activeAccount.balance = undefined;
 		initController();
 		expect(scope.account).toEqual(activeAccount);
+	});
+	
+	it("should assign open accounts", function() {
+		account3.is_closed = true;
+		initController();
+		expect(scope.accounts).toEqual([account1, account2]);
 	});
 
 	it("initializes initial scope", function() {
