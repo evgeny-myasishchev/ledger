@@ -1,5 +1,5 @@
 var homeApp = (function() {
-	var homeApp = angular.module('homeApp', ['ErrorHandler', 'ngRoute', 'ledgerDirectives', 'ledgersProvider', 'tagsProvider']);
+	var homeApp = angular.module('homeApp', ['ErrorHandler', 'ngRoute', 'ledgerDirectives', 'ledgersProvider', 'tagsProvider', 'transactions']);
 	
 	homeApp.config(["$httpProvider", function($httpProvider) {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
@@ -212,9 +212,6 @@ var homeApp = (function() {
 			.when('/accounts/:accountSequentialNumber', {
 				templateUrl: "accounts.html",
 				controller: 'HomeController'
-			}).when('/accounts/:accountSequentialNumber/report', {
-				templateUrl: "report.html",
-				controller: 'ReportTransactionsController'
 			}).otherwise({
 				redirectTo: '/accounts'
 			});

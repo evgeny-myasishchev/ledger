@@ -1,6 +1,6 @@
 !function() {
-	var homeApp = angular.module('homeApp');
-	homeApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
+	var transactions = angular.module('transactions');
+	transactions.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
 	function ($scope, $http, accounts, money) {
 		$scope.account = accounts.getActive();
 		$scope.accounts = accounts.getAllOpen();
