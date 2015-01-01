@@ -23,7 +23,9 @@ Rails.application.routes.draw do
     end
   end
   
-  resources :transactions, only: [:destroy] do
+  resources :transactions, only: [:index, :destroy] do
+    get ':from-:to' => 'transactions#search', on: :collection
+    post ':from-:to' => 'transactions#search', on: :collection
     post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
   end
   

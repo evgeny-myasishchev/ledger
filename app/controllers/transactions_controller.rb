@@ -2,7 +2,7 @@ class TransactionsController < ApplicationController
   include Application::Commands::AccountCommands
   
   def index
-    @transactions = Projections::Transaction.get_account_home_data current_user, params[:account_id]
+    @transactions = Projections::Transaction.get_root_data current_user, params[:account_id]
     respond_to do |format|
       format.json { render json: @transactions }
     end

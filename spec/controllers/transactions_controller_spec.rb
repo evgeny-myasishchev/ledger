@@ -5,12 +5,21 @@ describe TransactionsController do
   include AuthenticationHelper
   
   describe "routes", :type => :routing do
+    it 'routes root index' do
+      expect({get: 'transactions'}).to route_to controller: 'transactions', action: 'index'
+    end
+    
     it "routes nested index route" do
       expect({get: 'accounts/22331/transactions'}).to route_to controller: 'transactions', action: 'index', account_id: '22331'
       expect(account_transactions_path('22331')).to eql '/accounts/22331/transactions'
     end
-    
-    it "routes search" do
+
+    it 'routes root search' do
+      expect({get: 'transactions/1-25'}).to route_to controller: 'transactions', action: 'search', from: "1", to: "25"
+      expect({post: 'transactions/1-25'}).to route_to controller: 'transactions', action: 'search', from: "1", to: "25"
+    end
+
+    it "routes accounts nested search" do
       expect({get: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'search', account_id: '22331', from: "1", to: "25"
       expect({post: 'accounts/22331/transactions/1-25'}).to route_to controller: 'transactions', action: 'search', account_id: '22331', from: "1", to: "25"
     end
@@ -54,11 +63,19 @@ describe TransactionsController do
     
     describe "authenticated" do
       authenticate_user
-      it "should get transactions for given account" do
+      
+      it "should get home data for given account" do
         transactions = double(:transactions)
-        expect(Projections::Transaction).to receive(:get_account_home_data).with(user, 'a-100').and_return(transactions)
+        expect(Projections::Transaction).to receive(:get_root_data).with(user, 'a-100').and_return(transactions)
         get 'index', account_id: 'a-100', format: :json
         expect(response.status).to eql 200
+        expect(assigns(:transactions)).to be transactions
+      end
+      
+      it "should get home data for user" do
+        transactions = double(:transactions)
+        expect(Projections::Transaction).to receive(:get_root_data).with(user, nil).and_return(transactions)
+        get 'index', format: :json
         expect(assigns(:transactions)).to be transactions
       end
     end
