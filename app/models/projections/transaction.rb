@@ -67,7 +67,7 @@ class Projections::Transaction < ActiveRecord::Base
     criteria = criteria || {}
     query = account.nil? ? Transaction.joins(:account).where('projections_accounts.authorized_user_ids LIKE ?', "%{#{user.id}}%")
       : Transaction.where(account_id: account.aggregate_id)
-    query = query.select(:id, :transaction_id, :type_id, :amount, :tag_ids, :comment, :date, 
+    query = query.select(:id, :transaction_id, :account_id, :type_id, :amount, :tag_ids, :comment, :date, 
         :is_transfer, :sending_account_id, :sending_transaction_id, 
         :receiving_account_id, :receiving_transaction_id)
     query = query.order(date: :desc)

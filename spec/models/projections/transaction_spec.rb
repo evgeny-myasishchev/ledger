@@ -282,7 +282,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   end
   
   def expect_required_attributes transaction
-    expect(transaction.attributes.keys).to eql ["id", "transaction_id",
+    expect(transaction.attributes.keys).to eql ["id", "transaction_id", "account_id",
       "type_id", "amount", "tag_ids",
       "comment", "date", "is_transfer", "sending_account_id",
       "sending_transaction_id", "receiving_account_id", "receiving_transaction_id"]
