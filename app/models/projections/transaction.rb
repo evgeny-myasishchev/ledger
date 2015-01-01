@@ -3,6 +3,8 @@ class Projections::Transaction < ActiveRecord::Base
   include Domain::Events
   include Projections
   
+  belongs_to :account, primary_key: :aggregate_id
+  
   # Gets transfer counterpart. For sending transaction that would be the receiving and vice versa.
   def get_transfer_counterpart
     raise "Transaction '#{transaction_id}' is not involved in transfer." unless is_transfer
@@ -32,20 +34,21 @@ class Projections::Transaction < ActiveRecord::Base
     self.tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
   end
   
-  def self.get_account_home_data(user, account_id, limit: 25)
-    account = Account.ensure_authorized! account_id, user
-    transactions = build_search_query account_id
-    {
-      account_balance: account.balance,
+  def self.get_root_data(user, account_id, limit: 25)
+    account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
+    transactions = build_search_query user, account
+    root_data = {
       transactions_total: transactions.count(:id),
       transactions_limit: limit,
       transactions: transactions.take(limit)
     }
+    root_data[:account_balance] = account.balance if account
+    root_data
   end
   
   def self.search(user, account_id, criteria: {}, offset: 0, limit: 25, with_total: false)
-    account = Account.ensure_authorized! account_id, user
-    query = build_search_query(account_id, criteria: criteria)
+    account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
+    query = build_search_query(user, account, criteria: criteria)
     result = {
       transactions: query.offset(offset).take(limit)
     }
@@ -59,9 +62,12 @@ class Projections::Transaction < ActiveRecord::Base
   # * amount - exact amount to find
   # * from - date from
   # * to - date to
-  def self.build_search_query account_id, criteria: {}
+  def self.build_search_query user, account, criteria: {}
+    raise 'User or Account should be provided.' if user.nil? && account.nil?
     criteria = criteria || {}
-    query = Transaction.where(account_id: account_id).select(:id, :transaction_id, :type_id, :amount, :tag_ids, :comment, :date, 
+    query = account.nil? ? Transaction.joins(:account).where('projections_accounts.authorized_user_ids LIKE ?', "%{#{user.id}}%")
+      : Transaction.where(account_id: account.aggregate_id)
+    query = query.select(:id, :transaction_id, :type_id, :amount, :tag_ids, :comment, :date, 
         :is_transfer, :sending_account_id, :sending_transaction_id, 
         :receiving_account_id, :receiving_transaction_id)
     query = query.order(date: :desc)

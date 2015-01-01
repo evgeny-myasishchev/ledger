@@ -44,7 +44,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
   
-  describe "self.get_account_home_data" do
+  describe "self.get_root_data" do
     let(:user) { 
       u = User.new
       u.id = 2233
@@ -57,28 +57,38 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
       
-      allow(p::Account).to receive(:ensure_authorized!) { account }
+      allow(p::Account).to receive(:ensure_authorized!).with(account.aggregate_id, user) { account }
     end
     
     it "should check if the user is authorized" do
-      described_class.get_account_home_data user, account.aggregate_id
+      described_class.get_root_data user, account.aggregate_id
       expect(p::Account).to have_received(:ensure_authorized!).with(account.aggregate_id, user)
     end
     
     it "should include account balance" do
       account.balance = 2233119
       account.save!
-      data = described_class.get_account_home_data user, account.aggregate_id
+      data = described_class.get_root_data user, account.aggregate_id
       expect(data[:account_balance]).to eql(2233119)
+    end
+    
+    it "should get all transactions for the user using query builder" do
+      query = double(:query)
+      allow(query).to receive(:take) { query }
+      allow(query).to receive(:count) { 100 }
+      expect(described_class).to receive(:build_search_query).with(user, nil) { query }
+      
+      transactions = described_class.get_root_data(user, nil)[:transactions]
+      expect(transactions).to be query
     end
     
     it "should get all transactions for given account using query builder" do
       query = double(:query)
       allow(query).to receive(:take) { query }
       allow(query).to receive(:count) { 100 }
-      expect(described_class).to receive(:build_search_query).with(account.aggregate_id) { query }
+      expect(described_class).to receive(:build_search_query).with(user, account) { query }
       
-      transactions = described_class.get_account_home_data(user, account.aggregate_id)[:transactions]
+      transactions = described_class.get_root_data(user, account.aggregate_id)[:transactions]
       expect(transactions).to be query
     end
     
@@ -86,8 +96,8 @@ RSpec.describe Projections::Transaction, :type => :model do
       query = double(:query)
       expect(query).to receive(:take).with(5) { query }
       expect(query).to receive(:count) { 20 }
-      expect(described_class).to receive(:build_search_query).with(account.aggregate_id) { query }
-      data = described_class.get_account_home_data(user, account.aggregate_id, limit: 5)
+      expect(described_class).to receive(:build_search_query).with(user, account) { query }
+      data = described_class.get_root_data(user, account.aggregate_id, limit: 5)
       expect(data[:transactions_total]).to eql 20
       expect(data[:transactions_limit]).to eql 5
       expect(data[:transactions]).to be query
@@ -118,8 +128,14 @@ RSpec.describe Projections::Transaction, :type => :model do
     
     it 'should build serach query for given account and criteria' do
       criteria = double(:criteria)
-      expect(described_class).to receive(:build_search_query).with(account.aggregate_id, criteria: criteria) { query }
+      expect(described_class).to receive(:build_search_query).with(user, account, criteria: criteria) { query }
       expect(described_class.search(user, account.aggregate_id, criteria: criteria)).to eql(transactions: query)
+    end
+    
+    it 'should build search query for given user only if no account provided' do
+      criteria = double(:criteria)
+      expect(described_class).to receive(:build_search_query).with(user, nil, criteria: criteria) { query }
+      expect(described_class.search(user, nil, criteria: criteria)).to eql(transactions: query)
     end
     
     it 'should use limit and offset' do
@@ -148,24 +164,45 @@ RSpec.describe Projections::Transaction, :type => :model do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 0, date - 100, ['tag-2'], ''
     end
     
+    it 'should fail if user and account are nil' do
+      expect { described_class.build_search_query nil, nil }.to raise_error('User or Account should be provided.')
+    end
+    
     it 'should have required attributes' do
-      result = described_class.build_search_query account.aggregate_id
+      result = described_class.build_search_query user, account
       expect_required_attributes result.first
     end
     
     it 'should treat null criteria as empty' do
-      expect(described_class.build_search_query(account.aggregate_id, criteria: nil).length).to eql 3
+      expect(described_class.build_search_query(user, account, criteria: nil).length).to eql 3
+    end
+    
+    it 'should get all transactions of the user if no account provided' do
+      a2 = create_account_projection! 'account-2', authorized_user_ids: '{2233},{993}'
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-1', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-2', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-3', expence_id, 0, date, ['tag-1'], ''
+      
+      #Some fake stuff
+      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-1', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-2', expence_id, 0, date, ['tag-1'], ''
+      
+      result = described_class.build_search_query user, nil
+      expect(result.length).to eql 6
+      expect(result.detect { |t| t.transaction_id == 'ta-1' }).not_to be_nil
+      expect(result.detect { |t| t.transaction_id == 'ta-2' }).not_to be_nil
+      expect(result.detect { |t| t.transaction_id == 'ta-3' }).not_to be_nil
     end
     
     it 'should order transactions by date descending' do
-      transactions = described_class.build_search_query account.aggregate_id
+      transactions = described_class.build_search_query user, account
       expect(transactions[0].transaction_id).to eql 't-1'
       expect(transactions[1].transaction_id).to eql 't-2'
       expect(transactions[2].transaction_id).to eql 't-3'
     end
     
     it 'should filter by tag_ids' do
-      result = described_class.build_search_query account.aggregate_id, criteria: {tag_ids: ['tag-1', 'tag-2']}
+      result = described_class.build_search_query user, account, criteria: {tag_ids: ['tag-1', 'tag-2']}
       expect(result.length).to eql 2
       expect(result[0]).to eql described_class.find_by transaction_id: 't-1'
       expect(result[1]).to eql described_class.find_by transaction_id: 't-2'
@@ -180,11 +217,11 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.comment = 'This is t-2 comment'
       t2.save!
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {comment: 'is t-1'}
+      result = described_class.build_search_query user, account, criteria: {comment: 'is t-1'}
       expect(result.length).to eql 1
       expect(result[0]).to eql t1
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {comment: 'This is'}
+      result = described_class.build_search_query user, account, criteria: {comment: 'This is'}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
@@ -199,7 +236,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.amount = 10023
       t2.save!
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {amount: 10023}
+      result = described_class.build_search_query user, account, criteria: {amount: 10023}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
@@ -214,12 +251,12 @@ RSpec.describe Projections::Transaction, :type => :model do
       t2.date = date - 20
       t2.save!
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {from: t2.date}
+      result = described_class.build_search_query user, account, criteria: {from: t2.date}
       expect(result.length).to eql 2
       expect(result[0]).to eql t1
       expect(result[1]).to eql t2
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {from: t1.date}
+      result = described_class.build_search_query user, account, criteria: {from: t1.date}
       expect(result.length).to eql 1
       expect(result[0]).to eql t1
     end
@@ -237,7 +274,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       t3.date = date - 30
       t3.save!
       
-      result = described_class.build_search_query account.aggregate_id, criteria: {to: t2.date}
+      result = described_class.build_search_query user, account, criteria: {to: t2.date}
       expect(result.length).to eql 2
       expect(result[0]).to eql t2
       expect(result[1]).to eql t3
