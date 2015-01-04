@@ -54,5 +54,13 @@ namespace :deploy do
       end
     end
   end
-
+  
+  namespace :check do
+    after :make_linked_dirs, :ensure_linked_files do
+      on roles(:web), in: :groups, limit: 3, wait: 10 do
+        execute "cd #{shared_path} && [[ -f .env ]] || touch .env"
+        execute "cd #{shared_path} && [[ -f config/database.yml ]] || touch config/database.yml"
+      end
+    end
+  end
 end
