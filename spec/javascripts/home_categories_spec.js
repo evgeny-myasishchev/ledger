@@ -19,11 +19,11 @@ describe("CategoriesController", function() {
 		HomeHelpers.include(this);
 		this.assignActiveLedger({aggregate_id: 'ledger-332'});
 	});
-	
+
 	it('should assign scope categories', function() {
 		expect(scope.categories).toEqual([category1, category2, category3]);
 	});
-	
+
 	describe('createCategory', function() {
 		beforeEach(function() {
 			scope.isCreated = true;
@@ -32,7 +32,7 @@ describe("CategoriesController", function() {
 			scope.newCategoryName = 'New category 223';
 			$httpBackend.whenPOST('ledgers/ledger-332/categories').respond(200, JSON.stringify({category_id: 223}));
 		});
-		
+
 		it('should post create category', function() {
 			$httpBackend.expectPOST('ledgers/ledger-332/categories', function(data) {
 				var command = JSON.parse(data);
@@ -42,7 +42,7 @@ describe("CategoriesController", function() {
 			scope.createCategory();
 			$httpBackend.flush();
 		});
-		
+
 		it('should reset flags and add category to accounts service on created', function() {
 			expect(scope.createCategory().then).toBeDefined();
 			expect(scope.isCreated).toBeFalsy();
@@ -51,7 +51,7 @@ describe("CategoriesController", function() {
 			expect(accounts.addCategory).toHaveBeenCalledWith(223, 'New category 223');
 		});
 	});
-	
+
 	it('should put update and assign new name on success', function() {
 		$httpBackend.expectPUT('ledgers/ledger-332/categories/110', function(data) {
 			var command = JSON.parse(data);
@@ -62,13 +62,13 @@ describe("CategoriesController", function() {
 		$httpBackend.flush();
 		expect(category1.name).toEqual('New category name 110');
 	});
-	
+
 	describe('removeCategory', function() {
 		beforeEach(function() {
 			$httpBackend.expectDELETE('ledgers/ledger-332/categories/' + category1.category_id).respond(200);
 			scope.removeCategory(category1);
 		});
-		
+
 		it('should remove the category from accounts service on success', function() {
 			spyOn(accounts, 'removeCategory');
 			$httpBackend.flush();

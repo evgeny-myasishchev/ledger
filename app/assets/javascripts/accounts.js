@@ -1,7 +1,14 @@
-!function($) {
-	var homeApp = angular.module('homeApp');
+var accountsApp = (function($) {
+	var accountsApp = angular.module('accountsApp', ['ErrorHandler', 'ngRoute', 'ledgersProvider', 'ledgerHelpers']);
+	accountsApp.config(['$routeProvider', function($routeProvider) {
+			$routeProvider.when('/accounts/:accountSequentialNumber/report', {
+				templateUrl: "report.html",
+				controller: 'ReportTransactionsController'
+			});
+		}
+	]);
 	
-	homeApp.provider('accounts', function() {
+	accountsApp.provider('accounts', function() {
 		var accounts, categories;
 		this.assignAccounts = function(value) {
 			accounts = value;
@@ -81,7 +88,7 @@
 		}];
 	});
 	
-	homeApp.provider('accountsState', function() {
+	accountsApp.provider('accountsState', function() {
 		var showingClosed = false;
 		this.$get = function() {
 			return {
@@ -93,7 +100,7 @@
 		}
 	});
 	
-	homeApp.directive('accountsPanel', ['accounts', 'accountsState', function(accounts, accountsState) {
+	accountsApp.directive('accountsPanel', ['accounts', 'accountsState', function(accounts, accountsState) {
 		return {
 			restrict: 'E',
 			templateUrl: 'accounts-panel.html',
@@ -117,7 +124,7 @@
 		}
 	}]);
 	
-	homeApp.filter('activateFirstAccount', ['accounts', '$location', function(accounts, $location) {
+	accountsApp.filter('activateFirstAccount', ['accounts', '$location', function(accounts, $location) {
 		return function(account) {
 			var activeAccount = accounts.getActive();
 			if(activeAccount) return account;
@@ -127,7 +134,7 @@
 		}
 	}]);
 	
-	homeApp.filter('calculateTotal', ['ledgers', 'accounts', 'money', function(ledgers, accountsService, money) {
+	accountsApp.filter('calculateTotal', ['ledgers', 'accounts', 'money', function(ledgers, accountsService, money) {
 		return function(accounts, resultExpression) {
 			var that = this;
 			ledgers.loadCurrencyRates().then(function(rates) {
@@ -143,71 +150,5 @@
 		}
 	}]);
 	
-	homeApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
-	function($scope, $http, money, ledgers, accounts) {
-		var resetNewAccount = function() {
-			$scope.newAccount = {
-				name: null,
-				currency: null,
-				initialBalance: '0',
-				unit: null
-			};
-		}
-		resetNewAccount();
-		
-		//For testing
-		// $scope.newAccount.name = 'New account 123';
-		// $scope.newAccount.currencyCode = 'UAH';
-		// $scope.newAccount.initialBalance = '100.93';
-		
-		$scope.currencies = [];
-		var activeLedger = ledgers.getActiveLedger();
-		$http.get('ledgers/' + activeLedger.aggregate_id + '/accounts/new.json').success(function(data) {
-			$scope.newAccount.newAccountId = data.new_account_id;
-			$scope.currencies = data.currencies;
-			
-			//For testing
-			// $scope.newAccount.currency = data.currencies[174];
-		});
-		
-		$scope.$watch('newAccount.currency.unit', function(newVal) {
-			if(newVal == 'oz') $scope.newAccount.unit = 'oz';
-			else $scope.newAccount.unit = null;
-		});
-		
-		$scope.created = false;
-		$scope.creating = false;
-		$scope.create = function() {
-			$scope.creating = true;
-			var commandData = {
-				account_id: $scope.newAccount.newAccountId,
-				name: $scope.newAccount.name,
-				currency_code: $scope.newAccount.currency.code,
-				initial_balance: $scope.newAccount.initialBalance
-			};
-			if($scope.newAccount.unit) commandData.unit = $scope.newAccount.unit;
-			$http.post('ledgers/' + activeLedger.aggregate_id + '/accounts', commandData).success(function() {
-				var account = {
-					aggregate_id: commandData.account_id,
-					name: commandData.name,
-					currency_code: commandData.currency_code,
-					currency: $scope.newAccount.currency,
-					balance: money.parse(commandData.initial_balance),
-					is_closed: false
-				};
-				if(commandData.unit) account.unit = commandData.unit;
-				accounts.add(account);
-				$scope.created = true;
-			}).finally(function() {
-				$scope.creating = false;
-			});
-		};
-		$scope.createAnother = function() {
-			$http.get('ledgers/' + activeLedger.aggregate_id + '/accounts/new.json').success(function(data) {
-				resetNewAccount();
-				$scope.newAccount.newAccountId = data.new_account_id;
-				$scope.created = false;
-			});
-		};
-	}]);
-}(jQuery);
+	return accountsApp;
+})(jQuery);

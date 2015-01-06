@@ -22,6 +22,5 @@
 //= require bootstrap-tagsinput
 //= require typeahead.bundle
 //= require home
-//= require home.accounts
 //= require_tree .
 //= require_self

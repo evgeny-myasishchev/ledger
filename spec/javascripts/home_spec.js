@@ -21,20 +21,20 @@ describe("homeApp", function() {
 			$httpBackend = _$httpBackend_;
 		});
 	});
-	
+
 	describe('accountsStateProvider', function() {
 		var provider;
 		beforeEach(function() {
 			inject(['accountsState', function(p) { provider = p;}]);
 		});
-		
+
 		it('should get/set if showing closed accounts', function() {
 			expect(provider.showingClosed()).toBeFalsy();
 			expect(provider.showingClosed(true)).toBeTruthy();
 			expect(provider.showingClosed()).toBeTruthy();
 		});
 	});
-	
+
 	describe('HomeController', function() {
 		var activeAccount;
 		beforeEach(function() {
@@ -43,20 +43,20 @@ describe("homeApp", function() {
 			HomeHelpers.include(this);
 			this.assignActiveAccount(activeAccount);
 		});
-		
+
 		function initController() {
 			inject(function($rootScope, $controller) {
 				scope = $rootScope.$new();
 				controller = $controller('HomeController', {$scope: scope, $routeParams: routeParams});
 			});
 		}
-		
+
 		it("should set active account from accessor", function() {
 			this.assignActiveAccount(account2);
 			initController();
 			expect(scope.activeAccount).toEqual(account2);
 		});
-		
+
 		describe('renameAccount', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
@@ -75,7 +75,7 @@ describe("homeApp", function() {
 				expect(result.then).toBeDefined();
 			});
 		});
-		
+
 		describe('set-category/close/reopen/remove account', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });
@@ -84,7 +84,7 @@ describe("homeApp", function() {
 				HomeHelpers.include(this);
 				this.assignActiveLedger({aggregate_id: 'ledger-332'});
 			});
-			
+
 			it('should put set-category for given account and update category_id on success', function() {
 				$httpBackend.expectPUT('ledgers/ledger-332/accounts/a-2/set-category', function(data) {
 					expect(JSON.parse(data).category_id).toEqual(332);
@@ -94,14 +94,14 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 				expect(account2.category_id).toEqual(332);
 			});
-			
+
 			it('should post close for given account and update closed flag on success when closing', function() {
 				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/close').respond(200);
 				var result = scope.closeAccount(account2);
 				$httpBackend.flush();
 				expect(account2.is_closed).toBeTruthy();
 			});
-			
+
 			it('should post reopen for given account and update closed flag on success when reopening', function() {
 				$httpBackend.expectPOST('ledgers/ledger-332/accounts/a-2/reopen').respond(200);
 				account2.is_closed = true;
@@ -109,8 +109,8 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 				expect(account2.is_closed).toBeFalsy();
 			});
-			
-			it('should DELETE destroy for given account and remove it from the service on success when removing', 
+
+			it('should DELETE destroy for given account and remove it from the service on success when removing',
 			inject(['accounts', '$location', function(accounts, $location) {
 				spyOn(accounts, 'remove');
 				spyOn($location, 'path');
@@ -121,7 +121,7 @@ describe("homeApp", function() {
 				expect($location.path).toHaveBeenCalledWith('/accounts');
 			}]));
 		});
-		
+
 		describe('transactions', function() {
 			var transactions, date;
 			beforeEach(function() {
@@ -140,13 +140,13 @@ describe("homeApp", function() {
 				initController();
 				spyOn(scope, 'refreshRangeState');
 			});
-			
+
 			it("should be loaded for active account", function() {
 			    expect(scope.transactions).toBeUndefined();
 				$httpBackend.flush();
 				expect(scope.transactions.length).toEqual(transactions.length);
 			});
-			
+
 			it("should not be loaded if active account", function() {
 				this.assignActiveAccount(null);
 				initController();
@@ -154,39 +154,39 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 				expect(scope.transactions).toBeUndefined();
 			});
-			
+
 			it("should have dates converted to date object", function() {
 				$httpBackend.flush();
 				jQuery.each(scope.transactions, function(i, t) {
 					expect(t.date).toEqual(date);
 				});
 			});
-			
+
 			it('should update account balance', function() {
 				$httpBackend.flush();
 				expect(activeAccount.balance).toEqual(1193392);
 			});
-			
+
 			it('should assing transactions info', function() {
 				$httpBackend.flush();
 				expect(scope.transactionsInfo.total).toEqual(4432);
 				expect(scope.transactionsInfo.offset).toEqual(0);
 				expect(scope.transactionsInfo.limit).toEqual(25);
 			});
-			
+
 			it('should call scope.refreshRangeState', function() {
 				$httpBackend.flush();
 				expect(scope.refreshRangeState).toHaveBeenCalled();
 			});
 		});
-		
+
 		describe('fetching transactions range', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({transactions: []});
 				initController();
 				$httpBackend.flush();
 			});
-			
+
 			it('should let fetching only if total is more than limit', function() {
 				scope.transactionsInfo.total = 20;
 				scope.transactionsInfo.limit = 21;
@@ -196,7 +196,7 @@ describe("homeApp", function() {
 				scope.refreshRangeState();
 				expect(scope.canFetchRanges).toBeTruthy();
 			});
-			
+
 			it('should let fetching next range if it will not exceed total', function() {
 				scope.transactionsInfo.total = 21;
 				scope.transactionsInfo.limit = 5;
@@ -207,7 +207,7 @@ describe("homeApp", function() {
 				scope.refreshRangeState();
 				expect(scope.canFetchNextRange).toBeFalsy();
 			});
-			
+
 			it('should let fetching prev range if it will not become lower than zero', function() {
 				scope.transactionsInfo.total = 6;
 				scope.transactionsInfo.limit = 5;
@@ -221,7 +221,7 @@ describe("homeApp", function() {
 				scope.refreshRangeState();
 				expect(scope.canFetchPrevRange).toBeFalsy();
 			});
-			
+
 			it('should calculate currentRangeUpperBound', function() {
 				scope.transactionsInfo.total = 21;
 				scope.transactionsInfo.limit = 5;
@@ -232,7 +232,7 @@ describe("homeApp", function() {
 				scope.refreshRangeState();
 				expect(scope.currentRangeUpperBound).toEqual(21);
 			});
-			
+
 			it('should fetch next page on fetchNextRange', function() {
 				scope.transactionsInfo.offset = 10;
 				scope.transactionsInfo.limit = 20;
@@ -240,7 +240,7 @@ describe("homeApp", function() {
 				scope.fetchNextRange();
 				expect(scope.fetch).toHaveBeenCalledWith(30);
 			});
-		
+
 			it('should fetch prev page on fetchPrevRange', function() {
 				scope.transactionsInfo.offset = 40;
 				scope.transactionsInfo.limit = 20;
@@ -248,7 +248,7 @@ describe("homeApp", function() {
 				scope.fetchPrevRange();
 				expect(scope.fetch).toHaveBeenCalledWith(20);
 			});
-			
+
 			describe('fetch', function() {
 				beforeEach(function() {
 					date = new Date();
@@ -262,25 +262,25 @@ describe("homeApp", function() {
 					scope.fetch(10);
 					$httpBackend.flush();
 				});
-				
+
 				it('should get transactions range for given account and given offset', function() {
 					expect(scope.transactions.length).toEqual(transactions.length);
 				});
-				
+
 				it("should have dates converted to date object", function() {
 					jQuery.each(scope.transactions, function(i, t) {
 						expect(t.date).toEqual(date);
 					});
 				});
-				
+
 				it('should have new offset assigned', function() {
 					expect(scope.transactionsInfo.offset).toEqual(10);
 				});
-				
+
 				it('should call scope.refreshRangeState', function() {
 					expect(scope.refreshRangeState).toHaveBeenCalled();
 				});
-				
+
 				it('should post with search criteria if provided', function() {
 					scope.searchCriteria.criteria = {'key1': 'vlaue-1', 'key2': 'vlaue-2'};
 					$httpBackend.expectPOST('accounts/a-1/transactions/10-20.json', function(postBody) {
@@ -291,7 +291,7 @@ describe("homeApp", function() {
 					scope.fetch(10);
 					$httpBackend.flush();
 				});
-				
+
 				it('should update total if special option provided', function() {
 					$httpBackend.expectPOST('accounts/a-1/transactions/0-10.json', function(postBody) {
 						var data = JSON.parse(postBody);
@@ -305,7 +305,7 @@ describe("homeApp", function() {
 				});
 			});
 		});
-		
+
 		describe('search', function() {
 			var search;
 			beforeEach(inject(['search', function(s) {
@@ -314,7 +314,7 @@ describe("homeApp", function() {
 				$httpBackend.flush();
 				search = s;
 			}]));
-			
+
 			it('should use search provdier and parse the expression', function() {
 				scope.searchCriteria.expression = 'Search expression';
 				spyOn(search, 'parseExpression').and.returnValue({key1: 'value1'});
@@ -322,19 +322,19 @@ describe("homeApp", function() {
 				expect(search.parseExpression).toHaveBeenCalledWith('Search expression');
 				expect(scope.searchCriteria.criteria).toEqual({key1: 'value1'});
 			});
-			
+
 			it('should set the criteria to null if expression is null or empty', function() {
 				scope.searchCriteria.criteria = {key1: 'value1'};
 				scope.searchCriteria.expression = '';
 				scope.search();
 				expect(scope.searchCriteria.criteria).toBeNull();
-				
+
 				scope.searchCriteria.criteria = {key1: 'value1'};
 				scope.searchCriteria.expression = null;
 				scope.search();
 				expect(scope.searchCriteria.criteria).toBeNull();
 			});
-			
+
 			it('should fetch with zero offset', function() {
 				scope.transactionsInfo.offset = 100;
 				spyOn(scope, 'fetch');
@@ -342,7 +342,7 @@ describe("homeApp", function() {
 				expect(scope.fetch).toHaveBeenCalledWith(0, {updateTotal: true});
 			});
 		});
-		
+
 		describe("getTransferAmountSign", function() {
 			var transaction;
 			beforeEach(function() {
@@ -359,21 +359,21 @@ describe("homeApp", function() {
 				transaction.type_id = 2;
 				expect(scope.getTransferAmountSign(transaction)).toEqual('-');
 			});
-			
+
 			it("should return empty for other transactions", function() {
 				transaction.type_id = 2;
 				transaction.is_transfer = false;
 				expect(scope.getTransferAmountSign(transaction)).toBeNull();
 			});
 		});
-		
+
 		describe('adjust transaction', function() {
 			var transaction;
 			beforeEach(function() {
 				var date = new Date();
 				date.setHours(date.getHours() -  10);
 				transaction = {
-					transaction_id: 't-223', 
+					transaction_id: 't-223',
 					amount: '100.23',
 					tag_ids: [20],
 					date: date.toJSON(),
@@ -411,7 +411,7 @@ describe("homeApp", function() {
 					expect(transaction.amount).toEqual(20043);
 					expect(result.then).toBeDefined();
 				});
-				
+
 				it('should parse money string', function() {
 					$httpBackend.expectPOST('transactions/t-223/adjust-amount', function(data) {
 						var command = JSON.parse(data).command;
@@ -422,28 +422,28 @@ describe("homeApp", function() {
 					$httpBackend.flush();
 					expect(transaction.amount).toEqual(20043);
 				});
-				
+
 				describe('update activeAccount balance', function() {
 					beforeEach(function() {
 						$httpBackend.expectPOST('transactions/t-223/adjust-amount').respond(200);
 						activeAccount.balance = 250;
 						transaction.amount = 50;
 					});
-					
+
 					it('should update the balance for income transaction', function() {
 						transaction.type_id = Transaction.incomeId;
 						scope.adjustAmount(transaction, 100);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(300);
 					});
-					
+
 					it('should update the balance for refund transaction', function() {
 						transaction.type_id = Transaction.refundId;
 						scope.adjustAmount(transaction, 100);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(300);
 					});
-					
+
 					it('should update the balance for expence transaction', function() {
 						transaction.type_id = Transaction.expenceId;
 						scope.adjustAmount(transaction, 100);
@@ -479,37 +479,37 @@ describe("homeApp", function() {
 					expect(result.then).toBeDefined();
 				});
 			});
-			
+
 			describe('removeTransaction', function() {
 				beforeEach(function() {
 					$httpBackend.whenDELETE('transactions/t-223').respond(200);
 				});
-				
+
 				it('should DELETE destroy for given transaction', function() {
 					$httpBackend.expectDELETE('transactions/t-223').respond(200);
 					var result = scope.removeTransaction(transaction);
 					$httpBackend.flush();
 					expect(result.then).toBeDefined();
 				});
-				
+
 				describe('activeAccount.balance', function() {
 					beforeEach(function() {
 						activeAccount.balance = 5000;
 						transaction.amount = 1000;
 					});
-					
+
 					it('should subtract for income or refund', function() {
 						transaction.type_id = Transaction.incomeId;
 						scope.removeTransaction(transaction);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(4000);
-						
+
 						transaction.type_id = Transaction.refundId;
 						scope.removeTransaction(transaction);
 						$httpBackend.flush();
 						expect(activeAccount.balance).toEqual(3000);
 					});
-				
+
 					it('should add for expence', function() {
 						transaction.type_id = Transaction.expenceId;
 						scope.removeTransaction(transaction);
@@ -517,7 +517,7 @@ describe("homeApp", function() {
 						expect(activeAccount.balance).toEqual(6000);
 					});
 				})
-				
+
 				it('should remove the transaction from scope on success', function() {
 					scope.removeTransaction(transaction);
 					$httpBackend.flush();
@@ -526,7 +526,7 @@ describe("homeApp", function() {
 			});
 		});
 	});
-	
+
 	describe('getTransactionTypeIcon', function() {
 		var filter;
 		beforeEach(function() {
@@ -554,5 +554,5 @@ describe("homeApp", function() {
 			expect(filter({type: Transaction.refundKey})).toEqual('glyphicon glyphicon-share-alt');
 		});
 	});
-	
+
 });

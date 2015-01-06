@@ -8,8 +8,8 @@ describe('ErrorHandler', function() {
 			$rootScope = rs;
 		}]);
 	});
-	
-	
+
+
 	describe('http errors handling', function() {
 		it('should handle http server errors and broadcast them', function() {
 			var respond = $httpBackend.expectGET('some-data').respond(function() {

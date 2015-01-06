@@ -22,7 +22,7 @@ describe('home.accountsPanel', function() {
 			accounts = a;
 		}]);
 	});
-	
+
 	function compile() {
 		var result;
 		inject(function($rootScope, $compile) {
@@ -36,17 +36,17 @@ describe('home.accountsPanel', function() {
 		scope.$digest();
 		return result;
 	};
-	
+
 	it('should assign accounts', function() {
 		compile();
 		expect(scope.accounts).toEqual([account1, account2, account3]);
 	});
-	
+
 	it('should assign categories', function() {
 		compile();
 		expect(scope.categories).toEqual([category1, category2]);
 	});
-	
+
 	it('should determine if there are closed accounts with hasClosedAccounts method', function() {
 		compile();
 		scope.accounts = [{is_closed: false}, {is_closed: false}];
@@ -54,7 +54,7 @@ describe('home.accountsPanel', function() {
 		scope.accounts = [{is_closed: false}, {is_closed: false}, {is_closed: true}];
 		expect(scope.hasClosedAccounts()).toBeTruthy();
 	});
-	
+
 	it('should toggle showClosed flag using accountsState', inject(['accountsState', function(accountsState) {
 		compile();
 		scope.showClosed = true;

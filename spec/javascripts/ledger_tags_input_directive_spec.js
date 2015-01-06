@@ -22,14 +22,14 @@ describe('ledgerTagsInput', function() {
 		scope.$digest();
 		return result;
 	};
-  
+
 	it('should set initial tags', function() {
 		var result = compile(scope);
 		var input = result.find('input:first');
 		var items = input.tagsinput('items');
 		expect(items).toEqual(['Tag 100', 'Tag 102']);
 	});
-  
+
 	it('should update model when tags changed', function() {
 		var result = compile(scope);
 		var input = result.find('input:first');
@@ -38,7 +38,7 @@ describe('ledgerTagsInput', function() {
 		var items = input.tagsinput('items');
 		expect(items).toEqual(['Tag 101']);
 	});
-	
+
 	it('should update model when tags changed', function() {
 		scope.tag_ids = [];
 		var input = compile(scope).find('input:first');

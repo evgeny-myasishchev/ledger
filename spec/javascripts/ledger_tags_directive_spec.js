@@ -33,13 +33,13 @@ describe('ledgerTags', function() {
     var result = compile(scope);
     expect(result[0].innerHTML).toEqual('<div class="label label-info">Tag 100</div> <div class="label label-info">Tag 102</div>');
   });
-  
+
   it("should ignore null tags", function() {
     scope.tag_ids = null;
     var result = compile(scope);
     expect(result[0].innerHTML).toEqual('');
   });
-  
+
   it('should update tags on scope changes', function() {
       scope.tag_ids = '';
       var result = compile(scope);

@@ -5,13 +5,13 @@ describe("ledgersProvider", function() {
 		angular.module('ledgersProvider').config(['ledgersProvider', function(provider) {
 			ledgersProvider = provider;
 		}]);
-		inject(['ledgers', '$httpBackend', '$rootScope', function(ledgers, _$httpBackend_, rs) { 
+		inject(['ledgers', '$httpBackend', '$rootScope', function(ledgers, _$httpBackend_, rs) {
 			$httpBackend = _$httpBackend_;
 			$rootScope = rs;
-			subject = ledgers; 
+			subject = ledgers;
 		}]);
 	});
-	
+
 	it('should return first ledger on getActiveLedger', function() {
 		var l1;
 		ledgersProvider.assignLedgers([
@@ -19,7 +19,7 @@ describe("ledgersProvider", function() {
 		]);
 		expect(subject.getActiveLedger()).toEqual(l1);
 	});
-	
+
 	describe('loadCurrencyRates', function() {
 		var rate1, rate2;
 		beforeEach(function() {
@@ -30,7 +30,7 @@ describe("ledgersProvider", function() {
 			rate1 = {"id":14,"from":"EUR","to":"UAH","rate":16.1344};
 			rate2 = {"id":13,"from":"USD","to":"UAH","rate":12.2854};
 		});
-		
+
 		it('should load currency rates for active ledger and hash loaded rates by from', function() {
 			$httpBackend.expectGET('ledgers/l-1/currency-rates.json').respond(200, JSON.stringify([rate1, rate2]));
 			var loadedRates;
@@ -42,13 +42,13 @@ describe("ledgersProvider", function() {
 			expect(loadedRates[rate1.from]).toEqual(rate1);
 			expect(loadedRates[rate2.from]).toEqual(rate2);
 		});
-		
+
 		it('should cache loaded rates', function() {
 			$httpBackend.expectGET('ledgers/l-1/currency-rates.json').respond(200, JSON.stringify([rate1, rate2]));
-			
+
 			subject.loadCurrencyRates();
 			$httpBackend.flush();
-			
+
 			var loadedRates;
 			subject.loadCurrencyRates().then(function(result) {
 				loadedRates = result;
@@ -59,7 +59,7 @@ describe("ledgersProvider", function() {
 			expect(loadedRates[rate2.from]).toEqual(rate2);
 		});
 	});
-	
+
 	it('should handle account-added and reset rates if new account currency is not present', function() {
 		var activeLedger;
 		ledgersProvider.assignLedgers([
@@ -79,7 +79,7 @@ describe("ledgersProvider", function() {
 		$httpBackend.flush();
 		expect(loadedRates['USD']).toEqual(rate2);
 	});
-	
+
 	describe('activeLedgerFilter', function() {
 		it('should return given attribute of te active ledger', inject(['ledgers', 'activeLedgerFilter', function(ledgers, activeLedgerFilter) {
 			var activeLedger = {aggregate_id: 'ledger-1', currency_code: 'UAH'};

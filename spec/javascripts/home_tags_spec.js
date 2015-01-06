@@ -15,11 +15,11 @@ describe("TagsController", function() {
 			tags = t;
 		}]);
 	});
-	
+
 	it('should assign scope tags', function() {
 		expect(scope.tags).toEqual([tag1, tag2, tag3]);
 	});
-	
+
 	it('should reset flags and delegate create to tags service', function() {
 		scope.isCreated = true;
 		var promise = jQuery.Deferred().promise();
@@ -29,7 +29,7 @@ describe("TagsController", function() {
 		expect(scope.isCreated).toBeFalsy();
 		expect(tags.create).toHaveBeenCalledWith('New tag');
 	});
-	
+
 	it('should set scope flags on created', function() {
 		var deferred = jQuery.Deferred();
 		var promise = deferred.promise();
@@ -40,14 +40,14 @@ describe("TagsController", function() {
 		expect(scope.isCreated).toBeTruthy();
 		expect(scope.newTagName).toBeNull();
 	});
-	
+
 	it('should delegate rename to tags service', function() {
 		var promise = {};
 		spyOn(tags, 'rename').and.returnValue(promise);
 		expect(scope.renameTag(tag1, 'New name')).toBe(promise);
 		expect(tags.rename).toHaveBeenCalledWith(tag1.tag_id, 'New name');
 	});
-	
+
 	it('should delegate remove to tags service', function() {
 		spyOn(tags, 'remove');
 		scope.removeTag(tag1);
