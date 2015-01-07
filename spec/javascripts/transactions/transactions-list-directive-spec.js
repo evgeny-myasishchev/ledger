@@ -191,4 +191,56 @@ describe('transactions.transactionsList', function() {
 			});
 		});
 	});
+	
+	describe("getTransferAmountSign", function() {
+		var transaction;
+		beforeEach(function() {
+			transaction = {type_id: -100, is_transfer: true};
+			compile();
+		});
+
+		it("should return + sign for transfer income", function() {
+			transaction.type_id = 1;
+			expect(scope.getTransferAmountSign(transaction)).toEqual('+');
+		});
+
+		it("should return - sign for transfer expence", function() {
+			transaction.type_id = 2;
+			expect(scope.getTransferAmountSign(transaction)).toEqual('-');
+		});
+
+		it("should return empty for other transactions", function() {
+			transaction.type_id = 2;
+			transaction.is_transfer = false;
+			expect(scope.getTransferAmountSign(transaction)).toBeNull();
+		});
+	});
+	
+	describe('tti filter', function() {
+		var filter;
+		beforeEach(function() {
+			transaction = {type_id: -100, is_transfer: false};
+			inject(function(ttiFilter) { filter = ttiFilter});
+		});
+		it('should return transfer icon if transaction is transfer', function() {
+			transaction.is_transfer = true;
+			expect(filter(transaction)).toEqual('glyphicon glyphicon-transfer');
+			expect(filter({type: Transaction.transferKey})).toEqual('glyphicon glyphicon-transfer');
+		});
+		it('should return income specific icon if transaction is income', function() {
+			transaction.type_id = 1;
+			expect(filter(transaction)).toEqual('glyphicon glyphicon-plus');
+			expect(filter({type: Transaction.incomeKey})).toEqual('glyphicon glyphicon-plus');
+		});
+		it('should return expence specific icon if transaction is expence', function() {
+			transaction.type_id = 2;
+			expect(filter(transaction)).toEqual('glyphicon glyphicon-minus');
+			expect(filter({type: Transaction.expenceKey})).toEqual('glyphicon glyphicon-minus');
+		});
+		it('should return refund specific icon if transaction is refund', function() {
+			transaction.type_id = 3;
+			expect(filter(transaction)).toEqual('glyphicon glyphicon-share-alt');
+			expect(filter({type: Transaction.refundKey})).toEqual('glyphicon glyphicon-share-alt');
+		});
+	});
 });

@@ -58,6 +58,14 @@
 						}
 					});
 				};
+				
+				scope.getTransferAmountSign = function(transaction) {
+					if(transaction.is_transfer) {
+						return transaction.type_id == 2 ? '-' : '+';
+					} else {
+						return null;
+					}
+				};
 			}
 		}
 	}]);
