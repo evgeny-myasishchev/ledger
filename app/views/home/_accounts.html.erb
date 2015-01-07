@@ -1,6 +1,7 @@
 <div class='col-sm-5 col-md-4'>
 	<accounts-panel></accounts-panel>
 </div>
-<div class='col-sm-7 col-md-8' ng-if='activeAccount'>
+<div class='col-sm-7 col-md-8'>
+	<%= render partial: 'account_actions' %>
 	<%= render partial: 'account_transactions' %>
 </div>
