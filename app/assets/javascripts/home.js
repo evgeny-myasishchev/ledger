@@ -9,22 +9,22 @@ var homeApp = (function() {
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		
-		if(activeAccount) {
-			$http.get('accounts/' + activeAccount.aggregate_id + '/transactions.json').success(function(data) {
-				var transactions = data.transactions;
-				jQuery.each(transactions, function(i, t) {
-					t.date = new Date(t.date);
-				});
-				$scope.transactionsInfo = {
-					total: data.transactions_total,
-					offset: 0,
-					limit: data.transactions_limit
-				};
-				$scope.transactions = transactions;
-				activeAccount.balance = data.account_balance;
-				$scope.refreshRangeState();
+		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
+		
+		$http.get(transactionsBasePath + 'transactions.json').success(function(data) {
+			var transactions = data.transactions;
+			jQuery.each(transactions, function(i, t) {
+				t.date = new Date(t.date);
 			});
-		}
+			$scope.transactionsInfo = {
+				total: data.transactions_total,
+				offset: 0,
+				limit: data.transactions_limit
+			};
+			$scope.transactions = transactions;
+			if(activeAccount) activeAccount.balance = data.account_balance;
+			$scope.refreshRangeState();
+		});
 		
 		$scope.renameAccount = function(account, newName) {
 			return $http.put('accounts/' + account.aggregate_id + '/rename', {
@@ -90,7 +90,7 @@ var homeApp = (function() {
 				criteria: $scope.searchCriteria.criteria
 			};
 			if(options.updateTotal) data['with-total'] = true;
-			$http.post('accounts/' + activeAccount.aggregate_id + '/transactions/' + offset + '-' + to + '.json', data).success(function(data) {
+			$http.post(transactionsBasePath + 'transactions/' + offset + '-' + to + '.json', data).success(function(data) {
 				var transactions = data['transactions'];
 				jQuery.each(transactions, function(i, t) {
 					t.date = new Date(t.date);

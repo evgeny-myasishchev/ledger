@@ -147,12 +147,17 @@ describe("homeApp", function() {
 				expect(scope.transactions.length).toEqual(transactions.length);
 			});
 
-			it("should not be loaded if active account", function() {
+			it("should be loaded for all accounts", function() {
 				this.assignActiveAccount(null);
 				initController();
 			    expect(scope.transactions).toBeUndefined();
+				$httpBackend.expectGET('transactions.json').respond({
+					transactions_total: 4432,
+					transactions_limit: 25,
+					transactions: transactions
+				});
 				$httpBackend.flush();
-				expect(scope.transactions).toBeUndefined();
+				expect(scope.transactions.length).toEqual(transactions.length);
 			});
 
 			it("should have dates converted to date object", function() {
@@ -262,8 +267,19 @@ describe("homeApp", function() {
 					scope.fetch(10);
 					$httpBackend.flush();
 				});
-
+				
 				it('should get transactions range for given account and given offset', function() {
+					expect(scope.transactions.length).toEqual(transactions.length);
+				});
+				
+				it('should get transactions range for all accounts and given offset', function() {
+					this.assignActiveAccount(null);
+					$httpBackend.whenGET('transactions.json').respond({transactions: []});
+					$httpBackend.whenPOST('transactions/10-20.json').respond({transactions: transactions});
+					initController();
+					scope.transactionsInfo = {limit: 10};
+					scope.fetch(10);
+					$httpBackend.flush();
 					expect(scope.transactions.length).toEqual(transactions.length);
 				});
 
