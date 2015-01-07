@@ -20,7 +20,7 @@ var homeApp = (function() {
 					offset: 0,
 					limit: data.transactions_limit
 				};
-				$scope.transactions = transactions
+				$scope.transactions = transactions;
 				activeAccount.balance = data.account_balance;
 				$scope.refreshRangeState();
 			});

@@ -5,7 +5,13 @@
 		return {
 			restrict: 'E',
 			templateUrl: 'transactions-list.html',
+			scope: {
+				transactions: '=data'
+			},
 			link: function(scope, element, attrs) {
+				if(typeof(attrs.data) == 'undefined') {
+					throw 'Failed to initialize transactions list: data attribute is required.';
+				}
 				scope.adjustComment = function(transaction, comment) {
 					return $http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
 						command: {comment: comment}

@@ -19,16 +19,28 @@ describe('transactions.transactionsList', function() {
 	
 	function compile() {
 		var elem = angular.element('<div><script type="text/ng-template" id="transactions-list.html"></script>' +
-			'<transactions-list></transactions-list></div>');
+			'<transactions-list data="transactions"></transactions-list></div>');
 		var compiledElem = $compile(elem)(scope);
 		scope.$digest();
 		return compiledElem;
 	};
 	
+	describe('data attribute', function() {
+		it('should assign transactions from the given expression', function() {
+			scope.newTransactions = [{t1: true}, {t2: true}];
+			var element = $compile(angular.element('<div><script type="text/ng-template" id="transactions-list.html"></script>' +
+			'<transactions-list data="newTransactions"></transactions-list></div>'))(scope);
+			scope.$digest();
+			var isolatedScope = element.find('transactions-list').isolateScope();
+			expect(isolatedScope.transactions).toBeDefined();
+			expect(isolatedScope.transactions).toEqual(scope.newTransactions);
+		});
+	});
+	
 	describe('adjust transaction', function() {
 		var transaction;
 		beforeEach(function() {
-			compile();
+			scope = compile().find('transactions-list').isolateScope();
 			var date = new Date();
 			date.setHours(date.getHours() -  10);
 			
@@ -195,7 +207,7 @@ describe('transactions.transactionsList', function() {
 		var transaction;
 		beforeEach(function() {
 			transaction = {type_id: -100, is_transfer: true};
-			compile();
+			scope = compile().find('transactions-list').isolateScope();
 		});
 
 		it("should return + sign for transfer income", function() {
