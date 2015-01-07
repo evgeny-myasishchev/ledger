@@ -19,7 +19,7 @@ describe('transactions.transactionsList', function() {
 	function compile() {
 		var result;
 		inject(function($compile) {
-			result = $compile('<script type="text/ng-template" id="transactions.html"></script>' +
+			result = $compile('<script type="text/ng-template" id="transactions-list.html"></script>' +
 			'<transactions-list></transactions-list>')(scope);
 		});
 		scope.$digest();

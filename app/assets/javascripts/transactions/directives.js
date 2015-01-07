@@ -4,7 +4,7 @@
 	transactionsApp.directive('transactionsList', ['$http', 'accounts', 'tagsHelper', 'money', function($http, accounts, tagsHelper, money) {
 		return {
 			restrict: 'E',
-			templateUrl: 'transactions.html',
+			templateUrl: 'transactions-list.html',
 			link: function(scope, element, attrs) {
 				scope.adjustComment = function(transaction, comment) {
 					return $http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
