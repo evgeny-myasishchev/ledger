@@ -1,11 +1,16 @@
-<div class='panel panel-default'>
+<div class='panel panel-default panel-info'>
 	<div class='panel-heading'>
 		<strong>Accounts</strong>
-		<div class='pull-right'>
-			{{allAccountsTotal - closedTotal | money}} <sup>{{ 'currency_code' | activeLedger }}</sup>
-		</div>
 	</div>
 	<table class='table table-condensed table-hover' class='list-group'>
+		<tr ng-class="{active: activeAccount == null}">
+			<td>
+				<a href='#/accounts/{{account.sequential_number}}'>Total</a>
+				<div class='pull-right'>
+					<strong>{{allAccountsTotal - closedTotal | money}}</strong> <sup class='currency-code'>{{ 'currency_code' | activeLedger }}</sup>
+				</div>
+			</td>
+		</tr>
 		<tr ng-repeat-end ng-repeat="account in accounts | calculateTotal:'allAccountsTotal' | filter:{category_id: null, is_closed: false} | calculateTotal:'uncategorisedTotal'  | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
