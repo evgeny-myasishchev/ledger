@@ -1,4 +1,4 @@
-describe('home.acounts', function() {
+describe('acounts', function() {
 	describe('accountsProvider', function() {
 		var subject;
 		var account1, account2, account3, account4;
@@ -59,7 +59,24 @@ describe('home.acounts', function() {
 			initProvider();
 			expect(subject.getActive()).toBeNull();
 		});
-
+		
+		describe('getById', function() {
+			beforeEach(function() {
+				initProvider();
+			});
+			
+			it('should return account by id', function() {
+				expect(subject.getById(account1.aggregate_id)).toEqual(account1);
+				expect(subject.getById(account2.aggregate_id)).toEqual(account2);
+			});
+			
+			it('should fail if no account found', function() {
+				expect(function() { 
+					subject.getById('unknown-account-110');
+				}).toThrow('Unknown account id=unknown-account-110');
+			});
+		});
+		
 		describe('add', function() {
 			var $rootScope;
 			beforeEach(inject(['$rootScope', function(rs) {

@@ -40,6 +40,14 @@ var accountsApp = (function($) {
 					}
 					return activeAccount;
 				},
+				getById: function(accountId) {
+					var result = $.grep(accounts, function(account) { 
+						return account.aggregate_id == accountId;
+					});
+					if(result.length == 0) throw 'Unknown account id=' + accountId;
+					if(result.length > 1) throw 'Several accounts with the same id=' + accountId + ' found. This should never happen.';
+					return result[0];
+				},
 				makeActive: function(account) {
 					$location.path('/accounts/' + account.sequential_number);
 				},
