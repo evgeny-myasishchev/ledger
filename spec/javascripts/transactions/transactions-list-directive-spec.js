@@ -1,29 +1,28 @@
 describe('transactions.transactionsList', function() {
-	var scope, $httpBackend;
+	var scope, $httpBackend, $compile;
 	var account1, account2;
-	beforeEach(function() {
-		module('transactionsApp');
+	
+	beforeEach(module('transactionsApp'));
+	
+	beforeEach(inject(function(_$httpBackend_, _$compile_, $rootScope){
+		$httpBackend = _$httpBackend_;
+		scope = $rootScope.$new();
+		$compile = _$compile_;
+		
 		transactionsApp.config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
 				account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1, is_closed: false},
 				account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2, is_closed: false}
 			]);
 		}]);
-		
-		inject(['$httpBackend', '$rootScope', function(_$httpBackend_, $rootScope) {
-			$httpBackend = _$httpBackend_;
-			scope = $rootScope.$new();
-		}]);
-	});
+	}));
 	
 	function compile() {
-		var result;
-		inject(function($compile) {
-			result = $compile('<script type="text/ng-template" id="transactions-list.html"></script>' +
-			'<transactions-list></transactions-list>')(scope);
-		});
+		var elem = angular.element('<div><script type="text/ng-template" id="transactions-list.html"></script>' +
+			'<transactions-list></transactions-list></div>');
+		var compiledElem = $compile(elem)(scope);
 		scope.$digest();
-		return result;
+		return compiledElem;
 	};
 	
 	describe('adjust transaction', function() {
