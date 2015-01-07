@@ -10,6 +10,12 @@ describe("money", function() {
 		inject(function(money) { subject = money; });
 	});
 	
+	afterEach(function() {
+		angular.module('ledgerHelpers').config(function(moneyProvider) {
+			moneyProvider.configure(); //To apply defaults
+		});
+	});
+	
 	describe('toNumber', function() {
 		it('should convert the integer to floating point number', function() {
 			expect(subject.toNumber(100)).toEqual(1.00);

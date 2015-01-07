@@ -2,7 +2,6 @@ describe("ReportTransactionsController", function() {
 	var account1, account2, account3;
 	var controller, scope,  $httpBackend;
 	beforeEach(function() {
-		console.log('running spec from: ReportTransactionsController');
 		module('transactionsApp');
 		angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([

@@ -75,12 +75,13 @@
 	});
 	
 	ledgerHelpers.provider('money', function() {
-		var options = {
+		var defaults = {
 			separator: '.', //decimal separator
 			delimiter: ',' //thousands delimiter
 		};
+		var options = jQuery.extend({}, defaults);
 		this.configure = function(opts) {
-			jQuery.extend(options, opts);
+			jQuery.extend(options, defaults, opts);
 		};
 		
 		var toFiguresArray = function(number) {
