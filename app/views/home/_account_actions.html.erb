@@ -1,6 +1,6 @@
 <div class='clearfix' ng-init='assigningCategory=false;'>
 	<p style="text-align: left;" class='pull-left'>
-		<a href='#/accounts/{{activeAccount.sequential_number}}/report' ng-hide='activeAccount.is_closed' class='btn btn-sm btn-primary'>
+		<a href='#{{activeAccount ? "/accounts/" + activeAccount.sequential_number : ""}}/report' ng-hide='activeAccount.is_closed' class='btn btn-sm btn-primary'>
 			<i class='glyphicon glyphicon-plus-sign'></i> Report transactions
 		</a>
 		<button ng-hide='!activeAccount.is_closed' class='btn btn-sm btn-danger' ng-click='removeAccount(activeAccount)'>
