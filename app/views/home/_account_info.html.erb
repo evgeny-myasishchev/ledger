@@ -1,6 +1,6 @@
 <span class='glyphicon glyphicon-lock' ng-if='account.is_closed'></span>
 <a href='#/accounts/{{account.sequential_number}}'>
-	{{(account | activateFirstAccount).name}}
+	{{(account).name}}
 </a>
 <span class='pull-right'><strong>{{account.balance | money }}</strong> <sup class='currency-code'>{{account.currency_code}}</sup></span> 
 <hidden name='account.aggregate-id' value="{{account.aggregate_id}}" />
