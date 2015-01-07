@@ -1,11 +1,36 @@
 !function() {
 	var transactionsApp = angular.module('transactionsApp');
 
-	transactionsApp.directive('transactionsList', ['$http', function() {
+	transactionsApp.directive('transactionsList', ['$http', 'accounts', 'tagsHelper', 'money', function($http, accounts, tagsHelper, money) {
 		return {
 			restrict: 'E',
 			templateUrl: 'transactions.html',
 			link: function(scope, element, attrs) {
+				scope.adjustComment = function(transaction, comment) {
+					return $http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
+						command: {comment: comment}
+					}).success(function() {
+						transaction.comment = comment;
+					});
+				};
+				
+				scope.adjustTags = function(transaction, tag_ids) {
+					return $http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
+						command: {tag_ids: tag_ids}
+					}).success(function() {
+						transaction.tag_ids = tagsHelper.arrayToBracedString(tag_ids);
+					});
+				};
+		
+				scope.adjustDate = function(transaction, date) {
+					var jsonDate = date.toJSON();
+					return $http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
+						command: {date: date.toJSON()}
+					}).success(function() {
+						transaction.date = date;
+					});
+				};
+				
 				scope.adjustAmount = function(transaction, amount) {
 					amount = money.parse(amount);
 					return $http.post('transactions/'+ transaction.transaction_id + '/adjust-amount', {
@@ -13,17 +38,29 @@
 					}).success(function() {
 						var oldAmount = transaction.amount;
 						transaction.amount = amount;
+						var account = accounts.getById(transaction.account_id);
 						if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
-							activeAccount.balance = activeAccount.balance - oldAmount + amount;
+							account.balance = account.balance - oldAmount + amount;
 						} else if (transaction.type_id == Transaction.expenceId) {
-							activeAccount.balance = activeAccount.balance + oldAmount- amount;
+							account.balance = account.balance + oldAmount- amount;
+						}
+					});
+				};
+				
+				scope.removeTransaction = function(transaction) {
+					return $http.delete('transactions/' + transaction.transaction_id).success(function() {
+						scope.transactions.splice(scope.transactions.indexOf(transaction), 1);
+						var account = accounts.getById(transaction.account_id);
+						if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
+							account.balance -= transaction.amount;
+						} else if (transaction.type_id == Transaction.expenceId) {
+							account.balance += transaction.amount;
 						}
 					});
 				};
 			}
 		}
 	}]);
-
 
 	transactionsApp.filter('tti', function() {
 		return function(t) {
