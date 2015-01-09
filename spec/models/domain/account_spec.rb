@@ -183,11 +183,10 @@ describe Domain::Account do
   
   describe "report_income" do
     it "should raise TransactionReported and AccountBalanceChanged events" do
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       date = DateTime.now
       subject.make_created
       subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 1060
-      subject.report_income '10.40', date, ['t-1', 't-2'], 'Monthly income'
+      subject.report_income 'transaction-100', '10.40', date, ['t-1', 't-2'], 'Monthly income'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionReported,
       {
@@ -208,13 +207,18 @@ describe Domain::Account do
       }, at_index: 1
     end
     
+    it 'should fail if transaction_id is not unique' do
+      subject.make_created.report_income 'transaction-100', '10.00', DateTime.now
+      expect { subject.report_income 'transaction-100', '10.00', DateTime.now }.to raise_error ArgumentError, "transaction_id='transaction-100' is not unique."
+    end
+    
     it "should accept tags as a single arg" do
-      subject.make_created.report_income '10.00', DateTime.now, 't-1', nil
+      subject.make_created.report_income 'transaction-100', '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
     
     it "should treat null tags as empty" do
-      subject.make_created.report_income '10.00', DateTime.now, nil, nil
+      subject.make_created.report_income 'transaction-100', '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -234,10 +238,9 @@ describe Domain::Account do
     
   describe "report_expence" do
     it "should raise TransactionReported event" do
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       date = DateTime.now
       subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073
-      subject.report_expence '20.23', date, ['t-1', 't-2'], 'Monthly income'
+      subject.report_expence 'transaction-100', '20.23', date, ['t-1', 't-2'], 'Monthly income'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionReported, {
         aggregate_id: subject.aggregate_id, 
@@ -253,13 +256,18 @@ describe Domain::Account do
         balance: 3050}, at_index: 1
     end
     
+    it 'should fail if transaction_id is not unique' do
+      subject.make_created.report_expence('transaction-100', '20.23', DateTime.now)
+      expect { subject.report_expence('transaction-100', '20.23', DateTime.now) }.to raise_error ArgumentError, "transaction_id='transaction-100' is not unique."
+    end
+    
     it "should accept tags as a single arg" do
-      subject.make_created.report_expence '10.00', DateTime.now, 't-1', nil
+      subject.make_created.report_expence 'transaction-100', '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
     
     it "should treat null tags as empty" do
-      subject.make_created.report_expence '10.00', DateTime.now, nil, nil
+      subject.make_created.report_expence 'transaction-100', '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -279,10 +287,9 @@ describe Domain::Account do
 
   describe "report_refund" do
     it "should raise TransactionReported event" do
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-100')
       date = DateTime.now
       subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073
-      subject.report_refund '20.23', date, ['t-1', 't-2'], 'Coworker gave back'
+      subject.report_refund 'transaction-100', '20.23', date, ['t-1', 't-2'], 'Coworker gave back'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionReported, {
         aggregate_id: subject.aggregate_id, 
@@ -298,13 +305,18 @@ describe Domain::Account do
         balance: 7096}, at_index: 1
     end
     
+    it 'should fail if transaction_id is not unique' do
+      subject.make_created.report_refund('transaction-100', '20.23', DateTime.now)
+      expect { subject.report_refund('transaction-100', '20.23', DateTime.now) }.to raise_error ArgumentError, "transaction_id='transaction-100' is not unique."
+    end
+    
     it "should accept tags as a single arg" do
-      subject.make_created.report_refund '10.00', DateTime.now, 't-1', nil
+      subject.make_created.report_refund 'transaction-100', '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
     
     it "should treat null tags as empty" do
-      subject.make_created.report_refund '10.00', DateTime.now, nil, nil
+      subject.make_created.report_refund 'transaction-100', '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -327,9 +339,8 @@ describe Domain::Account do
     before(:each) { allow(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
 
     it "should raise TransferSent and AccountBalanceChanged events" do      
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110')
       date = DateTime.now
-      subject.send_transfer 'receiver-account-332', '20.23', date, ['t-1', 't-2'], 'Getting cache'
+      subject.send_transfer 'transaction-110', 'receiver-account-332', '20.23', date, ['t-1', 't-2'], 'Getting cache'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransferSent, {
         aggregate_id: subject.aggregate_id, 
@@ -344,18 +355,23 @@ describe Domain::Account do
         transaction_id: 'transaction-110',
         balance: 3050}, at_index: 1
     end
+    
+    it 'should fail if transaction_id is not unique' do
+      subject.send_transfer 'transaction-110', 'receiver-account-332', '20.23', DateTime.now
+      expect { subject.send_transfer 'transaction-110', 'receiver-account-332', '20.23', DateTime.now }.to raise_error ArgumentError, "transaction_id='transaction-110' is not unique."
+    end
 
     it "should return transaction_id" do
-      expect(subject.send_transfer('receiver-account-332', '20.23', DateTime.now, ['t-1', 't-2'], 'Getting cache')).to eql 'transaction-110'
+      expect(subject.send_transfer('transaction-110', 'receiver-account-332', '20.23', DateTime.now, ['t-1', 't-2'], 'Getting cache')).to eql 'transaction-110'
     end
 
     it "should accept tags as a single arg" do
-      subject.send_transfer('receiver-account-332', '20.23', DateTime.now, 't-1')
+      subject.send_transfer('transaction-110', 'receiver-account-332', '20.23', DateTime.now, 't-1')
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
 
     it "should treat null tags as empty" do
-      subject.send_transfer('receiver-account-332', '20.23', DateTime.now, nil)
+      subject.send_transfer('transaction-110', 'receiver-account-332', '20.23', DateTime.now, nil)
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -375,11 +391,10 @@ describe Domain::Account do
 
   describe "receive_transfer" do
     before(:each) { subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073 }
-    before(:each) { allow(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
     let(:date) { DateTime.now }
 
     it "should raise TransferReceived and AccountBalanceChanged events" do      
-      subject.receive_transfer 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1', 't-2'], 'Getting cache'
+      subject.receive_transfer 'transaction-110', 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1', 't-2'], 'Getting cache'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransferReceived, {
         aggregate_id: subject.aggregate_id, 
@@ -395,14 +410,19 @@ describe Domain::Account do
         transaction_id: 'transaction-110',
         balance: 7096}, at_index: 1
     end
+    
+    it 'should fail if transaction_id is not unique' do
+      subject.receive_transfer 'transaction-110', 'sending-account-332', 'sending-transaction-221', '20.23', DateTime.now
+      expect { subject.receive_transfer 'transaction-110', 'sending-account-332', 'sending-transaction-221', '20.23', DateTime.now }.to raise_error ArgumentError, "transaction_id='transaction-110' is not unique."
+    end
 
     it "should accept tags as a single arg" do
-      subject.receive_transfer 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1']
+      subject.receive_transfer 'transaction-110', 'sending-account-332', 'sending-transaction-221', '20.23', date, ['t-1']
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
 
     it "should treat null tags as empty" do
-      subject.receive_transfer 'sending-account-332', 'sending-transaction-221', '20.23', date, nil
+      subject.receive_transfer 'transaction-110', 'sending-account-332', 'sending-transaction-221', '20.23', date, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -690,7 +710,7 @@ describe Domain::Account do
       it 'should return the entire state of the account' do
         date = DateTime.now
         subject.make_created 'account-1', 'ledger-1', 'Account 1', 100000, 'UAH', unit: 'uz'
-        subject.report_income 100, date, ['t1', 't2'], 'Transaction 100'
+        subject.report_income 'transaction-110', 100, date, ['t1', 't2'], 'Transaction 100'
         snapshot = subject.get_snapshot
         expect(snapshot).to include({
           ledger_id: 'ledger-1',

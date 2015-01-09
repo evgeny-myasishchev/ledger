@@ -45,53 +45,53 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountRemoved.new aggregate_id
   end
   
-  def report_income amount, date, tag_ids = nil, comment = nil
+  def report_income transaction_id, amount, date, tag_ids = nil, comment = nil
     log.debug "Reporting #{amount} of income for account aggregate_id='#{aggregate_id}'"
+    ensure_transaction_id_unique! transaction_id
     amount = Money.parse(amount, @currency)
     balance = @balance + amount.integer_amount
     tag_ids = normalize_tag_ids tag_ids
-    transaction_id = AggregateId.new_id
     raise_transaction_reported transaction_id, Transaction::IncomeTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
   
-  def report_expence amount, date, tag_ids = [], comment = nil
+  def report_expence transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
     log.debug "Reporting #{amount} of expence for account aggregate_id='#{aggregate_id}'"
+    ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - amount.integer_amount
-    transaction_id = AggregateId.new_id
     raise_transaction_reported transaction_id, Transaction::ExpenceTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
 
-  def report_refund amount, date, tag_ids = [], comment = nil
+  def report_refund transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
     log.debug "Reporting #{amount} of refund for account aggregate_id='#{aggregate_id}'"
+    ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + amount.integer_amount
-    transaction_id = AggregateId.new_id
     raise_transaction_reported transaction_id, Transaction::RefundTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
 
-  def send_transfer(receiving_account_id, amount, date, tag_ids = [], comment = nil)
+  def send_transfer(transaction_id, receiving_account_id, amount, date, tag_ids = [], comment = nil)
     amount = Money.parse(amount, @currency)
     log.debug "Sending #{amount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
+    ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - amount.integer_amount
-    transaction_id = AggregateId.new_id
     raise_event TransferSent.new aggregate_id, transaction_id, receiving_account_id, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
     transaction_id
   end
 
-  def receive_transfer(sending_account_id, sending_transaction_id, amount, date, tag_ids = [], comment = nil)
+  def receive_transfer(transaction_id, sending_account_id, sending_transaction_id, amount, date, tag_ids = [], comment = nil)
     amount = Money.parse(amount, @currency)
     log.debug "Receiving #{amount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
+    ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + amount.integer_amount
-    transaction_id = AggregateId.new_id
     raise_event TransferReceived.new aggregate_id, transaction_id, sending_account_id, sending_transaction_id, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
@@ -292,5 +292,9 @@ class Domain::Account < CommonDomain::Aggregate
         date: event.date,
         comment: event.comment
       }
+    end
+    
+    def ensure_transaction_id_unique! transaction_id
+      raise ArgumentError.new("transaction_id='#{transaction_id}' is not unique.") if @transactions.key?(transaction_id)
     end
 end
