@@ -36,8 +36,8 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use account to report the income" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
-      expect(account).to receive(:report_income).with('34632.30', date, ['t-1', 't-2'], 'Monthly income')
-      cmd = c::ReportIncome.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income', headers: dummy_headers)
+      expect(account).to receive(:report_income).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Monthly income')
+      cmd = c::ReportIncome.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income', headers: dummy_headers)
       subject.handle_message cmd
     end
   end
@@ -46,8 +46,8 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use account to report the expence" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
-      expect(account).to receive(:report_expence).with('34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportExpence.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
+      expect(account).to receive(:report_expence).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
+      subject.handle_message c::ReportExpence.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
     end
   end
   
@@ -55,8 +55,8 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use account to report the expence" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
-      expect(account).to receive(:report_refund).with('34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportRefund.new('account-112', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
+      expect(account).to receive(:report_refund).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
+      subject.handle_message c::ReportRefund.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
     end
   end
     
@@ -69,14 +69,16 @@ RSpec.describe Application::AccountsService, :type => :model do
     
     it "should use source and target accounts to perform transfer" do
       command = c::ReportTransfer.new('src-110', 
+        sending_transaction_id: 'tr-1',
+        receiving_transaction_id: 'tr-2',
         receiving_account_id: 'dst-210',
         amount_sent: '44322.10',
         amount_received: '3693.50',
         date: date,
         tag_ids: ['t-1', 't-2'],
         comment: 'Food', headers: dummy_headers)
-      expect(sending_account).to receive(:send_transfer).with('dst-210', '44322.10', date, ['t-1', 't-2'], 'Food') { 'st-221' }
-      expect(receiving_account).to receive(:receive_transfer).with('src-110', 'st-221', '3693.50', date, ['t-1', 't-2'], 'Food')
+      expect(sending_account).to receive(:send_transfer).with('tr-1', 'dst-210', '44322.10', date, ['t-1', 't-2'], 'Food') { 'st-221' }
+      expect(receiving_account).to receive(:receive_transfer).with('tr-2', 'src-110', 'st-221', '3693.50', date, ['t-1', 't-2'], 'Food')
       subject.handle_message command
     end
   end

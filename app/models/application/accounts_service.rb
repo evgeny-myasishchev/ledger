@@ -16,12 +16,12 @@ class Application::AccountsService < CommonDomain::CommandHandler
     begin_unit_of_work command.headers do |uow|
       sending_account = uow.get_by_id Domain::Account, command.aggregate_id
       receiving_account = uow.get_by_id Domain::Account, command.receiving_account_id
-      sending_transaction_id = sending_account.send_transfer receiving_account.aggregate_id,
+      sending_transaction_id = sending_account.send_transfer command.sending_transaction_id, receiving_account.aggregate_id,
         command.amount_sent,
         command.date,
         command.tag_ids,
         command.comment
-      receiving_account.receive_transfer sending_account.aggregate_id, sending_transaction_id,
+      receiving_account.receive_transfer command.receiving_transaction_id, sending_account.aggregate_id, sending_transaction_id,
         command.amount_received,
         command.date,
         command.tag_ids,

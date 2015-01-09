@@ -19,6 +19,7 @@ describe Application::Commands do
       before(:each) do
         params[:account_id] = 'account-993'
         params[:command] = {
+          transaction_id: 'transaction-100',
           amount: '22110',
           date: date.iso8601
         }
@@ -33,6 +34,12 @@ describe Application::Commands do
       it "should fail if the account_id is not specified" do
         params[:account_id] = nil
         expect{subject}.to raise_error ArgumentError, 'account_id is missing'
+      end
+      
+      it "shold fail if transaction_id is missing" do
+        expect { described_class.build_from_params({
+          account_id: 'account-100', command: {amount: 100, date: DateTime.now}
+        }) }.to raise_error ArgumentError, 'transaction_id is missing'
       end
     
       it "should assign command attributes" do
@@ -77,7 +84,7 @@ describe Application::Commands do
     let(:described_class) {
       Class.new(CommonDomain::Command) do
         include Application::Commands::TransferCommandFactory
-        attr_reader :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment
+        attr_reader :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment
       end
     }
   
@@ -91,6 +98,8 @@ describe Application::Commands do
       before(:each) do
         params[:account_id] = 'sending-993'
         params[:command] = {
+          sending_transaction_id: 'transaction-101',
+          receiving_transaction_id: 'transaction-102',
           receiving_account_id: 'receiving-2291',
           amount_sent: '22110',
           amount_received: '100110',
@@ -104,6 +113,8 @@ describe Application::Commands do
         params[:command][:tag_ids] = ['t-1', 't-2']
         params[:command][:comment] = 'Command comment 201120'
         expect(subject.aggregate_id).to eql 'sending-993'
+        expect(subject.sending_transaction_id).to eql 'transaction-101'
+        expect(subject.receiving_transaction_id).to eql 'transaction-102'
         expect(subject.receiving_account_id).to eql 'receiving-2291'
         expect(subject.amount_sent).to eql '22110'
         expect(subject.amount_received).to eql '100110'
@@ -111,6 +122,16 @@ describe Application::Commands do
         expect(subject.tag_ids).to eql ['t-1', 't-2']
         expect(subject.comment).to eql 'Command comment 201120'
       end
+      
+      it "shold fail if sending or receiving transaction_id is not present" do
+        params[:command][:sending_transaction_id] = nil
+        expect{subject}.to raise_error ArgumentError, 'sending_transaction_id is missing'
+        
+        params[:command][:sending_transaction_id] = 't-1'
+        params[:command][:receiving_transaction_id] = nil
+        expect{subject}.to raise_error ArgumentError, 'receiving_transaction_id is missing'
+      end
+      
       
       it "should fail if the account_id is not specified" do
         params[:account_id] = nil
