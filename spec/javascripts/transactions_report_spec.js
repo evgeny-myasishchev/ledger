@@ -129,21 +129,55 @@ describe("ReportTransactionsController", function() {
 		});
 	
 		describe('on success', function() {
-			beforeEach(function() {
+			var command;
+			
+			function doReport(typeKey) {
+				scope.newTransaction.type = typeKey;
 				scope.reportedTransactions.push({test: true});
-				$httpBackend.expectPOST('accounts/a-2/transactions/report-expence').respond();
+				$httpBackend.expectPOST('accounts/a-2/transactions/report-' + typeKey, function(data) {
+					command = JSON.parse(data).command;
+					return true;
+				}).respond();
 				scope.report();
 				$httpBackend.flush();
-			});
+			};
 		
 			it("should insert the transaction into the begining of the reported transactions", function() {
+				doReport(Transaction.expenceKey);
 				expect(scope.reportedTransactions.length).toEqual(2);
 				expect(scope.reportedTransactions[0]).toEqual({
-					amount: 1050, tag_ids: '{1},{2}', type: 'expence', date: date, comment: 'New transaction 10.5'
+					transaction_id: command.transaction_id,
+					account_id: 'a-2',
+					amount: 1050, 
+					tag_ids: '{1},{2}', 
+					type_id: Transaction.expenceId, 
+					date: date, 
+					comment: 'New transaction 10.5'
+				});
+			});
+			
+			it('should pupulate inserted transaction with transfer specific stuff', function() {
+				scope.newTransaction.receivingAccountId = 'a-3'
+				scope.newTransaction.amountReceived = scope.newTransaction.amount;
+				doReport(Transaction.transferKey);
+				expect(scope.reportedTransactions[0]).toEqual({
+					transaction_id: command.sending_transaction_id,
+					account_id: 'a-2',
+					amount: 1050,
+					tag_ids: '{1},{2}',
+					type_id: Transaction.expenceId,
+					date: date,
+					comment: 'New transaction 10.5',
+					is_transfer: true,
+					sending_account_id: 'a-2',
+					sending_transaction_id: command.sending_transaction_id,
+					receiving_account_id: 'a-3',
+					receiving_transaction_id: command.receiving_transaction_id
 				});
 			});
 		
 			it('should reset the newTransaction model', function() {
+				doReport(Transaction.expenceKey);
 				expect(scope.newTransaction.amount).toBeNull();
 				expect(scope.newTransaction.tag_ids).toEqual([]);
 				expect(scope.newTransaction.comment).toBeNull();
@@ -162,7 +196,7 @@ describe("ReportTransactionsController", function() {
 				scope.newTransaction.type = typeKey;
 				scope.report();
 				$httpBackend.flush();
-			}
+			};
 		
 			it('should update the balance on income', function() {
 				doReport(100, Transaction.incomeKey);

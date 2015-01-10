@@ -15,7 +15,11 @@
 		// 	{"type":"transfer","amount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 	
-		var processReportedTransaction = function(transaction) {
+		var processReportedTransaction = function(command, transaction) {
+			transaction.account_id = $scope.account.aggregate_id;
+			transaction.transaction_id = command.transaction_id;
+			transaction.type_id = Transaction.TypeIdByKey[transaction.type];
+			
 			if(transaction.type == Transaction.incomeKey || transaction.type == Transaction.refundKey) {
 				$scope.account.balance += transaction.amount;
 			} else if(transaction.type == Transaction.expenceKey) {
@@ -28,8 +32,18 @@
 						return false;
 					}
 				});
+				
+				transaction.is_transfer = true;
+				transaction.type_id = Transaction.expenceId;
+				transaction.transaction_id = command.sending_transaction_id;
+				transaction.sending_account_id = transaction.account_id;
+				transaction.sending_transaction_id = command.sending_transaction_id;
+				transaction.receiving_account_id = command.receiving_account_id;
+				transaction.receiving_transaction_id = command.receiving_transaction_id;
+				delete transaction.receivingAccountId;
+				delete transaction.amountReceived;
 			}
-		
+			delete transaction.type;
 			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
 				return '{' + tag_id + '}';
 			}).join(',');
@@ -53,7 +67,7 @@
 				comment: $scope.newTransaction.comment
 			};
 			var amount = money.parse($scope.newTransaction.amount);
-			if($scope.newTransaction.type == 'transfer') {
+			if($scope.newTransaction.type == Transaction.transferKey) {
 				command.sending_transaction_id = newUUID();
 				command.receiving_transaction_id = newUUID();
 				command.receiving_account_id = $scope.newTransaction.receivingAccountId;
@@ -69,7 +83,7 @@
 				var reported = $scope.newTransaction;
 				resetNewTransaction();
 				reported.amount = amount;
-				processReportedTransaction(reported);
+				processReportedTransaction(command, reported);
 			});
 		};
 	}]);

@@ -57,13 +57,6 @@
 </div>
 
 <fieldset ng-show="reportedTransactions.length">
-	<legend>Reported transactions</fieldset>
-	<ul class="list-group">
-		<li ng-repeat="transaction in reportedTransactions" class="list-group-item">
-			<strong>{{transaction.amount | money}} ({{transaction.type}})</strong> 
-			<ledger-tags ng-model='transaction.tag_ids'></ledger-tags>
-			{{transaction.date.toLocaleDateString()}}{{transaction.comment ? ',' : ''}}
-			{{transaction.comment}}
-		</li>
-	</ul>
+	<legend>Reported transactions</legend>
+	<transactions-list data='reportedTransactions' />
 </fieldset>
