@@ -1,5 +1,5 @@
 var transactionsApp = (function() {
-	var transactionsApp = angular.module('transactionsApp', ['ErrorHandler', 'ngRoute', 'ledgerHelpers', 'accountsApp']);
+	var transactionsApp = angular.module('transactionsApp', ['ErrorHandler', 'ngRoute', 'UUID', 'ledgerHelpers', 'accountsApp']);
 	transactionsApp.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/report', {
 				templateUrl: "report-transactions.html",

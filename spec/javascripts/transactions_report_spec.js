@@ -59,11 +59,12 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.date = date;
 			scope.newTransaction.comment = 'New transaction 10.5';
 		});
-	
+		
 		it("should submit the new income transaction", function() {
 			scope.newTransaction.type = 'income';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-income', function(data) {
 				var command = JSON.parse(data).command;
+				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
@@ -78,6 +79,7 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.type = 'expence';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-expence', function(data) {
 				var command = JSON.parse(data).command;
+				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
@@ -93,6 +95,7 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.type = 'refund';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-refund', function(data) {
 				var command = JSON.parse(data).command;
+				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
@@ -110,6 +113,8 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.amountReceived = '100.22';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-transfer', function(data) {
 				var command = JSON.parse(data).command;
+				expect(command.sending_transaction_id).not.toBeUndefined();
+				expect(command.receiving_transaction_id).not.toBeUndefined();
 				expect(command.receiving_account_id).toEqual('a-2');
 				expect(command.amount_sent).toEqual(1050);
 				expect(command.amount_received).toEqual(10022);

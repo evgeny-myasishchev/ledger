@@ -509,3 +509,10 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 		}];
 	});
 }();
+
+angular.module('UUID', []).factory('newUUID', function () {
+	var newUUID = function() {
+		return uuid.v4();
+	};
+	return newUUID;
+});

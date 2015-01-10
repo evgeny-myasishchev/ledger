@@ -1,7 +1,7 @@
 !function() {
 	var transactionsApp = angular.module('transactionsApp');
-	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money',
-	function ($scope, $http, accounts, money) {
+	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID',
+	function ($scope, $http, accounts, money, newUUID) {
 		$scope.account = accounts.getActive();
 		$scope.accounts = accounts.getAllOpen();
 		$scope.reportedTransactions = [];
@@ -54,10 +54,13 @@
 			};
 			var amount = money.parse($scope.newTransaction.amount);
 			if($scope.newTransaction.type == 'transfer') {
+				command.sending_transaction_id = newUUID();
+				command.receiving_transaction_id = newUUID();
 				command.receiving_account_id = $scope.newTransaction.receivingAccountId;
 				command.amount_sent = amount;
 				command.amount_received = money.parse($scope.newTransaction.amountReceived);
 			} else {
+				command.transaction_id = newUUID();
 				command.amount = amount;
 			}
 			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
