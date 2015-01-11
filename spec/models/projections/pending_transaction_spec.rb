@@ -48,6 +48,13 @@ module Projections::PendingTransactionSpec
         expect(t.account_id).to eql event.account_id
         expect(t.type_id).to eql event.type_id
       end
+      
+      it 'should handle nil tag_ids' do
+        event = new_reported_event tag_ids: nil
+        subject.handle_message event
+        t = described_class.find_by_aggregate_id 't-101'
+        expect(t.tag_ids).to be_nil
+      end
     
       it 'should be idepmptent' do
         event = new_reported_event
@@ -59,8 +66,11 @@ module Projections::PendingTransactionSpec
     end
     
     describe 'on PendingTransactionAdjusted' do
-      it 'should update attributes of the pending transaction' do
+      before do
         described_class.create! aggregate_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
+      end
+      
+      it 'should update attributes of the pending transaction' do
         event = new_adjusted_event
         subject.handle_message event
         t = described_class.find_by_aggregate_id 't-101'
@@ -70,6 +80,13 @@ module Projections::PendingTransactionSpec
         expect(t.comment).to eql event.comment
         expect(t.account_id).to eql event.account_id
         expect(t.type_id).to eql event.type_id
+      end
+      
+      it 'should handle nil tag_ids' do
+        event = new_adjusted_event tag_ids: nil
+        subject.handle_message event
+        t = described_class.find_by_aggregate_id 't-101'
+        expect(t.tag_ids).to be_nil
       end
     end
     
