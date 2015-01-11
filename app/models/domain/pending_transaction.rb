@@ -6,7 +6,8 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
   attr_reader :is_approved
   
-  def report user, transaction_id, amount, date: DateTime.new, tag_ids: nil, comment: nil, account_id: nil, type_id: Domain::Transaction::ExpenceTypeId
+  def report user, transaction_id, amount, date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil
+    type_id ||= Domain::Transaction::ExpenceTypeId
     Log.debug "Reporting new pending transaction id=#{transaction_id} by user: #{user.id}"
     raise ArgumentError.new 'transaction_id can not be empty.' if transaction_id.blank?
     raise ArgumentError.new 'amount can not be empty.' if amount.blank?

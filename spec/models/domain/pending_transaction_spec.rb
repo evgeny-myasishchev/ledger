@@ -29,6 +29,16 @@ module PendingTransactionSpec
         expect { subject.report user, 't-101', '100.4', date: nil }.to raise_error ArgumentError, 'date can not be empty.'
       end
       
+      it 'should apply default type_id if not provided' do
+        subject.report user, 't-101', '100.4', date: date
+        expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+      end
+      
+      it 'should apply default type_id if nil' do
+        subject.report user, 't-101', '100.4', date: date, type_id: nil
+        expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+      end
+      
       it 'should raise reported event' do
         subject.report user, 't-101', '1003.32', date: date, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', account_id: 'a-100', type_id: Domain::Transaction::IncomeTypeId
         expect(subject).to have_one_uncommitted_event PendingTransactionReported, 
