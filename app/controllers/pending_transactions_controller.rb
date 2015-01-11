@@ -7,4 +7,9 @@ class PendingTransactionsController < ApplicationController
     dispatch_command cmd
     render nothing: true
   end
+  
+  def adjust
+    dispatch_command AdjustPendingTransaction.from_hash params
+    render nothing: true
+  end
 end

@@ -41,6 +41,26 @@ module PendingTransactionsControllerSpec
         expect(response.status).to eql 200
       end
     end
+      
+    describe 'PUT adjust' do
+      it 'should dispatch report command' do
+        date = DateTime.new
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command).to be_an_instance_of AdjustPendingTransaction
+          expect(command.aggregate_id).to eql 't-100'
+          expect(command.amount).to eql '222.32'
+          expect(command.date).to eql date
+          expect(command.tag_ids).to eql ['t-1', 't-2']
+          expect(command.comment).to eql 'Comment 100'
+          expect(command.account_id).to eql 'a-100'
+          expect(command.type_id).to eql 2
+        end
+        put :adjust, aggregate_id: 't-100',
+          amount: '222.32', date: date, tag_ids: ['t-1', 't-2'], 
+          comment: 'Comment 100', account_id: 'a-100', type_id: 2, format: :json
+        expect(response.status).to eql 200
+      end
+    end
   end
 
 end
