@@ -61,6 +61,17 @@ module PendingTransactionsControllerSpec
         expect(response.status).to eql 200
       end
     end
+      
+    describe 'POST approve' do
+      it 'should dispatch approve command' do
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command).to be_an_instance_of ApprovePendingTransaction
+          expect(command.aggregate_id).to eql 't-100'
+        end
+        put :approve, aggregate_id: 't-100'
+        expect(response.status).to eql 200
+      end
+    end
   end
 
 end
