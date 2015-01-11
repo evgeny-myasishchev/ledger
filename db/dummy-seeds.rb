@@ -52,9 +52,13 @@ fake_transactions_data = [
 
 include Application::Commands
 
+def new_id
+  CommonDomain::Infrastructure::AggregateId.new_id
+end
+
 def create_account(ledger, name, currency, &block)
   @log.info "Creating new account: #{name}"
-  account_id = CommonDomain::Infrastructure::AggregateId.new_id
+  account_id = new_id
   dispatch LedgerCommands::CreateNewAccount.new ledger.aggregate_id, account_id: account_id, name: name, initial_balance: 0, currency_code: currency.code
   if block_given? 
     yield(account_id) 
@@ -64,11 +68,11 @@ def create_account(ledger, name, currency, &block)
 end
 
 def report_income account_id, amount, date, tags, comment
-  dispatch AccountCommands::ReportIncome.new account_id, amount: amount, date: date, tag_ids: tags, comment: comment
+  dispatch AccountCommands::ReportIncome.new account_id, transaction_id: new_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
 def report_expence account_id, amount, date, tags, comment
-  dispatch AccountCommands::ReportExpence.new account_id, amount: amount, date: date, tag_ids: tags, comment: comment
+  dispatch AccountCommands::ReportExpence.new account_id, transaction_id: new_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
 cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
@@ -80,10 +84,10 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence data[:amount], date - rand(100), data[:tags], data[:comment]
+      account.report_expence new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
-  dispatch AccountCommands::ReportRefund.new account_id,
+  dispatch AccountCommands::ReportRefund.new account_id, transaction_id: new_id,
     amount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
   account_id
 end
@@ -97,20 +101,20 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence data[:amount], date - rand(100), data[:tags], data[:comment]
+      account.report_expence new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
-  dispatch AccountCommands::ReportRefund.new account_id,
+  dispatch AccountCommands::ReportRefund.new account_id, transaction_id: new_id,
     amount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
   account_id
 end
 
 pb_deposit_id = create_account ledger, 'PB Deposit', uah
 
-dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: cache_uah_account_id,
+dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, sending_transaction_id: new_id, receiving_account_id: cache_uah_account_id, receiving_transaction_id: new_id,
   amount_sent: '15000.00', amount_received: '15000.00', date: DateTime.now, tag_ids: [], comment: 'Getting cache'
 
-dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, receiving_account_id: pb_deposit_id,
+dispatch AccountCommands::ReportTransfer.new pb_credit_account_id, sending_transaction_id: new_id, receiving_account_id: pb_deposit_id, receiving_transaction_id: new_id,
   amount_sent: '5000.00', amount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
 @context.event_store.dispatcher.wait_pending
