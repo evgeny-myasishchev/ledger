@@ -6,6 +6,7 @@ module PendingTransactionSpec
   include Domain::Events
 
   describe Domain::PendingTransaction do
+    using AccountHelpers::D
     def make_reported subject, user, transaction_id: 't-101', amount: '1003.32', 
         date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
         account_id: 'a-100', type_id: Domain::Transaction::ExpenceTypeId
@@ -16,6 +17,18 @@ module PendingTransactionSpec
     let(:user) { User.new id: 134911 }
     
     describe 'report' do
+      it 'should fail if transaction_id is empty' do
+        expect { subject.report user, nil, '100.4' }.to raise_error ArgumentError, 'transaction_id can not be empty.'
+      end
+      
+      it 'should fail if amount is empty' do
+        expect { subject.report user, 't-101', nil }.to raise_error ArgumentError, 'amount can not be empty.'
+      end
+      
+      it 'should fail if date is empty' do
+        expect { subject.report user, 't-101', '100.4', date: nil }.to raise_error ArgumentError, 'date can not be empty.'
+      end
+      
       it 'should raise reported event' do
         subject.report user, 't-101', '1003.32', date: date, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', account_id: 'a-100', type_id: Domain::Transaction::IncomeTypeId
         expect(subject).to have_one_uncommitted_event PendingTransactionReported, 
@@ -82,6 +95,63 @@ module PendingTransactionSpec
         expect(subject.comment).to eql 'Expence 10.05'
         expect(subject.account_id).to eql 'a-200'
         expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+      end
+    end
+    
+    describe 'approve' do
+      let(:account) { Domain::Account.new.make_created 'account-100' }
+      
+      it 'should fail if account_id is empty' do
+        subject.report user, 't-100', '10.5'
+        expect { subject.approve account }.to raise_error Errors::DomainError, 'account_id is empty.'
+      end
+      
+      it 'should fail if account is wrong' do
+        subject.report user, 't-100', '10.5', account_id: 'account-101'
+        expect { subject.approve account }.to raise_error Errors::DomainError, "account is wrong. Expected account='account-101' but was account='account-100'."
+      end
+      
+      it 'should fail if already approved' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        subject.apply_event PendingTransactionApproved.new subject.aggregate_id
+        expect { subject.approve account }.to raise_error Errors::DomainError, "pending transaction id=(t-100) has already been approved."
+      end
+      
+      it 'should report income' do
+        allow(account).to receive(:report_income)
+        make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::IncomeTypeId
+        subject.approve account
+        expect(account).to have_received(:report_income).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
+      end
+      
+      it 'should report expence' do
+        allow(account).to receive(:report_expence)
+        make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenceTypeId
+        subject.approve account
+        expect(account).to have_received(:report_expence).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
+      end
+      
+      it 'should report refund' do
+        allow(account).to receive(:report_refund)
+        make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::RefundTypeId
+        subject.approve account
+        expect(account).to have_received(:report_refund).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
+      end
+      
+      it 'should fail if unknown type_id' do
+        make_reported subject, user, account_id: account.aggregate_id, type_id: 999
+        expect { subject.approve account }.to raise_error Errors::DomainError, 'unknown type: 999'
+      end
+      
+      it 'should raise approved event' do
+        make_reported subject, user, account_id: account.aggregate_id
+        subject.approve account
+        expect(subject).to have_one_uncommitted_event PendingTransactionApproved, aggregate_id: subject.aggregate_id
+      end
+      
+      it 'should set approved flag on approved' do
+        subject.apply_event PendingTransactionApproved.new subject.aggregate_id
+        expect(subject.is_approved).to be_truthy
       end
     end
   end

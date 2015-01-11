@@ -5,7 +5,7 @@ module AccountHelpers
         aggregate_id = "account-#{Random.rand(100)}" unless aggregate_id
         ledger_id = "ledger-#{Random.rand(100)}" unless ledger_id
         name = "name-#{Random.rand(100)}" unless name
-        self.apply_event I::AccountCreated.new aggregate_id, ledger_id, 1, name, initial_balance, currency_code, unit
+        self.apply_event Domain::Events::AccountCreated.new aggregate_id, ledger_id, 1, name, initial_balance, currency_code, unit
         self
       end
     end
