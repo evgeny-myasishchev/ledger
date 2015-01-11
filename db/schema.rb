@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141206094249) do
+ActiveRecord::Schema.define(version: 20150111202652) do
 
   create_table "currency_rates", force: true do |t|
     t.string   "from",       null: false
@@ -65,6 +65,20 @@ ActiveRecord::Schema.define(version: 20141206094249) do
     t.string  "projection_id", null: false
     t.integer "version",       null: false
   end
+
+  create_table "projections_pending_transactions", force: true do |t|
+    t.string   "aggregate_id", null: false
+    t.integer  "user_id",      null: false
+    t.string   "amount",       null: false
+    t.datetime "date"
+    t.string   "tag_ids"
+    t.text     "comment"
+    t.string   "account_id"
+    t.integer  "type_id",      null: false
+  end
+
+  add_index "projections_pending_transactions", ["aggregate_id"], name: "index_projections_pending_transactions_on_aggregate_id", unique: true
+  add_index "projections_pending_transactions", ["user_id"], name: "index_projections_pending_transactions_on_user_id"
 
   create_table "projections_tags", force: true do |t|
     t.string  "ledger_id",           null: false
