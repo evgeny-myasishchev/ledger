@@ -405,4 +405,36 @@ describe Application::Commands do
       end
     end
   end
+  
+  describe described_class::PendingTransactionCommands do
+    shared_examples :aliased_transaction_id do
+      it 'should alias transaction_id to aggregate_id' do
+        subject = described_class.new 'aggregate-223991'
+        expect(subject.transaction_id).to eql 'aggregate-223991'
+      end
+    end
+    
+    shared_examples :required_aggregate_id do
+      it 'should validate presence of aggregate_id' do
+        subject = described_class.from_hash Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+      end
+    end
+    
+    describe described_class::ReportPendingTransaction do
+      it_behaves_like :aliased_transaction_id
+      it_behaves_like :required_aggregate_id
+    end
+    
+    describe described_class::AdjustPendingTransaction do
+      it_behaves_like :aliased_transaction_id
+      it_behaves_like :required_aggregate_id
+    end
+    
+    describe described_class::ApprovePendingTransaction do
+      it_behaves_like :aliased_transaction_id
+      it_behaves_like :required_aggregate_id
+    end
+  end
 end

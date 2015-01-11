@@ -116,4 +116,23 @@ module Application::Commands
       end
     end
   end
+  
+  commands_group :PendingTransactionCommands do
+    module PendingTransactionBaseCommand
+      def self.included(receiver)
+        receiver.include ActiveModel::Validations
+        receiver.validates :aggregate_id, presence: true
+        receiver.send(:alias_method, :transaction_id, :aggregate_id)
+      end
+    end  
+    command :ReportPendingTransaction, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+      include PendingTransactionBaseCommand
+    end
+    command :AdjustPendingTransaction, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+      include PendingTransactionBaseCommand
+    end
+    command :ApprovePendingTransaction do
+      include PendingTransactionBaseCommand
+    end
+  end
 end
