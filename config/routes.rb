@@ -29,6 +29,12 @@ Rails.application.routes.draw do
     post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
   end
   
+  resources :pending_transactions, only: [], path: 'pending-transactions', param: :aggregate_id do
+    post '/' => 'pending_transactions#report', on: :collection
+    put '/' => 'pending_transactions#adjust', on: :member
+    post 'approve' => 'pending_transactions#approve', on: :member
+  end
+  
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
