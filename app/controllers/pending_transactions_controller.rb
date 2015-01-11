@@ -1,6 +1,13 @@
 class PendingTransactionsController < ApplicationController
   include Application::Commands::PendingTransactionCommands
   
+  def index
+    @transactions = Projections::PendingTransaction.get_pending_transactions current_user
+    respond_to do |format|
+      format.json { render json: @transactions }
+    end
+  end
+  
   def report
     cmd = ReportPendingTransaction.from_hash params
     cmd.user = current_user

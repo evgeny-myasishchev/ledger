@@ -19,6 +19,22 @@ module Projections::PendingTransactionSpec
       PendingTransactionAdjusted.new transaction_id, amount, date, tag_ids, comment, account_id, type_id
     end
     
+    describe 'get_penging_transactions' do
+      it 'should return all pending transactions belonging to the given user' do
+        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-101'
+        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-102'
+        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-103'
+        subject.handle_message new_reported_event user_id: 33223, transaction_id: 't-104'
+        subject.handle_message new_reported_event user_id: 33223, transaction_id: 't-105'
+        
+        user_transactions = described_class.get_pending_transactions User.new id: 33222
+        expect(user_transactions.length).to eql 3
+        expect(user_transactions).to include described_class.find_by_aggregate_id 't-101'
+        expect(user_transactions).to include described_class.find_by_aggregate_id 't-102'
+        expect(user_transactions).to include described_class.find_by_aggregate_id 't-103'
+      end
+    end
+    
     describe 'on PendingTransactionReported' do
       it 'should insert new pending transaction' do
         event = new_reported_event

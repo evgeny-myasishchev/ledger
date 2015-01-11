@@ -8,6 +8,10 @@ module PendingTransactionsControllerSpec
     authenticate_user
     
     describe "routes", :type => :routing do
+      it "routes GET 'index'" do
+        expect({get: 'pending-transactions'}).to route_to controller: 'pending_transactions', action: 'index'
+      end
+      
       it "routes POST 'report'" do
         expect({post: 'pending-transactions'}).to route_to controller: 'pending_transactions', action: 'report'
       end
@@ -18,6 +22,16 @@ module PendingTransactionsControllerSpec
     
       it "routes POST 'approve'" do
         expect({post: 'pending-transactions/t-110/approve'}).to route_to controller: 'pending_transactions', action: 'approve', aggregate_id: 't-110'
+      end
+    end
+    
+    describe 'GET index' do
+      it 'should query user pending transactions and return them' do
+        transactions = double(:transactions)
+        expect(Projections::PendingTransaction).to receive(:get_pending_transactions).with(controller.current_user).and_return(transactions)
+        get 'index', format: :json
+        expect(assigns(:transactions)).to be transactions
+        expect(response.status).to eql 200
       end
     end
   

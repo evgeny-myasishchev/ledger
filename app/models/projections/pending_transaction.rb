@@ -3,6 +3,10 @@ class Projections::PendingTransaction < ActiveRecord::Base
   include Domain::Events
   include Projections
   
+  def self.get_pending_transactions user
+    where(user_id: user.id).all
+  end
+  
   projection do
     on PendingTransactionReported do |event|
       t = PendingTransaction.find_or_initialize_by aggregate_id: event.aggregate_id
