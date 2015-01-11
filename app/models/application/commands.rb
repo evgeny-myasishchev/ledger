@@ -126,6 +126,7 @@ module Application::Commands
       end
     end  
     command :ReportPendingTransaction, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+      attr_writer :user
       include PendingTransactionBaseCommand
     end
     command :AdjustPendingTransaction, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
