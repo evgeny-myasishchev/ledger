@@ -7,6 +7,10 @@ class Projections::PendingTransaction < ActiveRecord::Base
     where(user_id: user.id).all
   end
   
+  def self.get_pending_transactions_count user
+    where(user_id: user.id).count
+  end
+  
   projection do
     on PendingTransactionReported do |event|
       t = PendingTransaction.find_or_initialize_by aggregate_id: event.aggregate_id

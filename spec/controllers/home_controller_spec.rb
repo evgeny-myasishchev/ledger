@@ -28,12 +28,14 @@ describe HomeController do
         expect(Projections::Account).to receive(:get_user_accounts).with(user).and_return(accounts)
         expect(Projections::Tag).to receive(:get_user_tags).with(user).and_return(tags)
         expect(Projections::Category).to receive(:get_user_categories).with(user).and_return(categories)
+        expect(Projections::PendingTransaction).to receive(:get_pending_transactions_count).with(user).and_return(223)
         get 'index'
         expect(response.status).to eql 200
         expect(assigns(:ledgers)).to be ledgers
         expect(assigns(:accounts)).to be accounts
         expect(assigns(:tags)).to be tags
         expect(assigns(:categories)).to be categories
+        expect(assigns(:pending_transactions_count)).to eql 223
       end
     end
   end

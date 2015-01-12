@@ -19,19 +19,33 @@ module Projections::PendingTransactionSpec
       PendingTransactionAdjusted.new transaction_id, amount, date, tag_ids, comment, account_id, type_id
     end
     
-    describe 'get_penging_transactions' do
-      it 'should return all pending transactions belonging to the given user' do
-        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-101'
-        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-102'
-        subject.handle_message new_reported_event user_id: 33222, transaction_id: 't-103'
-        subject.handle_message new_reported_event user_id: 33223, transaction_id: 't-104'
-        subject.handle_message new_reported_event user_id: 33223, transaction_id: 't-105'
+    describe 'read methods' do
+      let(:user_1) { User.new id: 33222 }
+      let(:user_2) { User.new id: 33223 }
+
+      before do
+        subject.handle_message new_reported_event user_id: user_1.id, transaction_id: 't-101'
+        subject.handle_message new_reported_event user_id: user_1.id, transaction_id: 't-102'
+        subject.handle_message new_reported_event user_id: user_1.id, transaction_id: 't-103'
+        subject.handle_message new_reported_event user_id: user_2.id, transaction_id: 't-104'
+        subject.handle_message new_reported_event user_id: user_2.id, transaction_id: 't-105'
+      end
+      
+      describe 'get_penging_transactions' do
+        it 'should return all pending transactions belonging to the given user' do
+          user_transactions = described_class.get_pending_transactions user_1
+          expect(user_transactions.length).to eql 3
+          expect(user_transactions).to include described_class.find_by_aggregate_id 't-101'
+          expect(user_transactions).to include described_class.find_by_aggregate_id 't-102'
+          expect(user_transactions).to include described_class.find_by_aggregate_id 't-103'
+        end
+      end
         
-        user_transactions = described_class.get_pending_transactions User.new id: 33222
-        expect(user_transactions.length).to eql 3
-        expect(user_transactions).to include described_class.find_by_aggregate_id 't-101'
-        expect(user_transactions).to include described_class.find_by_aggregate_id 't-102'
-        expect(user_transactions).to include described_class.find_by_aggregate_id 't-103'
+      describe 'get_penging_transactions_count' do
+        it 'should count pending transactions belonging to the given user' do
+          expect(described_class.get_pending_transactions_count(user_1)).to eql 3
+          expect(described_class.get_pending_transactions_count(user_2)).to eql 2
+        end
       end
     end
     
