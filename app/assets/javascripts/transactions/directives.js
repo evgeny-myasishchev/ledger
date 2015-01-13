@@ -103,4 +103,21 @@
 		}
 	}]);
 	
+	transactionsApp.directive('reviewAndApprovePending', [function() {
+		return {
+			restrict: 'E',
+			replace: true,
+			templateUrl: 'review-and-approve-pending-transaction.html',
+			link: function(scope, element, attrs) {
+				element.modal({
+					show: false
+				});
+				scope.startReview = function(transaction) {
+					console.log(transaction);
+					element.modal('show');
+				}
+			}
+		}
+	}]);
+	
 }(jQuery);

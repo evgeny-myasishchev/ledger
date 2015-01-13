@@ -29,7 +29,10 @@
 		</li>
 	</script>
 	<script type="text/ng-template" id='pending-transactions.html'>
-		<%= render partial: 'transactions/pending' %>
+	<%= render partial: 'transactions/pending' %>
+	</script>
+	<script type="text/ng-template" id='review-and-approve-pending-transaction.html'>
+	<%= render partial: 'transactions/review_and_approve' %>
 	</script>
 	<script type="text/javascript">
 		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'pendingTransactionsProvider',

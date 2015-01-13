@@ -14,7 +14,7 @@
 	<tbody>
 		<tr ng-repeat="transaction in transactions">
 			<td style='width: 20px; white-space: nowrap; padding-right: 20px;'>
-				<button class='btn btn-success btn-xs' title='Review and Approve'><i class='glyphicon glyphicon-ok'></i></button>
+				<button class='btn btn-success btn-xs' title='Review and Approve' ng-click='startReview(transaction)'><i class='glyphicon glyphicon-ok'></i></button>
 			</th>
 			<td style='width: 20px;'><i class='{{transaction | tti}}'></i></td>
 			<td>{{transaction.amount}}</td>
@@ -24,3 +24,5 @@
 		</tr>
 	</tbody>
 </table>
+
+<review-and-approve-pending />
