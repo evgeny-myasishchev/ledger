@@ -112,10 +112,17 @@
 				element.modal({
 					show: false
 				});
-				scope.startReview = function(transaction) {
-					console.log(transaction);
-					element.modal('show');
-				}
+				element.on('shown.bs.modal', function() {
+					element.find('select:first').focus();
+				});
+				
+				scope.$watch('pendingTransaction', function(newVal) {
+					if(newVal) {
+						element.modal('show');
+					} else {
+						element.modal('hide');
+					}
+				});
 			}
 		}
 	}]);

@@ -156,7 +156,7 @@ var ledgerDirectives = angular.module('ledgerDirectives', ['ledgerHelpers', 'tag
 				try {
 					handlingModelChanges = true;
 					input.tagsinput('removeAll');
-					$.each(newTagIds, function(index, newTagId) {
+					if(newTagIds) $.each(newTagIds, function(index, newTagId) {
 						var tag = tagsById[newTagId];
 						if(tag) input.tagsinput('add', tag.name);
 					});
