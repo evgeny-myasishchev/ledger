@@ -1,4 +1,4 @@
-!function() {
+!function($) {
 	var transactionsApp = angular.module('transactionsApp');
 
 	transactionsApp.directive('transactionsList', ['$http', 'accounts', 'tagsHelper', 'money', function($http, accounts, tagsHelper, money) {
@@ -85,4 +85,23 @@
 			return null;
 		}
 	});
-}();
+	
+	transactionsApp.directive('pendingTransactionsMenuInjector', [function() {
+		return {
+			restrict: 'E',
+			replace: true,
+			templateUrl: 'pending-transactions-menu.html',
+			scope: {
+				count: '=count'
+			},
+			link: function(scope, element, attrs) {
+				console.log(scope);
+				if(!attrs.count) {
+					return;
+				}
+				element.prependTo('#main-navbar-right');
+			}
+		}
+	}]);
+	
+}(jQuery);

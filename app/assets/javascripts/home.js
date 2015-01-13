@@ -5,10 +5,11 @@ var homeApp = (function() {
 	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
 	}]);
 	
-	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 'ledgers', 'accounts', 'money', 'accountsState', 'search',
-	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
+	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 
+	'ledgers', 'accounts', 'money', 'accountsState', 'search', 'pendingTransactions',
+	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search, pendingTransactions) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
-		
+		$scope.$root.pendingTransactionsCount = pendingTransactions.getCount();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
 		
 		$http.get(transactionsBasePath + 'transactions.json').success(function(data) {

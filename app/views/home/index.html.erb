@@ -23,15 +23,26 @@
 	<script type="text/ng-template" id='categories.html'>
 	<%= render partial: 'categories' %>
 	</script>
+	<script type="text/ng-template" id='pending-transactions-menu.html'>
+		<li>
+			<a href='#/pending-transactions'>Pending transactions <span class='label label-info'>{{count}}</span></a>
+		</li>
+	</script>
+	<script type="text/ng-template" id='pending-transactions.html'>
+		<%= render partial: 'transactions/pending' %>
+	</script>
 	<script type="text/javascript">
-		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', function(ledgersProvider, accountsProvider, tagsProvider) {
+		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'pendingTransactionsProvider',
+		function(ledgersProvider, accountsProvider, tagsProvider, pendingTransactionsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
 			accountsProvider.assignAccounts(<%= raw @accounts.to_json(methods: :currency) %>);
 			accountsProvider.assignCategories(<%= raw @categories.to_json %>);
 			tagsProvider.assignTags(<%= raw @tags.to_json %>);
+			pendingTransactionsProvider.setPendingTransactionsCount(<%= @pending_transactions_count %>);
 		}]);
 	</script>
 	<ldr-errors-notifier></ldr-errors-notifier>
+	<pending-transactions-menu-injector count='pendingTransactionsCount'></pending-transactions-menu-injector>
 	<div ng-view class='row'>
 	</div>
 </div>

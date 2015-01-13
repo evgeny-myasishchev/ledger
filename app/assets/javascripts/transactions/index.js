@@ -12,6 +12,10 @@ var transactionsApp = (function() {
 				templateUrl: "report-transactions.html",
 				controller: 'ReportTransactionsController'
 			});
+			$routeProvider.when('/pending-transactions', {
+				templateUrl: "pending-transactions.html",
+				controller: 'PendingTransactionsController'
+			});
 		}
 	]);
 	return transactionsApp;
