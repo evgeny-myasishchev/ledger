@@ -95,7 +95,6 @@
 				count: '=count'
 			},
 			link: function(scope, element, attrs) {
-				console.log(scope);
 				if(!attrs.count) {
 					return;
 				}
