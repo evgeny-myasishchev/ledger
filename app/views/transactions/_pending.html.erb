@@ -1,1 +1,26 @@
 <h2>Pending transactions</h2>
+
+<table class='table table-condensed'>
+	<thead>
+		<tr>
+			<th></th>
+			<th></th>
+			<th>Amount</th>
+			<th>Tags</th>
+			<th>Date</th>
+			<th>Description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="transaction in transactions">
+			<td style='width: 20px; white-space: nowrap; padding-right: 20px;'>
+				<button class='btn btn-success btn-xs' title='Review and Approve'><i class='glyphicon glyphicon-ok'></i></button>
+			</th>
+			<td style='width: 20px;'><i class='{{transaction | tti}}'></i></td>
+			<td>{{transaction.amount}}</td>
+			<td><ledger-tags ng-model="transaction.tag_ids" /></td>
+			<td>{{transaction.date.toLocaleDateString()}}</td>
+			<td>{{transaction.comment}}</td>
+		</tr>
+	</tbody>
+</table>

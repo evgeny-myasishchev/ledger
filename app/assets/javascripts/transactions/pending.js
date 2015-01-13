@@ -23,5 +23,12 @@
 	
 	transactionsApp.controller('PendingTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID',
 	function ($scope, $http, accounts, money, newUUID) {
+		$http.get('pending-transactions.json').success(function(data) {
+			var transactions = data;
+			jQuery.each(transactions, function(i, t) {
+				if(t.date) t.date = new Date(t.date);
+			});
+			$scope.transactions = transactions;
+		});
 	}]);
 }();
