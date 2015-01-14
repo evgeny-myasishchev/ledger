@@ -23,6 +23,10 @@ module PendingTransactionsControllerSpec
       it "routes POST 'approve'" do
         expect({post: 'pending-transactions/t-110/approve'}).to route_to controller: 'pending_transactions', action: 'approve', aggregate_id: 't-110'
       end
+      
+      it "routes POST 'adjust-and-approve'" do
+        expect({post: 'pending-transactions/t-110/adjust-and-approve'}).to route_to controller: 'pending_transactions', action: 'adjust_and_approve', aggregate_id: 't-110'
+      end
     end
     
     describe 'GET index' do
