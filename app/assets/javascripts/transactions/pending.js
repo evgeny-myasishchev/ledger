@@ -23,6 +23,7 @@
 	
 	transactionsApp.controller('PendingTransactionsController', ['$scope', '$http', 'accounts', 'money',
 	function ($scope, $http, accounts, money) {
+		$scope.approvedTransactions = [];
 		$http.get('pending-transactions.json').success(function(data) {
 			var transactions = data;
 			jQuery.each(transactions, function(i, t) {
