@@ -51,4 +51,23 @@ RSpec.describe Application::PendingTransactionsService, :type => :model do
       subject.handle_message cmd
     end
   end
+  
+  describe 'AdjustAndApprovePendingTransaction' do
+    let(:account) { double(:account, aggregate_id: 'a-101') }
+    before do
+      allow(pt).to receive(:account_id) { account.aggregate_id }
+    end
+    it 'should approve the pending transaction' do
+      cmd = c::AdjustAndApprovePendingTransaction.new 'pt-223', amount: '100.33', date: DateTime.now, 
+        tag_ids: ['t-1', 't-2'], comment: 'Transaction 223', account_id: 'a-110', 
+        type_id: 2, headers: dummy_headers
+        
+      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Account, account.aggregate_id).and_return(account).and_save(with_dummy_headers)
+      expect(pt).to receive(:adjust).with(amount: cmd.amount, date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment,
+        account_id: cmd.account_id, type_id: cmd.type_id)
+      expect(pt).to receive(:approve).with(account)
+      subject.handle_message cmd
+    end
+  end
 end

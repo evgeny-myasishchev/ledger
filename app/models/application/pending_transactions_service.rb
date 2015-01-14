@@ -21,4 +21,13 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
       transaction.approve account
     end
   end
+  
+  on PendingTransactionCommands::AdjustAndApprovePendingTransaction do |cmd|
+    begin_unit_of_work cmd.headers do |uow|
+      transaction = uow.get_by_id Domain::PendingTransaction, cmd.aggregate_id
+      transaction.adjust amount: cmd.amount, date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment, account_id: cmd.account_id, type_id: cmd.type_id
+      account = uow.get_by_id Domain::Account, transaction.account_id
+      transaction.approve account
+    end
+  end
 end

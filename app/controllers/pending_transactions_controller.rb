@@ -26,6 +26,7 @@ class PendingTransactionsController < ApplicationController
   end
   
   def adjust_and_approve
+    dispatch_command AdjustAndApprovePendingTransaction.from_hash params
     render nothing: true
   end
 end
