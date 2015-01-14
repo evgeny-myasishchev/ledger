@@ -25,4 +25,9 @@
 	</tbody>
 </table>
 
-<review-and-approve-pending />
+<review-and-approve-pending></review-and-approve-pending>
+
+<fieldset ng-show="approvedTransactions.length">
+	<legend>Approved transactions</legend>
+	<transactions-list data='approvedTransactions' />
+</fieldset>

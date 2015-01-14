@@ -14,6 +14,7 @@ describe('transactions.PendingTransactionsController', function() {
 				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, is_closed: false}
 			]);
 		}]);
+		$httpBackend.whenGET('pending-transactions.json').respond([]);
 	}));
 	
 	function initController() {
@@ -54,7 +55,7 @@ describe('transactions.PendingTransactionsController', function() {
 	
 	describe('startReview', function() {
 		beforeEach(function() {
-			$httpBackend.whenGET('pending-transactions.json').respond([]);
+			initController();
 		});
 		
 		it('should initialize pending transaction', function() {
@@ -76,6 +77,66 @@ describe('transactions.PendingTransactionsController', function() {
 			expect(scope.pendingTransaction.comment).toEqual(transaction.comment);
 			expect(scope.pendingTransaction.account_id).toEqual(transaction.account_id);
 			expect(scope.pendingTransaction.type_id).toEqual(transaction.type_id);
+		});
+	});
+	
+	describe('adjustAndApprove', function() {
+		var pendingTransaction;
+		beforeEach(function() {
+			initController();
+			scope.pendingTransaction = pendingTransaction = {
+				aggregate_id: 't-332',
+				amount: '223.43',
+				date: new Date(),
+				tag_ids: "{t1},{t2}",
+				comment: 'Comment 332',
+				account_id: 44332,
+				type_id: 2
+			};
+		});
+		
+		it("should submit the new income transaction", function() {
+			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
+				var command = JSON.parse(data);
+				command.date = new Date(command.date);
+				expect(command).toEqual(scope.pendingTransaction);
+				return true;
+			}).respond();
+			scope.adjustAndApprove();
+			$httpBackend.flush();
+		});
+		
+		describe('on success', function() {
+			beforeEach(function() {
+				$httpBackend.flush();
+				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
+				scope.approvedTransactions = [{t1: true}, {t2: true}];
+				scope.transactions  = [{t1: true}, pendingTransactions, {t2: true}];
+				scope.adjustAndApprove();
+				$httpBackend.flush();
+			});
+			
+			it('should insert the transaction into the begining of approvedTransactions', function() {
+				expect(scope.approvedTransactions.length).toEqual(3);
+				expect(scope.approvedTransactions[0]).toEqual(pendingTransaction);
+			});
+			
+			it('should convert amount to integer', function() {
+				expect(scope.approvedTransactions[0].amount).toEqual(22343);
+			});
+			
+			it('should rename aggregte_id to transaction_id', function() {
+				expect(scope.approvedTransactions[0].aggregate_id).toBeUndefined();
+				expect(scope.approvedTransactions[0].transaction_id).toEqual('t-332');
+			});
+			
+			it('should clear the pending transaction', function() {
+				expect(scope.pendingTransaction).toBeNull();
+			});
+			
+			it('should remove the transaction from pendingTransactions', function() {
+				expect(scope.transactions.length).toEqual(2);
+			});
 		});
 	});
 });
