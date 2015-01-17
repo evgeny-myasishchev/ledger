@@ -11,7 +11,7 @@
 			</div>
 			<div class='form-group form-inline'>
 				<div class="form-group">
-					<input tabindex="1" autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
+					<input autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
 				</div>
 				<div class="form-group">
 					<label class='control-label' for="type">Type</label>
@@ -31,20 +31,20 @@
 				<div class='form-group'>
 					<label class='control-label' for="type">Target account</label>
 					<div class='form-inline'>
-						<select tabindex="2" ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
+						<select ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
 							<option value="">--Chose account--</option>
 						</select>
 					</div>
 				</div>
 				<div class='form-group form-inline'>
-					<input tabindex="3" type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amount_received' required>
+					<input type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amount_received' required>
 				</div>
 			</div>
 			<div class="form-group">
-				<ledger-tags-input tabindex="4" ng-model='newTransaction.tag_ids' />
+				<ledger-tags-input ng-model='newTransaction.tag_ids' />
 			</div>
 			<div class="form-group">
-				<input tabindex="5" type="text" class="form-control" placeholder="Comment" ng-model='newTransaction.comment'>
+				<input type="text" class="form-control" placeholder="Comment" ng-model='newTransaction.comment'>
 			</div>
 			<div class="form-group">
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
