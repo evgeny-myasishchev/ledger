@@ -10,6 +10,11 @@ Transaction.TypeIdByKey[Transaction.incomeKey] = Transaction.incomeId;
 Transaction.TypeIdByKey[Transaction.expenceKey] = Transaction.expenceId;
 Transaction.TypeIdByKey[Transaction.refundKey] = Transaction.refundId;
 
+Transaction.TypeKeyById = {};
+Transaction.TypeKeyById[Transaction.incomeId] = Transaction.incomeKey;
+Transaction.TypeKeyById[Transaction.expenceId] = Transaction.expenceKey;
+Transaction.TypeKeyById[Transaction.refundId] = Transaction.refundKey;
+
 angular.module('ErrorHandler', [])
 .config(['$httpProvider', function($httpProvider) {
 	$httpProvider.interceptors.push(['$q', '$rootScope', function($q, $rootScope) {

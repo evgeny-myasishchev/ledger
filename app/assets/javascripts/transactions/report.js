@@ -15,75 +15,72 @@
 		// 	{"type":"transfer","amount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 	
-		var processReportedTransaction = function(command, transaction) {
-			transaction.account_id = $scope.account.aggregate_id;
-			transaction.transaction_id = command.transaction_id;
-			transaction.type_id = Transaction.TypeIdByKey[transaction.type];
-			
-			if(transaction.type == Transaction.incomeKey || transaction.type == Transaction.refundKey) {
-				$scope.account.balance += transaction.amount;
-			} else if(transaction.type == Transaction.expenceKey) {
-				$scope.account.balance -= transaction.amount;
-			} else if(transaction.type == Transaction.transferKey) {
-				$scope.account.balance -= transaction.amount;
-				$.each(accounts.getAll(), function(index, account) {
-					if(account.aggregate_id == transaction.receivingAccountId) {
-						account.balance += money.parse(transaction.amountReceived);
-						return false;
-					}
-				});
-				
-				transaction.is_transfer = true;
-				transaction.type_id = Transaction.expenceId;
-				transaction.transaction_id = command.sending_transaction_id;
-				transaction.sending_account_id = transaction.account_id;
-				transaction.sending_transaction_id = command.sending_transaction_id;
-				transaction.receiving_account_id = command.receiving_account_id;
-				transaction.receiving_transaction_id = command.receiving_transaction_id;
-				delete transaction.receivingAccountId;
-				delete transaction.amountReceived;
+		var processReportedTransaction = function(command) {
+			var account = accounts.getById(command.account_id);
+			if(command.type_id == Transaction.incomeId || command.type_id == Transaction.refundId) {
+				account.balance += command.amount;
+			} else if(command.type_id == Transaction.expenceId) {
+				account.balance -= command.amount;
+			} 
+			if(command.is_transfer) {
+				var receivingAccount = accounts.getById(command.receiving_account_id);
+				receivingAccount.balance += money.parse(command.amount_received);
 			}
-			delete transaction.type;
-			transaction.tag_ids = jQuery.map(transaction.tag_ids, function(tag_id) {
+			command.tag_ids = jQuery.map(command.tag_ids, function(tag_id) {
 				return '{' + tag_id + '}';
 			}).join(',');
-			$scope.reportedTransactions.unshift(transaction);
+			$scope.reportedTransactions.unshift(command);
 		};
 	
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
 				amount: null,
 				tag_ids: [],
-				type: Transaction.expenceKey,
+				type_id: Transaction.expenceId,
 				date: new Date(),
 				comment: null
 			};
+			//For testing purposes
+			// $scope.account = $scope.accounts[0];
+			// $scope.newTransaction = {
+			// 	amount: '332.03',
+			// 	tag_ids: [1, 2],
+			// 	type_id: Transaction.transferKey,
+			// 	date: new Date(),
+			// 	comment: 'Hello world, this is test transaction'
+			// };
 		};
 		resetNewTransaction();
 		$scope.report = function() {
 			var command = {
+				transaction_id: newUUID(),
+				amount: money.parse($scope.newTransaction.amount),
+				date: $scope.newTransaction.date,
 				tag_ids: $scope.newTransaction.tag_ids,
-				date: $scope.newTransaction.date.toJSON(),
-				comment: $scope.newTransaction.comment
+				comment: $scope.newTransaction.comment,
+				type_id: $scope.newTransaction.type_id,
+				account_id: $scope.account.aggregate_id
 			};
-			var amount = money.parse($scope.newTransaction.amount);
-			if($scope.newTransaction.type == Transaction.transferKey) {
-				command.sending_transaction_id = newUUID();
+			var typeKey;
+			if($scope.newTransaction.type_id == Transaction.transferKey) {
+				typeKey = Transaction.transferKey;
+				command.type_id = Transaction.expenceId;
+				command.sending_account_id = command.account_id;
+				command.sending_transaction_id = command.transaction_id;
 				command.receiving_transaction_id = newUUID();
-				command.receiving_account_id = $scope.newTransaction.receivingAccountId;
-				command.amount_sent = amount;
-				command.amount_received = money.parse($scope.newTransaction.amountReceived);
+				command.receiving_account_id = $scope.newTransaction.receiving_account_id;
+				command.amount_sent = command.amount;
+				command.amount_received = money.parse($scope.newTransaction.amount_received);
+				command.is_transfer = true;
 			} else {
-				command.transaction_id = newUUID();
-				command.amount = amount;
+				typeKey = Transaction.TypeKeyById[$scope.newTransaction.type_id];
+				command.is_transfer = false;
 			}
-			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + $scope.newTransaction.type, {
+			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + typeKey, {
 				command: command
 			}).success(function() {
-				var reported = $scope.newTransaction;
 				resetNewTransaction();
-				reported.amount = amount;
-				processReportedTransaction(command, reported);
+				processReportedTransaction(command);
 			});
 		};
 	}]);

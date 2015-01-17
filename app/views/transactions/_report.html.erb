@@ -15,10 +15,10 @@
 				</div>
 				<div class="form-group">
 					<label class='control-label' for="type">Type</label>
-					<select name="type" id="type" class='form-control' ng-model='newTransaction.type'>
-						<option value="income">Income</option>
-						<option value="expence">Expence</option>
-						<option value="refund">Refund</option>
+					<select name="type" id="type" class='form-control' ng-model='newTransaction.type_id'>
+						<option value="1">Income</option>
+						<option value="2">Expence</option>
+						<option value="3">Refund</option>
 						<option value="transfer">Transfer</option>
 					</select>
 				</div>
@@ -27,18 +27,17 @@
 					<ldr-datepicker ng-model='newTransaction.date' />
 				</div>
 			</div>
-			<div ng-if='newTransaction.type == "transfer"' class='form-group'>
+			<div ng-if='newTransaction.type_id == "transfer"' class='form-group'>
 				<div class='form-group'>
 					<label class='control-label' for="type">Target account</label>
 					<div class='form-inline'>
-						<select tabindex="2" class='form-control' ng-model='newTransaction.receivingAccountId' required>
+						<select tabindex="2" ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
 							<option value="">--Chose account--</option>
-							<option ng-repeat="account in accounts | orderBy:'name'" value="{{account.aggregate_id}}">{{account.name}} ({{account.balance | money}})</option>
 						</select>
 					</div>
 				</div>
 				<div class='form-group form-inline'>
-					<input tabindex="3" type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amountReceived' required>
+					<input tabindex="3" type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amount_received' required>
 				</div>
 			</div>
 			<div class="form-group">

@@ -43,9 +43,8 @@ describe("ReportTransactionsController", function() {
 		currentDate.setMilliseconds(0);
 		scope.newTransaction.date.setMilliseconds(0);
 		expect(scope.newTransaction.date.toJSON()).toEqual(currentDate.toJSON());
-		scope.newTransaction.date = null;
 		expect(scope.newTransaction).toEqual({
-			amount: null, tag_ids: [], type: 'expence', date: null, comment: null
+			amount: null, tag_ids: [], type_id: Transaction.expenceId, date: scope.newTransaction.date, comment: null
 		});
 	});
 
@@ -61,7 +60,7 @@ describe("ReportTransactionsController", function() {
 		});
 		
 		it("should submit the new income transaction", function() {
-			scope.newTransaction.type = 'income';
+			scope.newTransaction.type_id = Transaction.incomeId;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-income', function(data) {
 				var command = JSON.parse(data).command;
 				expect(command.transaction_id).not.toBeUndefined();
@@ -69,6 +68,9 @@ describe("ReportTransactionsController", function() {
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
 				expect(command.comment).toEqual('New transaction 10.5');
+				expect(command.type_id).toEqual(Transaction.incomeId);
+				expect(command.account_id).toEqual('a-2');
+				expect(command.is_transfer).toEqual(false);
 				return true;
 			}).respond();
 			scope.report();
@@ -76,7 +78,7 @@ describe("ReportTransactionsController", function() {
 		});
 	
 		it("should submit the new expence transaction", function() {
-			scope.newTransaction.type = 'expence';
+			scope.newTransaction.type_id = Transaction.expenceId;;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-expence', function(data) {
 				var command = JSON.parse(data).command;
 				expect(command.transaction_id).not.toBeUndefined();
@@ -84,6 +86,9 @@ describe("ReportTransactionsController", function() {
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
 				expect(command.comment).toEqual('New transaction 10.5');
+				expect(command.type_id).toEqual(Transaction.expenceId);
+				expect(command.account_id).toEqual('a-2');
+				expect(command.is_transfer).toEqual(false);
 				return true;
 			}).respond();
 
@@ -92,7 +97,7 @@ describe("ReportTransactionsController", function() {
 		});
 	
 		it("should submit the new refund transaction", function() {
-			scope.newTransaction.type = 'refund';
+			scope.newTransaction.type_id = Transaction.refundId;;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-refund', function(data) {
 				var command = JSON.parse(data).command;
 				expect(command.transaction_id).not.toBeUndefined();
@@ -100,6 +105,9 @@ describe("ReportTransactionsController", function() {
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
 				expect(command.comment).toEqual('New transaction 10.5');
+				expect(command.type_id).toEqual(Transaction.refundId);
+				expect(command.account_id).toEqual('a-2');
+				expect(command.is_transfer).toEqual(false);
 				return true;
 			}).respond();
 
@@ -108,19 +116,24 @@ describe("ReportTransactionsController", function() {
 		});
 	
 		it("should submit the new transfer transaction", function() {
-			scope.newTransaction.type = 'transfer';
-			scope.newTransaction.receivingAccountId = account2.aggregate_id;
-			scope.newTransaction.amountReceived = '100.22';
+			scope.newTransaction.type_id = Transaction.transferKey;
+			scope.newTransaction.receiving_account_id = account2.aggregate_id;
+			scope.newTransaction.amount_received = '100.22';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-transfer', function(data) {
 				var command = JSON.parse(data).command;
 				expect(command.sending_transaction_id).not.toBeUndefined();
+				expect(command.sending_transaction_id).toEqual(command.transaction_id);
 				expect(command.receiving_transaction_id).not.toBeUndefined();
 				expect(command.receiving_account_id).toEqual('a-2');
-				expect(command.amount_sent).toEqual(1050);
+				expect(command.amount).toEqual(1050);
+				expect(command.amount_sent).toEqual(command.amount);
 				expect(command.amount_received).toEqual(10022);
 				expect(command.tag_ids).toEqual([1, 2]);
 				expect(command.date).toEqual(date.toJSON());
 				expect(command.comment).toEqual('New transaction 10.5');
+				expect(command.type_id).toEqual(Transaction.expenceId);
+				expect(command.account_id).toEqual('a-2');
+				expect(command.is_transfer).toEqual(true);
 				return true;
 			}).respond();
 
@@ -131,10 +144,11 @@ describe("ReportTransactionsController", function() {
 		describe('on success', function() {
 			var command;
 			
-			function doReport(typeKey) {
-				scope.newTransaction.type = typeKey;
+			function doReport(typeId) {
+				scope.newTransaction.type_id = typeId;
+				var method = typeId == Transaction.transferKey ? typeId : Transaction.TypeKeyById[typeId];
 				scope.reportedTransactions.push({test: true});
-				$httpBackend.expectPOST('accounts/a-2/transactions/report-' + typeKey, function(data) {
+				$httpBackend.expectPOST('accounts/a-2/transactions/report-' + method, function(data) {
 					command = JSON.parse(data).command;
 					return true;
 				}).respond();
@@ -143,7 +157,7 @@ describe("ReportTransactionsController", function() {
 			};
 		
 			it("should insert the transaction into the begining of the reported transactions", function() {
-				doReport(Transaction.expenceKey);
+				doReport(Transaction.expenceId);
 				expect(scope.reportedTransactions.length).toEqual(2);
 				expect(scope.reportedTransactions[0]).toEqual({
 					transaction_id: command.transaction_id,
@@ -152,18 +166,21 @@ describe("ReportTransactionsController", function() {
 					tag_ids: '{1},{2}', 
 					type_id: Transaction.expenceId, 
 					date: date, 
-					comment: 'New transaction 10.5'
+					comment: 'New transaction 10.5',
+					is_transfer: false
 				});
 			});
 			
 			it('should pupulate inserted transaction with transfer specific stuff', function() {
-				scope.newTransaction.receivingAccountId = 'a-3'
-				scope.newTransaction.amountReceived = scope.newTransaction.amount;
+				scope.newTransaction.receiving_account_id = 'a-3'
+				scope.newTransaction.amount_received = scope.newTransaction.amount;
 				doReport(Transaction.transferKey);
 				expect(scope.reportedTransactions[0]).toEqual({
 					transaction_id: command.sending_transaction_id,
 					account_id: 'a-2',
 					amount: 1050,
+					amount_sent: 1050,
+					amount_received: 1050,
 					tag_ids: '{1},{2}',
 					type_id: Transaction.expenceId,
 					date: date,
@@ -177,7 +194,7 @@ describe("ReportTransactionsController", function() {
 			});
 		
 			it('should reset the newTransaction model', function() {
-				doReport(Transaction.expenceKey);
+				doReport(Transaction.expenceId);
 				expect(scope.newTransaction.amount).toBeNull();
 				expect(scope.newTransaction.tag_ids).toEqual([]);
 				expect(scope.newTransaction.comment).toBeNull();
@@ -190,34 +207,36 @@ describe("ReportTransactionsController", function() {
 				scope.account.balance = 500;
 			});
 		
-			function doReport(amount, typeKey) {
-				$httpBackend.expectPOST('accounts/a-1/transactions/report-' + typeKey).respond();
+			function doReport(amount, typeId) {
+				scope.newTransaction.type_id = typeId;
+				var method = typeId == Transaction.transferKey ? typeId : Transaction.TypeKeyById[typeId];
+				$httpBackend.expectPOST('accounts/a-1/transactions/report-' + method).respond();
 				scope.newTransaction.amount = amount;
-				scope.newTransaction.type = typeKey;
+				scope.newTransaction.type_id = typeId;
 				scope.report();
 				$httpBackend.flush();
 			};
 		
 			it('should update the balance on income', function() {
-				doReport(100, Transaction.incomeKey);
+				doReport(100, Transaction.incomeId);
 				expect(scope.account.balance).toEqual(600);
 			});
 		
 			it('should update the balance on expence', function() {
-				doReport(100, Transaction.expenceKey);
+				doReport(100, Transaction.expenceId);
 				expect(scope.account.balance).toEqual(400);
 			});
 		
 			it('should update the balance on refund', function() {
-				doReport(100, Transaction.refundKey);
+				doReport(100, Transaction.refundId);
 				expect(scope.account.balance).toEqual(600);
 			});
 		
 			it('should update the balance on on transfer', function() {
 				var receivingAccount = scope.accounts[1];
 				receivingAccount.balance = 10000;
-				scope.newTransaction.receivingAccountId = receivingAccount.aggregate_id;
-				scope.newTransaction.amountReceived = '50';
+				scope.newTransaction.receiving_account_id = receivingAccount.aggregate_id;
+				scope.newTransaction.amount_received = '50';
 				doReport(100, Transaction.transferKey);
 				expect(scope.account.balance).toEqual(400);
 				expect(receivingAccount.balance).toEqual(15000);
