@@ -107,11 +107,15 @@ describe('transactions.PendingTransactionsController', function() {
 		});
 		
 		describe('on success', function() {
+			var changeEventEmitted;
 			beforeEach(function() {
 				$httpBackend.flush();
 				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
 				scope.approvedTransactions = [{t1: true}, {t2: true}];
 				scope.transactions  = [{t1: true}, pendingTransactions, {t2: true}];
+				scope.$on('pending-transactions-changed', function() {
+					changeEventEmitted = true;
+				});
 				scope.adjustAndApprove();
 				$httpBackend.flush();
 			});
@@ -136,6 +140,10 @@ describe('transactions.PendingTransactionsController', function() {
 			
 			it('should remove the transaction from pendingTransactions', function() {
 				expect(scope.transactions.length).toEqual(2);
+			});
+			
+			it('should emit pending-transactions-changed event', function() {
+				expect(changeEventEmitted).toBeTruthy();
 			});
 		});
 	});

@@ -47,6 +47,7 @@
 					})[0];
 					var originalIndex = $scope.transactions.indexOf(originalTransaction);
 					$scope.transactions.splice(originalIndex, 1);
+					$scope.$emit('pending-transactions-changed');
 				});
 		};
 		
