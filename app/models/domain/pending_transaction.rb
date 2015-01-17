@@ -37,7 +37,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     Log.debug "Approving transaction id=#{aggregate_id}"
     raise Errors::DomainError.new 'account_id is empty.' if account_id.blank?
     raise Errors::DomainError.new "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
-    raise Errors::DomainError.new "pending transaction id=(t-100) has already been approved." if @is_approved
+    raise Errors::DomainError.new "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
     if type_id == Domain::Transaction::IncomeTypeId
       account.report_income aggregate_id, amount, date, tag_ids, comment
     elsif type_id == Domain::Transaction::ExpenceTypeId
