@@ -6,10 +6,9 @@ var homeApp = (function() {
 	}]);
 	
 	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 
-	'ledgers', 'accounts', 'money', 'accountsState', 'search', 'pendingTransactions',
-	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search, pendingTransactions) {
+	'ledgers', 'accounts', 'money', 'accountsState', 'search',
+	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
-		$scope.$root.pendingTransactionsCount = pendingTransactions.getCount();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
 		
 		$http.get(transactionsBasePath + 'transactions.json').success(function(data) {

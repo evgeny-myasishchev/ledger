@@ -57,12 +57,6 @@ describe("homeApp", function() {
 			expect(scope.activeAccount).toEqual(account2);
 		});
 		
-		it('should set pending transactions count from provider', inject(function(pendingTransactions) {
-			spyOn(pendingTransactions, 'getCount').and.returnValue(332);
-			initController();
-			expect(scope.$root.pendingTransactionsCount).toEqual(332);
-		}));
-
 		describe('renameAccount', function() {
 			beforeEach(function() {
 				$httpBackend.whenGET('accounts/a-1/transactions.json').respond({ transactions: [] });

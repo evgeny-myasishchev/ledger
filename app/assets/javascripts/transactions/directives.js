@@ -86,18 +86,14 @@
 		}
 	});
 	
-	transactionsApp.directive('pendingTransactionsMenuInjector', [function() {
+	transactionsApp.directive('pendingTransactionsMenuInjector', ['pendingTransactions', function(pendingTransactions) {
 		return {
 			restrict: 'E',
 			replace: true,
 			templateUrl: 'pending-transactions-menu.html',
-			scope: {
-				count: '=count'
-			},
+			scope: {},
 			link: function(scope, element, attrs) {
-				if(!attrs.count) {
-					return;
-				}
+				scope.count = pendingTransactions.getCount();
 				element.prependTo('#main-navbar-right');
 			}
 		}
