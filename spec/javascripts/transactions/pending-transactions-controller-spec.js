@@ -64,9 +64,8 @@ describe('transactions.PendingTransactionsController', function() {
 				transaction_id: 't-332',
 				amount: '223.43',
 				date: new Date(),
-				tag_ids: "{t1},{t2}",
 				comment: 'Comment 332',
-				account_id: 44332,
+				account_id: account1.aggregate_id,
 				type_id: 2
 			});
 			
@@ -88,14 +87,13 @@ describe('transactions.PendingTransactionsController', function() {
 				transaction_id: 't-332',
 				amount: '223.43',
 				date: new Date(),
-				tag_ids: "{t1},{t2}",
 				comment: 'Comment 332',
-				account_id: 44332,
+				account_id: account1.aggregate_id,
 				type_id: 2
 			};
 		});
 		
-		it("should submit the new income transaction", function() {
+		it("should submit the adjust-and-approve", function() {
 			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
 				var command = JSON.parse(data);
 				command.date = new Date(command.date);
@@ -106,13 +104,35 @@ describe('transactions.PendingTransactionsController', function() {
 			$httpBackend.flush();
 		});
 		
+		it("convert null tags to empty array", function() {
+			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
+				var command = JSON.parse(data);
+				expect(command.tag_ids).toEqual([]);
+				return true;
+			}).respond();
+			scope.pendingTransaction.tag_ids = null;
+			scope.adjustAndApprove();
+			$httpBackend.flush();
+		});
+		
+		it("convert type_id to integer", function() {
+			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
+				var command = JSON.parse(data);
+				expect(command.type_id).toEqual(1);
+				return true;
+			}).respond();
+			scope.pendingTransaction.type_id = "1";
+			scope.adjustAndApprove();
+			$httpBackend.flush();
+		});
+		
 		describe('on success', function() {
 			var changeEventEmitted;
 			beforeEach(function() {
 				$httpBackend.flush();
 				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
 				scope.approvedTransactions = [{t1: true}, {t2: true}];
-				scope.transactions  = [{t1: true}, pendingTransaction, {t2: true}];
+				scope.transactions  = [{t1: true}, jQuery.extend({}, pendingTransaction), {t2: true}];
 				scope.$on('pending-transactions-changed', function() {
 					changeEventEmitted = true;
 				});
@@ -136,6 +156,7 @@ describe('transactions.PendingTransactionsController', function() {
 			
 			it('should remove the transaction from pendingTransactions', function() {
 				expect(scope.transactions.length).toEqual(2);
+				expect(scope.transactions).toEqual([{t1: true}, {t2: true}]);
 			});
 			
 			it('should emit pending-transactions-changed event', function() {

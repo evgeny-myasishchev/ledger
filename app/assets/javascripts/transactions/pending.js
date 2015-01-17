@@ -14,14 +14,15 @@
 		});
 		
 		$scope.adjustAndApprove = function() {
+			$scope.pendingTransaction.type_id = parseInt($scope.pendingTransaction.type_id);
+			if(!$scope.pendingTransaction.tag_ids) $scope.pendingTransaction.tag_ids = [];
 			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + '/adjust-and-approve', $scope.pendingTransaction)
 				.success(function() {
 					var transaction = $scope.pendingTransaction;
 					$scope.pendingTransaction = null;
 					transaction.amount = money.parse(transaction.amount);
 					$scope.approvedTransactions.unshift(transaction);
-					var originalIndex = $scope.transactions.indexOf(transaction);
-					$scope.transactions.splice(originalIndex, 1);
+					removePendingTransaction(transaction.transaction_id);
 					transactions.processApprovedTransaction(transaction);
 					$scope.$emit('pending-transactions-changed');
 				});
@@ -41,6 +42,14 @@
 		
 		$scope.stopReview = function() {
 			$scope.pendingTransaction = null;
+		};
+		
+		var removePendingTransaction = function(transaction_id) {
+			var transaction = jQuery.grep($scope.transactions, function(t) {
+				return t.transaction_id == transaction_id;
+			})[0];
+			var index = $scope.transactions.indexOf(transaction);
+			$scope.transactions.splice(index, 1);
 		};
 		
 		// $scope.startReview(transactions[0]);
