@@ -10,9 +10,9 @@ class Dev::DummyPendingTransactionsGenerator
     
   def generate number
     dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '223.43', date: DateTime.now
-    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '223.43', date: DateTime.now
-    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '223.43', date: DateTime.now
-    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '223.43', date: DateTime.now
+    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '100.02', date: DateTime.now
+    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '95.32', date: DateTime.now
+    dispatch ReportPendingTransaction.new AggregateId.new_id, user: @user, amount: '113.93', date: DateTime.now, comment: 'Food in class'
     
     @context.event_store.dispatcher.wait_pending
   end
