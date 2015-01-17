@@ -22,10 +22,7 @@
 					transaction.transaction_id = transaction.aggregate_id;
 					delete transaction.aggregate_id;
 					$scope.approvedTransactions.unshift(transaction);
-					var originalTransaction = jQuery.grep($scope.transactions, function(t) {
-						return t.aggregate_id == transaction.transaction_id;
-					})[0];
-					var originalIndex = $scope.transactions.indexOf(originalTransaction);
+					var originalIndex = $scope.transactions.indexOf(transaction);
 					$scope.transactions.splice(originalIndex, 1);
 					$scope.$emit('pending-transactions-changed');
 				});
