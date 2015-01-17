@@ -1,7 +1,7 @@
 !function() {
 	var transactionsApp = angular.module('transactionsApp');
-	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID',
-	function ($scope, $http, accounts, money, newUUID) {
+	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID', 'transactions',
+	function ($scope, $http, accounts, money, newUUID, transactions) {
 		$scope.account = accounts.getActive();
 		$scope.accounts = accounts.getAllOpen();
 		$scope.reportedTransactions = [];
@@ -16,19 +16,7 @@
 		// ];
 	
 		var processReportedTransaction = function(command) {
-			var account = accounts.getById(command.account_id);
-			if(command.type_id == Transaction.incomeId || command.type_id == Transaction.refundId) {
-				account.balance += command.amount;
-			} else if(command.type_id == Transaction.expenceId) {
-				account.balance -= command.amount;
-			} 
-			if(command.is_transfer) {
-				var receivingAccount = accounts.getById(command.receiving_account_id);
-				receivingAccount.balance += money.parse(command.amount_received);
-			}
-			command.tag_ids = jQuery.map(command.tag_ids, function(tag_id) {
-				return '{' + tag_id + '}';
-			}).join(',');
+			transactions.processReportedTransaction(command);
 			$scope.reportedTransactions.unshift(command);
 		};
 	

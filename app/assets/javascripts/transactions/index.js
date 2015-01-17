@@ -11,14 +11,26 @@ var transactionsApp = (function() {
 			pendingTransactionsCount = value;
 		};
 		
-		this.$get = [function() {
+		this.$get = ['accounts', function(accounts) {
 			return {
 				getPendingCount: function() {
 					return pendingTransactionsCount;
 				},
 				
-				processReportedTransaction: function(transaction) {
-					
+				processReportedTransaction: function(command) {
+					var account = accounts.getById(command.account_id);
+					if(command.type_id == Transaction.incomeId || command.type_id == Transaction.refundId) {
+						account.balance += command.amount;
+					} else if(command.type_id == Transaction.expenceId) {
+						account.balance -= command.amount;
+					}
+					if(command.is_transfer) {
+						var receivingAccount = accounts.getById(command.receiving_account_id);
+						receivingAccount.balance += command.amount_received;
+					}
+					command.tag_ids = jQuery.map(command.tag_ids, function(tag_id) {
+						return '{' + tag_id + '}';
+					}).join(',');
 				},
 				
 				processApprovedTransaction: function(transaction) {
