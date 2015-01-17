@@ -61,7 +61,7 @@ describe('transactions.PendingTransactionsController', function() {
 		it('should initialize pending transaction', function() {
 			var transaction;
 			scope.startReview(transaction = {
-				aggregate_id: 't-332',
+				transaction_id: 't-332',
 				amount: '223.43',
 				date: new Date(),
 				tag_ids: "{t1},{t2}",
@@ -70,7 +70,7 @@ describe('transactions.PendingTransactionsController', function() {
 				type_id: 2
 			});
 			
-			expect(scope.pendingTransaction.aggregate_id).toEqual(transaction.aggregate_id);
+			expect(scope.pendingTransaction.transaction_id).toEqual(transaction.transaction_id);
 			expect(scope.pendingTransaction.amount).toEqual(transaction.amount);
 			expect(scope.pendingTransaction.date).toEqual(transaction.date);
 			expect(scope.pendingTransaction.tag_ids).toEqual(transaction.tag_ids);
@@ -85,7 +85,7 @@ describe('transactions.PendingTransactionsController', function() {
 		beforeEach(function() {
 			initController();
 			scope.pendingTransaction = pendingTransaction = {
-				aggregate_id: 't-332',
+				transaction_id: 't-332',
 				amount: '223.43',
 				date: new Date(),
 				tag_ids: "{t1},{t2}",
@@ -127,11 +127,6 @@ describe('transactions.PendingTransactionsController', function() {
 			
 			it('should convert amount to integer', function() {
 				expect(scope.approvedTransactions[0].amount).toEqual(22343);
-			});
-			
-			it('should rename aggregte_id to transaction_id', function() {
-				expect(scope.approvedTransactions[0].aggregate_id).toBeUndefined();
-				expect(scope.approvedTransactions[0].transaction_id).toEqual('t-332');
 			});
 			
 			it('should clear the pending transaction', function() {

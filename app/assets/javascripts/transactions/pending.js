@@ -14,13 +14,11 @@
 		});
 		
 		$scope.adjustAndApprove = function() {
-			$http.post('pending-transactions/' + $scope.pendingTransaction.aggregate_id + '/adjust-and-approve', $scope.pendingTransaction)
+			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + '/adjust-and-approve', $scope.pendingTransaction)
 				.success(function() {
 					var transaction = $scope.pendingTransaction;
 					$scope.pendingTransaction = null;
 					transaction.amount = money.parse(transaction.amount);
-					transaction.transaction_id = transaction.aggregate_id;
-					delete transaction.aggregate_id;
 					$scope.approvedTransactions.unshift(transaction);
 					var originalIndex = $scope.transactions.indexOf(transaction);
 					$scope.transactions.splice(originalIndex, 1);
@@ -30,7 +28,7 @@
 		
 		$scope.startReview = function(transaction) {
 			$scope.pendingTransaction = {
-				aggregate_id: transaction.aggregate_id,
+				transaction_id: transaction.transaction_id,
 				amount: transaction.amount,
 				date: transaction.date,
 				tag_ids: transaction.tag_ids,
