@@ -1,12 +1,12 @@
 describe('transactions.PendingTransactionsController', function() {
-	var scope, $httpBackend, pendingTransactions, subject;
+	var scope, $httpBackend, transactions, subject;
 	var account1, account2, account3;
 	
 	beforeEach(module('transactionsApp'));
 	
-	beforeEach(inject(function(_$httpBackend_, $rootScope, _pendingTransactions_){
+	beforeEach(inject(function(_$httpBackend_, $rootScope, _transactions_){
 		$httpBackend = _$httpBackend_;
-		pendingTransactions = _pendingTransactions_;
+		transactions = _transactions_;
 		angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
 				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, is_closed: false},
@@ -112,7 +112,7 @@ describe('transactions.PendingTransactionsController', function() {
 				$httpBackend.flush();
 				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
 				scope.approvedTransactions = [{t1: true}, {t2: true}];
-				scope.transactions  = [{t1: true}, pendingTransactions, {t2: true}];
+				scope.transactions  = [{t1: true}, pendingTransaction, {t2: true}];
 				scope.$on('pending-transactions-changed', function() {
 					changeEventEmitted = true;
 				});

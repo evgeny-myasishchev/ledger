@@ -35,13 +35,13 @@
 	<%= render partial: 'transactions/review_and_approve' %>
 	</script>
 	<script type="text/javascript">
-		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'pendingTransactionsProvider',
-		function(ledgersProvider, accountsProvider, tagsProvider, pendingTransactionsProvider) {
+		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'transactionsProvider',
+		function(ledgersProvider, accountsProvider, tagsProvider, transactionsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
 			accountsProvider.assignAccounts(<%= raw @accounts.to_json(methods: :currency) %>);
 			accountsProvider.assignCategories(<%= raw @categories.to_json %>);
 			tagsProvider.assignTags(<%= raw @tags.to_json %>);
-			pendingTransactionsProvider.setPendingTransactionsCount(<%= @pending_transactions_count %>);
+			transactionsProvider.setPendingTransactionsCount(<%= @pending_transactions_count %>);
 		}]);
 	</script>
 	<ldr-errors-notifier></ldr-errors-notifier>

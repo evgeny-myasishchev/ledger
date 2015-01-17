@@ -86,9 +86,9 @@
 		}
 	});
 	
-	transactionsApp.directive('pendingTransactionsMenuInjector', ['pendingTransactions', function(pendingTransactions) {
+	transactionsApp.directive('pendingTransactionsMenuInjector', ['transactions', function(transactions) {
 		var updateActionState = function(scope, element) {
-			scope.count = pendingTransactions.getCount();
+			scope.count = transactions.getPendingCount();
 			if(scope.count > 0) element.show();
 			else element.hide();
 		};
