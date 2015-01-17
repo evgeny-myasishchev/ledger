@@ -4,7 +4,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
   include Projections
   
   def self.get_pending_transactions user
-    where(user_id: user.id).all
+    where(user_id: user.id).select(:id, :transaction_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id).all
   end
   
   def self.get_pending_transactions_count user
@@ -13,7 +13,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
   
   projection do
     on PendingTransactionReported do |event|
-      t = PendingTransaction.find_or_initialize_by aggregate_id: event.aggregate_id
+      t = PendingTransaction.find_or_initialize_by transaction_id: event.aggregate_id
       t.update_attributes!(
         user_id: event.user_id,
         amount: event.amount,
@@ -26,7 +26,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
     end
     
     on PendingTransactionAdjusted do |event|
-      PendingTransaction.where(aggregate_id: event.aggregate_id).update_all(
+      PendingTransaction.where(transaction_id: event.aggregate_id).update_all(
         amount: event.amount,
         date: event.date,
         tag_ids: build_tags_string(event.tag_ids),
@@ -37,7 +37,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
     end
     
     on PendingTransactionApproved do |event|
-      PendingTransaction.delete_all aggregate_id: event.aggregate_id
+      PendingTransaction.delete_all transaction_id: event.aggregate_id
     end
     
     private def build_tags_string(tag_ids)

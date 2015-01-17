@@ -35,9 +35,14 @@ module Projections::PendingTransactionSpec
         it 'should return all pending transactions belonging to the given user' do
           user_transactions = described_class.get_pending_transactions user_1
           expect(user_transactions.length).to eql 3
-          expect(user_transactions).to include described_class.find_by_aggregate_id 't-101'
-          expect(user_transactions).to include described_class.find_by_aggregate_id 't-102'
-          expect(user_transactions).to include described_class.find_by_aggregate_id 't-103'
+          expect(user_transactions).to include described_class.find_by_transaction_id 't-101'
+          expect(user_transactions).to include described_class.find_by_transaction_id 't-102'
+          expect(user_transactions).to include described_class.find_by_transaction_id 't-103'
+        end
+        
+        it 'should include allowed attributes only' do
+          transaction = described_class.get_pending_transactions(user_1).first
+          expect(transaction.attribute_names).to eql ['id', 'transaction_id', 'amount', 'date', 'tag_ids', 'comment', 'account_id', 'type_id']
         end
       end
         
@@ -53,7 +58,7 @@ module Projections::PendingTransactionSpec
       it 'should insert new pending transaction' do
         event = new_reported_event
         subject.handle_message event
-        t = described_class.find_by_aggregate_id 't-101'
+        t = described_class.find_by_transaction_id 't-101'
         expect(t.user_id).to eql event.user_id
         expect(t.amount).to eql event.amount
         expect(t.date.to_datetime).to eql event.date
@@ -66,7 +71,7 @@ module Projections::PendingTransactionSpec
       it 'should handle nil tag_ids' do
         event = new_reported_event tag_ids: nil
         subject.handle_message event
-        t = described_class.find_by_aggregate_id 't-101'
+        t = described_class.find_by_transaction_id 't-101'
         expect(t.tag_ids).to be_nil
       end
     
@@ -81,13 +86,13 @@ module Projections::PendingTransactionSpec
     
     describe 'on PendingTransactionAdjusted' do
       before do
-        described_class.create! aggregate_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
+        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
       end
       
       it 'should update attributes of the pending transaction' do
         event = new_adjusted_event
         subject.handle_message event
-        t = described_class.find_by_aggregate_id 't-101'
+        t = described_class.find_by_transaction_id 't-101'
         expect(t.amount).to eql event.amount
         expect(t.date.to_datetime).to eql event.date
         expect(t.tag_ids).to eql '{t-1},{t-2}'
@@ -99,19 +104,19 @@ module Projections::PendingTransactionSpec
       it 'should handle nil tag_ids' do
         event = new_adjusted_event tag_ids: nil
         subject.handle_message event
-        t = described_class.find_by_aggregate_id 't-101'
+        t = described_class.find_by_transaction_id 't-101'
         expect(t.tag_ids).to be_nil
       end
     end
     
     describe 'on PendingTransactionApproved' do
       before do
-        described_class.create! aggregate_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
+        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
       end
       
       it 'should remove the pending transaction' do
         subject.handle_message PendingTransactionApproved.new 't-101'
-        expect(described_class.find_by_aggregate_id('t-101')).to be_nil
+        expect(described_class.find_by_transaction_id('t-101')).to be_nil
       end
       
       it "should be idempotent" do
