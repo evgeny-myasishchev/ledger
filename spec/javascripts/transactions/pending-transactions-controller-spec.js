@@ -116,6 +116,7 @@ describe('transactions.PendingTransactionsController', function() {
 				scope.$on('pending-transactions-changed', function() {
 					changeEventEmitted = true;
 				});
+				spyOn(transactions, 'processApprovedTransaction');
 				scope.adjustAndApprove();
 				$httpBackend.flush();
 			});
@@ -139,6 +140,10 @@ describe('transactions.PendingTransactionsController', function() {
 			
 			it('should emit pending-transactions-changed event', function() {
 				expect(changeEventEmitted).toBeTruthy();
+			});
+			
+			it('should use transactions provider to process approved transaction', function() {
+				expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(scope.approvedTransactions[0]);
 			});
 		});
 	});

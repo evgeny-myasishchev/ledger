@@ -70,4 +70,30 @@ describe('transactions.transactionsProvider', function() {
 			expect(receivingAccount.balance).toEqual(15000);
 		});
 	});
+		
+	describe('processApprovedTransaction', function() {
+		
+		function doProcess(amount, typeId, initializer) {
+			var transaction = {
+				account_id: account1.aggregate_id,
+				type_id: typeId,
+				amount: amount,
+				tag_ids: []
+			};
+			if(initializer) initializer(transaction);
+			subject.processApprovedTransaction(transaction);
+			return transaction;
+		};
+		
+		it('should processReportedTransaction', function() {
+			spyOn(subject, 'processReportedTransaction');
+			var transaction = doProcess(100, Transaction.incomeId);
+			expect(subject.processReportedTransaction).toHaveBeenCalledWith(transaction);
+		});
+		
+		it('should decrement pending transactions cound', function() {
+			doProcess(100, Transaction.incomeId);
+			expect(subject.getPendingCount()).toEqual(31);
+		});
+	});
 });

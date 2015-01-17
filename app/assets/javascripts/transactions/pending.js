@@ -1,8 +1,8 @@
 !function() {
 	var transactionsApp = angular.module('transactionsApp');
 	
-	transactionsApp.controller('PendingTransactionsController', ['$scope', '$http', 'accounts', 'money',
-	function ($scope, $http, accounts, money) {
+	transactionsApp.controller('PendingTransactionsController', ['$scope', '$http', 'accounts', 'money', 'transactions',
+	function ($scope, $http, accounts, money, transactions) {
 		$scope.approvedTransactions = [];
 		$http.get('pending-transactions.json').success(function(data) {
 			var transactions = data;
@@ -22,6 +22,7 @@
 					$scope.approvedTransactions.unshift(transaction);
 					var originalIndex = $scope.transactions.indexOf(transaction);
 					$scope.transactions.splice(originalIndex, 1);
+					transactions.processApprovedTransaction(transaction);
 					$scope.$emit('pending-transactions-changed');
 				});
 		};
