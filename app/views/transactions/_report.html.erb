@@ -29,15 +29,17 @@
 			</div>
 			<div ng-if='newTransaction.type_id == "transfer"' class='form-group'>
 				<div class='form-group'>
-					<label class='control-label' for="type">Target account</label>
+					<label class='control-label' for="type">To the account</label>
 					<div class='form-inline'>
 						<select ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
-							<option value="">--Chose account--</option>
+							<option value="">--Please chose account--</option>
 						</select>
+						<span class='help-block' style='display: inline-block'>An account that receives the transfer</span>
 					</div>
 				</div>
 				<div class='form-group form-inline'>
-					<input type="text" class="form-control" placeholder="Target amount" ng-model='newTransaction.amount_received' required>
+					<input type="text" class="form-control" placeholder="Amount received" ng-model='newTransaction.amount_received' required>
+					<span class='help-block' style='display: inline-block'>An actual amount that will be added to the receiving account</span>
 				</div>
 			</div>
 			<div class="form-group">
