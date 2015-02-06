@@ -11,6 +11,9 @@ var homeApp = (function() {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
 		
+		$scope.startRenaming = function() { $scope.isRenaming = true; };
+		$scope.stopRenaming = function() { $scope.isRenaming = false; };
+		
 		$http.get(transactionsBasePath + 'transactions.json').success(function(data) {
 			var transactions = data.transactions;
 			jQuery.each(transactions, function(i, t) {

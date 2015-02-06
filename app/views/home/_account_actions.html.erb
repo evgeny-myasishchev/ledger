@@ -13,7 +13,7 @@
 				<span class="glyphicon glyphicon-cog"></span>
 			</button>
 			<ul class="dropdown-menu" role="menu">
-				<li><a href="#" ng-click='isRenaming = true; $event.preventDefault();'>Rename account</a></li>
+				<li><a href="#" ng-click='startRenaming(); $event.preventDefault();'>Rename account</a></li>
 				<li ng-show='categories.length'><a href="#" ng-click='assigningCategory = true; $event.preventDefault();'>Set category</a></li>
 				<li ng-show="!activeAccount.is_closed"><a href="#" ng-click='closeAccount(activeAccount); $event.preventDefault();'>Close account</a></li>
 				<li ng-show="activeAccount.is_closed"><a href="#" ng-click='reopenAccount(activeAccount); $event.preventDefault();'>Reopen account</a></li>
@@ -28,7 +28,7 @@
 				<small ng-if='activeAccount.unit'>{{activeAccount.unit}}.</small>
 				<sup>{{activeAccount.currency_code}}</sup>
 			</small> 
-			<span ldr-bubble-editor trigger-on='isRenaming' finally='isRenaming = false' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
+			<span ldr-bubble-editor trigger-on='isRenaming' finally='stopRenaming()' value="activeAccount.name" submit='renameAccount(activeAccount, newValue)'>{{activeAccount.name}}</span>
 		</h2>
 	</div>
 	<div class='pull-right' ng-show='assigningCategory'>
