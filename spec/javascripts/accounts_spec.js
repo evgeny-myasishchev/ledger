@@ -261,6 +261,25 @@ describe('acounts', function() {
 			expect(accounts.makeActive).toHaveBeenCalledWith(a1);
 		});
 	});
+	
+	describe('nameWithBalanceFilter', function() {
+		var subject, money;
+		beforeEach(function() {
+			module('accountsApp');
+			a1 = {name: 'Account 1', balance: 10000, currency_code: 'UAH'};
+			a2 = {name: 'Account 2', balance: 20000, currency_code: 'EUR'};
+
+			inject(['nameWithBalanceFilter', 'moneyFilter', function(filter, _money_) {
+				subject = filter;
+				money = _money_;
+			}]);
+		});
+
+		it('should return account name with balance and currency code', function() {
+			expect(subject(a1)).toEqual('Account 1 (' + money(a1.balance) + ' UAH)');
+			expect(subject(a2)).toEqual('Account 2 (' + money(a2.balance) + ' EUR)');
+		});
+	});
 
 	describe("NewAccountController", function() {
 		var controller, scope,  $httpBackend;

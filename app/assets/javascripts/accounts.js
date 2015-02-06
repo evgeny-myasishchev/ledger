@@ -158,5 +158,11 @@ var accountsApp = (function($) {
 		}
 	}]);
 	
+	accountsApp.filter('nameWithBalance', ['moneyFilter', function(money) {
+		return function(account) {
+			return account.name + ' (' + money(account.balance) + ' ' + account.currency_code + ')';
+		}
+	}]);
+	
 	return accountsApp;
 })(jQuery);

@@ -5,7 +5,7 @@
 			<div class='form-group'>
 				<label class='control-label' for="type">Account</label>
 				<div class='form-inline'>
-					<select ng-options='account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='account' required>
+					<select ng-options='account | nameWithBalance for account in accounts | orderBy:"name"' class='form-control' ng-model='account' required>
 					</select>
 				</div>
 			</div>
@@ -31,7 +31,7 @@
 				<div class='form-group'>
 					<label class='control-label' for="type">To the account</label>
 					<div class='form-inline'>
-						<select ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
+						<select ng-options='account.aggregate_id as account | nameWithBalance for account in accounts | orderBy:"name"' class='form-control' ng-model='newTransaction.receiving_account_id' required>
 							<option value="">--Please chose account--</option>
 						</select>
 						<span class='help-block' style='display: inline-block'>An account that receives the transfer</span>
