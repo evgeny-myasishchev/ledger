@@ -5,7 +5,7 @@
 	<table class='table table-condensed table-hover' class='list-group'>
 		<tr ng-class="{active: activeAccount == null}">
 			<td>
-				<a href='#/accounts/{{account.sequential_number}}'>Total</a>
+				<a href='#/accounts'>Total</a>
 				<div class='pull-right'>
 					<strong>{{allAccountsTotal - closedTotal | money}}</strong> <sup class='currency-code'>{{ 'currency_code' | activeLedger }}</sup>
 				</div>
