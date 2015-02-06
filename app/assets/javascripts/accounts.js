@@ -143,7 +143,7 @@ var accountsApp = (function($) {
 	}]);
 	
 	accountsApp.filter('calculateTotal', ['ledgers', 'accounts', 'money', function(ledgers, accountsService, money) {
-		return function(accounts, resultExpression) {
+		return function(accounts, scope, resultExpression) {
 			var that = this;
 			ledgers.loadCurrencyRates().then(function(rates) {
 				var result = 0;
@@ -152,7 +152,7 @@ var accountsApp = (function($) {
 					var actualBalance = accountsService.getActualBalance(account, rates);
 					if(actualBalance) result += actualBalance;
 				});
-				that.$eval(resultExpression + '=' + result);
+				scope.$eval(resultExpression + '=' + result);
 			});
 			return accounts;
 		}

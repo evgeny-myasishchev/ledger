@@ -11,7 +11,7 @@
 				</div>
 			</td>
 		</tr>
-		<tr ng-repeat-end ng-repeat="account in accounts | calculateTotal:'allAccountsTotal' | filter:{category_id: null, is_closed: false} | calculateTotal:'uncategorisedTotal'  | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | calculateTotal:this:'allAccountsTotal' | filter:{category_id: null, is_closed: false} | calculateTotal:this:'uncategorisedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
@@ -21,7 +21,7 @@
 				{{category.name}} <small class='pull-right'>{{categorisedTotal | money}} <sup>{{ 'currency_code' | activeLedger }}</sup></small>
 			</td>
 		</tr>
-		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | calculateTotal:'categorisedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-repeat-end ng-repeat="account in accounts | filter:{category_id: category.category_id, is_closed: false} | calculateTotal:this:'categorisedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>
@@ -31,7 +31,7 @@
 				Closed accounts
 			</td>
 		</tr>
-		<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | calculateTotal:'closedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
+		<tr ng-show='showClosed' ng-repeat="account in accounts | filter:{is_closed: true} | calculateTotal:this:'closedTotal' | orderBy:'name'" ng-class="{active: activeAccount == account}">
 			<td>
 				<%= render partial: 'account_info' %>
 			</td>

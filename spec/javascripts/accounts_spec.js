@@ -170,7 +170,7 @@ describe('acounts', function() {
 	describe('calculateTotalFilter', function() {
 		var a1, a2, a3, all, rates;
 		var accounts;
-		var scope;
+		var scope, filter;
 		beforeEach(function() {
 			module('accountsApp');
 			a1 = {balance: 10000, currency_code: 'UAH'};
@@ -181,7 +181,7 @@ describe('acounts', function() {
 			inject(['$rootScope', 'calculateTotalFilter', 'ledgers', 'accounts', function($rootScope, theFilter, ledgers, a) {
 				accounts = a;
 				scope = $rootScope.$new();
-				scope.filter = theFilter;
+				filter = theFilter;
 				var deferredCurrencyRates = $.Deferred();
 				deferredCurrencyRates.resolve(rates = {
 					EUR: {"id":14,"from":"EUR","to":"UAH","rate":16.22},
@@ -196,18 +196,18 @@ describe('acounts', function() {
 		});
 
 		it('should return supplied accounts', function() {
-			expect(scope.filter(all, 'result')).toEqual(all);
+			expect(filter(all, scope, 'result')).toEqual(all);
 		});
 
 		it('should operate with actual balance using accounts', function() {
-			expect(scope.filter(all, 'result')).toEqual(all);
+			expect(filter(all, scope, 'result')).toEqual(all);
 			expect(accounts.getActualBalance).toHaveBeenCalledWith(a1, rates);
 			expect(accounts.getActualBalance).toHaveBeenCalledWith(a2, rates);
 			expect(accounts.getActualBalance).toHaveBeenCalledWith(a3, rates);
 		});
 
 		it('should assign summary of all balances to given variable', function() {
-			scope.filter(all, 'result');
+			filter(all, scope, 'result');
 			scope.$digest();
 			expect(scope.result).toEqual(60000);
 		});
@@ -219,7 +219,7 @@ describe('acounts', function() {
 			});
 			a1.currency_code = 'GBP';
 			a2.currency_code = 'GBP';
-			scope.filter(all, 'result');
+			filter(all, scope, 'result');
 			scope.$digest();
 			expect(scope.result).toEqual(30000);
 		});
