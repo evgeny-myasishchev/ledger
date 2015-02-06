@@ -32,17 +32,17 @@ describe("ledgerHelpers", function() {
 	});
 
 	describe('thenFilter', function() {
-		var scope, $q, $rootScope;
-		beforeEach(inject(['$q', '$rootScope', 'thenFilter', function(theQ, theRootScope, thenFilter) {
+		var scope, thenFilter, $q, $rootScope;
+		beforeEach(inject(['$q', '$rootScope', 'thenFilter', function(theQ, theRootScope, _thenFilter_) {
 			$q = theQ;
 			$rootScope = theRootScope;
 			scope = $rootScope.$new();
-			scope.thenFilter = thenFilter;
+			thenFilter = _thenFilter_;
 		}]));
 
 		it('should evaluate given expression when promise is resolved', function() {
 			var deferred = $q.defer();
-			scope.thenFilter(deferred.promise, 'test="value"');
+			thenFilter(deferred.promise, scope, 'test="value"');
 			deferred.resolve();
 			$rootScope.$apply();
 			expect(scope.test).toEqual('value');

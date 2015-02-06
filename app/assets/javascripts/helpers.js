@@ -155,10 +155,10 @@
 	}]);
 	
 	ledgerHelpers.filter('then', [function() {
-		return function(promise, expression) {
+		return function(promise, scope, expression) {
 			var that = this;
 			return promise.then(function() {
-				that.$eval(expression, {});
+				scope.$eval(expression, {});
 			});
 		}
 	}]);
