@@ -18,7 +18,7 @@ class AccountsController < ApplicationController
   end
   
   def rename
-    dispatch_command RenameAccount.from_hash params
+    dispatch_command RenameAccount.new params[:aggregate_id], name: params[:name]
     render nothing: true
   end
   

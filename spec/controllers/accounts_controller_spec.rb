@@ -95,12 +95,13 @@ RSpec.describe AccountsController, :type => :controller do
   describe "PUT 'rename'" do
     it "should dispatch rename command" do
       command = double(:command)
-      expect(i::RenameAccount).to receive(:from_hash) do |params|
-        expect(params).to be controller.params
+      expect(i::RenameAccount).to receive(:new) do |aggregate_id, data|
+        expect(aggregate_id).to eql 'account-223'
+        expect(data[:name]).to eql 'value-1'
         command
       end
       expect(controller).to receive(:dispatch_command).with(command)
-      put 'rename', aggregate_id: 'account-223', key1: 'value-1', key2: 'value-2'
+      put 'rename', aggregate_id: 'account-223', name: 'value-1'
       expect(response.status).to eql 200
     end
   end
