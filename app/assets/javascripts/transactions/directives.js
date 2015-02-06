@@ -6,6 +6,7 @@
 			restrict: 'E',
 			templateUrl: 'transactions-list.html',
 			scope: {
+				showAccount: '=',
 				transactions: '=data'
 			},
 			link: function(scope, element, attrs) {
