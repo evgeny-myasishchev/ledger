@@ -262,6 +262,31 @@ describe('acounts', function() {
 		});
 	});
 	
+	describe('accountByIdFilter', function() {
+		var a1, a2;
+		var accounts;
+		var subject;
+		beforeEach(function() {
+			module('accountsApp');
+			a1 = {aggregate_id: 'a1'};
+			a2 = {aggregate_id: 'a2'};
+
+			inject(['accountByIdFilter', 'accounts', function(filter, theAccounts) {
+				accounts = theAccounts;
+				subject = filter;
+			}]);
+			
+			spyOn(accounts, 'getById').and.callFake(function(account_id) {
+				return {'a1': a1, 'a2': a2}[account_id];
+			});
+		});
+
+		it('should return corresponding account by id', function() {
+			expect(subject(a1.aggregate_id)).toBe(a1);
+			expect(subject(a2.aggregate_id)).toBe(a2);
+		});
+	});
+	
 	describe('nameWithBalanceFilter', function() {
 		var subject, money;
 		beforeEach(function() {

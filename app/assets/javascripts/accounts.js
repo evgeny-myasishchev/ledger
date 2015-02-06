@@ -164,5 +164,11 @@ var accountsApp = (function($) {
 		}
 	}]);
 	
+	accountsApp.filter('accountById', ['accounts', function(accounts) {
+		return function(accountId) {
+			return accounts.getById(accountId);
+		}
+	}]);
+	
 	return accountsApp;
 })(jQuery);
