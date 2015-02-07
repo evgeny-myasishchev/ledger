@@ -78,8 +78,8 @@ class Projections::Transaction < ActiveRecord::Base
         tag_ids_serach_query << 'tag_ids like ?'
       }
       query = query.where [tag_ids_serach_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
-    end
-    query = query.where 'comment like ?', "%#{criteria[:comment]}%" if criteria[:comment]
+    end 
+    query = query.where Transaction.arel_table[:comment].matches("%#{criteria[:comment]}%") if criteria[:comment]
     query = query.where amount: criteria[:amount] if criteria[:amount]
     query = query.where 'date >= ?', criteria[:from] if criteria[:from]
     query = query.where 'date <= ?', criteria[:to] if criteria[:to]

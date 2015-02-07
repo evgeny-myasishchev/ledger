@@ -227,6 +227,17 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(result[1]).to eql t2
     end
     
+    it 'should filter by comment case insensitive' do
+      t1 = described_class.find_by transaction_id: 't-1'
+      t1.comment = 'insensitive'
+      t1.save!
+      t2 = described_class.find_by transaction_id: 't-2'
+      t2.comment = 'INSENSITIVE'
+      t2.save!
+      result = described_class.build_search_query user, account, criteria: {comment: 'INSENSITIVE'}
+      expect(result.length).to eql 2
+    end
+    
     it 'should filter by exact amount' do
       t1 = described_class.find_by transaction_id: 't-1'
       t1.amount = 10023
