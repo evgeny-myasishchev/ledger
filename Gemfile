@@ -74,5 +74,6 @@ group :development, :test do
   gem 'puma'
   gem "spring"
   gem "spring-commands-rspec"
-  gem 'jasmine-rails'  
+  gem 'jasmine-rails'
+  gem 'rest-client'
 end
