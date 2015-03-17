@@ -16,7 +16,7 @@ log.debug 'Doing existing data clenup...'
 @context.projections.for_each { |projection| projection.cleanup! }
 
 log.info 'Creating user dev@domain.com'
-user = User.create_with(id: 1, password: 'password').find_or_create_by! email: 'dev@domain.com'
+user = User.create_with(password: 'password').find_or_create_by! email: 'dev@domain.com'
 
 @dispatch_context = CommonDomain::DispatchCommand::DispatchContext::StaticDispatchContext.new user.id, '127.0.0.1'
 
