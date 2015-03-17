@@ -39,7 +39,7 @@ Rails.application.routes.draw do
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
   
   namespace :api do
-    get 'sessions/new'
+    resources :sessions, only: [:create]
   end
   
   # The priority is based upon order of creation: first created -> highest priority.
