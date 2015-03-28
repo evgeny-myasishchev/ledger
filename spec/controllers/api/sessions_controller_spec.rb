@@ -19,13 +19,12 @@ RSpec.describe Api::SessionsController, :type => :controller do
     end
     
     it 'should return 401 if no google_id_token present in params' do
-      allow(GoogleIDToken::Extractor).to receive(:extract) { nil }
       post :create, format: :json
       expect(response).to have_http_status(:unauthorized)
     end
     
-    it 'should return 401 if the token got expired' do
-      expect(User).to receive(:find_by).with(email: 'user@domain.com') { nil }
+    it 'should return 401 if the token is invalid' do
+      allow(GoogleIDToken::Extractor).to receive(:extract).with('dummy-token').and_raise GoogleIDToken::InvalidTokenException.new 'invalid token'
       post :create, format: :json, google_id_token: 'dummy-token'
       expect(response).to have_http_status(:unauthorized)
     end

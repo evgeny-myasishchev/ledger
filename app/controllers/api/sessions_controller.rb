@@ -7,9 +7,18 @@ class Api::SessionsController < ApplicationController
   
   def create
     if params[:google_id_token]
-      token = GoogleIDToken::Extractor.extract(params[:google_id_token])
-      user = User.find_by email: token['email']
-      sign_in :user, user if user
+      begin
+        token = GoogleIDToken::Extractor.extract(params[:google_id_token])
+        user = User.find_by email: token['email']
+        if user
+          sign_in :user, user
+        else
+          logger.debug "Authentication failed. User #{token['email']} not found."
+        end
+      rescue GoogleIDToken::InvalidTokenException => e
+        logger.error 'Failed to extract the google_id_token'
+        logger.error $!.inspect
+      end
     end
     respond_to do |format|
       format.json {
