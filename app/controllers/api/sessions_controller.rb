@@ -16,7 +16,7 @@ class Api::SessionsController < ApplicationController
           logger.debug "Authentication failed. User #{token['email']} not found."
         end
       rescue GoogleIDToken::InvalidTokenException => e
-        logger.error "Failed to extract the google_id_token: #{e.inspect}"
+        logger.warn "Failed to extract the google_id_token: #{e.inspect}"
       end
     end
     respond_to do |format|
