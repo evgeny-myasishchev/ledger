@@ -4,7 +4,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   include Domain::Events
   
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
-  attr_reader :is_approved
+  attr_reader :is_approved, :is_rejected
   
   def report user, transaction_id, amount, date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil
     type_id ||= Domain::Transaction::ExpenceTypeId
@@ -50,6 +50,12 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     raise_event PendingTransactionApproved.new aggregate_id
   end
   
+  def reject
+    return if @is_rejected
+    Log.debug "Rejecting transaction id=#{aggregate_id}"
+    raise_event PendingTransactionRejected.new aggregate_id
+  end
+  
   on PendingTransactionReported do |event|
     @is_approved = false
     @aggregate_id = event.aggregate_id
@@ -64,6 +70,10 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   
   on PendingTransactionApproved do |event|
     @is_approved = true
+  end
+  
+  on PendingTransactionRejected do |event|
+    @is_rejected = true
   end
   
   private def update_attributes event

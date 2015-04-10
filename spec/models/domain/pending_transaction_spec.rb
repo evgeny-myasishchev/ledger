@@ -164,5 +164,23 @@ module PendingTransactionSpec
         expect(subject.is_approved).to be_truthy
       end
     end
+    
+    describe 'reject' do
+      it 'should raise rejected event' do
+        subject.reject
+        expect(subject).to have_one_uncommitted_event PendingTransactionRejected, aggregate_id: subject.aggregate_id
+      end
+      
+      it 'should be idempotent' do
+        subject.apply_event PendingTransactionRejected.new subject.aggregate_id
+        subject.reject
+        expect(subject).not_to have_uncommitted_events
+      end
+      
+      it 'should set rejected flag on rejected' do
+        subject.apply_event PendingTransactionRejected.new subject.aggregate_id
+        expect(subject.is_rejected).to be_truthy
+      end
+    end
   end
 end
