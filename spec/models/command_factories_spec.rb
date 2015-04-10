@@ -441,5 +441,10 @@ describe Application::Commands do
       it_behaves_like :aliased_transaction_id
       it_behaves_like :required_aggregate_id
     end
+    
+    describe described_class::RejectPendingTransaction do
+      it_behaves_like :aliased_transaction_id
+      it_behaves_like :required_aggregate_id
+    end
   end
 end

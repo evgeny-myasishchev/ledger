@@ -138,5 +138,8 @@ module Application::Commands
     command :AdjustAndApprovePendingTransaction, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionBaseCommand
     end
+    command :RejectPendingTransaction do
+      include PendingTransactionBaseCommand
+    end
   end
 end

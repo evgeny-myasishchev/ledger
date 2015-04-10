@@ -70,4 +70,16 @@ RSpec.describe Application::PendingTransactionsService, :type => :model do
       subject.handle_message cmd
     end
   end
+  
+  
+  describe 'RejectPendingTransaction' do
+    let(:account) { double(:account, aggregate_id: 'a-101') }
+    
+    it 'should reject the pending transaction' do
+      cmd = c::RejectPendingTransaction.new 'pt-223', headers: dummy_headers
+      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers)
+      expect(pt).to receive(:reject)
+      subject.handle_message cmd
+    end
+  end
 end

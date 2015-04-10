@@ -30,4 +30,6 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
       transaction.approve account
     end
   end
+  
+  handle(PendingTransactionCommands::RejectPendingTransaction).with(Domain::PendingTransaction).using(:reject)
 end

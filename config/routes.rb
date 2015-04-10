@@ -29,7 +29,7 @@ Rails.application.routes.draw do
     post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
   end
   
-  resources :pending_transactions, only: [:index], path: 'pending-transactions', param: :aggregate_id do
+  resources :pending_transactions, only: [:index, :destroy], path: 'pending-transactions', param: :aggregate_id do
     post '/' => 'pending_transactions#report', on: :collection
     put '/' => 'pending_transactions#adjust', on: :member
     post 'approve' => 'pending_transactions#approve', on: :member

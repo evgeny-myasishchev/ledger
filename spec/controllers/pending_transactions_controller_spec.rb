@@ -27,6 +27,10 @@ module PendingTransactionsControllerSpec
       it "routes POST 'adjust-and-approve'" do
         expect({post: 'pending-transactions/t-110/adjust-and-approve'}).to route_to controller: 'pending_transactions', action: 'adjust_and_approve', aggregate_id: 't-110'
       end
+      
+      it "routes DELETE to reject" do
+        expect({delete: 'pending-transactions/t-110'}).to route_to controller: 'pending_transactions', action: 'destroy', aggregate_id: 't-110'
+      end
     end
     
     describe 'GET index' do
@@ -90,7 +94,6 @@ module PendingTransactionsControllerSpec
         expect(response.status).to eql 200
       end
     end
-    
       
     describe 'PUT adjust-and-approve' do
       it 'should dispatch report command' do
@@ -111,6 +114,17 @@ module PendingTransactionsControllerSpec
         expect(response.status).to eql 200
       end
     end
+    
+      
+    describe 'DELETE destroy' do
+      it 'should dispatch approve command' do
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command).to be_an_instance_of RejectPendingTransaction
+          expect(command.aggregate_id).to eql 't-100'
+        end
+        delete :destroy, aggregate_id: 't-100'
+        expect(response.status).to eql 200
+      end
+    end
   end
-
 end
