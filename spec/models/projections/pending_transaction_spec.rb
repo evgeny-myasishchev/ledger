@@ -124,5 +124,21 @@ module Projections::PendingTransactionSpec
         expect { subject.handle_message PendingTransactionApproved.new 't-101' }.not_to change { described_class.count }
       end
     end
+    
+    describe 'on PendingTransactionRejected' do
+      before do
+        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
+      end
+      
+      it 'should remove the pending transaction' do
+        subject.handle_message PendingTransactionRejected.new 't-101'
+        expect(described_class.find_by_transaction_id('t-101')).to be_nil
+      end
+      
+      it "should be idempotent" do
+        subject.handle_message PendingTransactionRejected.new 't-101'
+        expect { subject.handle_message PendingTransactionRejected.new 't-101' }.not_to change { described_class.count }
+      end
+    end
   end
 end

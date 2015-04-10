@@ -40,6 +40,10 @@ class Projections::PendingTransaction < ActiveRecord::Base
       PendingTransaction.delete_all transaction_id: event.aggregate_id
     end
     
+    on PendingTransactionRejected do |event|
+      PendingTransaction.delete_all transaction_id: event.aggregate_id
+    end
+    
     private def build_tags_string(tag_ids)
       tag_ids.nil? ? nil : tag_ids.map { |id| "{#{id}}" }.join(',')
     end
