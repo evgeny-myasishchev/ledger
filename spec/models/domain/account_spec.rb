@@ -227,6 +227,7 @@ describe Domain::Account do
       subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
         'transaction-100', income_id, 1040, date, ['t-1', 't-2'], 'Monthly income')
       expect(subject.transactions['transaction-100']).to eql({
+        id: 'transaction-100',
         type_id: income_id,
         amount: 1040,
         date: date,
@@ -276,6 +277,7 @@ describe Domain::Account do
       subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
         'transaction-100', Domain::Transaction::ExpenceTypeId, 2023, date, ['t-1', 't-2'], 'Monthly income')
       expect(subject.transactions['transaction-100']).to eql({
+        id: 'transaction-100',
         type_id: Domain::Transaction::ExpenceTypeId,
         amount: 2023,
         date: date,
@@ -325,6 +327,7 @@ describe Domain::Account do
       subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
         'transaction-100', Domain::Transaction::RefundTypeId, 2023, date, ['t-1', 't-2'], 'Coworker gave back')
       expect(subject.transactions['transaction-100']).to eql({
+        id: 'transaction-100',
         type_id: Domain::Transaction::RefundTypeId,
         amount: 2023,
         date: date,
@@ -380,6 +383,7 @@ describe Domain::Account do
       subject.make_created.apply_event I::TransferSent.new(subject.aggregate_id, 
         'transaction-110', 'receiver-account-332', 2023, date, ['t-1', 't-2'], 'Getting cache')
       expect(subject.transactions['transaction-110']).to eql({
+        id: 'transaction-110',
         type_id: Domain::Transaction::ExpenceTypeId,
         amount: 2023,
         date: date,
@@ -431,6 +435,7 @@ describe Domain::Account do
       subject.make_created.apply_event I::TransferReceived.new(
         subject.aggregate_id, 'transaction-110', 'sending-account-332', 'sending-transaction-221', 2023, date, ['t-1', 't-2'], 'Getting cache')
       expect(subject.transactions['transaction-110']).to eql({
+        id: 'transaction-110',
         type_id: Domain::Transaction::IncomeTypeId,
         amount: 2023,
         date: date,
@@ -702,6 +707,31 @@ describe Domain::Account do
     it 'should remove the transaction on TransactionRemoved' do
       subject.apply_event I::TransactionRemoved.new subject.aggregate_id, 't-1'
       expect(subject.transactions['t-1']).to be_nil
+    end
+  end
+  
+  describe 'move_transaction_to' do
+    let(:target_account) { described_class.new.make_created }
+    before do
+      subject.make_created
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, [], ''
+      allow(subject).to receive(:remove_transaction).and_call_original
+      allow(target_account).to receive(:accept_moved_transaction_from).and_call_original
+      @transaction = subject.transactions['t-1']
+      subject.move_transaction_to 't-1', target_account
+    end
+    
+    it 'should remove the transaction' do
+      expect(subject).to have_received(:remove_transaction).with('t-1')
+    end
+    
+    it 'should accept moved transaction by target account' do
+      expect(target_account).to have_received(:accept_moved_transaction_from).with(subject, @transaction)
+    end
+    
+    it 'should raise moved event' do
+      expect(subject).to have_one_uncommitted_event I::TransactionMovedTo, {
+        aggregate_id: subject.aggregate_id, target_account_id: target_account.aggregate_id, transaction_id: 't-1'}, at_index: 2
     end
   end
   

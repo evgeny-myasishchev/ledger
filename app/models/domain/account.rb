@@ -157,6 +157,19 @@ class Domain::Account < CommonDomain::Aggregate
     raise_balance_changed transaction_id, new_balance
   end
   
+  def move_transaction_to transaction_id, target_account
+    transaction = get_transaction!(transaction_id)
+    log.debug "Moving transaction id='#{transaction_id}' from account id='#{aggregate_id}' to account id=#{target_account.aggregate_id}"
+    remove_transaction transaction_id
+    target_account.accept_moved_transaction_from self, transaction
+    raise_event TransactionMovedTo.new aggregate_id, target_account.aggregate_id, transaction_id
+  end
+  
+  def accept_moved_transaction_from sending_account, transaction
+    # report[income|expence|refund|send_transfer|receive_transfer]
+    # raise_event TransactionMovedFrom.new aggregate_id, target_account.aggregate_id, transaction[:id]
+  end
+  
   def get_snapshot
     {
       ledger_id: ledger_id,
@@ -278,6 +291,10 @@ class Domain::Account < CommonDomain::Aggregate
     @transactions.delete event.transaction_id
   end
   
+  on TransactionMovedTo do |event|
+    # No logic for now
+  end
+  
   private 
     def get_transaction! transaction_id
       raise "Unknown transaction '#{transaction_id}'" unless @transactions.key?(transaction_id)
@@ -286,6 +303,7 @@ class Domain::Account < CommonDomain::Aggregate
   
     def index_transaction transaction_id, type_id, event
       @transactions[transaction_id] = {
+        id: transaction_id,
         type_id: type_id,
         amount: event.amount,
         tag_ids: event.tag_ids,
