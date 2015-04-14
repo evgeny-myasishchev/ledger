@@ -50,6 +50,10 @@ describe TransactionsController do
     it "routes DELETE 'destroy" do
       expect({delete: 'transactions/t-100'}).to route_to controller: 'transactions', action: 'destroy', id: 't-100'
     end
+    
+    it "routes POST 'move-to" do
+      expect({post: 'transactions/t-100/move-to/account-332'}).to route_to controller: 'transactions', action: 'move_to', id: 't-100', target_account_id: 'account-332'
+    end
   end
   
   describe "GET 'index'" do
@@ -180,6 +184,22 @@ describe TransactionsController do
     
     it "should dispatch the RemoveTransaction command" do
       should_dispatch 'destroy', cmd::RemoveTransaction, :delete
+    end
+  end
+    
+  describe "POST 'move-to'" do
+    include AuthenticationHelper
+    authenticate_user
+    
+    it "should dispatch the MoveTransaction command" do
+      command = double(:command)
+      expect(cmd::MoveTransaction).to receive(:new) do |params|
+        expect(params).to be controller.params
+        command
+      end
+      expect(controller).to receive(:dispatch_command).with(command)
+      post :move_to, id: 't-112', target_account_id: 'account-110'
+      expect(response.status).to eql 200
     end
   end
   

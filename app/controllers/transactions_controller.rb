@@ -60,6 +60,11 @@ class TransactionsController < ApplicationController
     dispatch_command RemoveTransaction.new params
     render nothing: true
   end
+    
+  def move_to
+    dispatch_command MoveTransaction.new params
+    render nothing: true
+  end
   
   private def dispatch_transaction_command command_class
     dispatch_command command_class.build_from_params params
