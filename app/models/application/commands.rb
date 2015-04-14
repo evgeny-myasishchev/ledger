@@ -115,6 +115,14 @@ module Application::Commands
         super(nil, transaction_id: params[:id], headers: params[:headers])
       end
     end
+    command :MoveTransaction, :transaction_id, :target_account_id do
+      include ActiveModel::Validations
+      validates :transaction_id, presence: true
+      validates :target_account_id, presence: true
+      def initialize(params)
+        super(nil, transaction_id: params[:id], target_account_id: params[:target_account_id], headers: params[:headers])
+      end
+    end
   end
   
   commands_group :PendingTransactionCommands do

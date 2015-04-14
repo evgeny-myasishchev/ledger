@@ -257,6 +257,21 @@ describe Application::Commands do
       end
     end
     
+    describe described_class::MoveTransaction do
+      it "should initialize the command from params" do
+        subject = described_class.new id: 't-100', target_account_id: 'account-223'
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.target_account_id).to eql('account-223')
+      end
+    
+      it "should validate presentce of transaction_id and target_account_id" do
+        subject = described_class.new Hash.new
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+        expect(subject.errors[:target_account_id]).to eql ["can't be blank"]
+      end
+    end
+    
     describe described_class::RenameAccount do
       it "shold validate presence of all attributes" do
         subject = described_class.from_hash Hash.new
