@@ -385,10 +385,11 @@ describe Domain::Account do
       expect(subject.transactions['transaction-110']).to eql({
         id: 'transaction-110',
         type_id: Domain::Transaction::ExpenceTypeId,
+        is_transfer: true,
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
-        comment: 'Getting cache'      
+        comment: 'Getting cache'
       })
     end
   end
@@ -437,6 +438,7 @@ describe Domain::Account do
       expect(subject.transactions['transaction-110']).to eql({
         id: 'transaction-110',
         type_id: Domain::Transaction::IncomeTypeId,
+        is_transfer: true,
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],

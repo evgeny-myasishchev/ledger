@@ -256,11 +256,13 @@ class Domain::Account < CommonDomain::Aggregate
   end
 
   on TransferSent do |event|
-    index_transaction event.transaction_id, Transaction::ExpenceTypeId, event
+    transaction = index_transaction event.transaction_id, Transaction::ExpenceTypeId, event
+    transaction[:is_transfer] = true
   end
 
   on TransferReceived do |event|
-    index_transaction event.transaction_id, Transaction::IncomeTypeId, event
+    transaction = index_transaction event.transaction_id, Transaction::IncomeTypeId, event
+    transaction[:is_transfer] = true
   end
   
   on TransactionTagged do |event|
