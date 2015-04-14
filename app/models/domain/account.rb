@@ -166,8 +166,32 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def accept_moved_transaction_from sending_account, transaction
-    # report[income|expence|refund|send_transfer|receive_transfer]
-    # raise_event TransactionMovedFrom.new aggregate_id, target_account.aggregate_id, transaction[:id]
+    log.debug "Accepting moved transaction transaction id='#{transaction[:id]}' from account id='#{sending_account.aggregate_id}' to account id=#{aggregate_id}"
+    if transaction[:is_transfer]
+      send_transfer transaction[:id], 
+        transaction[:receiving_account_id], 
+        transaction[:amount], 
+        transaction[:date], 
+        transaction[:tag_ids], 
+        transaction[:comment] if transaction[:type_id] == Transaction::ExpenceTypeId
+      receive_transfer transaction[:id], 
+        transaction[:sending_account_id], 
+        transaction[:sending_transaction_id], 
+        transaction[:amount], 
+        transaction[:date], 
+        transaction[:tag_ids], 
+        transaction[:comment] if transaction[:type_id] == Transaction::IncomeTypeId
+    else
+      verb = 'refund'
+      verb = 'income' if transaction[:type_id] == Transaction::IncomeTypeId
+      verb = 'expence' if transaction[:type_id] == Transaction::ExpenceTypeId
+      send "report_#{verb}".to_sym, transaction[:id],
+        transaction[:amount],
+        transaction[:date],
+        transaction[:tag_ids],
+        transaction[:comment]
+    end
+    raise_event TransactionMovedFrom.new aggregate_id, sending_account.aggregate_id, transaction[:id]
   end
   
   def get_snapshot
@@ -257,11 +281,14 @@ class Domain::Account < CommonDomain::Aggregate
 
   on TransferSent do |event|
     transaction = index_transaction event.transaction_id, Transaction::ExpenceTypeId, event
+    transaction[:receiving_account_id] = event.receiving_account_id
     transaction[:is_transfer] = true
   end
 
   on TransferReceived do |event|
     transaction = index_transaction event.transaction_id, Transaction::IncomeTypeId, event
+    transaction[:sending_account_id] = event.sending_account_id
+    transaction[:sending_transaction_id] = event.sending_transaction_id
     transaction[:is_transfer] = true
   end
   
@@ -294,6 +321,10 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   on TransactionMovedTo do |event|
+    # No logic for now
+  end
+  
+  on TransactionMovedFrom do |event|
     # No logic for now
   end
   

@@ -60,6 +60,16 @@ class Application::AccountsService < CommonDomain::CommandHandler
       account.remove_transaction transaction_id
     end
   end
+  
+
+  on AccountCommands::MoveTransaction do |command|
+    transaction = Projections::Transaction.find_by_transaction_id command.transaction_id
+    begin_unit_of_work command.headers do |uow|
+      account = uow.get_by_id Domain::Account, transaction.account_id
+      target_account = uow.get_by_id Domain::Account, command.target_account_id
+      account.move_transaction_to command.transaction_id, target_account
+    end
+  end
 
   private def perform_adjustment transaction_id, headers, &block
     transaction = Projections::Transaction.find_by_transaction_id transaction_id

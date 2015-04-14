@@ -35,6 +35,7 @@ module Domain::Events
   event :TransactionUntagged, :transaction_id, :tag_id
   event :TransactionRemoved, :transaction_id
   event :TransactionMovedTo, :target_account_id, :transaction_id
+  event :TransactionMovedFrom, :sending_account_id, :transaction_id
   
   #Pending transaction events
   event :PendingTransactionReported, :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id

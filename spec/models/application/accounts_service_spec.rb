@@ -187,5 +187,26 @@ RSpec.describe Application::AccountsService, :type => :model do
       end
     end
   end
+    
+  describe "MoveTransaction" do
+    let(:date) { DateTime.now }
+    let(:sending_account) { double(:sending_account, aggregate_id: 'src-110') }
+    let(:receiving_account) { double(:receiving_account, aggregate_id: 'dst-210') }
+    
+    before(:each) do
+      expect(p::Transaction).to receive(:find_by_transaction_id).with('t-100') { p::Transaction.new account_id: 'src-110' }
+      expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
+    end
+    
+    it "should use source and target accounts to perform transfer" do
+      command = c::MoveTransaction.new(
+        id: 't-100',
+        target_account_id: 'dst-210',
+        headers: dummy_headers)
+      expect(sending_account).to receive(:move_transaction_to).with('t-100', receiving_account)
+      subject.handle_message command
+    end
+  end
 
 end

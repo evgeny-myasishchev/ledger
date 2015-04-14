@@ -386,6 +386,7 @@ describe Domain::Account do
         id: 'transaction-110',
         type_id: Domain::Transaction::ExpenceTypeId,
         is_transfer: true,
+        receiving_account_id: 'receiver-account-332',
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
@@ -439,6 +440,8 @@ describe Domain::Account do
         id: 'transaction-110',
         type_id: Domain::Transaction::IncomeTypeId,
         is_transfer: true,
+        sending_account_id: 'sending-account-332',
+        sending_transaction_id: 'sending-transaction-221',
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
@@ -734,6 +737,60 @@ describe Domain::Account do
     it 'should raise moved event' do
       expect(subject).to have_one_uncommitted_event I::TransactionMovedTo, {
         aggregate_id: subject.aggregate_id, target_account_id: target_account.aggregate_id, transaction_id: 't-1'}, at_index: 2
+    end
+  end
+  
+  describe 'accept_moved_transaction_from' do
+    let(:sending_account) { described_class.new.make_created }
+    let(:date) { DateTime.now }
+    
+    before do
+      subject.make_created
+    end
+    
+    it 'should report income if transaction is income' do
+      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
+      t = sending_account.transactions['t-1']
+      expect(subject).to receive(:report_income).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      subject.accept_moved_transaction_from sending_account, t
+    end
+    
+    it 'should report expense if transaction is expense' do
+      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', expence_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
+      t = sending_account.transactions['t-1']
+      expect(subject).to receive(:report_expence).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      subject.accept_moved_transaction_from sending_account, t
+    end
+    
+    it 'should report refund if transaction is refund' do
+      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', refund_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
+      t = sending_account.transactions['t-1']
+      expect(subject).to receive(:report_refund).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      subject.accept_moved_transaction_from sending_account, t
+    end
+    
+    it 'should send transfer if transaction is expense and transfer' do
+      sending_account.apply_event I::TransferSent.new(subject.aggregate_id,
+        't-1', 'receiver-account-332', 2023, date, ['t-1', 't-2'], 'Comment t-1')
+      t = sending_account.transactions['t-1']
+      expect(subject).to receive(:send_transfer).with t[:id], t[:receiving_account_id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      subject.accept_moved_transaction_from sending_account, t
+    end
+    
+    it 'should receive transfer if transaction is income and transfer' do
+      sending_account.apply_event I::TransferReceived.new(
+        subject.aggregate_id, 't-1', 'sending-account-332', 'sending-transaction-221', 2023, date, ['t-1', 't-2'], 'Comment t-1')
+      t = sending_account.transactions['t-1']
+      expect(subject).to receive(:receive_transfer).with t[:id], t[:sending_account_id], t[:sending_transaction_id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      subject.accept_moved_transaction_from sending_account, t
+    end
+    
+    it 'should raise TransactionMovedFrom event' do
+      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
+      t = sending_account.transactions['t-1']
+      subject.accept_moved_transaction_from sending_account, t
+      expect(subject).to have_one_uncommitted_event I::TransactionMovedFrom, {
+        aggregate_id: subject.aggregate_id, sending_account_id: sending_account.aggregate_id, transaction_id: 't-1'}, at_index: 2
     end
   end
   
