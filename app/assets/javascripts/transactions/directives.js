@@ -11,7 +11,9 @@
 			link: function(scope, element, attrs) {
 				var popoverParent;
 				scope.move = function() {
-					transactions.moveTo(scope.transaction, scope.targetAccount);
+					transactions.moveTo(scope.transaction, scope.targetAccount).then(function() {
+						popoverParent.popover('hide');
+					});
 				}
 				scope.cancel = function() {
 					popoverParent.popover('hide');
@@ -20,18 +22,22 @@
 					if(!popoverParent) {
 						if(!scope.accounts) scope.accounts = accounts.getAllOpen();
 						popoverParent = $(element).parents('.btn-group');
-						popoverParent.popover({
-							html: true, 
-							title: 'Moving transaction',
-							trigger: 'manual',
-							placement: 'left',
-							container: 'body',
-							content: function() { return link(scope); }
-						});
-						initialized = true;
+						console.log(popoverParent);
 					}
+					popoverParent.popover({
+						html: true, 
+						title: 'Moving transaction',
+						trigger: 'manual',
+						placement: 'left',
+						container: 'body',
+						content: function() { return link(scope); }
+					});
+					popoverParent.on('hidden.bs.popover', function() {
+						popoverParent.popover('destroy');
+					});
 					popoverParent.popover('show');
-				})
+				});
+				
 				scope.$on('$destroy', function() {
 					if(popoverParent) popoverParent.popover('destroy');
 				});
