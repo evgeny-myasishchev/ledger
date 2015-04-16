@@ -36,6 +36,10 @@ var transactionsApp = (function() {
 				processApprovedTransaction: function(transaction) {
 					this.processReportedTransaction(transaction);
 					pendingTransactionsCount--;
+				},
+				
+				moveTo: function(transaction, account) {
+					
 				}
 			}
 		}];

@@ -30,7 +30,16 @@
 						<i class='glyphicon glyphicon-cog'></i>
 					</button>
 					<ul class="dropdown-menu" role="menu">
-						<li><a ng-click="confirmRemoval = true" ng-init="confirmRemoval = false"><i class='glyphicon glyphicon-trash'></i> Remove</a></li>
+						<li>
+							<a href='#' onclick='return false;' ng-click="confirmRemoval = true" ng-init="confirmRemoval = false">
+								<i class='glyphicon glyphicon-trash'></i> Remove
+							</a>
+						</li>
+						<li>
+							<a href='#' onclick='return false;' move-transaction-action>
+								<i class='glyphicon glyphicon-share'></i> Move
+							</a>
+						</li>
 					</ul>
 				</div>
 			</td>

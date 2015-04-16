@@ -1,5 +1,45 @@
 !function($) {
 	var transactionsApp = angular.module('transactionsApp');
+	
+	transactionsApp.directive('moveTransactionAction', 
+	['$templateCache', '$compile', 'accounts', 'transactions', function($templateCache, $compile, accounts, transactions) {
+		var template = $templateCache.get('move-transaction.html');
+		var link = $compile(template);
+		return {
+			restrict: 'A',
+			template: '',
+			link: function(scope, element, attrs) {
+				var popoverParent;
+				scope.move = function() {
+					transactions.moveTo(scope.transaction, scope.targetAccount);
+				}
+				scope.cancel = function() {
+					popoverParent.popover('hide');
+				}
+				element.click(function(e) {
+					if(!popoverParent) {
+						if(!scope.accounts) scope.accounts = accounts.getAllOpen();
+						popoverParent = $(element).parents('.btn-group');
+						popoverParent.popover({
+							html: true, 
+							title: 'Moving transaction',
+							trigger: 'manual',
+							placement: 'left',
+							container: 'body',
+							content: function() { return link(scope); }
+						});
+						initialized = true;
+					}
+					popoverParent.popover('show');
+				})
+				scope.$on('$destroy', function() {
+					if(popoverParent) popoverParent.popover('destroy');
+				});
+				// if(scope.transaction.transaction_id == '13355f56-3542-4017-80ca-0f3ea49a383e')
+				// 	element.trigger('click');
+			}
+		}
+	}]);
 
 	transactionsApp.directive('transactionsList', ['$http', 'accounts', 'tagsHelper', 'money', function($http, accounts, tagsHelper, money) {
 		return {
