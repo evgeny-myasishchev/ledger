@@ -11,7 +11,7 @@ var transactionsApp = (function() {
 			pendingTransactionsCount = value;
 		};
 		
-		this.$get = ['accounts', function(accounts) {
+		this.$get = ['$http', 'accounts', function($http, accounts) {
 			return {
 				getPendingCount: function() {
 					return pendingTransactionsCount;
@@ -38,8 +38,19 @@ var transactionsApp = (function() {
 					pendingTransactionsCount--;
 				},
 				
-				moveTo: function(transaction, account) {
-					
+				moveTo: function(transaction, targetAccount) {
+					var sourceAccount = accounts.getById(transaction.account_id);
+					return $http.post('transactions/' + transaction.transaction_id + '/move-to/' + targetAccount.aggregate_id).then(function() {
+						if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
+							sourceAccount.balance -= transaction.amount;
+							targetAccount.balance += transaction.amount;
+						} else if(transaction.type_id == Transaction.expenceId) {
+							sourceAccount.balance += transaction.amount;
+							targetAccount.balance -= transaction.amount;
+						}
+						transaction.account_id = targetAccount.aggregate_id;
+						transaction.has_been_moved = true;
+					});
 				}
 			}
 		}];

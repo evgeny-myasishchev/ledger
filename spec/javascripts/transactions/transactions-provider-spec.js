@@ -96,4 +96,65 @@ describe('transactions.transactionsProvider', function() {
 			expect(subject.getPendingCount()).toEqual(31);
 		});
 	});
+	
+	describe('moveTo', function() {
+		var transaction, sourceAccount, targetAccount;
+		var $httpBackend;
+		beforeEach(inject(function($injector) {
+			sourceAccount = account1;
+			targetAccount = account2;
+			transaction = {
+				transaction_id: 't-32',
+				account_id: account1.aggregate_id,
+				amount: 450,
+				type_id: Transaction.incomeId
+			};
+			sourceAccount.balance = 5450;
+			targetAccount.balance = 3450;
+			$httpBackend = $injector.get('$httpBackend');
+			$httpBackend.whenPOST('transactions/t-32/move-to/' + targetAccount.aggregate_id).respond(200);
+		}));
+		
+		afterEach(function() {
+			$httpBackend.verifyNoOutstandingExpectation();
+			$httpBackend.verifyNoOutstandingRequest();
+		});
+		
+		it('should post move action', function() {
+			$httpBackend.expectPOST('transactions/t-32/move-to/' + targetAccount.aggregate_id).respond(200);
+			var result = subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(result.then).toBeDefined();
+		});
+		
+		it('should update account id and put has_been_moved flag of the transaction on success', function() {
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(transaction.account_id).toEqual(targetAccount.aggregate_id);
+			expect(transaction.has_been_moved).toBeTruthy();
+		});
+		
+		it('should update balance of source and target accounts for income transaction on success', function() {
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(sourceAccount.balance).toEqual(5000);
+			expect(targetAccount.balance).toEqual(3900);
+		});
+		
+		it('should update balance of source and target accounts for expense transaction on success', function() {
+			transaction.type_id = Transaction.expenceId;
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(sourceAccount.balance).toEqual(5900);
+			expect(targetAccount.balance).toEqual(3000);
+		});
+		
+		it('should update balance of source and target accounts for refund transaction on success', function() {
+			transaction.type_id = Transaction.refundId;
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(sourceAccount.balance).toEqual(5000);
+			expect(targetAccount.balance).toEqual(3900);
+		});
+	});
 });
