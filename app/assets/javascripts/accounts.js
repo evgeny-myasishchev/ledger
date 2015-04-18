@@ -111,12 +111,21 @@ var accountsApp = (function($) {
 	accountsApp.directive('selectAccount', ['accounts', function(accounts) {
 		return {
 			restrict: 'E',
-			template: "<select ng-options='account | nameWithBalance for account in accounts | orderBy:\"name\"' class='form-control' ng-model='account' required></select>",
+			replace: true,
+			template: 
+					"<select ng-options='account | nameWithBalance for account in accounts | filter:filterAccount | orderBy:\"name\"' " + 
+						"class='form-control' required>" + 
+					"</select>",
 			scope: {
-				account: '=ngModel'
+				account: '=ngModel',
+				except: '='
 			},
 			link: function(scope, element, attrs) {
 				scope.accounts = accounts.getAll();
+				scope.filterAccount = function(account) {
+					if(scope.except) return account.aggregate_id != scope.except.aggregate_id;
+					return true;
+				}
 			}
 		}
 	}]);
