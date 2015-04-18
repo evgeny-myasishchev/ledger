@@ -159,6 +159,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def move_transaction_to transaction_id, target_account
     transaction = get_transaction!(transaction_id)
+    raise "Can not move transaction '#{transaction_id}' onto the same account." if self.aggregate_id == target_account.aggregate_id
     log.debug "Moving transaction id='#{transaction_id}' from account id='#{aggregate_id}' to account id=#{target_account.aggregate_id}"
     remove_transaction transaction_id
     target_account.accept_moved_transaction_from self, transaction

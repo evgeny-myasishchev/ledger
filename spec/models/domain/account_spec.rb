@@ -726,6 +726,11 @@ describe Domain::Account do
       subject.move_transaction_to 't-1', target_account
     end
     
+    it 'should raise error if moving to the same account' do
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-2', income_id, 10000, DateTime.new, [], ''
+      expect { subject.move_transaction_to 't-2', subject }.to raise_error("Can not move transaction 't-2' onto the same account.")
+    end
+    
     it 'should remove the transaction' do
       expect(subject).to have_received(:remove_transaction).with('t-1')
     end
