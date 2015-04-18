@@ -134,6 +134,22 @@ describe('transactions.transactionsProvider', function() {
 			expect(transaction.has_been_moved).toBeTruthy();
 		});
 		
+		it('should update sending_account_id on success for expense transfer', function() {
+			transaction.type_id = Transaction.expenceId;
+			transaction.is_transfer = true;
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(transaction.sending_account_id).toEqual(targetAccount.aggregate_id);
+		});
+		
+		it('should update receiving_account_id on success for income transfer', function() {
+			transaction.type_id = Transaction.incomeId;
+			transaction.is_transfer = true;
+			subject.moveTo(transaction, targetAccount);
+			$httpBackend.flush();
+			expect(transaction.receiving_account_id).toEqual(targetAccount.aggregate_id);
+		});
+		
 		it('should update balance of source and target accounts for income transaction on success', function() {
 			subject.moveTo(transaction, targetAccount);
 			$httpBackend.flush();

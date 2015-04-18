@@ -44,9 +44,11 @@ var transactionsApp = (function() {
 						if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
 							sourceAccount.balance -= transaction.amount;
 							targetAccount.balance += transaction.amount;
+							if(transaction.is_transfer) transaction.receiving_account_id = targetAccount.aggregate_id;
 						} else if(transaction.type_id == Transaction.expenceId) {
 							sourceAccount.balance += transaction.amount;
 							targetAccount.balance -= transaction.amount;
+							if(transaction.is_transfer) transaction.sending_account_id = targetAccount.aggregate_id;
 						}
 						transaction.account_id = targetAccount.aggregate_id;
 						transaction.has_been_moved = true;
