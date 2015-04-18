@@ -12,7 +12,9 @@
 	</thead>
 	<tbody>
 		<tr ng-repeat="transaction in transactions" ng-class='{"bg-success": transaction.has_been_moved}'>
-			<td><i class='{{transaction | tti}}'></i></td>
+			<td show-transaction-info>
+				<i class='{{transaction | tti}}'></i>
+			</td>
 			<td ldr-bubble-editor format='money' submit='adjustAmount(transaction, newValue)' value="transaction.amount">
 				{{getTransferAmountSign(transaction)}}{{transaction.amount | money}} <sup ng-if='showAccount'>{{(transaction.account_id | accountById).currency_code}}</sup>
 			</td>
