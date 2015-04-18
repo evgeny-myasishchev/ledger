@@ -363,6 +363,10 @@ describe Domain::Account do
       subject.send_transfer 'transaction-110', 'receiver-account-332', '20.23', DateTime.now
       expect { subject.send_transfer 'transaction-110', 'receiver-account-332', '20.23', DateTime.now }.to raise_error ArgumentError, "transaction_id='transaction-110' is not unique."
     end
+    
+    it 'should fail if receiving account is the same' do
+      expect { subject.send_transfer 'transaction-110', subject.aggregate_id, '20.23', DateTime.now }.to raise_error ArgumentError, "Can not send transfer onto the same account '#{subject.aggregate_id}'."
+    end
 
     it "should return transaction_id" do
       expect(subject.send_transfer('transaction-110', 'receiver-account-332', '20.23', DateTime.now, ['t-1', 't-2'], 'Getting cache')).to eql 'transaction-110'
@@ -728,7 +732,7 @@ describe Domain::Account do
     
     it 'should raise error if moving to the same account' do
       subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-2', income_id, 10000, DateTime.new, [], ''
-      expect { subject.move_transaction_to 't-2', subject }.to raise_error("Can not move transaction 't-2' onto the same account.")
+      expect { subject.move_transaction_to 't-2', subject }.to raise_error(ArgumentError, "Can not move transaction 't-2' onto the same account.")
     end
     
     it 'should remove the transaction' do

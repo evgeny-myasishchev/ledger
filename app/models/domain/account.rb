@@ -77,6 +77,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def send_transfer(transaction_id, receiving_account_id, amount, date, tag_ids = [], comment = nil)
     amount = Money.parse(amount, @currency)
+    raise ArgumentError.new "Can not send transfer onto the same account '#{aggregate_id}'." if aggregate_id == receiving_account_id
     log.debug "Sending #{amount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
@@ -159,7 +160,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def move_transaction_to transaction_id, target_account
     transaction = get_transaction!(transaction_id)
-    raise "Can not move transaction '#{transaction_id}' onto the same account." if self.aggregate_id == target_account.aggregate_id
+    raise ArgumentError.new "Can not move transaction '#{transaction_id}' onto the same account." if self.aggregate_id == target_account.aggregate_id
     log.debug "Moving transaction id='#{transaction_id}' from account id='#{aggregate_id}' to account id=#{target_account.aggregate_id}"
     remove_transaction transaction_id
     target_account.accept_moved_transaction_from self, transaction
