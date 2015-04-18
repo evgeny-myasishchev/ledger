@@ -56,7 +56,7 @@
 				command.sending_account_id = command.account_id;
 				command.sending_transaction_id = command.transaction_id;
 				command.receiving_transaction_id = newUUID();
-				command.receiving_account_id = $scope.newTransaction.receiving_account_id;
+				command.receiving_account_id = $scope.newTransaction.receivingAccount.aggregate_id;
 				command.amount_sent = command.amount;
 				command.amount_received = money.parse($scope.newTransaction.amount_received);
 				command.is_transfer = true;

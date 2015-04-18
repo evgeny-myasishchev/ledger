@@ -117,7 +117,7 @@ describe("ReportTransactionsController", function() {
 	
 		it("should submit the new transfer transaction", function() {
 			scope.newTransaction.type_id = Transaction.transferKey;
-			scope.newTransaction.receiving_account_id = account2.aggregate_id;
+			scope.newTransaction.receivingAccount = account2;
 			scope.newTransaction.amount_received = '100.22';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-transfer', function(data) {
 				var command = JSON.parse(data).command;
@@ -172,7 +172,7 @@ describe("ReportTransactionsController", function() {
 			});
 			
 			it('should pupulate inserted transaction with transfer specific stuff', function() {
-				scope.newTransaction.receiving_account_id = 'a-3'
+				scope.newTransaction.receivingAccount = account3;
 				scope.newTransaction.amount_received = scope.newTransaction.amount;
 				doReport(Transaction.transferKey);
 				expect(scope.reportedTransactions[0]).toEqual({
@@ -235,7 +235,7 @@ describe("ReportTransactionsController", function() {
 			it('should update the balance on on transfer', function() {
 				var receivingAccount = scope.accounts[1];
 				receivingAccount.balance = 10000;
-				scope.newTransaction.receiving_account_id = receivingAccount.aggregate_id;
+				scope.newTransaction.receivingAccount = receivingAccount;
 				scope.newTransaction.amount_received = '50';
 				doReport(100, Transaction.transferKey);
 				expect(scope.account.balance).toEqual(400);
