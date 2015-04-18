@@ -1,5 +1,5 @@
 describe('transactions.moveTransactionAction', function() {
-	var scope, $httpBackend, $compile;
+	var outerScope, scope, $httpBackend, $compile;
 	var account1, account2;
 	
 	beforeEach(function() {
@@ -14,18 +14,20 @@ describe('transactions.moveTransactionAction', function() {
 	
 	beforeEach(inject(function(_$httpBackend_, _$compile_, $rootScope){
 		$httpBackend = _$httpBackend_;
-		scope = $rootScope.$new();
-		scope.transaction = {
+		outerScope = $rootScope.$new();
+		outerScope.transaction = {
 			transaction_id: 't-432'
 		}
 		$compile = _$compile_;
 	}));
 	
 	function compile() {
-		var elem = angular.element('<button move-transaction-action></button');
-		var compiledElem = $compile(elem)(scope);
-		scope.$digest();
-		return compiledElem;
+		var elem = angular.element('<div class="btn-group"><button move-transaction-action transaction="transaction"></button></div>');
+		var compiledElem = $compile(elem)(outerScope);
+		outerScope.$digest();
+		var button = compiledElem.find('button');
+		scope = button.isolateScope();
+		return button;
 	};
 	
 	describe('data attribute', function() {
@@ -33,6 +35,14 @@ describe('transactions.moveTransactionAction', function() {
 			var element = compile();
 			element.click();
 			expect(scope.accounts).toEqual([account1, account2]);
+		});
+		
+		it('should clear target account on element click', function() {
+			var element = compile();
+			scope.targetAccount = account2;
+			element.click();
+			expect(scope.accounts).toEqual([account1, account2]);
+			expect(scope.targetAccount).toBeNull();
 		});
 	});
 	

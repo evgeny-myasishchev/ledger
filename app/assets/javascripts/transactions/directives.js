@@ -8,41 +8,39 @@
 		return {
 			restrict: 'A',
 			template: '',
+			scope: {
+				transaction: '='
+			},
 			link: function(scope, element, attrs) {
 				var popoverParent;
 				scope.move = function() {
 					transactions.moveTo(scope.transaction, scope.targetAccount).then(function() {
-						popoverParent.popover('hide');
+						if(popoverParent) popoverParent.popover('hide');
 					});
 				}
 				scope.cancel = function() {
-					popoverParent.popover('hide');
+					if(popoverParent) popoverParent.popover('hide');
 				}
 				element.click(function(e) {
-					if(!popoverParent) {
-						if(!scope.accounts) scope.accounts = accounts.getAllOpen();
-						popoverParent = $(element).parents('.btn-group');
-						console.log(popoverParent);
-					}
+					scope.accounts = accounts.getAllOpen();
+					scope.targetAccount = null;
+					popoverParent = $(element).parents('.btn-group');
 					popoverParent.popover({
 						html: true, 
 						title: 'Moving transaction',
 						trigger: 'manual',
 						placement: 'left',
-						container: 'body',
 						content: function() { return link(scope); }
 					});
+					popoverParent.data('bs.popover').tip()
+						.css('min-width', 300).css('max-width', 500);
 					popoverParent.on('hidden.bs.popover', function() {
 						popoverParent.popover('destroy');
 					});
 					popoverParent.popover('show');
 				});
-				
-				scope.$on('$destroy', function() {
-					if(popoverParent) popoverParent.popover('destroy');
-				});
 				// if(scope.transaction.transaction_id == '13355f56-3542-4017-80ca-0f3ea49a383e')
-				// 	element.trigger('click');
+				// 	setTimeout(function() { element.trigger('click'); }, 100);
 			}
 		}
 	}]);
