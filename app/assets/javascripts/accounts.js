@@ -108,6 +108,19 @@ var accountsApp = (function($) {
 		}
 	});
 	
+	accountsApp.directive('selectAccount', ['accounts', function(accounts) {
+		return {
+			restrict: 'E',
+			template: "<select ng-options='account | nameWithBalance for account in accounts | orderBy:\"name\"' class='form-control' ng-model='account' required></select>",
+			scope: {
+				account: '=ngModel'
+			},
+			link: function(scope, element, attrs) {
+				scope.accounts = accounts.getAll();
+			}
+		}
+	}]);
+	
 	accountsApp.directive('accountsPanel', ['accounts', 'accountsState', function(accounts, accountsState) {
 		return {
 			restrict: 'E',
