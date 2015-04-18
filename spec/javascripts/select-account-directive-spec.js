@@ -39,12 +39,20 @@ describe('acounts', function() {
 				expect(scope.filterAccount(account3)).toBeTruthy();
 			});
 			
-			it('should return false if no except account provided', function() {
+			it('should return false if except account provided', function() {
 				outerScope.otherAccount = account2;
 				compile('<select-account except="otherAccount"></select-account>');
 				expect(scope.filterAccount(account1)).toBeTruthy();
 				expect(scope.filterAccount(account2)).toBeFalsy();
 				expect(scope.filterAccount(account3)).toBeTruthy(true);
+			});
+			
+			it('should return false if multiple except accounts provided', function() {
+				outerScope.exceptAccounts = [account1, account2];
+				compile('<select-account except="exceptAccounts"></select-account>');
+				expect(scope.filterAccount(account1)).toBeFalsy();
+				expect(scope.filterAccount(account2)).toBeFalsy();
+				expect(scope.filterAccount(account3)).toBeTruthy();
 			});
 		});
 	})

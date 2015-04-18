@@ -122,9 +122,18 @@ var accountsApp = (function($) {
 			},
 			link: function(scope, element, attrs) {
 				scope.accounts = accounts.getAll();
+				var exceptMap = {};
+				if(scope.except) {
+					if($.isArray(scope.except)) {
+						$.each(scope.except, function(i, account) {
+							exceptMap[account.aggregate_id] = true;
+						})
+					} else {
+						exceptMap[scope.except.aggregate_id] = true;
+					}
+				}
 				scope.filterAccount = function(account) {
-					if(scope.except) return account.aggregate_id != scope.except.aggregate_id;
-					return true;
+					return !exceptMap[account.aggregate_id];
 				}
 			}
 		}
