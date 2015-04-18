@@ -59,10 +59,6 @@ gem 'capistrano-rvm', group: :development
 gem 'event-store', github: 'evgeny-myasishchev/event-store'
 gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
-# TW Bootstrap related stuff
-# Temporary using own branch untill pull request #810 is merged
-gem 'twitter-bootstrap-rails', git: 'https://github.com/evgeny-myasishchev/twitter-bootstrap-rails.git', branch: 'move-flyphicons-to-twitter'
-
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
 
