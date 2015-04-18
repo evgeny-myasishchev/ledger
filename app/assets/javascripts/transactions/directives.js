@@ -12,7 +12,7 @@
 				transaction: '='
 			},
 			link: function(scope, element, attrs) {
-				var popoverParent, content;
+				var popoverParent;
 				scope.move = function() {
 					transactions.moveTo(scope.transaction, scope.targetAccount).then(function() {
 						if(popoverParent) popoverParent.popover('hide');
@@ -34,7 +34,6 @@
 					} else {
 						scope.dontMoveTo = accounts.getById(scope.transaction.account_id);
 					}
-					if(!content) content = link(scope);
 					popoverParent = $(element).parents('.btn-group');
 					popoverParent.popover({
 						html: true, 
@@ -42,7 +41,7 @@
 						trigger: 'manual',
 						placement: 'left',
 						content: function() {
-							return content;
+							return link(scope, function() {});
 						}
 					});
 					popoverParent.data('bs.popover').tip()
