@@ -29,6 +29,9 @@ module Ledger
     
     config.log_config_path = File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
     
+    config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap", "fonts")
+    config.assets.precompile += %w( *.eot *.svg *.ttf *.woff *.woff2 )
+    
     initializer :initialize_log4r, {:before => :initialize_logger} do
       initialize_logging
     end
