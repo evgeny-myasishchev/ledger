@@ -16,7 +16,8 @@ describe('transactions.moveTransactionAction', function() {
 		$httpBackend = _$httpBackend_;
 		outerScope = $rootScope.$new();
 		outerScope.transaction = {
-			transaction_id: 't-432'
+			transaction_id: 't-432',
+			account_id: account1.aggregate_id
 		}
 		$compile = _$compile_;
 	}));
@@ -35,6 +36,21 @@ describe('transactions.moveTransactionAction', function() {
 			var element = compile();
 			element.click();
 			expect(scope.accounts).toEqual([account1, account2]);
+		});
+		
+		it('should assign account that should not be moved to for regular transactions', function() {
+			var element = compile();
+			element.click();
+			expect(scope.dontMoveTo).toEqual(account1);
+		});
+		
+		it('should assign accounts that should not be moved to for transfer transactions', function() {
+			outerScope.transaction.is_transfer = true;
+			outerScope.transaction.sending_account_id = account1.aggregate_id;
+			outerScope.transaction.receiving_account_id = account2.aggregate_id;
+			var element = compile();
+			element.click();
+			expect(scope.dontMoveTo).toEqual([account1, account2]);
 		});
 		
 		it('should clear target account on element click', function() {

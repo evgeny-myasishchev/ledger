@@ -6,7 +6,7 @@
 	</div>
 	<div class='form-group'>
 		<label class='control-label'>To account</label>
-		<select-account ng-model='targetAccount' except='transaction.account_id | accountById' />
+		<select-account ng-model='targetAccount' except='dontMoveTo' />
 	</div>
 	<div class='form-group'>
 		<input type='submit' class='btn btn-primary btn-sm' value='Move' />

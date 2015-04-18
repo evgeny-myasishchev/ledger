@@ -24,9 +24,17 @@
 					}
 				}
 				element.click(function(e) {
-					if(!content) content = link(scope);
 					scope.accounts = accounts.getAllOpen();
 					scope.targetAccount = null;
+					if(scope.transaction.is_transfer) {
+						scope.dontMoveTo = [
+							accounts.getById(scope.transaction.sending_account_id),
+							accounts.getById(scope.transaction.receiving_account_id)
+						];
+					} else {
+						scope.dontMoveTo = accounts.getById(scope.transaction.account_id);
+					}
+					if(!content) content = link(scope);
 					popoverParent = $(element).parents('.btn-group');
 					popoverParent.popover({
 						html: true, 
