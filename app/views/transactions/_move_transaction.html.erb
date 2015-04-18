@@ -1,5 +1,9 @@
 <form ng-submit='move()'>
 	<div class='form-group'>
+		<label class='control-label'>From account</label>
+		<input class='form-control' type='text' readonly ng-model='(transaction.account_id | accountById).name'>
+	</div>
+	<div class='form-group'>
 		<label class='control-label'>To account</label>
 		<select-account ng-model='targetAccount' except='transaction.account_id | accountById' />
 	</div>

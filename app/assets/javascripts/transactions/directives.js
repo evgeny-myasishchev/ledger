@@ -12,16 +12,19 @@
 				transaction: '='
 			},
 			link: function(scope, element, attrs) {
-				var popoverParent;
+				var popoverParent, content;
 				scope.move = function() {
 					transactions.moveTo(scope.transaction, scope.targetAccount).then(function() {
 						if(popoverParent) popoverParent.popover('hide');
 					});
 				}
 				scope.cancel = function() {
-					if(popoverParent) popoverParent.popover('hide');
+					if(popoverParent) {
+						popoverParent.popover('hide');
+					}
 				}
 				element.click(function(e) {
+					if(!content) content = link(scope);
 					scope.accounts = accounts.getAllOpen();
 					scope.targetAccount = null;
 					popoverParent = $(element).parents('.btn-group');
@@ -30,16 +33,21 @@
 						title: 'Moving transaction',
 						trigger: 'manual',
 						placement: 'left',
-						content: function() { return link(scope); }
+						content: function() {
+							return content;
+						}
 					});
 					popoverParent.data('bs.popover').tip()
 						.css('min-width', 300).css('max-width', 500);
-					popoverParent.on('hidden.bs.popover', function() {
+					popoverParent.on('hidden.bs.popover', function(e) {
 						popoverParent.popover('destroy');
 					});
 					popoverParent.popover('show');
 				});
-				// if(scope.transaction.transaction_id == '13355f56-3542-4017-80ca-0f3ea49a383e')
+				scope.$on('$destroy', function() {
+					if(popoverParent) popoverParent.popover('destroy');
+				});
+				// if(scope.transaction.transaction_id == 'a571a773-8df0-4d1a-a254-1ae3706894b4')
 				// 	setTimeout(function() { element.trigger('click'); }, 100);
 			}
 		}
