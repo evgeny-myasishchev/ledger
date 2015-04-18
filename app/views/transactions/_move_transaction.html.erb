@@ -1,12 +1,7 @@
 <form ng-submit='move()'>
-	<!-- <div class='alert alert-warning'>
-		This feature is experimental. It may crash or work incorrectly.
-	</div> -->
 	<div class='form-group'>
 		<label class='control-label'>To account</label>
-		<select ng-options='account | nameWithBalance for account in accounts | orderBy:"name"' class='form-control' ng-model='targetAccount' required>
-			<option value="">--Please chose account--</option>
-		</select>
+		<select-account ng-model='targetAccount' except='transaction.account_id | accountById' />
 	</div>
 	<div class='form-group'>
 		<input type='submit' class='btn btn-primary btn-sm' value='Move' />
