@@ -3,7 +3,7 @@ describe('acounts', function() {
 		var account1, account2, account3, account4;
 		var $compile, scope, outerScope;
 		beforeEach(function() {
-			module('homeApp');
+			module('accountsApp');
 			accountsApp.config(['accountsProvider', function(accountsProvider) {
 				accountsProvider.assignAccounts([
 					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1, is_closed: false},
