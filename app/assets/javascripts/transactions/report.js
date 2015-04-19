@@ -38,11 +38,16 @@
 			// 	comment: 'Hello world, this is test transaction'
 			// };
 		};
+		$scope.$watch('newTransaction.amount', function(newVal) {
+			if(!newVal) return;
+			if(newVal[0] == '-') $scope.newTransaction.type_id = Transaction.expenceId;
+			else if(newVal[0] == '+') $scope.newTransaction.type_id = Transaction.incomeId;
+		});
 		resetNewTransaction();
 		$scope.report = function() {
 			var command = {
 				transaction_id: newUUID(),
-				amount: money.parse($scope.newTransaction.amount),
+				amount: Math.abs(money.parse($scope.newTransaction.amount)),
 				date: $scope.newTransaction.date,
 				tag_ids: $scope.newTransaction.tag_ids,
 				comment: $scope.newTransaction.comment,
@@ -58,7 +63,7 @@
 				command.receiving_transaction_id = newUUID();
 				command.receiving_account_id = $scope.newTransaction.receivingAccount.aggregate_id;
 				command.amount_sent = command.amount;
-				command.amount_received = money.parse($scope.newTransaction.amount_received);
+				command.amount_received = Math.abs(money.parse($scope.newTransaction.amount_received));
 				command.is_transfer = true;
 			} else {
 				typeKey = Transaction.TypeKeyById[$scope.newTransaction.type_id];

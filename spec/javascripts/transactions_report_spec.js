@@ -47,6 +47,31 @@ describe("ReportTransactionsController", function() {
 			amount: null, tag_ids: [], type_id: Transaction.expenceId, date: scope.newTransaction.date, comment: null
 		});
 	});
+	
+	describe('newTransaction.amount changes', function() {
+		beforeEach(function() {
+			scope.newTransaction.type_id = null;
+			scope.newTransaction.amount = null;
+		});
+		
+		it('should set transaction type to income if amount is signed and positive', function() {
+			scope.newTransaction.amount = "+1000";
+			scope.$digest();
+			expect(scope.newTransaction.type_id).toEqual(Transaction.incomeId);
+		});
+		
+		it('should set transaction type to expense if amount is signed and negative', function() {
+			scope.newTransaction.amount = "-1000";
+			scope.$digest();
+			expect(scope.newTransaction.type_id).toEqual(Transaction.expenceId);
+		});
+		
+		it('should do nothing if amount has no sign', function() {
+			scope.newTransaction.amount = "1000";
+			scope.$digest();
+			expect(scope.newTransaction.type_id).toBeNull();
+		});
+	});
 
 	describe("report", function() {
 		var date;
@@ -137,6 +162,34 @@ describe("ReportTransactionsController", function() {
 				return true;
 			}).respond();
 
+			scope.report();
+			$httpBackend.flush();
+		});
+		
+		it("should use absolute value of amount for regular transactions", function() {
+			scope.newTransaction.type_id = Transaction.incomeId;
+			scope.newTransaction.amount = '-10.50';
+			$httpBackend.whenPOST('accounts/a-2/transactions/report-income', function(data) {
+				var command = JSON.parse(data).command;
+				expect(command.amount).toEqual(1050);
+				return true;
+			}).respond();
+			scope.report();
+			$httpBackend.flush();
+		});
+		
+		it("should use absolute value of amount for transfer", function() {
+			scope.newTransaction.type_id = Transaction.transferKey;
+			scope.newTransaction.receivingAccount = account2;
+			scope.newTransaction.amount = '-10.50';
+			scope.newTransaction.amount_received = '-10.50';
+			$httpBackend.whenPOST('accounts/a-2/transactions/report-transfer', function(data) {
+				var command = JSON.parse(data).command;
+				expect(command.amount).toEqual(1050);
+				expect(command.amount_sent).toEqual(1050);
+				expect(command.amount_received).toEqual(1050);
+				return true;
+			}).respond();
 			scope.report();
 			$httpBackend.flush();
 		});
