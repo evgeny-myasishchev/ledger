@@ -4,7 +4,7 @@ describe("money", function() {
 		module('ledgerHelpers');
 		angular.module('ledgerHelpers').config(function(moneyProvider) {
 			moneyProvider.configure({
-				separator: '|', delimiter: '-'
+				separator: '|', delimiter: '~'
 			});
 		});
 		inject(function(money) { subject = money; });
@@ -52,15 +52,15 @@ describe("money", function() {
 		});
 		
 		it('should separate thousands with delimiter', function() {
-			expect(subject.formatInteger(100000)).toEqual('1-000|00');
-			expect(subject.formatInteger(99988877)).toEqual('999-888|77');
-			expect(subject.formatInteger(99988877766655)).toEqual('999-888-777-666|55');
-			expect(subject.formatInteger(199988877766655)).toEqual('1-999-888-777-666|55');
+			expect(subject.formatInteger(100000)).toEqual('1~000|00');
+			expect(subject.formatInteger(99988877)).toEqual('999~888|77');
+			expect(subject.formatInteger(99988877766655)).toEqual('999~888~777~666|55');
+			expect(subject.formatInteger(199988877766655)).toEqual('1~999~888~777~666|55');
 		});
 		
 		it('should format negative integers', function() {
 			expect(subject.formatInteger(-10000)).toEqual('-100|00');
-			expect(subject.formatInteger(-100000)).toEqual('-1-000|00');
+			expect(subject.formatInteger(-100000)).toEqual('-1~000|00');
 		});
 		
 		it('should raise error if formatting fractional number', function() {
@@ -82,10 +82,10 @@ describe("money", function() {
 				expect(subject.parse('10|01')).toEqual(1001);
 			});
 			it('should return an integer removing separator and delimiter', function() {
-				expect(subject.parse('9-888-777-666|55')).toEqual(988877766655);
+				expect(subject.parse('9~888~777~666|55')).toEqual(988877766655);
 			});
 			it('should ignore white spacess', function() {
-				expect(subject.parse('9-8 88-7 77-6 66|55')).toEqual(988877766655);
+				expect(subject.parse('9~8 88~7 77~6 66|55')).toEqual(988877766655);
 			});
 			it('should add decimal part', function() {
 				expect(subject.parse('100')).toEqual(10000);
