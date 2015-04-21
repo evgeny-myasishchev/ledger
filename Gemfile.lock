@@ -6,9 +6,9 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: dbe430cb0a4da2e83b0161c6fdffd10026656042
+  revision: 243dcc3ed7a97afc3efb89f5f009682c2f6c3a05
   specs:
-    common-domain (2.0.1.rc2)
+    common-domain (2.0.1.rc3)
       event-store (~> 2)
 
 GIT
@@ -171,7 +171,7 @@ GEM
       rspec-mocks (~> 3.1.0)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.1)
-    sequel (4.18.0)
+    sequel (4.21.0)
     spring (1.1.3)
     spring-commands-rspec (1.0.2)
       spring (>= 0.9.1)
