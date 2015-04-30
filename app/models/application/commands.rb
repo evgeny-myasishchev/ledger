@@ -16,106 +16,106 @@ module Application::Commands
   end
   
   commands_group :LedgerCommands do
-    command :CreateNewAccount, :account_id, :name, :initial_balance, :currency_code, :unit do
+    command :CreateNewAccount, :aggregate_id, :account_id, :name, :initial_balance, :currency_code, :unit do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id, :name, :initial_balance, :currency_code
     end
-    command :CloseAccount, :account_id do
+    command :CloseAccount, :aggregate_id, :account_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id
     end
-    command :ReopenAccount, :account_id do
+    command :ReopenAccount, :aggregate_id, :account_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id
     end
-    command :RemoveAccount, :account_id do
+    command :RemoveAccount, :aggregate_id, :account_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id
     end
-    command :CreateTag, :name do
+    command :CreateTag, :aggregate_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
     end
-    command :ImportTagWithId, :tag_id, :name do
+    command :ImportTagWithId, :aggregate_id, :tag_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :tag_id, :name
     end
-    command :RenameTag, :tag_id, :name do
+    command :RenameTag, :aggregate_id, :tag_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :tag_id, :name
     end
     
-    command :RemoveTag, :tag_id do
+    command :RemoveTag, :aggregate_id, :tag_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :tag_id
     end
-    command :CreateCategory, :name do
+    command :CreateCategory, :aggregate_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
     end
-    command :ImportCategory, :category_id, :display_order, :name do
+    command :ImportCategory, :aggregate_id, :category_id, :display_order, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :category_id, :name
     end
-    command :RenameCategory, :category_id, :name do
+    command :RenameCategory, :aggregate_id, :category_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :category_id, :name
     end
-    command :RemoveCategory, :category_id do
+    command :RemoveCategory, :aggregate_id, :category_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :category_id
     end
-    command :SetAccountCategory, :account_id, :category_id do
+    command :SetAccountCategory, :aggregate_id, :account_id, :category_id do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :account_id, :category_id
     end
   end
   
   commands_group :AccountCommands do
-    command :RenameAccount, :name do
+    command :RenameAccount, :aggregate_id, :name do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id, :name
     end
-    command :SetAccountUnit, :unit do
+    command :SetAccountUnit, :aggregate_id, :unit do
       include ActiveModel::Validations
       validates_presence_of :aggregate_id
     end
     
     # TODO: Rework other commands to use ActiveModel::Validations instead of custom factories
-    command :ReportIncome, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportIncome, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportExpence, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportExpence, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportRefund, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportRefund, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include IncomeExpenceCommandFactory
     end
-    command :ReportTransfer, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
+    command :ReportTransfer, :aggregate_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
       include TransferCommandFactory
     end
-    command :AdjustAmount, :transaction_id, :amount do
+    command :AdjustAmount, :aggregate_id, :transaction_id, :amount do
       include AdjustTransactionBase
-      validates :amount, presence: true
+      validates :amount, :aggregate_id, presence: true
     end
-    command :AdjustTags, :transaction_id, :tag_ids do
+    command :AdjustTags, :aggregate_id, :transaction_id, :tag_ids do
       include AdjustTransactionBase
     end
-    command :AdjustDate, :transaction_id, :date do
+    command :AdjustDate, :aggregate_id, :transaction_id, :date do
       include AdjustTransactionBase
       validates :date, presence: true
     end
-    command :AdjustComment, :transaction_id, :comment do
+    command :AdjustComment, :aggregate_id, :transaction_id, :comment do
       include AdjustTransactionBase
     end
-    command :RemoveTransaction, :transaction_id do
+    command :RemoveTransaction, :aggregate_id, :transaction_id do
       include ActiveModel::Validations
       validates :transaction_id, presence: true
       def initialize(params)
         super(nil, transaction_id: params[:id], headers: params[:headers])
       end
     end
-    command :MoveTransaction, :transaction_id, :target_account_id do
+    command :MoveTransaction, :aggregate_id, :transaction_id, :target_account_id do
       include ActiveModel::Validations
       validates :transaction_id, presence: true
       validates :target_account_id, presence: true
@@ -133,20 +133,20 @@ module Application::Commands
         receiver.send(:alias_method, :transaction_id, :aggregate_id)
       end
     end  
-    command :ReportPendingTransaction, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :ReportPendingTransaction, :aggregate_id, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       attr_writer :user
       include PendingTransactionBaseCommand
     end
-    command :AdjustPendingTransaction, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :AdjustPendingTransaction, :aggregate_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionBaseCommand
     end
-    command :ApprovePendingTransaction do
+    command :ApprovePendingTransaction, :aggregate_id do
       include PendingTransactionBaseCommand
     end
-    command :AdjustAndApprovePendingTransaction, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :AdjustAndApprovePendingTransaction, :aggregate_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionBaseCommand
     end
-    command :RejectPendingTransaction do
+    command :RejectPendingTransaction, :aggregate_id do
       include PendingTransactionBaseCommand
     end
   end
