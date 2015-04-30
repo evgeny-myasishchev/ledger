@@ -17,7 +17,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use the account to rename" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       expect(account).to receive(:rename).with('New Name 112')
-      cmd = c::RenameAccount.new('account-112', name: 'New Name 112', headers: dummy_headers)
+      cmd = c::RenameAccount.new(aggregate_id: 'account-112', name: 'New Name 112', headers: dummy_headers)
       subject.handle_message cmd
     end
   end
@@ -26,7 +26,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     it "should use the account to set unit" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       expect(account).to receive(:set_unit).with('new-unit-1')
-      cmd = c::SetAccountUnit.new('account-112', unit: 'new-unit-1', headers: dummy_headers)
+      cmd = c::SetAccountUnit.new(aggregate_id: 'account-112', unit: 'new-unit-1', headers: dummy_headers)
       subject.handle_message cmd
     end
   end
@@ -37,7 +37,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
       expect(account).to receive(:report_income).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Monthly income')
-      cmd = c::ReportIncome.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income', headers: dummy_headers)
+      cmd = c::ReportIncome.new(aggregate_id: 'account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Monthly income', headers: dummy_headers)
       subject.handle_message cmd
     end
   end
@@ -47,7 +47,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
       expect(account).to receive(:report_expence).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportExpence.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
+      subject.handle_message c::ReportExpence.new(aggregate_id: 'account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
     end
   end
   
@@ -56,7 +56,7 @@ RSpec.describe Application::AccountsService, :type => :model do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
       expect(account).to receive(:report_refund).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
-      subject.handle_message c::ReportRefund.new('account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
+      subject.handle_message c::ReportRefund.new(aggregate_id: 'account-112', transaction_id: 'tr-1', amount: '34632.30', date: date, tag_ids: ['t-1', 't-2'], comment: 'Food', headers: dummy_headers)
     end
   end
     
