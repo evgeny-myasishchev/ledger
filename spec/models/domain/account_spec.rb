@@ -237,11 +237,11 @@ describe Domain::Account do
     end
   end
     
-  describe "report_expence" do
+  describe "report_expense" do
     it "should raise TransactionReported event" do
       date = DateTime.now
       subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073
-      subject.report_expence 'transaction-100', '20.23', date, ['t-1', 't-2'], 'Monthly income'
+      subject.report_expense 'transaction-100', '20.23', date, ['t-1', 't-2'], 'Monthly income'
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionReported, {
         aggregate_id: subject.aggregate_id, 
@@ -258,17 +258,17 @@ describe Domain::Account do
     end
     
     it 'should fail if transaction_id is not unique' do
-      subject.make_created.report_expence('transaction-100', '20.23', DateTime.now)
-      expect { subject.report_expence('transaction-100', '20.23', DateTime.now) }.to raise_error ArgumentError, "transaction_id='transaction-100' is not unique."
+      subject.make_created.report_expense('transaction-100', '20.23', DateTime.now)
+      expect { subject.report_expense('transaction-100', '20.23', DateTime.now) }.to raise_error ArgumentError, "transaction_id='transaction-100' is not unique."
     end
     
     it "should accept tags as a single arg" do
-      subject.make_created.report_expence 'transaction-100', '10.00', DateTime.now, 't-1', nil
+      subject.make_created.report_expense 'transaction-100', '10.00', DateTime.now, 't-1', nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql ['t-1']
     end
     
     it "should treat null tags as empty" do
-      subject.make_created.report_expence 'transaction-100', '10.00', DateTime.now, nil, nil
+      subject.make_created.report_expense 'transaction-100', '10.00', DateTime.now, nil, nil
       expect(subject.get_uncommitted_events[0].tag_ids).to eql []
     end
 
@@ -767,7 +767,7 @@ describe Domain::Account do
     it 'should report expense if transaction is expense' do
       sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', expence_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
       t = sending_account.transactions['t-1']
-      expect(subject).to receive(:report_expence).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
+      expect(subject).to receive(:report_expense).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
       subject.accept_moved_transaction_from sending_account, t
     end
     

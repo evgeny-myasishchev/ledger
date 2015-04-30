@@ -55,7 +55,7 @@ class Domain::Account < CommonDomain::Aggregate
     raise_balance_changed transaction_id, balance
   end
   
-  def report_expence transaction_id, amount, date, tag_ids = [], comment = nil
+  def report_expense transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
     log.debug "Reporting #{amount} of expence for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
@@ -186,7 +186,7 @@ class Domain::Account < CommonDomain::Aggregate
     else
       verb = 'refund'
       verb = 'income' if transaction[:type_id] == Transaction::IncomeTypeId
-      verb = 'expence' if transaction[:type_id] == Transaction::ExpenceTypeId
+      verb = 'expense' if transaction[:type_id] == Transaction::ExpenceTypeId
       send "report_#{verb}".to_sym, transaction[:id],
         transaction[:amount],
         transaction[:date],
