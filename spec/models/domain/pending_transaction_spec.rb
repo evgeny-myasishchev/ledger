@@ -135,10 +135,10 @@ module PendingTransactionSpec
       end
       
       it 'should report expence' do
-        allow(account).to receive(:report_expence)
+        allow(account).to receive(:report_expense)
         make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenceTypeId
         subject.approve account
-        expect(account).to have_received(:report_expence).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
+        expect(account).to have_received(:report_expense).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
       end
       
       it 'should report refund' do

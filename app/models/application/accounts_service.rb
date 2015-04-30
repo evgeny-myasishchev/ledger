@@ -8,7 +8,7 @@ class Application::AccountsService < CommonDomain::CommandHandler
 
   handle(AccountCommands::ReportIncome).with(Domain::Account)
 
-  handle(AccountCommands::ReportExpence).with(Domain::Account)
+  handle(AccountCommands::ReportExpense).with(Domain::Account)
 
   handle(AccountCommands::ReportRefund).with(Domain::Account)
 

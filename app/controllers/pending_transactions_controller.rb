@@ -9,8 +9,8 @@ class PendingTransactionsController < ApplicationController
   end
   
   def report
+    params[:user] = current_user
     cmd = ReportPendingTransaction.from_hash params
-    cmd.user = current_user
     dispatch_command cmd
     render nothing: true
   end

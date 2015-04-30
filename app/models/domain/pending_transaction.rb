@@ -41,7 +41,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     if type_id == Domain::Transaction::IncomeTypeId
       account.report_income aggregate_id, amount, date, tag_ids, comment
     elsif type_id == Domain::Transaction::ExpenceTypeId
-      account.report_expence aggregate_id, amount, date, tag_ids, comment
+      account.report_expense aggregate_id, amount, date, tag_ids, comment
     elsif type_id == Domain::Transaction::RefundTypeId
       account.report_refund aggregate_id, amount, date, tag_ids, comment
     else

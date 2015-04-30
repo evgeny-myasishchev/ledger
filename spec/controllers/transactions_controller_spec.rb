@@ -29,7 +29,7 @@ describe TransactionsController do
     end
     
     it "routes POST 'report-expence'" do
-      expect({post: 'accounts/22331/transactions/report-expence'}).to route_to controller: 'transactions', action: 'report_expence', account_id: '22331'
+      expect({post: 'accounts/22331/transactions/report-expense'}).to route_to controller: 'transactions', action: 'report_expense', account_id: '22331'
     end
     
     it "routes POST 'report-refund'" do
@@ -108,7 +108,7 @@ describe TransactionsController do
     describe "POST 'report_income'" do
       it "should build the ReportIncome command from params and dispatch it" do
         command = double(:command)
-        expect(cmd::ReportIncome).to receive(:build_from_params) do |params|
+        expect(cmd::ReportIncome).to receive(:from_hash) do |params|
           expect(params).to be controller.params
           command
         end
@@ -118,15 +118,15 @@ describe TransactionsController do
       end
     end
   
-    describe "POST 'report_expence'" do
+    describe "POST 'report_expense'" do
       it "should build the ReportExpence command from params and dispatch it" do
         command = double(:command)
-        expect(cmd::ReportExpence).to receive(:build_from_params) do |params|
+        expect(cmd::ReportExpense).to receive(:from_hash) do |params|
           expect(params).to be controller.params
           command
         end
         expect(controller).to receive(:dispatch_command).with(command)
-        post 'report_expence', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
+        post 'report_expense', account_id: 'account-2233', param1: 'value-1', param2: 'value-2'
         expect(response.status).to eql 200
       end
     end 
@@ -134,7 +134,7 @@ describe TransactionsController do
     describe "POST 'report_refund'" do
       it "should build the ReportRefund command from params and dispatch it" do
         command = double(:command)
-        expect(cmd::ReportRefund).to receive(:build_from_params) do |params|
+        expect(cmd::ReportRefund).to receive(:from_hash) do |params|
           expect(params).to be controller.params
           command
         end
@@ -147,7 +147,7 @@ describe TransactionsController do
     describe "POST 'report_transfer'" do
       it "should build the ReportTransfer command from params and dispatch it" do
         command = double(:command)
-        expect(cmd::ReportTransfer).to receive(:build_from_params) do |params|
+        expect(cmd::ReportTransfer).to receive(:from_hash) do |params|
           expect(params).to be controller.params
           command
         end

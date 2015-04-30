@@ -24,8 +24,8 @@ class TransactionsController < ApplicationController
     dispatch_transaction_command ReportIncome
   end
   
-  def report_expence
-    dispatch_transaction_command ReportExpence
+  def report_expense
+    dispatch_transaction_command ReportExpense
   end
   
   def report_refund
@@ -67,7 +67,7 @@ class TransactionsController < ApplicationController
   end
   
   private def dispatch_transaction_command command_class
-    dispatch_command command_class.build_from_params params
+    dispatch_command command_class.from_hash params
     render nothing: true
   end
 end
