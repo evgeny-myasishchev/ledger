@@ -8,8 +8,13 @@ namespace :ledger do
   desc "Generate dummy pending transactions"
   task :dummy_pending_transactions, [:user_id] => :environment do |t, a|
     log = Rails.logger
-    user = User.find a[:user_id]
-    raise 'Please provide valid user_id' if user.blank?
+    if a[:user_id].nil? || a[:user_id].blank? || (user = User.find(a[:user_id])).nil?
+      puts "Available users:"
+      User.all.each { |u| 
+        puts u.inspect
+      }
+      raise 'Please provide valid user_id'
+    end
     log.info "Generating dummy pending transactions for user: #{user.inspect}"
     
     generator = Dev::DummyPendingTransactionsGenerator.new user, Rails.application.domain_context
