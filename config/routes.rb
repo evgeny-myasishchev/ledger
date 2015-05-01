@@ -23,11 +23,12 @@ Rails.application.routes.draw do
     end
   end
   
-  resources :transactions, only: [:index, :destroy] do
+  resources :transactions, only: [:index] do
     get ':from-:to' => 'transactions#search', on: :collection
     post ':from-:to' => 'transactions#search', on: :collection
     post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
-    post 'move-to/:target_account_id' => 'transactions#move_to', on: :member
+    post 'move-to/:target_account_id' => 'transactions#move_to'
+    delete '/' => 'transactions#destroy'
   end
   
   resources :pending_transactions, only: [:index, :destroy], path: 'pending-transactions', param: :aggregate_id do

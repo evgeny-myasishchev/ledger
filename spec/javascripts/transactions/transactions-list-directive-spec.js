@@ -63,7 +63,7 @@ describe('transactions.transactionsList', function() {
 		describe('adjustComment', function() {
 			it('should post adjust-comment for given transaction', function() {
 				$httpBackend.expectPOST('transactions/t-223/adjust-comment', function(data) {
-					var command = JSON.parse(data).command;
+					var command = JSON.parse(data);
 					expect(command.comment).toEqual('New comment 223');
 					return true;
 				}).respond(200);
@@ -77,7 +77,7 @@ describe('transactions.transactionsList', function() {
 		describe('adjustTags', function() {
 			it('should post adjust-tags for given transaction', function() {
 				$httpBackend.expectPOST('transactions/t-223/adjust-tags', function(data) {
-					var command = JSON.parse(data).command;
+					var command = JSON.parse(data);
 					expect(command.tag_ids).toEqual([10, 20, 40]);
 					return true;
 				}).respond(200);
@@ -92,7 +92,7 @@ describe('transactions.transactionsList', function() {
 			it('should post adjust-date for given transaction', function() {
 				var newDate = new Date();
 				$httpBackend.expectPOST('transactions/t-223/adjust-date', function(data) {
-					var command = JSON.parse(data).command;
+					var command = JSON.parse(data);
 					expect(command.date).toEqual(newDate.toJSON());
 					return true;
 				}).respond(200);
@@ -151,7 +151,7 @@ describe('transactions.transactionsList', function() {
 		describe('adjustAmount', function() {
 			it('should post adjust-amount for given transaction', function() {
 				$httpBackend.expectPOST('transactions/t-223/adjust-amount', function(data) {
-					var command = JSON.parse(data).command;
+					var command = JSON.parse(data);
 					expect(command.amount).toEqual(20043);
 					return true;
 				}).respond(200);
@@ -163,7 +163,7 @@ describe('transactions.transactionsList', function() {
 
 			it('should parse money string', function() {
 				$httpBackend.expectPOST('transactions/t-223/adjust-amount', function(data) {
-					var command = JSON.parse(data).command;
+					var command = JSON.parse(data);
 					expect(command.amount).toEqual(20043);
 					return true;
 				}).respond(200);

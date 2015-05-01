@@ -42,7 +42,7 @@
 				currency_code: $scope.newAccount.currency.code,
 				initial_balance: $scope.newAccount.initialBalance
 			};
-			if($scope.newAccount.unit) commandData.unit = $scope.newAccount.unit;
+			commandData.unit = $scope.newAccount.unit;
 			$http.post('ledgers/' + activeLedger.aggregate_id + '/accounts', commandData).success(function() {
 				var account = {
 					aggregate_id: commandData.account_id,

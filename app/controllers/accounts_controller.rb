@@ -13,32 +13,32 @@ class AccountsController < ApplicationController
   end
   
   def create
-    dispatch_command CreateNewAccount.new params[:ledger_id], params
+    dispatch_command CreateNewAccount.new params
     render nothing: true
   end
   
   def rename
-    dispatch_command RenameAccount.new params[:aggregate_id], name: params[:name]
+    dispatch_command RenameAccount.new params
     render nothing: true
   end
   
   def close
-    dispatch_command CloseAccount.new params[:ledger_id], params
+    dispatch_command CloseAccount.new params
     render nothing: true
   end
   
   def reopen
-    dispatch_command ReopenAccount.new params[:ledger_id], params
+    dispatch_command ReopenAccount.new params
     render nothing: true
   end
   
   def set_category
-    dispatch_command SetAccountCategory.new params[:ledger_id], params
+    dispatch_command SetAccountCategory.new params
     render nothing: true
   end
   
   def destroy
-    dispatch_command RemoveAccount.new params[:ledger_id], params
+    dispatch_command RemoveAccount.new params
     render nothing: true
   end
 end

@@ -48,11 +48,11 @@ describe TransactionsController do
     end
     
     it "routes DELETE 'destroy" do
-      expect({delete: 'transactions/t-100'}).to route_to controller: 'transactions', action: 'destroy', id: 't-100'
+      expect({delete: 'transactions/t-100'}).to route_to controller: 'transactions', action: 'destroy', transaction_id: 't-100'
     end
     
     it "routes POST 'move-to" do
-      expect({post: 'transactions/t-100/move-to/account-332'}).to route_to controller: 'transactions', action: 'move_to', id: 't-100', target_account_id: 'account-332'
+      expect({post: 'transactions/t-100/move-to/account-332'}).to route_to controller: 'transactions', action: 'move_to', transaction_id: 't-100', target_account_id: 'account-332'
     end
   end
   
@@ -198,7 +198,7 @@ describe TransactionsController do
         command
       end
       expect(controller).to receive(:dispatch_command).with(command)
-      post :move_to, id: 't-112', target_account_id: 'account-110'
+      post :move_to, transaction_id: 't-112', target_account_id: 'account-110'
       expect(response.status).to eql 200
     end
   end
@@ -210,7 +210,7 @@ describe TransactionsController do
       command
     end
     expect(controller).to receive(:dispatch_command).with(command)
-    send verb, action, id: 't-112', transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
+    send verb, action, transaction_id: 't-112', param1: 'value-1', param2: 'value-2'
     expect(response.status).to eql 200
   end
 end

@@ -115,7 +115,7 @@
 				}
 				scope.adjustComment = function(transaction, comment) {
 					return $http.post('transactions/' + transaction.transaction_id + '/adjust-comment', {
-						command: {comment: comment}
+						comment: comment
 					}).success(function() {
 						transaction.comment = comment;
 					});
@@ -123,7 +123,7 @@
 				
 				scope.adjustTags = function(transaction, tag_ids) {
 					return $http.post('transactions/' + transaction.transaction_id + '/adjust-tags', {
-						command: {tag_ids: tag_ids}
+						tag_ids: tag_ids
 					}).success(function() {
 						transaction.tag_ids = tagsHelper.arrayToBracedString(tag_ids);
 					});
@@ -132,7 +132,7 @@
 				scope.adjustDate = function(transaction, date) {
 					var jsonDate = date.toJSON();
 					return $http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
-						command: {date: date.toJSON()}
+						date: date.toJSON()
 					}).success(function() {
 						transaction.date = date;
 					});
@@ -141,7 +141,7 @@
 				scope.adjustAmount = function(transaction, amount) {
 					amount = money.parse(amount);
 					return $http.post('transactions/'+ transaction.transaction_id + '/adjust-amount', {
-						command: {amount: amount}
+						amount: amount
 					}).success(function() {
 						var oldAmount = transaction.amount;
 						transaction.amount = amount;

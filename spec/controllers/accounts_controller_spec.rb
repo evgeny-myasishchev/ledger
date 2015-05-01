@@ -61,8 +61,7 @@ RSpec.describe AccountsController, :type => :controller do
   describe "ledger nested actions" do
     def should_dispatch verb, action, command_class
       command = double(:command)
-      expect(command_class).to receive(:new) do |aggregate_id, params|
-        expect(aggregate_id).to eql 'ledger-221'
+      expect(command_class).to receive(:new) do |params|
         expect(params).to be controller.params
         command
       end
@@ -95,9 +94,8 @@ RSpec.describe AccountsController, :type => :controller do
   describe "PUT 'rename'" do
     it "should dispatch rename command" do
       command = double(:command)
-      expect(i::RenameAccount).to receive(:new) do |aggregate_id, data|
-        expect(aggregate_id).to eql 'account-223'
-        expect(data[:name]).to eql 'value-1'
+      expect(i::RenameAccount).to receive(:new) do |data|
+        expect(data).to be controller.params
         command
       end
       expect(controller).to receive(:dispatch_command).with(command)

@@ -41,13 +41,6 @@ class Application::LedgersService < CommonDomain::CommandHandler
     end
   end
 
-  on LedgerCommands::ImportTagWithId do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.aggregate_id
-      ledger.import_tag_with_id command.tag_id, command.name
-    end
-  end
-
   on LedgerCommands::RenameTag do |command|
     begin_unit_of_work command.headers do |uow|
       ledger = uow.get_by_id Domain::Ledger, command.aggregate_id
@@ -66,13 +59,6 @@ class Application::LedgersService < CommonDomain::CommandHandler
     begin_unit_of_work command.headers do |uow|
       ledger = uow.get_by_id Domain::Ledger, command.aggregate_id
       ledger.create_category command.name
-    end
-  end
-
-  on LedgerCommands::ImportCategory do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.aggregate_id
-      ledger.import_category command.category_id, command.display_order, command.name
     end
   end
 

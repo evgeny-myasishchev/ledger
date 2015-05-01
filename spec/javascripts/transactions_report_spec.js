@@ -87,7 +87,7 @@ describe("ReportTransactionsController", function() {
 		it("should submit the new income transaction", function() {
 			scope.newTransaction.type_id = Transaction.incomeId;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-income', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
@@ -105,7 +105,7 @@ describe("ReportTransactionsController", function() {
 		it("should submit the new expence transaction", function() {
 			scope.newTransaction.type_id = Transaction.expenceId;;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-expence', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
@@ -124,7 +124,7 @@ describe("ReportTransactionsController", function() {
 		it("should submit the new refund transaction", function() {
 			scope.newTransaction.type_id = Transaction.refundId;;
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-refund', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.transaction_id).not.toBeUndefined();
 				expect(command.amount).toEqual(1050);
 				expect(command.tag_ids).toEqual([1, 2]);
@@ -145,7 +145,7 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.receivingAccount = account2;
 			scope.newTransaction.amount_received = '100.22';
 			$httpBackend.expectPOST('accounts/a-2/transactions/report-transfer', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.sending_transaction_id).not.toBeUndefined();
 				expect(command.sending_transaction_id).toEqual(command.transaction_id);
 				expect(command.receiving_transaction_id).not.toBeUndefined();
@@ -170,7 +170,7 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.type_id = Transaction.incomeId;
 			scope.newTransaction.amount = '-10.50';
 			$httpBackend.whenPOST('accounts/a-2/transactions/report-income', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.amount).toEqual(1050);
 				return true;
 			}).respond();
@@ -184,7 +184,7 @@ describe("ReportTransactionsController", function() {
 			scope.newTransaction.amount = '-10.50';
 			scope.newTransaction.amount_received = '-10.50';
 			$httpBackend.whenPOST('accounts/a-2/transactions/report-transfer', function(data) {
-				var command = JSON.parse(data).command;
+				var command = JSON.parse(data);
 				expect(command.amount).toEqual(1050);
 				expect(command.amount_sent).toEqual(1050);
 				expect(command.amount_received).toEqual(1050);
@@ -202,7 +202,7 @@ describe("ReportTransactionsController", function() {
 				var method = typeId == Transaction.transferKey ? typeId : Transaction.TypeKeyById[typeId];
 				scope.reportedTransactions.push({test: true});
 				$httpBackend.expectPOST('accounts/a-2/transactions/report-' + method, function(data) {
-					command = JSON.parse(data).command;
+					command = JSON.parse(data);
 					return true;
 				}).respond();
 				scope.report();

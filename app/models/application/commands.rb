@@ -3,70 +3,61 @@ module Application::Commands
   include CommonDomain::Command::DSL
   
   commands_group :LedgerCommands do
-    command :CreateNewAccount, :aggregate_id, :account_id, :name, :initial_balance, :currency_code, :unit do
+    command :CreateNewAccount, :ledger_id, :account_id, :name, :initial_balance, :currency_code, :unit do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :account_id, :name, :initial_balance, :currency_code
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :account_id, :name, :initial_balance, :currency_code
     end
-    command :CloseAccount, :aggregate_id, :account_id do
+    command :CloseAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :account_id
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :account_id
     end
-    command :ReopenAccount, :aggregate_id, :account_id do
+    command :ReopenAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :account_id
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :account_id
     end
-    command :RemoveAccount, :aggregate_id, :account_id do
+    command :RemoveAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :account_id
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :account_id
     end
-    command :CreateTag, :aggregate_id, :name do
+    command :CreateTag, :ledger_id, :name do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :name
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :name
     end
-    command :ImportTagWithId, :aggregate_id, :tag_id, :name do
+    command :RenameTag, :ledger_id, :tag_id, :name do
       include ActiveModel::Validations
-      validates_presence_of :aggregate_id, :tag_id, :name
-    end
-    command :RenameTag, :aggregate_id, :tag_id, :name do
-      include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :tag_id, :name
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :tag_id, :name
     end
     
-    command :RemoveTag, :aggregate_id, :tag_id do
+    command :RemoveTag, :ledger_id, :tag_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :tag_id
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :tag_id
     end
-    command :CreateCategory, :aggregate_id, :name do
+    command :CreateCategory, :ledger_id, :name do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :name
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :name
     end
-    command :ImportCategory, :aggregate_id, :category_id, :display_order, :name do
+    command :RenameCategory, :ledger_id, :category_id, :name do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :category_id, :name
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :category_id, :name
     end
-    command :RenameCategory, :aggregate_id, :category_id, :name do
+    command :RemoveCategory, :ledger_id, :category_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :category_id, :name
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :category_id
     end
-    command :RemoveCategory, :aggregate_id, :category_id do
+    command :SetAccountCategory, :ledger_id, :account_id, :category_id do
       include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :category_id
-    end
-    command :SetAccountCategory, :aggregate_id, :account_id, :category_id do
-      include ActiveModel::Validations
-      alias_method :ledger_id, :aggregate_id
-      validates_presence_of :aggregate_id, :account_id, :category_id
+      alias_method :aggregate_id, :ledger_id
+      validates_presence_of :ledger_id, :account_id, :category_id
     end
   end
   

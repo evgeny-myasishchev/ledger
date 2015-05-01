@@ -27,8 +27,7 @@ RSpec.describe CategoriesController, :type => :controller do
   describe "ledger nested actions" do
     def should_dispatch verb, action, command_class
       command = double(:command)
-      expect(command_class).to receive(:new) do |aggregate_id, params|
-        expect(aggregate_id).to eql 'ledger-221'
+      expect(command_class).to receive(:new) do |params|
         expect(params).to be controller.params
         command
       end

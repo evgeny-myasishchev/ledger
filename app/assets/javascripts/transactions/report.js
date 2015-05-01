@@ -69,9 +69,7 @@
 				typeKey = Transaction.TypeKeyById[$scope.newTransaction.type_id];
 				command.is_transfer = false;
 			}
-			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + typeKey, {
-				command: command
-			}).success(function() {
+			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + typeKey, command).success(function() {
 				resetNewTransaction();
 				processReportedTransaction(command);
 			});

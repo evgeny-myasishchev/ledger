@@ -384,7 +384,7 @@ describe('acounts', function() {
 					expect(command.name).toEqual('New account');
 					expect(command.currency_code).toEqual('UAH');
 					expect(command.initial_balance).toEqual('2332.31');
-					expect(command.unit).toBeUndefined();
+					expect(command.unit).toBeNull();
 					return true;
 				}).respond();
 				expect(scope.created).toBeFalsy();
