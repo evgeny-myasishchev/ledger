@@ -9,13 +9,13 @@ module Projections::PendingTransactionSpec
     
     def new_reported_event user_id: 33222, transaction_id: 't-101', amount: '1003.32', 
         date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
-        account_id: 'a-100', type_id: Domain::Transaction::ExpenceTypeId
+        account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
       PendingTransactionReported.new transaction_id, user_id, amount, date, tag_ids, comment, account_id, type_id
     end
     
     def new_adjusted_event transaction_id: 't-101', amount: '1003.32', 
         date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
-        account_id: 'a-100', type_id: Domain::Transaction::ExpenceTypeId
+        account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
       PendingTransactionAdjusted.new transaction_id, amount, date, tag_ids, comment, account_id, type_id
     end
     

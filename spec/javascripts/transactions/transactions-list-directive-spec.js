@@ -133,8 +133,8 @@ describe('transactions.transactionsList', function() {
 					expect(account1.balance).toEqual(3000);
 				});
 
-				it('should add for expence', function() {
-					transaction.type_id = Transaction.expenceId;
+				it('should add for expense', function() {
+					transaction.type_id = Transaction.expenseId;
 					scope.removeTransaction(transaction);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(6000);
@@ -193,8 +193,8 @@ describe('transactions.transactionsList', function() {
 					expect(account1.balance).toEqual(300);
 				});
 
-				it('should update the balance for expence transaction', function() {
-					transaction.type_id = Transaction.expenceId;
+				it('should update the balance for expense transaction', function() {
+					transaction.type_id = Transaction.expenseId;
 					scope.adjustAmount(transaction, 100);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(200);
@@ -215,7 +215,7 @@ describe('transactions.transactionsList', function() {
 			expect(scope.getTransferAmountSign(transaction)).toEqual('+');
 		});
 
-		it("should return - sign for transfer expence", function() {
+		it("should return - sign for transfer expense", function() {
 			transaction.type_id = 2;
 			expect(scope.getTransferAmountSign(transaction)).toEqual('-');
 		});
@@ -243,10 +243,10 @@ describe('transactions.transactionsList', function() {
 			expect(filter(transaction)).toEqual('glyphicon glyphicon-plus');
 			expect(filter({type: Transaction.incomeKey})).toEqual('glyphicon glyphicon-plus');
 		});
-		it('should return expence specific icon if transaction is expence', function() {
+		it('should return expense specific icon if transaction is expense', function() {
 			transaction.type_id = 2;
 			expect(filter(transaction)).toEqual('glyphicon glyphicon-minus');
-			expect(filter({type: Transaction.expenceKey})).toEqual('glyphicon glyphicon-minus');
+			expect(filter({type: Transaction.expenseKey})).toEqual('glyphicon glyphicon-minus');
 		});
 		it('should return refund specific icon if transaction is refund', function() {
 			transaction.type_id = 3;

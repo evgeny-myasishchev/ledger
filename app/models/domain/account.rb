@@ -57,11 +57,11 @@ class Domain::Account < CommonDomain::Aggregate
   
   def report_expense transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
-    log.debug "Reporting #{amount} of expence for account aggregate_id='#{aggregate_id}'"
+    log.debug "Reporting #{amount} of expense for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - amount.integer_amount
-    raise_transaction_reported transaction_id, Transaction::ExpenceTypeId, amount.integer_amount, date, tag_ids, comment
+    raise_transaction_reported transaction_id, Transaction::ExpenseTypeId, amount.integer_amount, date, tag_ids, comment
     raise_balance_changed transaction_id, balance
   end
 
@@ -109,7 +109,7 @@ class Domain::Account < CommonDomain::Aggregate
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
       new_balance = @balance - original_integer_amount + new_amount.integer_amount
-    elsif transaction[:type_id] == Transaction::ExpenceTypeId
+    elsif transaction[:type_id] == Transaction::ExpenseTypeId
       new_balance = @balance + original_integer_amount - new_amount.integer_amount
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
@@ -148,7 +148,7 @@ class Domain::Account < CommonDomain::Aggregate
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId)
       new_balance = @balance - amount
-    elsif transaction[:type_id] == Transaction::ExpenceTypeId
+    elsif transaction[:type_id] == Transaction::ExpenseTypeId
       new_balance = @balance + amount
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
@@ -175,7 +175,7 @@ class Domain::Account < CommonDomain::Aggregate
         transaction[:amount], 
         transaction[:date], 
         transaction[:tag_ids], 
-        transaction[:comment] if transaction[:type_id] == Transaction::ExpenceTypeId
+        transaction[:comment] if transaction[:type_id] == Transaction::ExpenseTypeId
       receive_transfer transaction[:id], 
         transaction[:sending_account_id], 
         transaction[:sending_transaction_id], 
@@ -186,7 +186,7 @@ class Domain::Account < CommonDomain::Aggregate
     else
       verb = 'refund'
       verb = 'income' if transaction[:type_id] == Transaction::IncomeTypeId
-      verb = 'expense' if transaction[:type_id] == Transaction::ExpenceTypeId
+      verb = 'expense' if transaction[:type_id] == Transaction::ExpenseTypeId
       send "report_#{verb}".to_sym, transaction[:id],
         transaction[:amount],
         transaction[:date],
@@ -282,7 +282,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
 
   on TransferSent do |event|
-    transaction = index_transaction event.transaction_id, Transaction::ExpenceTypeId, event
+    transaction = index_transaction event.transaction_id, Transaction::ExpenseTypeId, event
     transaction[:receiving_account_id] = event.receiving_account_id
     transaction[:is_transfer] = true
   end

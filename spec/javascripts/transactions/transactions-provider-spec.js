@@ -48,8 +48,8 @@ describe('transactions.transactionsProvider', function() {
 			expect(account1.balance).toEqual(600);
 		});
 
-		it('should update the balance on expence', function() {
-			doProcess(100, Transaction.expenceId);
+		it('should update the balance on expense', function() {
+			doProcess(100, Transaction.expenseId);
 			expect(account1.balance).toEqual(400);
 		});
 
@@ -61,7 +61,7 @@ describe('transactions.transactionsProvider', function() {
 		it('should update the balance on on transfer', function() {
 			var receivingAccount = account2;
 			receivingAccount.balance = 10000;
-			doProcess(100, Transaction.expenceId, function(transaction) {
+			doProcess(100, Transaction.expenseId, function(transaction) {
 				transaction.is_transfer = true;
 				transaction.receiving_account_id = receivingAccount.aggregate_id;
 				transaction.amount_received = 5000;
@@ -135,7 +135,7 @@ describe('transactions.transactionsProvider', function() {
 		});
 		
 		it('should update sending_account_id on success for expense transfer', function() {
-			transaction.type_id = Transaction.expenceId;
+			transaction.type_id = Transaction.expenseId;
 			transaction.is_transfer = true;
 			subject.moveTo(transaction, targetAccount);
 			$httpBackend.flush();
@@ -158,7 +158,7 @@ describe('transactions.transactionsProvider', function() {
 		});
 		
 		it('should update balance of source and target accounts for expense transaction on success', function() {
-			transaction.type_id = Transaction.expenceId;
+			transaction.type_id = Transaction.expenseId;
 			subject.moveTo(transaction, targetAccount);
 			$httpBackend.flush();
 			expect(sourceAccount.balance).toEqual(5900);

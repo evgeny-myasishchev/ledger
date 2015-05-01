@@ -9,7 +9,7 @@ module PendingTransactionSpec
     using AccountHelpers::D
     def make_reported subject, user, transaction_id: 't-101', amount: '1003.32', 
         date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
-        account_id: 'a-100', type_id: Domain::Transaction::ExpenceTypeId
+        account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
       subject.apply_event PendingTransactionReported.new transaction_id, user.id, amount, date, tag_ids, comment, account_id, type_id
     end
     
@@ -31,12 +31,12 @@ module PendingTransactionSpec
       
       it 'should apply default type_id if not provided' do
         subject.report user, 't-101', '100.4', date: date
-        expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+        expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId
       end
       
       it 'should apply default type_id if nil' do
         subject.report user, 't-101', '100.4', date: date, type_id: nil
-        expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+        expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId
       end
       
       it 'should raise reported event' do
@@ -73,7 +73,7 @@ module PendingTransactionSpec
       end
       
       it 'should raise adjusted event with changed attributes' do
-        subject.adjust amount: '10.05', date: adjusted_date, tag_ids: ['t-21', 't-22'], comment: 'Expence 10.05', account_id: 'a-200', type_id: Domain::Transaction::ExpenceTypeId
+        subject.adjust amount: '10.05', date: adjusted_date, tag_ids: ['t-21', 't-22'], comment: 'Expence 10.05', account_id: 'a-200', type_id: Domain::Transaction::ExpenseTypeId
         expect(subject).to have_one_uncommitted_event PendingTransactionAdjusted, 
           aggregate_id: 't-101', 
           amount: '10.05',
@@ -81,11 +81,11 @@ module PendingTransactionSpec
           tag_ids: ['t-21', 't-22'],
           comment: 'Expence 10.05',
           account_id: 'a-200',
-          type_id: Domain::Transaction::ExpenceTypeId
+          type_id: Domain::Transaction::ExpenseTypeId
       end
       
       it 'should not raise if attributes has not changed' do
-        subject.adjust amount: '1003.32', date: date, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', account_id: 'a-100', type_id: Domain::Transaction::ExpenceTypeId
+        subject.adjust amount: '1003.32', date: date, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
         expect(subject).not_to have_uncommitted_events
       end
       
@@ -98,13 +98,13 @@ module PendingTransactionSpec
       end
       
       it 'should update attributes on reported' do
-        subject.apply_event PendingTransactionAdjusted.new 't-101', '10.05', adjusted_date, ['t-21', 't-22'], 'Expence 10.05', 'a-200', Domain::Transaction::ExpenceTypeId
+        subject.apply_event PendingTransactionAdjusted.new 't-101', '10.05', adjusted_date, ['t-21', 't-22'], 'Expence 10.05', 'a-200', Domain::Transaction::ExpenseTypeId
         expect(subject.amount).to eql '10.05'
         expect(subject.date).to eql adjusted_date
         expect(subject.tag_ids).to eql ['t-21', 't-22']
         expect(subject.comment).to eql 'Expence 10.05'
         expect(subject.account_id).to eql 'a-200'
-        expect(subject.type_id).to eql Domain::Transaction::ExpenceTypeId
+        expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId
       end
     end
     
@@ -134,9 +134,9 @@ module PendingTransactionSpec
         expect(account).to have_received(:report_income).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
       end
       
-      it 'should report expence' do
+      it 'should report expense' do
         allow(account).to receive(:report_expense)
-        make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenceTypeId
+        make_reported subject, user, account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenseTypeId
         subject.approve account
         expect(account).to have_received(:report_expense).with(subject.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment)
       end

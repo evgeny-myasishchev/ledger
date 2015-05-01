@@ -21,7 +21,7 @@ var transactionsApp = (function() {
 					var account = accounts.getById(command.account_id);
 					if(command.type_id == Transaction.incomeId || command.type_id == Transaction.refundId) {
 						account.balance += command.amount;
-					} else if(command.type_id == Transaction.expenceId) {
+					} else if(command.type_id == Transaction.expenseId) {
 						account.balance -= command.amount;
 					}
 					if(command.is_transfer) {
@@ -45,7 +45,7 @@ var transactionsApp = (function() {
 							sourceAccount.balance -= transaction.amount;
 							targetAccount.balance += transaction.amount;
 							if(transaction.is_transfer) transaction.receiving_account_id = targetAccount.aggregate_id;
-						} else if(transaction.type_id == Transaction.expenceId) {
+						} else if(transaction.type_id == Transaction.expenseId) {
 							sourceAccount.balance += transaction.amount;
 							targetAccount.balance -= transaction.amount;
 							if(transaction.is_transfer) transaction.sending_account_id = targetAccount.aggregate_id;

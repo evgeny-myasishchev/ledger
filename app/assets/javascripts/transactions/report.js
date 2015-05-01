@@ -8,10 +8,10 @@
 		//For testing purposes
 		// $scope.reportedTransactions = [
 		// 	{"type":"income","amount":90,"tag_ids":'{1},{2}',"comment":"test123123","date":new Date("2014-07-16T21:09:27.000Z")},
-		// 	{"type":"expence","amount":2010,"tag_ids":'{2}',"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
-		// 	{"type":"expence","amount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
+		// 	{"type":"expense","amount":2010,"tag_ids":'{2}',"comment":null,"date":new Date("2014-07-16T21:09:06.000Z")},
+		// 	{"type":"expense","amount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
 		// 	{"type":"refund","amount":1050,"tag_ids":'{2},{3}',"comment":"Having lunch and getting some food","date":new Date("2014-07-16T21:08:51.000Z")},
-		// 	{"type":"expence","amount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
+		// 	{"type":"expense","amount":1050,"tag_ids":null,"comment":"test1","date":new Date("2014-07-16T21:08:44.000Z")},
 		// 	{"type":"transfer","amount":1050,"tag_ids":null,"comment":null,"date":new Date("2014-06-30T21:00:00.000Z")}
 		// ];
 	
@@ -24,7 +24,7 @@
 			$scope.newTransaction = {
 				amount: null,
 				tag_ids: [],
-				type_id: Transaction.expenceId,
+				type_id: Transaction.expenseId,
 				date: new Date(),
 				comment: null
 			};
@@ -40,7 +40,7 @@
 		};
 		$scope.$watch('newTransaction.amount', function(newVal) {
 			if(!newVal) return;
-			if(newVal[0] == '-') $scope.newTransaction.type_id = Transaction.expenceId;
+			if(newVal[0] == '-') $scope.newTransaction.type_id = Transaction.expenseId;
 			else if(newVal[0] == '+') $scope.newTransaction.type_id = Transaction.incomeId;
 		});
 		resetNewTransaction();
@@ -57,7 +57,7 @@
 			var typeKey;
 			if($scope.newTransaction.type_id == Transaction.transferKey) {
 				typeKey = Transaction.transferKey;
-				command.type_id = Transaction.expenceId;
+				command.type_id = Transaction.expenseId;
 				command.sending_account_id = command.account_id;
 				command.sending_transaction_id = command.transaction_id;
 				command.receiving_transaction_id = newUUID();

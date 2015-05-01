@@ -5,7 +5,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   let(:e) { Domain::Events }
   let(:p) { Projections }
   let(:income_id) { Domain::Transaction::IncomeTypeId }
-  let(:expence_id) { Domain::Transaction::ExpenceTypeId }
+  let(:expense_id) { Domain::Transaction::ExpenseTypeId }
   include AccountHelpers::P
   
   describe "get_transfer_counterpart" do
@@ -53,9 +53,9 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:date) { DateTime.now }
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
     before(:each) do
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
       
       allow(p::Account).to receive(:ensure_authorized!).with(account.aggregate_id, user) { account }
     end
@@ -110,9 +110,9 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
     let(:query) { double(:query) }
     before(:each) do
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
       
       allow(p::Account).to receive(:ensure_authorized!) { account }
       
@@ -159,9 +159,9 @@ RSpec.describe Projections::Transaction, :type => :model do
     before(:each) do
       allow(p::Account).to receive(:ensure_authorized!) { account }
       
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expence_id, 0, date - 110, ['tag-3'], ''
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', expence_id, 0, date, ['tag-1'], ''
-      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expence_id, 0, date - 100, ['tag-2'], ''
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expense_id, 0, date - 110, ['tag-3'], ''
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', expense_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new account.aggregate_id, 't-2', expense_id, 0, date - 100, ['tag-2'], ''
     end
     
     it 'should fail if user and account are nil' do
@@ -179,13 +179,13 @@ RSpec.describe Projections::Transaction, :type => :model do
     
     it 'should get all transactions of the user if no account provided' do
       a2 = create_account_projection! 'account-2', authorized_user_ids: '{2233},{993}'
-      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-1', expence_id, 0, date, ['tag-1'], ''
-      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-2', expence_id, 0, date, ['tag-1'], ''
-      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-3', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-1', expense_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-2', expense_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-3', expense_id, 0, date, ['tag-1'], ''
       
       #Some fake stuff
-      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-1', expence_id, 0, date, ['tag-1'], ''
-      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-2', expence_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-1', expense_id, 0, date, ['tag-1'], ''
+      subject.handle_message e::TransactionReported.new 'fake-account-1', 'fake-2', expense_id, 0, date, ['tag-1'], ''
       
       result = described_class.build_search_query user, nil
       expect(result.length).to eql 6
@@ -359,7 +359,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       date1 = DateTime.now - 100
       date2 = date1 - 100
       subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, date1, ['t-1', 't-2'], 'Comment 100'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expence_id, 2000, date2, ['t-3', 't-4'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expense_id, 2000, date2, ['t-3', 't-4'], 'Comment 101'
       
       t1 = described_class.find_by_transaction_id 't-1'
       expect(t1.account_id).to eql('account-1')
@@ -371,7 +371,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       
       t2 = described_class.find_by_transaction_id 't-2'
       expect(t2.account_id).to eql('account-1')
-      expect(t2.type_id).to eql(expence_id)
+      expect(t2.type_id).to eql(expense_id)
       expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
       expect(t2.comment).to eql 'Comment 101'
@@ -396,10 +396,10 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
 
     describe "on TransferSent" do
-      it "should record the transaction as expence" do
+      it "should record the transaction as expense" do
         expect(t1.account_id).to eql('account-1')
         expect(t1.transaction_id).to eql('t-1')
-        expect(t1.type_id).to eql(expence_id)
+        expect(t1.type_id).to eql(expense_id)
         expect(t1.amount).to eql(10523)
         expect(t1.tag_ids).to eql '{t-1},{t-2}'
         expect(t1.comment).to eql 'Comment 100'
@@ -451,7 +451,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:date) { DateTime.now - 100 }
     let(:t1) { p::Transaction.find_by_transaction_id 't-1' }
     before(:each) do
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expence_id, 2000, date, [100, 200], 'Comment 1'
+      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expense_id, 2000, date, [100, 200], 'Comment 1'
     end
     
     it "should update amount on TransactionAmountAdjusted" do
@@ -504,12 +504,12 @@ RSpec.describe Projections::Transaction, :type => :model do
     
     before(:each) do
       date = DateTime.new
-      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expence_id, 2000, date - 120, ['t-4'], 'Comment 103'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
-      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-3', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
-      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-4', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
-      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-5', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
-      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-6', expence_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-3', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-4', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-5', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
+      subject.handle_message e::TransactionReported.new account2.aggregate_id, 't-6', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
       subject.handle_message e::AccountRemoved.new account1.aggregate_id
     end
     

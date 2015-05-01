@@ -103,7 +103,7 @@ class Projections::Transaction < ActiveRecord::Base
       unless Transaction.exists?(transaction_id: event.transaction_id)
         t = build_transaction(event)
         t.is_transfer = true
-        t.type_id = Domain::Transaction::ExpenceTypeId
+        t.type_id = Domain::Transaction::ExpenseTypeId
         t.sending_account_id = event.aggregate_id
         t.sending_transaction_id = event.transaction_id
         t.receiving_account_id = event.receiving_account_id

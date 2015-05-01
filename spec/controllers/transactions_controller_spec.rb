@@ -28,7 +28,7 @@ describe TransactionsController do
       expect({post: 'accounts/22331/transactions/report-income'}).to route_to controller: 'transactions', action: 'report_income', account_id: '22331'
     end
     
-    it "routes POST 'report-expence'" do
+    it "routes POST 'report-expense'" do
       expect({post: 'accounts/22331/transactions/report-expense'}).to route_to controller: 'transactions', action: 'report_expense', account_id: '22331'
     end
     

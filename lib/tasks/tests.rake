@@ -63,7 +63,7 @@ namespace :ledger do
         
       options[:number].times do |i|
         log.debug "Generating transaction: #{i}"
-        RestClient.post(URI.join(base_url, "accounts/#{options[:account_id]}/transactions/report-expence").to_s, 
+        RestClient.post(URI.join(base_url, "accounts/#{options[:account_id]}/transactions/report-expense").to_s, 
           {
             authenticity_token: authenticity_token,
             command: {

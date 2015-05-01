@@ -7,7 +7,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   attr_reader :is_approved, :is_rejected
   
   def report user, transaction_id, amount, date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil
-    type_id ||= Domain::Transaction::ExpenceTypeId
+    type_id ||= Domain::Transaction::ExpenseTypeId
     Log.debug "Reporting new pending transaction id=#{transaction_id} by user: #{user.id}"
     raise ArgumentError.new 'transaction_id can not be empty.' if transaction_id.blank?
     raise ArgumentError.new 'amount can not be empty.' if amount.blank?
@@ -40,7 +40,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     raise Errors::DomainError.new "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
     if type_id == Domain::Transaction::IncomeTypeId
       account.report_income aggregate_id, amount, date, tag_ids, comment
-    elsif type_id == Domain::Transaction::ExpenceTypeId
+    elsif type_id == Domain::Transaction::ExpenseTypeId
       account.report_expense aggregate_id, amount, date, tag_ids, comment
     elsif type_id == Domain::Transaction::RefundTypeId
       account.report_refund aggregate_id, amount, date, tag_ids, comment

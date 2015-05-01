@@ -72,20 +72,20 @@ def report_income account_id, amount, date, tags, comment
   dispatch AccountCommands::ReportIncome.new account_id, transaction_id: new_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
-def report_expence account_id, amount, date, tags, comment
+def report_expense account_id, amount, date, tags, comment
   dispatch AccountCommands::ReportExpence.new account_id, transaction_id: new_id, amount: amount, date: date, tag_ids: tags, comment: comment
 end
 
 cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
   report_income account_id, '36332.57', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
-  report_expence account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
+  report_expense account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
   
   # Reporting in bulk directly. It just works faster.
   begin_unit_of_work({}) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
+      account.report_expense new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
   dispatch AccountCommands::ReportRefund.new account_id, transaction_id: new_id,
@@ -102,11 +102,11 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
-      account.report_expence new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
+      account.report_expense new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
     end
   end
   dispatch AccountCommands::ReportRefund.new account_id, transaction_id: new_id,
-    amount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expence refund'
+    amount: '50.00', date: DateTime.now, tag_ids: tag_ids_by_name['food'], comment: 'Shared expense refund'
   account_id
 end
 

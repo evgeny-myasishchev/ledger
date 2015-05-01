@@ -11,7 +11,7 @@ describe Domain::Account do
     end
   }
   let(:income_id) { Domain::Transaction::IncomeTypeId }
-  let(:expence_id) { Domain::Transaction::ExpenceTypeId }
+  let(:expense_id) { Domain::Transaction::ExpenseTypeId }
   let(:refund_id) { Domain::Transaction::RefundTypeId }
   
   describe "create" do
@@ -246,7 +246,7 @@ describe Domain::Account do
       expect(subject).to have_one_uncommitted_event I::TransactionReported, {
         aggregate_id: subject.aggregate_id, 
         transaction_id: 'transaction-100',
-        type_id: Domain::Transaction::ExpenceTypeId,
+        type_id: Domain::Transaction::ExpenseTypeId,
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
@@ -275,10 +275,10 @@ describe Domain::Account do
     it 'should add transaction to transactions on TransactionReported' do
       date = DateTime.now
       subject.make_created.apply_event I::TransactionReported.new(subject.aggregate_id, 
-        'transaction-100', Domain::Transaction::ExpenceTypeId, 2023, date, ['t-1', 't-2'], 'Monthly income')
+        'transaction-100', Domain::Transaction::ExpenseTypeId, 2023, date, ['t-1', 't-2'], 'Monthly income')
       expect(subject.transactions['transaction-100']).to eql({
         id: 'transaction-100',
-        type_id: Domain::Transaction::ExpenceTypeId,
+        type_id: Domain::Transaction::ExpenseTypeId,
         amount: 2023,
         date: date,
         tag_ids: ['t-1', 't-2'],
@@ -388,7 +388,7 @@ describe Domain::Account do
         'transaction-110', 'receiver-account-332', 2023, date, ['t-1', 't-2'], 'Getting cache')
       expect(subject.transactions['transaction-110']).to eql({
         id: 'transaction-110',
-        type_id: Domain::Transaction::ExpenceTypeId,
+        type_id: Domain::Transaction::ExpenseTypeId,
         is_transfer: true,
         receiving_account_id: 'receiver-account-332',
         amount: 2023,
@@ -467,7 +467,7 @@ describe Domain::Account do
         subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-2', 's-a-1', 's-t-1', 12000, DateTime.new, [], ''
         subject.apply_event I::TransactionAmountAdjusted.new subject.aggregate_id, 't-2', 10000
         
-        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expence_id, 10000, DateTime.new, [], ''
+        subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expense_id, 10000, DateTime.new, [], ''
         
         subject.apply_event I::TransferSent.new subject.aggregate_id, 't-4', 'r-a-1', 13000, DateTime.new, [], ''
         subject.apply_event I::TransactionAmountAdjusted.new subject.aggregate_id, 't-4', 10000
@@ -513,8 +513,8 @@ describe Domain::Account do
         end
       end
       
-      describe "expence transactions" do
-        it "should raise balance cahnge and amount adjustments related events for regular expence transaction" do
+      describe "expense transactions" do
+        it "should raise balance cahnge and amount adjustments related events for regular expense transaction" do
           subject.adjust_amount 't-3', '50.00'
           expect(subject).to have_one_uncommitted_event I::TransactionAmountAdjusted, {
             aggregate_id: subject.aggregate_id, transaction_id: 't-3', amount: 5000}, at_index: 0
@@ -586,7 +586,7 @@ describe Domain::Account do
       before(:each) do
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 
           't-1', 
-          Domain::Transaction::ExpenceTypeId, 
+          Domain::Transaction::ExpenseTypeId, 
           100, 
           DateTime.new,
           [100, 400, 500],
@@ -597,7 +597,7 @@ describe Domain::Account do
         
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 
           't-2', 
-          Domain::Transaction::ExpenceTypeId, 
+          Domain::Transaction::ExpenseTypeId, 
           100, 
           DateTime.new,
           [100],
@@ -634,7 +634,7 @@ describe Domain::Account do
         subject.clear_uncommitted_events
         subject.apply_event I::TransactionReported.new subject.aggregate_id, 
           't-3', 
-          Domain::Transaction::ExpenceTypeId, 
+          Domain::Transaction::ExpenseTypeId, 
           100, 
           DateTime.new,
           [100, 200],
@@ -661,7 +661,7 @@ describe Domain::Account do
       subject.make_created
       subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, [], ''
       subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-2', refund_id, 10000, DateTime.new, [], ''
-      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expence_id, 10000, DateTime.new, [], ''
+      subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-3', expense_id, 10000, DateTime.new, [], ''
       subject.apply_event I::TransferSent.new subject.aggregate_id, 't-4', 'r-a-1', 10000, DateTime.new, [], ''
       subject.apply_event I::TransferReceived.new subject.aggregate_id, 't-5', 's-a-1', 's-t-1', 10000, DateTime.new, [], ''
       subject.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 't-5', 50000
@@ -683,7 +683,7 @@ describe Domain::Account do
         aggregate_id: subject.aggregate_id, transaction_id: 't-2', balance: 40000}, at_index: 1
     end
     
-    it "should raise removed and balance change for expence transactions" do
+    it "should raise removed and balance change for expense transactions" do
       subject.remove_transaction 't-3'
       expect(subject).to have_one_uncommitted_event I::TransactionRemoved, {
         aggregate_id: subject.aggregate_id, transaction_id: 't-3'}, at_index: 0
@@ -765,7 +765,7 @@ describe Domain::Account do
     end
     
     it 'should report expense if transaction is expense' do
-      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', expence_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
+      sending_account.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', expense_id, 10000, DateTime.new, ['tag-1', 'tag-2'], 'Comment t1'
       t = sending_account.transactions['t-1']
       expect(subject).to receive(:report_expense).with t[:id], t[:amount], t[:date], t[:tag_ids], t[:comment]
       subject.accept_moved_transaction_from sending_account, t

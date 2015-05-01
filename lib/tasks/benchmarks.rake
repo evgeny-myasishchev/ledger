@@ -100,7 +100,7 @@ namespace :bm do
         account = repo.get_by_id Domain::Account, 'account-1'
         bm = Benchmark.measure {
           number.times do
-            account.report_expence 100, DateTime.now, [], 'Benchmark test expence'
+            account.report_expense 100, DateTime.now, [], 'Benchmark test expense'
             repo.save account
           end
         }

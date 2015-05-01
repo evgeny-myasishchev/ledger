@@ -1,18 +1,18 @@
 var Transaction = {
     incomeId: 1, incomeKey: 'income',
-    expenceId: 2, expenceKey: 'expence',
+    expenseId: 2, expenseKey: 'expense',
     refundId: 3, refundKey: 'refund',
 	transferKey: 'transfer'
 };
 
 Transaction.TypeIdByKey = {};
 Transaction.TypeIdByKey[Transaction.incomeKey] = Transaction.incomeId;
-Transaction.TypeIdByKey[Transaction.expenceKey] = Transaction.expenceId;
+Transaction.TypeIdByKey[Transaction.expenseKey] = Transaction.expenseId;
 Transaction.TypeIdByKey[Transaction.refundKey] = Transaction.refundId;
 
 Transaction.TypeKeyById = {};
 Transaction.TypeKeyById[Transaction.incomeId] = Transaction.incomeKey;
-Transaction.TypeKeyById[Transaction.expenceId] = Transaction.expenceKey;
+Transaction.TypeKeyById[Transaction.expenseId] = Transaction.expenseKey;
 Transaction.TypeKeyById[Transaction.refundId] = Transaction.refundKey;
 
 angular.module('ErrorHandler', [])

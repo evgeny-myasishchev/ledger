@@ -9,7 +9,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     include Application::Commands::AccountCommands
   end
   }
-  let(:account) { double(:account, report_income: nil, report_expence: nil)}
+  let(:account) { double(:account, report_income: nil, report_expense: nil)}
   let(:sending_account) { double(:sending_account, aggregate_id: 'src-110') }
   let(:receiving_account) { double(:receiving_account, aggregate_id: 'dst-210') }
   
@@ -45,7 +45,7 @@ RSpec.describe Application::AccountsService, :type => :model do
   end
   
   describe "ReportExpense" do
-    it "should use account to report the expence" do
+    it "should use account to report the expense" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
       expect(account).to receive(:report_expense).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
@@ -54,7 +54,7 @@ RSpec.describe Application::AccountsService, :type => :model do
   end
   
   describe "ReportRefund" do
-    it "should use account to report the expence" do
+    it "should use account to report the expense" do
       expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
       date = DateTime.now
       expect(account).to receive(:report_refund).with('tr-1', '34632.30', date, ['t-1', 't-2'], 'Food')
