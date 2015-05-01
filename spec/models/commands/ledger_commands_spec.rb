@@ -1,15 +1,11 @@
 require 'rails_helper'
 
 describe Application::Commands::LedgerCommands do
-  describe described_class::CreateNewAccount do
-    it "should vlaidate presence of all attributes" do
-      subject = described_class.from_hash aggregate_id: nil, account_id: nil, name: nil, initial_balance: nil, currency_code: nil, unit: nil
-      expect(subject.valid?).to be_falsey
-      expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
-      expect(subject.errors[:account_id]).to eql ["can't be blank"]
-      expect(subject.errors[:name]).to eql ["can't be blank"]
-      expect(subject.errors[:initial_balance]).to eql ["can't be blank"]
-      expect(subject.errors[:currency_code]).to eql ["can't be blank"]
+  shared_examples_for 'a command with aliased aggregate_id as ledger_id' do |params|
+    it 'should alias ledger_id as aggregate_id' do
+      params[:aggregate_id] = 'test aggregate-id 23992'
+      subject = described_class.new params
+      expect(subject.aggregate_id).to eql subject.ledger_id
     end
   end
   
@@ -22,19 +18,36 @@ describe Application::Commands::LedgerCommands do
     end
   end
   
+  describe described_class::CreateNewAccount do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', account_id: 'a-1', name: 'a 1', initial_balance: 100, currency_code: 'UAH', unit: :oz
+    it "should vlaidate presence of all attributes" do
+      subject = described_class.from_hash aggregate_id: nil, account_id: nil, name: nil, initial_balance: nil, currency_code: nil, unit: nil
+      expect(subject.valid?).to be_falsey
+      expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+      expect(subject.errors[:account_id]).to eql ["can't be blank"]
+      expect(subject.errors[:name]).to eql ["can't be blank"]
+      expect(subject.errors[:initial_balance]).to eql ["can't be blank"]
+      expect(subject.errors[:currency_code]).to eql ["can't be blank"]
+    end
+  end
+  
   describe described_class::CloseAccount do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', account_id: 'a-1'
     it_behaves_like 'a command with required aggregate_id and account_id'
   end
   
   describe described_class::ReopenAccount do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', account_id: 'a-1'
     it_behaves_like 'a command with required aggregate_id and account_id'
   end
   
   describe described_class::RemoveAccount do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', account_id: 'a-1'
     it_behaves_like 'a command with required aggregate_id and account_id'
   end
   
   describe described_class::CreateTag do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', name: 't-1'
     it "shold validate presence of aggregate_id and name" do
       subject = described_class.from_hash aggregate_id: nil, name: nil
       expect(subject.valid?).to be_falsey
@@ -48,6 +61,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::RenameTag do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', tag_id: 't-1', name: 't-1'
     it "shold validate presence of aggregate_id, tag_id and name" do
       subject = described_class.from_hash aggregate_id: nil, tag_id: nil, name: nil
       expect(subject.valid?).to be_falsey
@@ -63,6 +77,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::RemoveTag do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', tag_id: 't-1'
     it "shold validate presence of aggregate_id, tag_id" do
       subject = described_class.from_hash aggregate_id: nil, tag_id: nil
       expect(subject.valid?).to be_falsey
@@ -76,6 +91,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::CreateCategory do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', name: 'c-1'
     it "shold validate presence of aggregate_id and name" do
       subject = described_class.from_hash aggregate_id: nil, name: nil
       expect(subject.valid?).to be_falsey
@@ -89,6 +105,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::RenameCategory do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', category_id: 'c-1', name: 'c-1'
     it "shold validate presence of aggregate_id, category_id and name" do
       subject = described_class.from_hash aggregate_id: nil, category_id: nil, name: nil
       expect(subject.valid?).to be_falsey
@@ -104,6 +121,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::RemoveCategory do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', category_id: 'c-1'
     it "shold validate presence of aggregate_id, category_id" do
       subject = described_class.from_hash aggregate_id: nil, category_id: nil
       expect(subject.valid?).to be_falsey
@@ -117,6 +135,7 @@ describe Application::Commands::LedgerCommands do
   end
   
   describe described_class::SetAccountCategory do
+    it_behaves_like 'a command with aliased aggregate_id as ledger_id', aggregate_id: 'l-1', account_id: 'a-1', category_id: 'c-1'
     it "shold validate presence of aggregate_id, account_id, category_id" do
       subject = described_class.from_hash aggregate_id: nil, account_id: nil, category_id: nil
       expect(subject.valid?).to be_falsey
