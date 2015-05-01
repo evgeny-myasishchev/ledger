@@ -18,14 +18,14 @@ Rails.application.routes.draw do
   resources :accounts, only: [] do
     resources :transactions, only: [:index] do
       post 'report-income', 'report-expense', 'report-refund', 'report-transfer', on: :collection
-      get ':from-:to' => 'transactions#search', on: :collection
-      post ':from-:to' => 'transactions#search', on: :collection
+      get ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
+      post ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
     end
   end
   
   resources :transactions, only: [:index] do
-    get ':from-:to' => 'transactions#search', on: :collection
-    post ':from-:to' => 'transactions#search', on: :collection
+    get ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
+    post ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
     post 'adjust-amount', 'adjust-tags', 'adjust-date', 'adjust-comment'
     post 'move-to/:target_account_id' => 'transactions#move_to'
     delete '/' => 'transactions#destroy'
