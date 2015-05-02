@@ -13,7 +13,7 @@ module ApplicationCommandsRegularCommandsSpec
           DateTime.iso8601 d
         }
         before(:each) do
-          params.merge!(aggregate_id: 'account-993',
+          params.merge!(account_id: 'account-993',
             transaction_id: 'transaction-100',
             amount: '22110',
             comment: 'Command comment 201120',
@@ -24,7 +24,7 @@ module ApplicationCommandsRegularCommandsSpec
         subject { described_class.from_hash params }
     
         it "should assign command attributes" do
-          expect(subject.aggregate_id).to eql 'account-993'
+          expect(subject.account_id).to eql 'account-993'
           expect(subject.amount).to eql '22110'
           expect(subject.date).not_to be_nil
           expect(subject.tag_ids).to eql ['t-1', 't-2']
@@ -36,9 +36,9 @@ module ApplicationCommandsRegularCommandsSpec
         end
     
         it 'should validate presence of required attributes' do
-          subject = described_class.new aggregate_id: '', transaction_id: '', amount: '', comment: '', tag_ids: nil, date: nil
+          subject = described_class.new account_id: '', transaction_id: '', amount: '', comment: '', tag_ids: nil, date: nil
           expect(subject.valid?).to be_falsey
-          expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+          expect(subject.errors[:account_id]).to eql ["can't be blank"]
           expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
           expect(subject.errors[:amount]).to eql ["can't be blank"]
           expect(subject.errors[:date]).to eql ["can't be blank"]

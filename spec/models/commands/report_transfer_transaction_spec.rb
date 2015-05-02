@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe Application::Commands do
   describe Application::Commands::AccountCommands::ReportTransfer do
-    describe "build_from_params" do
+    describe "from_hash" do
       let(:params) { Hash.new }
       let(:date) { 
         d = (DateTime.now - 100)
@@ -10,7 +10,7 @@ describe Application::Commands do
         DateTime.iso8601 d
       }
       before(:each) do
-        params.merge!(aggregate_id: 'sending-993',
+        params.merge!(account_id: 'sending-993',
           sending_transaction_id: 'transaction-101',
           receiving_transaction_id: 'transaction-102',
           receiving_account_id: 'receiving-2291',
@@ -24,7 +24,7 @@ describe Application::Commands do
       subject { described_class.from_hash params }
     
       it "should assign command attributes" do
-        expect(subject.aggregate_id).to eql 'sending-993'
+        expect(subject.account_id).to eql 'sending-993'
         expect(subject.sending_transaction_id).to eql 'transaction-101'
         expect(subject.receiving_transaction_id).to eql 'transaction-102'
         expect(subject.receiving_account_id).to eql 'receiving-2291'
@@ -36,7 +36,7 @@ describe Application::Commands do
       end
       
       it 'should validate presence of required attributes' do
-        params.merge!(aggregate_id: nil,
+        params.merge!(account_id: nil,
           sending_transaction_id: nil,
           receiving_transaction_id: nil,
           receiving_account_id: nil,
@@ -45,7 +45,7 @@ describe Application::Commands do
           date: nil)
         subject = described_class.new params
         expect(subject.valid?).to be_falsey
-        expect(subject.errors[:aggregate_id]).to eql ["can't be blank"]
+        expect(subject.errors[:account_id]).to eql ["can't be blank"]
         expect(subject.errors[:sending_transaction_id]).to eql ["can't be blank"]
         expect(subject.errors[:receiving_transaction_id]).to eql ["can't be blank"]
         expect(subject.errors[:amount_sent]).to eql ["can't be blank"]

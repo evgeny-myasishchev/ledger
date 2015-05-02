@@ -5,81 +5,70 @@ module Application::Commands
   commands_group :LedgerCommands do
     command :CreateNewAccount, :ledger_id, :account_id, :name, :initial_balance, :currency_code, :unit do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :account_id, :name, :initial_balance, :currency_code
     end
     command :CloseAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :account_id
     end
     command :ReopenAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :account_id
     end
     command :RemoveAccount, :ledger_id, :account_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :account_id
     end
     command :CreateTag, :ledger_id, :name do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :name
     end
     command :RenameTag, :ledger_id, :tag_id, :name do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :tag_id, :name
     end
     
     command :RemoveTag, :ledger_id, :tag_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :tag_id
     end
     command :CreateCategory, :ledger_id, :name do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :name
     end
     command :RenameCategory, :ledger_id, :category_id, :name do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :category_id, :name
     end
     command :RemoveCategory, :ledger_id, :category_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :category_id
     end
     command :SetAccountCategory, :ledger_id, :account_id, :category_id do
       include ActiveModel::Validations
-      alias_method :aggregate_id, :ledger_id
       validates_presence_of :ledger_id, :account_id, :category_id
     end
   end
   
   commands_group :AccountCommands do
-    command :RenameAccount, :aggregate_id, :name do
+    command :RenameAccount, :id, :name do
       include ActiveModel::Validations
-      validates_presence_of :aggregate_id, :name
+      validates_presence_of :id, :name
     end
-    command :SetAccountUnit, :aggregate_id, :unit do
+    command :SetAccountUnit, :id, :unit do
       include ActiveModel::Validations
-      validates_presence_of :aggregate_id
+      validates_presence_of :id
     end
-    command :ReportIncome, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportIncome, :account_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include ReportRegularTransactionCommand
     end
-    command :ReportExpense, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportExpense, :account_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include ReportRegularTransactionCommand
     end
-    command :ReportRefund, :aggregate_id, :transaction_id, :amount, :date, :tag_ids, :comment do
+    command :ReportRefund, :account_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include ReportRegularTransactionCommand
     end
-    command :ReportTransfer, :aggregate_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
+    command :ReportTransfer, :account_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
       include ReportTransferTransactionCommand
     end
     command :AdjustAmount, :transaction_id, :amount do
@@ -108,19 +97,19 @@ module Application::Commands
   end
   
   commands_group :PendingTransactionCommands do
-    command :ReportPendingTransaction, :aggregate_id, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :ReportPendingTransaction, :id, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
     end
-    command :AdjustPendingTransaction, :aggregate_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :AdjustPendingTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
     end
-    command :ApprovePendingTransaction, :aggregate_id do
+    command :ApprovePendingTransaction, :id do
       include PendingTransactionCommand
     end
-    command :AdjustAndApprovePendingTransaction, :aggregate_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
+    command :AdjustAndApprovePendingTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
     end
-    command :RejectPendingTransaction, :aggregate_id do
+    command :RejectPendingTransaction, :id do
       include PendingTransactionCommand
     end
   end
