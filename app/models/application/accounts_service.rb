@@ -6,15 +6,15 @@ class Application::AccountsService < CommonDomain::CommandHandler
 
   handle(AccountCommands::SetAccountUnit).with(Domain::Account).using(:set_unit)
 
-  handle(AccountCommands::ReportIncome).with(Domain::Account)
+  handle(AccountCommands::ReportIncome, id: :account_id).with(Domain::Account)
 
-  handle(AccountCommands::ReportExpense).with(Domain::Account)
+  handle(AccountCommands::ReportExpense, id: :account_id).with(Domain::Account)
 
-  handle(AccountCommands::ReportRefund).with(Domain::Account)
+  handle(AccountCommands::ReportRefund, id: :account_id).with(Domain::Account)
 
   on AccountCommands::ReportTransfer do |command|
     begin_unit_of_work command.headers do |uow|
-      sending_account = uow.get_by_id Domain::Account, command.aggregate_id
+      sending_account = uow.get_by_id Domain::Account, command.account_id
       receiving_account = uow.get_by_id Domain::Account, command.receiving_account_id
       sending_transaction_id = sending_account.send_transfer command.sending_transaction_id, receiving_account.aggregate_id,
         command.amount_sent,

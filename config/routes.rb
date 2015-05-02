@@ -12,7 +12,7 @@ Rails.application.routes.draw do
     resources :tags, only: [:create, :update, :destroy], param: :tag_id
     resources :categories, only: [:create, :update, :destroy], param: :category_id
   end
-  resources :accounts, only: [], param: :aggregate_id do
+  resources :accounts, only: [] do
     put 'rename', on: :member
   end
   resources :accounts, only: [] do
@@ -31,7 +31,7 @@ Rails.application.routes.draw do
     delete '/' => 'transactions#destroy'
   end
   
-  resources :pending_transactions, only: [:index, :destroy], path: 'pending-transactions', param: :aggregate_id do
+  resources :pending_transactions, only: [:index, :destroy], path: 'pending-transactions' do
     post '/' => 'pending_transactions#report', on: :collection
     put '/' => 'pending_transactions#adjust', on: :member
     post 'approve' => 'pending_transactions#approve', on: :member

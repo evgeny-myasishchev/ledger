@@ -6,7 +6,7 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
   on PendingTransactionCommands::ReportPendingTransaction do |cmd|
     begin_unit_of_work cmd.headers do |uow|
       transaction = PendingTransaction.new
-      transaction.report cmd.user, cmd.aggregate_id, cmd.amount, 
+      transaction.report cmd.user, cmd.id, cmd.amount, 
         date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment, type_id: cmd.type_id, account_id: cmd.account_id
       uow.add_new transaction
     end
@@ -16,7 +16,7 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
   
   on PendingTransactionCommands::ApprovePendingTransaction do |cmd|
     begin_unit_of_work cmd.headers do |uow|
-      transaction = uow.get_by_id Domain::PendingTransaction, cmd.aggregate_id
+      transaction = uow.get_by_id Domain::PendingTransaction, cmd.id
       account = uow.get_by_id Domain::Account, transaction.account_id
       transaction.approve account
     end
@@ -24,7 +24,7 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
   
   on PendingTransactionCommands::AdjustAndApprovePendingTransaction do |cmd|
     begin_unit_of_work cmd.headers do |uow|
-      transaction = uow.get_by_id Domain::PendingTransaction, cmd.aggregate_id
+      transaction = uow.get_by_id Domain::PendingTransaction, cmd.id
       transaction.adjust amount: cmd.amount, date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment, account_id: cmd.account_id, type_id: cmd.type_id
       account = uow.get_by_id Domain::Account, transaction.account_id
       transaction.approve account

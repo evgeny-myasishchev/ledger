@@ -33,7 +33,7 @@ RSpec.describe AccountsController, :type => :controller do
     end
     
     it "routes rename" do
-      expect({put: 'accounts/33223/rename'}).to route_to controller: 'accounts', action: 'rename', aggregate_id: '33223'
+      expect({put: 'accounts/33223/rename'}).to route_to controller: 'accounts', action: 'rename', id: '33223'
     end
     
     it "routes ledgers nested set-category route" do
@@ -99,7 +99,7 @@ RSpec.describe AccountsController, :type => :controller do
         command
       end
       expect(controller).to receive(:dispatch_command).with(command)
-      put 'rename', aggregate_id: 'account-223', name: 'value-1'
+      put 'rename', id: 'account-223', name: 'value-1'
       expect(response.status).to eql 200
     end
   end

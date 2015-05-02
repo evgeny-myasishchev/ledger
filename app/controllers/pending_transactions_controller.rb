@@ -31,7 +31,7 @@ class PendingTransactionsController < ApplicationController
   end
   
   def destroy
-    dispatch_command RejectPendingTransaction.new params[:aggregate_id]
+    dispatch_command RejectPendingTransaction.new params
     render nothing: true
   end
 end
