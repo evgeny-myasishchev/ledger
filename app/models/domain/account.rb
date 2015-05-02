@@ -196,6 +196,22 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event TransactionMovedFrom.new aggregate_id, sending_account.aggregate_id, transaction[:id]
   end
   
+  def convert_transaction_to transaction_id, type_id
+    transaction = get_transaction! transaction_id
+    raise ArgumentError.new "Transfer transaction '#{transaction_id}' can not be converted." if transaction[:is_transfer]
+    return if transaction[:type_id] == type_id
+    log.debug "Converting type of transaction '#{transaction_id}' to #{type_id}."
+    new_balance = @balance
+    if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId) && 
+      type_id == Transaction::ExpenseTypeId
+      new_balance -= transaction[:amount] * 2
+    elsif transaction[:type_id] == Transaction::ExpenseTypeId
+      new_balance += transaction[:amount] * 2
+    end
+    raise_event TransactionTypeConverted.new aggregate_id, transaction_id, type_id
+    raise_event AccountBalanceChanged.new aggregate_id, transaction_id, new_balance unless new_balance == @balance
+  end
+  
   def get_snapshot
     {
       ledger_id: ledger_id,
@@ -328,6 +344,10 @@ class Domain::Account < CommonDomain::Aggregate
   
   on TransactionMovedFrom do |event|
     # No logic for now
+  end
+  
+  on TransactionTypeConverted do |event|
+    @transactions[event.transaction_id][:type_id] = event.type_id
   end
   
   private 
