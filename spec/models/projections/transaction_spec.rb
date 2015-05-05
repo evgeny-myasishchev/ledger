@@ -498,6 +498,21 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
   
+  describe 'on TransactionTypeConverted' do
+    let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
+    
+    it 'should update transaction type' do
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, DateTime.new, [], ''
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, DateTime.new, [], ''
+      
+      subject.handle_message e::TransactionTypeConverted.new account1.aggregate_id, 't-1', income_id
+      subject.handle_message e::TransactionTypeConverted.new account1.aggregate_id, 't-2', expense_id
+      
+      expect(p::Transaction.find_by_transaction_id('t-1').type_id).to eql income_id
+      expect(p::Transaction.find_by_transaction_id('t-2').type_id).to eql expense_id
+    end
+  end
+  
   describe "on AccountRemoved" do
     let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
     let(:account2) { create_account_projection! 'account-2', authorized_user_ids: '{100}' }

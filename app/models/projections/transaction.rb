@@ -147,6 +147,10 @@ class Projections::Transaction < ActiveRecord::Base
       transaction.remove_tag event.tag_id
       transaction.save!
     end
+    
+    on TransactionTypeConverted do |event| 
+      Transaction.where(transaction_id: event.transaction_id).update_all type_id: event.type_id
+    end
         
     on TransactionRemoved do |event|
       if Transaction.exists?(transaction_id: event.transaction_id)
