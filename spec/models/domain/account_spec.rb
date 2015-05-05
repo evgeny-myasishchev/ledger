@@ -803,7 +803,7 @@ describe Domain::Account do
     end
   end
   
-  describe 'convert_transaction_to' do
+  describe 'convert_transaction_type' do
     before do
       subject.make_created
       subject.apply_event I::TransactionReported.new subject.aggregate_id, 't-1', income_id, 10000, DateTime.new, [], ''
@@ -813,7 +813,7 @@ describe Domain::Account do
     end
     
     it 'should convert income transaction to expense' do
-      subject.convert_transaction_to 't-1', expense_id
+      subject.convert_transaction_type 't-1', expense_id
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionTypeConverted, {
         aggregate_id: subject.aggregate_id, transaction_id: 't-1', type_id: expense_id}, at_index: 0
@@ -822,7 +822,7 @@ describe Domain::Account do
     end
     
     it 'should convert expense transaction to income' do
-      subject.convert_transaction_to 't-2', income_id
+      subject.convert_transaction_type 't-2', income_id
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionTypeConverted, {
         aggregate_id: subject.aggregate_id, transaction_id: 't-2',  type_id: income_id}, at_index: 0
@@ -831,14 +831,14 @@ describe Domain::Account do
     end
     
     it 'should convert refund transaction to income' do
-      subject.convert_transaction_to 't-3', income_id
+      subject.convert_transaction_type 't-3', income_id
       expect(subject).to have_uncommitted_events exactly: 1
       expect(subject).to have_one_uncommitted_event I::TransactionTypeConverted, {
         aggregate_id: subject.aggregate_id, transaction_id: 't-3',  type_id: income_id}, at_index: 0
     end
     
     it 'should convert refund transaction to expense' do
-      subject.convert_transaction_to 't-3', expense_id
+      subject.convert_transaction_type 't-3', expense_id
       expect(subject).to have_uncommitted_events exactly: 2
       expect(subject).to have_one_uncommitted_event I::TransactionTypeConverted, {
         aggregate_id: subject.aggregate_id, transaction_id: 't-3',  type_id: expense_id}, at_index: 0
@@ -847,9 +847,9 @@ describe Domain::Account do
     end
     
     it 'should do nothing if transaction type is the same' do
-      subject.convert_transaction_to 't-1', income_id
-      subject.convert_transaction_to 't-2', expense_id
-      subject.convert_transaction_to 't-3', refund_id
+      subject.convert_transaction_type 't-1', income_id
+      subject.convert_transaction_type 't-2', expense_id
+      subject.convert_transaction_type 't-3', refund_id
       expect(subject).not_to have_uncommitted_events
     end
     
@@ -860,7 +860,7 @@ describe Domain::Account do
     
     it 'should raise error if converting transfer transaction' do
       subject.transactions['t-1'][:is_transfer] = true
-      expect { subject.convert_transaction_to 't-1', expense_id }.to raise_error ArgumentError, "Transfer transaction 't-1' can not be converted."
+      expect { subject.convert_transaction_type 't-1', expense_id }.to raise_error ArgumentError, "Transfer transaction 't-1' can not be converted."
       expect(subject).not_to have_uncommitted_events
     end
   end

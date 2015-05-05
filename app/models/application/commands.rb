@@ -85,9 +85,9 @@ module Application::Commands
     command :AdjustComment, :transaction_id, :comment do
       include AdjustTransactionCommand
     end
-    command :ConvertTransactionType, :transaction_id, :type_id do
-      include AdjustTransactionCommand
-      validates :type_id, presence: true
+    command :ConvertTransactionType, :account_id, :transaction_id, :type_id do
+      include ActiveModel::Validations
+      validates :account_id, :transaction_id, :type_id, presence: true
     end
     command :RemoveTransaction, :transaction_id do
       include ActiveModel::Validations

@@ -196,7 +196,7 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event TransactionMovedFrom.new aggregate_id, sending_account.aggregate_id, transaction[:id]
   end
   
-  def convert_transaction_to transaction_id, type_id
+  def convert_transaction_type transaction_id, type_id
     transaction = get_transaction! transaction_id
     raise ArgumentError.new "Transfer transaction '#{transaction_id}' can not be converted." if transaction[:is_transfer]
     return if transaction[:type_id] == type_id

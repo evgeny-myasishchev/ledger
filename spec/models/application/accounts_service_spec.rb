@@ -168,6 +168,17 @@ RSpec.describe Application::AccountsService, :type => :model do
     end
   end
   
+  describe "ConvertTransactionType" do
+    it "should use account to handle the command" do
+      expect(repository).to get_by_id(Domain::Account, 'account-112').and_return(account).and_save(with_dummy_headers)
+      date = DateTime.now
+      expect(account).to receive(:convert_transaction_type).with('t-1', 100332)
+      subject.handle_message c::ConvertTransactionType.new(attributes: {
+        account_id: 'account-112', transaction_id: 't-1', type_id: 100332
+      }, headers: dummy_headers)
+    end
+  end
+  
   describe "RemoveTransaction" do
     describe "regular transaction" do
       it "should get the transaction and use the account to remove it" do

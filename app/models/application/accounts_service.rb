@@ -54,6 +54,8 @@ class Application::AccountsService < CommonDomain::CommandHandler
       account.adjust_tags transaction_id, command.tag_ids
     end
   end
+  
+  handle(AccountCommands::ConvertTransactionType, id: :account_id).with(Domain::Account)
 
   on AccountCommands::RemoveTransaction do |command|
     perform_adjustment command.transaction_id, command.headers do |account, transaction_id|
