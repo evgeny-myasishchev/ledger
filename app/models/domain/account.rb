@@ -200,13 +200,17 @@ class Domain::Account < CommonDomain::Aggregate
     transaction = get_transaction! transaction_id
     raise ArgumentError.new "Transfer transaction '#{transaction_id}' can not be converted." if transaction[:is_transfer]
     return if transaction[:type_id] == type_id
-    log.debug "Converting type of transaction '#{transaction_id}' to #{type_id}."
+    log.debug "Converting transaction '#{transaction_id}' of type '#{transaction[:type_id]}' to type '#{type_id}'."
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId) && 
       type_id == Transaction::ExpenseTypeId
       new_balance -= transaction[:amount] * 2
+      log.debug "Current balance: #{@balance}, new balance: #{new_balance}"
     elsif transaction[:type_id] == Transaction::ExpenseTypeId
       new_balance += transaction[:amount] * 2
+      log.debug "Current balance: #{@balance}, new balance: #{new_balance}"
+    else
+      log.warn "Unexpected conversion. The balance wasn't changed."
     end
     raise_event TransactionTypeConverted.new aggregate_id, transaction_id, type_id
     raise_event AccountBalanceChanged.new aggregate_id, transaction_id, new_balance unless new_balance == @balance
