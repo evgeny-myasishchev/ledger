@@ -60,5 +60,20 @@ describe Application::Commands do
         expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
       end
     end
+    
+    describe described_class::ConvertTransactionType do
+      it "should initialize the command from params" do
+        subject = described_class.new transaction_id: 't-100', type_id: 101
+        expect(subject.transaction_id).to eql('t-100')
+        expect(subject.type_id).to eql(101)
+      end
+    
+      it "should validate presentce of transaction_id and type_id" do
+        subject = described_class.new transaction_id: nil, type_id: nil
+        expect(subject.valid?).to be_falsey
+        expect(subject.errors[:transaction_id]).to eql ["can't be blank"]
+        expect(subject.errors[:type_id]).to eql ["can't be blank"]
+      end
+    end
   end
 end
