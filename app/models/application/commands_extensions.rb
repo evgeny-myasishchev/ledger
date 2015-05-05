@@ -13,7 +13,9 @@ module Application::CommandsExtensions
       include ActiveModel::Validations
       validates_presence_of :account_id, :transaction_id, :amount, :date
       def initialize_by_hash hash
-        hash[:date] = DateTime.iso8601(hash[:date]) if hash[:date]
+        if (hash[:date] && !hash[:date].is_a?(Date))
+          hash[:date] = DateTime.iso8601(hash[:date])
+        end
         super
       end
     end
@@ -26,7 +28,9 @@ module Application::CommandsExtensions
       validates_presence_of :account_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date
       
       def initialize_by_hash hash
-        hash[:date] = DateTime.iso8601(hash[:date]) if hash[:date]
+        if (hash[:date] && !hash[:date].is_a?(Date))
+          hash[:date] = DateTime.iso8601(hash[:date])
+        end
         super
       end
     end

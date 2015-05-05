@@ -52,6 +52,13 @@ describe Application::Commands do
         expect(subject.errors[:amount_received]).to eql ["can't be blank"]
         expect(subject.errors[:date]).to eql ["can't be blank"]
       end
+      
+      it 'should accept date as an object' do
+        date = DateTime.now
+        params[:date] = date
+        subject = described_class.from_hash params
+        expect(subject.date).to be date
+      end
     end
   end
 end

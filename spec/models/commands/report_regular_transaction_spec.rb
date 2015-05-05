@@ -34,6 +34,12 @@ module ApplicationCommandsRegularCommandsSpec
         it "should parse the date from ISO 8601 format" do
           expect(subject.date).to eql date
         end
+        
+        it 'should accept date as an object' do
+          params[:date] = date
+          subject = described_class.from_hash params
+          expect(subject.date).to be date
+        end
     
         it 'should validate presence of required attributes' do
           subject = described_class.new account_id: '', transaction_id: '', amount: '', comment: '', tag_ids: nil, date: nil
