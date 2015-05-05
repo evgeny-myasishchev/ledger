@@ -57,6 +57,7 @@ class TransactionsController < ApplicationController
   end
   
   def convert_type
+    params[:type_id] = params[:type_id].to_i
     dispatch_command ConvertTransactionType.new params
     render nothing: true
   end

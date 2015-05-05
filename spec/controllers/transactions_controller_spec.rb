@@ -193,7 +193,18 @@ describe TransactionsController do
         command
       end
       expect(controller).to receive(:dispatch_command).with(command)
-      put :convert_type, account_id: 'account-100', transaction_id: 't-112', type_id: 'type-100'
+      put :convert_type, account_id: 'account-100', transaction_id: 't-112', type_id: 4302
+      expect(response.status).to eql 200
+    end
+    
+    it "should automatically convert type_id to integer" do
+      command = double(:command)
+      expect(cmd::ConvertTransactionType).to receive(:new) do |params|
+        expect(params[:type_id]).to eql 4302
+        command
+      end
+      allow(controller).to receive(:dispatch_command)
+      put :convert_type, account_id: 'account-100', transaction_id: 't-112', type_id: '4302'
       expect(response.status).to eql 200
     end
   end

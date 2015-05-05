@@ -863,6 +863,11 @@ describe Domain::Account do
       expect { subject.convert_transaction_type 't-1', expense_id }.to raise_error ArgumentError, "Transfer transaction 't-1' can not be converted."
       expect(subject).not_to have_uncommitted_events
     end
+    
+    it 'should raise error if type_id is not integer' do
+      expect { subject.convert_transaction_type 't-1', expense_id.to_s }.to raise_error ArgumentError, "Transaction type '#{expense_id}' is not a valid integer."
+      expect(subject).not_to have_uncommitted_events
+    end
   end
   
   describe 'snapshots' do

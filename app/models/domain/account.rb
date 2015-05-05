@@ -199,6 +199,7 @@ class Domain::Account < CommonDomain::Aggregate
   def convert_transaction_type transaction_id, type_id
     transaction = get_transaction! transaction_id
     raise ArgumentError.new "Transfer transaction '#{transaction_id}' can not be converted." if transaction[:is_transfer]
+    raise ArgumentError.new "Transaction type '#{type_id}' is not a valid integer." unless type_id.is_a?(Integer)
     return if transaction[:type_id] == type_id
     log.debug "Converting transaction '#{transaction_id}' of type '#{transaction[:type_id]}' to type '#{type_id}'."
     new_balance = @balance
