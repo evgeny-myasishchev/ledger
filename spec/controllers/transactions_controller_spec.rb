@@ -39,12 +39,16 @@ describe TransactionsController do
     it "routes POST 'report-transfer'" do
       expect({post: 'accounts/22331/transactions/report-transfer'}).to route_to controller: 'transactions', action: 'report_transfer', account_id: '22331'
     end
-    
+
     it "routes POST 'adjust-[field]'" do
       expect({post: 'transactions/t-100/adjust-amount'}).to route_to controller: 'transactions', action: 'adjust_amount', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-tags'}).to route_to controller: 'transactions', action: 'adjust_tags', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-date'}).to route_to controller: 'transactions', action: 'adjust_date', transaction_id: 't-100'
       expect({post: 'transactions/t-100/adjust-comment'}).to route_to controller: 'transactions', action: 'adjust_comment', transaction_id: 't-100'
+    end
+    
+    it "routes PUT 'convert-type'" do
+      expect({put: 'accounts/a-22331/transactions/t-5563/convert-type/type-499843'}).to route_to controller: 'transactions', action: 'convert_type', account_id: 'a-22331', transaction_id: 't-5563', type_id: 'type-499843'
     end
     
     it "routes DELETE 'destroy" do
@@ -178,6 +182,22 @@ describe TransactionsController do
     end
   end
   
+  describe 'ConvertTransactionType' do
+    include AuthenticationHelper
+    authenticate_user
+    
+    it "should build and dispatch put 'convert-type'" do
+      command = double(:command)
+      expect(cmd::ConvertTransactionType).to receive(:new) do |params|
+        expect(params).to be controller.params
+        command
+      end
+      expect(controller).to receive(:dispatch_command).with(command)
+      put :convert_type, account_id: 'account-100', transaction_id: 't-112', type_id: 'type-100'
+      expect(response.status).to eql 200
+    end
+  end
+    
   describe "DELETE 'destroy'" do
     include AuthenticationHelper
     authenticate_user

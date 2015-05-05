@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :accounts, only: [] do
     resources :transactions, only: [:index] do
       post 'report-income', 'report-expense', 'report-refund', 'report-transfer', on: :collection
+      put 'convert-type/:type_id' => 'transactions#convert_type'
       get ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
       post ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
     end

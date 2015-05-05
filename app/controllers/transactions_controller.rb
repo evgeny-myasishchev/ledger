@@ -56,6 +56,11 @@ class TransactionsController < ApplicationController
     render nothing: true
   end
   
+  def convert_type
+    dispatch_command ConvertTransactionType.new params
+    render nothing: true
+  end
+  
   def destroy
     dispatch_command RemoveTransaction.new params
     render nothing: true
