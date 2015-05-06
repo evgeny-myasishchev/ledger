@@ -1,6 +1,32 @@
 //= require_self
 //= require_tree .
 
+var Transaction = {
+    incomeId: 1, incomeKey: 'income',
+    expenseId: 2, expenseKey: 'expense',
+    refundId: 3, refundKey: 'refund',
+	transferId: undefined, transferKey: 'transfer',
+	l10n: {}
+};
+Transaction.TypeIdByKey = {};
+Transaction.TypeKeyById = {};
+Transaction.TypeById = {};
+
+Transaction.l10n[Transaction.incomeKey] = 'Income';
+Transaction.l10n[Transaction.expenseKey] = 'Expense';
+Transaction.l10n[Transaction.refundKey] = 'Refund';
+Transaction.l10n[Transaction.transferKey] = 'Transfer';
+
+jQuery.each([Transaction.incomeKey, Transaction.expenseKey, Transaction.refundKey, Transaction.refundKey], function(i, key) {
+	var id = Transaction[key + 'Id'];
+	var type = {id: id, key: key, t: function() { return Transaction.l10n[key]; }};
+	Transaction.TypeIdByKey[key] = id;
+	Transaction.TypeKeyById[id] = key;
+	Transaction.TypeById[id] = type;
+	Transaction[key] = type;
+});
+Transaction.regular = [Transaction.income, Transaction.expense, Transaction.refund];
+
 var transactionsApp = (function() {
 	var transactionsApp = angular.module('transactionsApp', ['ErrorHandler', 'ngRoute', 'UUID', 'ledgerHelpers', 'accountsApp']);
 	
@@ -53,10 +79,28 @@ var transactionsApp = (function() {
 						transaction.account_id = targetAccount.aggregate_id;
 						transaction.has_been_moved = true;
 					});
+				},
+				
+				convertType: function(transaction, typeId) {
+					var account = accounts.getById(transaction.account_id);
+					return $http.put('accounts/' + account.aggregate_id + '/transactions/' + transaction.transaction_id + '/convert-type/' + typeId).then(function() {
+						if(typeId == Transaction.expenseId && (transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId)) {
+							account.balance -= transaction.amount * 2;
+						} else if(transaction.type_id == Transaction.expenseId) {
+							account.balance += transaction.amount * 2;
+						}
+						transaction.type_id = typeId;
+					});
 				}
 			}
 		}];
 	});
+	
+	transactionsApp.filter('transactionTypeName', function() {
+		return function(typeId) {
+			return Transaction.TypeById[typeId].t();
+		}
+	})
 	
 	transactionsApp.config(['$routeProvider', function($routeProvider) {
 			$routeProvider.when('/report', {

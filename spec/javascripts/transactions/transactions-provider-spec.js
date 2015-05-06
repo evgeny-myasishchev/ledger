@@ -173,4 +173,96 @@ describe('transactions.transactionsProvider', function() {
 			expect(targetAccount.balance).toEqual(3900);
 		});
 	});
+		
+	describe('convertType', function() {
+		var incomeTransaction, expenseTransaction;
+		var $httpBackend;
+		beforeEach(inject(function($injector) {
+			incomeTransaction = {
+				transaction_id: 't-32',
+				account_id: account1.aggregate_id,
+				amount: 450,
+				type_id: Transaction.incomeId
+			};
+			expenseTransaction = {
+				transaction_id: 't-33',
+				account_id: account1.aggregate_id,
+				amount: 450,
+				type_id: Transaction.expenseId
+			};
+			account1.balance = 5450;
+			$httpBackend = $injector.get('$httpBackend');
+		}));
+		
+		afterEach(function() {
+			$httpBackend.verifyNoOutstandingExpectation();
+			$httpBackend.verifyNoOutstandingRequest();
+		});
+		
+		it('should put convert action and update type_id on success', function() {
+			$httpBackend
+				.expectPUT('accounts/' + account1.aggregate_id + '/transactions/' + incomeTransaction.transaction_id + '/convert-type/' + Transaction.expenseId)
+				.respond(200);
+			var result = subject.convertType(incomeTransaction, Transaction.expenseId);
+			$httpBackend.flush();
+			expect(result.then).toBeDefined();
+			expect(incomeTransaction.type_id).toEqual(Transaction.expenseId);
+		});
+		
+		it('should update the balance when converting income to expense', function() {
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + incomeTransaction.transaction_id + '/convert-type/' + Transaction.expenseId)
+				.respond(200);
+			subject.convertType(incomeTransaction, Transaction.expenseId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(4550);
+		});
+		
+		it('should update the balance when converting refund to expense', function() {
+			incomeTransaction.type_id = Transaction.refundId;
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + incomeTransaction.transaction_id + '/convert-type/' + Transaction.expenseId)
+				.respond(200);
+			subject.convertType(incomeTransaction, Transaction.expenseId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(4550);
+		});
+		
+		it('should not change the balance if converting income to refund', function() {
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + incomeTransaction.transaction_id + '/convert-type/' + Transaction.refundId)
+				.respond(200);
+			subject.convertType(incomeTransaction, Transaction.refundId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(5450);
+		});
+		
+		it('should not change the balance if converting refund to income', function() {
+			incomeTransaction.type_id = Transaction.refundId;
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + incomeTransaction.transaction_id + '/convert-type/' + Transaction.incomeId)
+				.respond(200);
+			subject.convertType(incomeTransaction, Transaction.incomeId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(5450);
+		});
+		
+		it('should update the balance when converting expense to income', function() {
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + expenseTransaction.transaction_id + '/convert-type/' + Transaction.incomeId)
+				.respond(200);
+			subject.convertType(expenseTransaction, Transaction.incomeId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(6350);
+		});
+		
+		it('should update the balance when converting expense to refund', function() {
+			$httpBackend
+				.whenPUT('accounts/' + account1.aggregate_id + '/transactions/' + expenseTransaction.transaction_id + '/convert-type/' + Transaction.refundId)
+				.respond(200);
+			subject.convertType(expenseTransaction, Transaction.refundId);
+			$httpBackend.flush();
+			expect(account1.balance).toEqual(6350);
+		});
+	});
 });

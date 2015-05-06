@@ -42,6 +42,11 @@
 								<i class='glyphicon glyphicon-share'></i> Move
 							</a>
 						</li>
+						<li>
+							<a ng-if="!transaction.is_transfer" href='#' onclick='return false;' convert-transaction-action transaction='transaction'>
+								<i class='glyphicon glyphicon-none'></i> Convert
+							</a>
+						</li>
 					</ul>
 				</div>
 			</td>
