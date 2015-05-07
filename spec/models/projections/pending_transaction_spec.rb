@@ -75,6 +75,13 @@ module Projections::PendingTransactionSpec
         expect(t.tag_ids).to be_nil
       end
     
+      it 'should handle empty tag_ids' do
+        event = new_reported_event tag_ids: ""
+        subject.handle_message event
+        t = described_class.find_by_transaction_id 't-101'
+        expect(t.tag_ids).to be_nil
+      end
+    
       it 'should be idepmptent' do
         event = new_reported_event
         subject.handle_message event

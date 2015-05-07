@@ -34,6 +34,11 @@ module PendingTransactionSpec
         expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId
       end
       
+      it 'should apply default type_id if empty provided' do
+        subject.report user, 't-101', '100.4', date: date, type_id: ''
+        expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId
+      end
+      
       it 'should apply default type_id if nil' do
         subject.report user, 't-101', '100.4', date: date, type_id: nil
         expect(subject.type_id).to eql Domain::Transaction::ExpenseTypeId

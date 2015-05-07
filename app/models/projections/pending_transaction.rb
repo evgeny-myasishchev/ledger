@@ -45,7 +45,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
     end
     
     private def build_tags_string(tag_ids)
-      tag_ids.nil? ? nil : tag_ids.map { |id| "{#{id}}" }.join(',')
+      tag_ids.blank? ? nil : tag_ids.map { |id| "{#{id}}" }.join(',')
     end
   end
 end
