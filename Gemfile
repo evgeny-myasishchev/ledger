@@ -56,10 +56,8 @@ gem 'capistrano-rvm', group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-# gem 'event-store', github: 'evgeny-myasishchev/event-store'
-gem 'event-store', path: '../infora-event-store'
-# gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
-gem 'common-domain', path: '../infora-common-domain'
+gem 'event-store', github: 'evgeny-myasishchev/event-store'
+gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
