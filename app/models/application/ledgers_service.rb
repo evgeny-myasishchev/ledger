@@ -1,6 +1,6 @@
 class Application::LedgersService < CommonDomain::CommandHandler
   include Application::Commands
-  include CommonDomain::NonAtomicUnitOfWork
+  include CommonDomain::UnitOfWork::Atomic
   
   on LedgerCommands::CreateNewAccount do |command|
     begin_unit_of_work command.headers do |uow|
@@ -33,48 +33,14 @@ class Application::LedgersService < CommonDomain::CommandHandler
       ledger.remove_account account
     end
   end
-
-  on LedgerCommands::CreateTag do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.create_tag command.name
-    end
-  end
-
-  on LedgerCommands::RenameTag do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.rename_tag command.tag_id, command.name
-    end
-  end
-
-  on LedgerCommands::RemoveTag do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.remove_tag command.tag_id
-    end
-  end
-
-  on LedgerCommands::CreateCategory do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.create_category command.name
-    end
-  end
-
-  on LedgerCommands::RenameCategory do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.rename_category command.category_id, command.name
-    end
-  end
-
-  on LedgerCommands::RemoveCategory do |command|
-    begin_unit_of_work command.headers do |uow|
-      ledger = uow.get_by_id Domain::Ledger, command.ledger_id
-      ledger.remove_category command.category_id
-    end
-  end
+  
+  handle(LedgerCommands::CreateTag, id: :ledger_id).with(Domain::Ledger)
+  handle(LedgerCommands::RenameTag, id: :ledger_id).with(Domain::Ledger)
+  handle(LedgerCommands::RemoveTag, id: :ledger_id).with(Domain::Ledger)
+  
+  handle(LedgerCommands::CreateCategory, id: :ledger_id).with(Domain::Ledger)
+  handle(LedgerCommands::RenameCategory, id: :ledger_id).with(Domain::Ledger)
+  handle(LedgerCommands::RemoveCategory, id: :ledger_id).with(Domain::Ledger)
 
   on LedgerCommands::SetAccountCategory do |command|
     begin_unit_of_work command.headers do |uow|

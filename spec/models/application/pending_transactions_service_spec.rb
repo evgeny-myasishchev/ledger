@@ -1,8 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Application::PendingTransactionsService, :type => :model do
-  let(:repository) { double(:repository) }
-  let(:repository_factory) { double(:repository_factory, create_repository: repository) }
+  include DummyEventStore
+  let(:repository) { repository_factory.repository }
+  let(:repository_factory) { create_dummy_repo_factory }
   subject { described_class.new repository_factory }
   let(:c) { Module.new do
     include Application::Commands::PendingTransactionCommands
@@ -21,7 +22,7 @@ RSpec.describe Application::PendingTransactionsService, :type => :model do
       expect(pt).to receive(:report).with(cmd.user, cmd.id, cmd.amount,
         date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment,
         account_id: cmd.account_id, type_id: cmd.type_id)
-      expect(repository).to receive(:save).with(pt, with_dummy_headers)
+      expect(repository).to receive(:save).with(pt, with_dummy_headers, with_dummy_transaction_context)
       subject.handle_message cmd
     end
   end
@@ -45,8 +46,8 @@ RSpec.describe Application::PendingTransactionsService, :type => :model do
     end
     it 'should approve the pending transaction' do
       cmd = c::ApprovePendingTransaction.new id: 'pt-223', headers: dummy_headers
-      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, account.aggregate_id).and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, account.aggregate_id).and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(pt).to receive(:approve).with(account)
       subject.handle_message cmd
     end
@@ -62,8 +63,8 @@ RSpec.describe Application::PendingTransactionsService, :type => :model do
         tag_ids: ['t-1', 't-2'], comment: 'Transaction 223', account_id: 'a-110', 
         type_id: 2, headers: dummy_headers
         
-      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, account.aggregate_id).and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::PendingTransaction, 'pt-223').and_return(pt).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, account.aggregate_id).and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(pt).to receive(:adjust).with(amount: cmd.amount, date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment,
         account_id: cmd.account_id, type_id: cmd.type_id)
       expect(pt).to receive(:approve).with(account)

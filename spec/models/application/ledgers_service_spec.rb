@@ -1,8 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Application::LedgersService, :type => :model do
-  let(:repository) { double(:repository) }
-  let(:repository_factory) { double(:repository_factory, create_repository: repository) }
+  include DummyEventStore
+  let(:repository) { repository_factory.repository }
+  let(:repository_factory) { create_dummy_repo_factory }
   subject { described_class.new repository_factory }
   let(:i) {
     Module.new do
@@ -22,10 +23,10 @@ RSpec.describe Application::LedgersService, :type => :model do
         unit: 'oz', 
         headers: dummy_headers
       initial_data = Domain::Account::InitialData.new('Account 1223', '100.23', Currency['UAH'], 'oz')
-      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers, with_dummy_transaction_context)
       account = double(:account, aggregate_id: 'account-1332')
       expect(ledger1).to receive(:create_new_account).with('account-1332', initial_data).and_return(account)
-      expect(repository).to receive(:save).with(account, with_dummy_headers)
+      expect(repository).to receive(:save).with(account, with_dummy_headers, with_dummy_transaction_context)
       subject.handle_message cmd
     end
   end
@@ -34,8 +35,8 @@ RSpec.describe Application::LedgersService, :type => :model do
     it "use the ledger to close the account" do
       cmd = i::LedgerCommands::CloseAccount.new ledger_id: 'ledger-1', account_id: 'account-1332', headers: dummy_headers
       account = double(:account)
-      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(ledger1).to receive(:close_account).with(account)
       subject.handle_message cmd
     end
@@ -45,8 +46,8 @@ RSpec.describe Application::LedgersService, :type => :model do
     it "use the ledger to reopen the account" do
       cmd = i::LedgerCommands::ReopenAccount.new ledger_id: 'ledger-1', account_id: 'account-1332', headers: dummy_headers
       account = double(:account)
-      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(ledger1).to receive(:reopen_account).with(account)
       subject.handle_message cmd
     end
@@ -56,8 +57,8 @@ RSpec.describe Application::LedgersService, :type => :model do
     it "use the ledger to remove the account" do
       cmd = i::LedgerCommands::RemoveAccount.new ledger_id: 'ledger-1', account_id: 'account-1332', headers: dummy_headers
       account = double(:account)
-      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(ledger1).to receive(:remove_account).with(account)
       subject.handle_message cmd
     end
@@ -121,8 +122,8 @@ RSpec.describe Application::LedgersService, :type => :model do
     it 'should use the ledger to set account category' do
       cmd = i::LedgerCommands::SetAccountCategory.new ledger_id: 'ledger-1', account_id: 'account-1332', category_id: 'category-33223', headers: dummy_headers
       account = double(:account)
-      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers)
-      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Ledger, 'ledger-1').and_return(ledger1).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'account-1332').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
       expect(ledger1).to receive(:set_account_category).with(account, 'category-33223')
       subject.handle_message cmd
     end

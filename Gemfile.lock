@@ -4,18 +4,17 @@ GIT
   specs:
     log4r (1.1.11)
 
-GIT
-  remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 9ba94fa59010e1736d987b37edd9bb674b47e9d6
-  specs:
-    event-store (2.0.1.rc1)
-      sequel
-
 PATH
   remote: ../infora-common-domain
   specs:
     common-domain (3.0.1.b1)
-      event-store (~> 2)
+      event-store (~> 3)
+
+PATH
+  remote: ../infora-event-store
+  specs:
+    event-store (3.0.1.b1)
+      sequel
 
 GEM
   remote: https://rubygems.org/

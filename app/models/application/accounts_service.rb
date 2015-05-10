@@ -1,6 +1,6 @@
 class Application::AccountsService < CommonDomain::CommandHandler
   include Application::Commands
-  include CommonDomain::NonAtomicUnitOfWork
+  include CommonDomain::UnitOfWork::Atomic
   
   handle(AccountCommands::RenameAccount).with(Domain::Account).using(:rename)
 

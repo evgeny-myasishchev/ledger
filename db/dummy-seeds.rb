@@ -1,6 +1,6 @@
 # This file contains initialization of the dummy data that is used for development purposes
 
-include CommonDomain::NonAtomicUnitOfWork
+include CommonDomain::UnitOfWork::Atomic
 
 log = Rails.logger
 @log = log
