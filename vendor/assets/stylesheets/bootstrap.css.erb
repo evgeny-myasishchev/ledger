@@ -2,9 +2,15 @@
 =require ../bootstrap/css/bootstrap.css
 */
 
+/*Using custom font name because in other case chrome gives occasional issues.*/
+
 @font-face {
-	font-family: 'Glyphicons Halflings';
+	font-family: 'Glyphicons Halflings Local';
 
 	src: url("<%= asset_path 'glyphicons-halflings-regular.eot' %>");
 	src: url("<%= asset_path 'glyphicons-halflings-regular.eot?#iefix' %>") format('embedded-opentype'), url("<%= asset_path 'glyphicons-halflings-regular.woff2' %>") format('woff2'), url("<%= asset_url 'glyphicons-halflings-regular.woff' %>") format('woff'), url("<%= asset_path 'glyphicons-halflings-regular.ttf' %>") format('truetype'), url("<%= asset_path 'glyphicons-halflings-regular.svg#glyphicons_halflingsregular' %>") format('svg');
+}
+
+.glyphicon {
+	font-family: 'Glyphicons Halflings Local';
 }
