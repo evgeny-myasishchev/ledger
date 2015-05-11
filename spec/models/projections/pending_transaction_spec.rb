@@ -61,7 +61,7 @@ module Projections::PendingTransactionSpec
         t = described_class.find_by_transaction_id 't-101'
         expect(t.user_id).to eql event.user_id
         expect(t.amount).to eql event.amount
-        expect(t.date.to_datetime).to eql event.date
+        expect(t.date.to_datetime).to eql event.date.to_datetime
         expect(t.tag_ids).to eql '{t-1},{t-2}'
         expect(t.comment).to eql event.comment
         expect(t.account_id).to eql event.account_id
@@ -101,7 +101,7 @@ module Projections::PendingTransactionSpec
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.amount).to eql event.amount
-        expect(t.date.to_datetime).to eql event.date
+        expect(t.date.to_datetime).to eql event.date.to_datetime
         expect(t.tag_ids).to eql '{t-1},{t-2}'
         expect(t.comment).to eql event.comment
         expect(t.account_id).to eql event.account_id
