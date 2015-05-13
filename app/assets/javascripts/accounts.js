@@ -33,6 +33,13 @@ var accountsApp = (function($) {
 				getAllCategories: function() {
 					return categories;
 				},
+				getCategoryById: function(categoryId) {
+					var result = $.grep(categories, function(category) {
+						return category.category_id == categoryId;
+					});
+					if(result.length == 0) throw 'Unknown category id=' + categoryId + '.';
+					return result[0];
+				},
 				getActive: function() {
 					var activeAccount = null;
 					if($routeParams.accountSequentialNumber) {
@@ -113,7 +120,7 @@ var accountsApp = (function($) {
 			restrict: 'E',
 			replace: true,
 			template: 
-					"<select ng-options='account | nameWithBalance for account in accounts | filter:filterAccount | orderBy:\"name\"' " + 
+					"<select ng-options='account | nameWithBalance group by (account.category_id | categoryName) for account in accounts | filter:filterAccount | orderBy:\"name\"' " + 
 						"class='form-control' required>" + 
 					"</select>",
 			scope: {
@@ -192,6 +199,16 @@ var accountsApp = (function($) {
 	accountsApp.filter('nameWithBalance', ['moneyFilter', function(money) {
 		return function(account) {
 			return account.name + ' (' + money(account.balance) + ' ' + account.currency_code + ')';
+		}
+	}]);
+	
+	accountsApp.filter('categoryName', ['accounts', function(accounts) {
+		return function(categoryId) {
+			try {
+				return accounts.getCategoryById(parseInt(categoryId)).name;
+			} catch(e) {
+				return null;
+			}
 		}
 	}]);
 	

@@ -14,8 +14,8 @@ describe('acounts', function() {
 					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, category_id: null, is_closed: false}
 				]);
 				accountsProvider.assignCategories([
-					category1 = {id: 1, display_order: 1, name: 'Category 1'},
-					category2 = {id: 2, display_order: 2, name: 'Category 2'}
+					category1 = {id: 1, category_id: 100, display_order: 1, name: 'Category 1'},
+					category2 = {id: 2, category_id: 200, display_order: 2, name: 'Category 2'}
 				]);
 			}]);
 
@@ -126,6 +126,17 @@ describe('acounts', function() {
 				expect(subject.getAllCategories()).toEqual([category2]);
 				subject.removeCategory(category2);
 				expect(subject.getAllCategories()).toEqual([]);
+			});
+			
+			it('should get category by id', function() {
+				expect(subject.getCategoryById(category1.category_id)).toEqual(category1);
+				expect(subject.getCategoryById(category2.category_id)).toEqual(category2);
+			});
+			
+			it('should throw error if getting not existing category by id', function() {
+				expect(function() {
+					subject.getCategoryById(100332);
+				}).toThrow("Unknown category id=100332.")
 			});
 		});
 
@@ -262,6 +273,37 @@ describe('acounts', function() {
 		});
 	});
 	
+	describe('categoryNameFilter', function() {
+		var accounts;
+		var subject, category1, category2;
+		beforeEach(function() {
+			module('accountsApp');
+			category1 = {id: 1, category_id: 100, display_order: 1, name: 'Category 1'};
+			category2 = {id: 2, category_id: 200, display_order: 2, name: 'Category 2'};
+			var categories = {};
+			categories[category1.category_id] = category1;
+			categories[category2.category_id] = category2;
+
+			inject(['categoryNameFilter', 'accounts', function(filter, theAccounts) {
+				accounts = theAccounts;
+				subject = filter;
+			}]);
+			spyOn(accounts, 'getCategoryById').and.callFake(function(categoryId) {
+				if(categories[categoryId]) return categories[categoryId];
+				throw 'Unknown category';
+			});
+		});
+
+		it('should return name of corresponding category_id', function() {
+			expect(subject(category1.category_id)).toBe(category1.name);
+			expect(subject(category2.category_id)).toBe(category2.name);
+		});
+		
+		it('should return null for unknown category', function() {
+			expect(subject(4342)).toBeNull();
+		});
+	});
+		
 	describe('accountByIdFilter', function() {
 		var a1, a2;
 		var accounts;
