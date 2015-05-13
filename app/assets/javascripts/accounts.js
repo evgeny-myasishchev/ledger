@@ -133,7 +133,7 @@ var accountsApp = (function($) {
 					}
 				}
 				scope.filterAccount = function(account) {
-					return !exceptMap[account.aggregate_id];
+					return !exceptMap[account.aggregate_id] && !account.is_closed;
 				}
 			}
 		}

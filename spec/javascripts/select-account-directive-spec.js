@@ -32,6 +32,15 @@ describe('acounts', function() {
 		});
 		
 		describe('filterAccount', function() {
+			it('should filter out closed accounts', function() {
+				account1.is_closed = true;
+				account2.is_closed = true;
+				compile();
+				expect(scope.filterAccount(account1)).toBeFalsy();
+				expect(scope.filterAccount(account2)).toBeFalsy();
+				expect(scope.filterAccount(account3)).toBeTruthy();
+			});
+			
 			it('should return true if no except provided', function() {
 				compile();
 				expect(scope.filterAccount(account1)).toBeTruthy();
