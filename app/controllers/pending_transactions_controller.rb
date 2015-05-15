@@ -11,6 +11,8 @@ class PendingTransactionsController < ApplicationController
   def report
     params[:user] = current_user
     cmd = ReportPendingTransaction.from_hash params
+    cmd.headers[:bank_name] = params[:bank_name] if params[:bank_name]
+    cmd.headers[:bank_bic_code] = params[:bank_bic_code] if params[:bank_bic_code]
     dispatch_command cmd
     render nothing: true
   end

@@ -62,6 +62,24 @@ module PendingTransactionsControllerSpec
           comment: 'Comment 100', account_id: 'a-100', type_id: 2, format: :json
         expect(response.status).to eql 200
       end
+      
+      it 'should append bank info headers if provided with parameters' do
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command.headers[:bank_name]).to eql 'Bank 443'
+          expect(command.headers[:bank_bic_code]).to eql 'bic code 443'
+        end
+        post :report, id: 't-100', bank_name: 'Bank 443', bank_bic_code: 'bic code 443'
+        expect(response.status).to eql 200
+      end
+      
+      it 'should not append bank info headers if no corresponding params' do
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command.headers.key?(:bank_name)).to be false
+          expect(command.headers.key?(:bank_bic_code)).to be false
+        end
+        post :report, id: 't-100'
+        expect(response.status).to eql 200
+      end
     end
       
     describe 'PUT adjust' do
