@@ -12,6 +12,10 @@ RSpec.describe AccountsController, :type => :controller do
   authenticate_user
   
   describe "routes", :type => :routing do
+    it "routes GET accounts route" do
+      expect({get: 'accounts'}).to route_to controller: 'accounts', action: 'index'
+    end
+    
     it "routes ledgers nested new route" do
       expect({get: 'ledgers/22331/accounts/new'}).to route_to controller: 'accounts', action: 'new', ledger_id: '22331'
     end
@@ -38,6 +42,16 @@ RSpec.describe AccountsController, :type => :controller do
     
     it "routes ledgers nested set-category route" do
       expect({put: 'ledgers/22331/accounts/33322/set-category'}).to route_to controller: 'accounts', action: 'set_category', ledger_id: '22331', account_id: '33322'
+    end
+  end
+  
+  describe "GET 'index'" do
+    it 'should get user accounts' do
+      accounts = double(:accounts)
+      expect(Projections::Account).to receive(:get_user_accounts).with(user).and_return(accounts)
+      get :index, format: :json
+      expect(response.status).to eql 200
+      expect(assigns(:accounts)).to be accounts
     end
   end
   

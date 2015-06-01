@@ -12,7 +12,7 @@ Rails.application.routes.draw do
     resources :tags, only: [:create, :update, :destroy], param: :tag_id
     resources :categories, only: [:create, :update, :destroy], param: :category_id
   end
-  resources :accounts, only: [] do
+  resources :accounts, only: [:index] do
     put 'rename', on: :member
   end
   resources :accounts, only: [] do

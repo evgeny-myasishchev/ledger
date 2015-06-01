@@ -19,7 +19,7 @@ describe HomeController do
     describe "authenticated" do
       include AuthenticationHelper
       authenticate_user
-      it "should related data for given user" do
+      it "should get related data for given user" do
         ledgers = double(:ledgers)
         accounts = double(:accounts)
         tags = double(:tags)

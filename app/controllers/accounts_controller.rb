@@ -2,6 +2,13 @@ class AccountsController < ApplicationController
   include Application::Commands::LedgerCommands
   include Application::Commands::AccountCommands
   
+  def index
+    @accounts = Projections::Account.get_user_accounts current_user
+    respond_to do |format|
+      format.json { render json: @accounts }
+    end
+  end
+  
   def new
     @currencies = Currency.known
     @new_account_id = CommonDomain::Infrastructure::AggregateId.new_id
