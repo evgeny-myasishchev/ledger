@@ -51,6 +51,11 @@ describe("homeApp", function() {
 			});
 		}
 
+		it("should set accounts available flag", function() {
+			initController();
+			expect(scope.accountsAvailable).toBeTruthy();
+		});
+		
 		it("should set active account from accessor", function() {
 			this.assignActiveAccount(account2);
 			initController();

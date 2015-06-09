@@ -10,7 +10,7 @@ var homeApp = (function() {
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
-		
+		$scope.accountsAvailable = accounts.getAll().length > 0;
 		$scope.startRenaming = function() { $scope.isRenaming = true; };
 		$scope.stopRenaming = function() { $scope.isRenaming = false; };
 		

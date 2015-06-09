@@ -1,7 +1,12 @@
-<div class='col-sm-5 col-md-4'>
+<div class="jumbotron" ng-if="!accountsAvailable">
+	<p>You don't have any account yet.</p>
+	<p><a href='#/accounts/new' class='btn btn-lg btn-primary'>Add new account</a></p>
+</div>
+
+<div class='col-sm-5 col-md-4' ng-if="accountsAvailable">
 	<accounts-panel></accounts-panel>
 </div>
-<div class='col-sm-7 col-md-8'>
+<div class='col-sm-7 col-md-8' ng-if="accountsAvailable">
 	<%= render partial: 'account_actions' %>
 	<%= render partial: 'account_transactions' %>
 </div>
