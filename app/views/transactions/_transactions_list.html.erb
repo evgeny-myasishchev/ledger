@@ -1,6 +1,6 @@
 <table class='table table-condensed'>
 	<thead>
-		<tr>
+		<tr ng-if="transactions.length">
 			<th></th>
 			<th>Amount</th>
 			<th ng-if='showAccount'>Account</th>
@@ -11,7 +11,13 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="transaction in transactions" ng-class='{"bg-success": transaction.has_been_moved}'>
+		
+		<tr ng-if="!transactions.length">
+			<td>
+				<div class='jumbotron' style="margin-bottom: 0">No transactions fetched</div>
+			</td>
+		</tr>
+		<tr ng-if="transactions.length" ng-repeat="transaction in transactions" ng-class='{"bg-success": transaction.has_been_moved}'>
 			<td show-transaction-info>
 				<i class='{{transaction | tti}}'></i>
 			</td>
