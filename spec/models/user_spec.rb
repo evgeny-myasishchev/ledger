@@ -11,10 +11,10 @@ describe User do
       expect(described_class.from_omniauth(auth)).to eql u
     end
 
-    it 'should create a new using auth data and return it' do      
+    it 'should initialize new user object using auth data and return it' do
       created = described_class.from_omniauth(auth)
       expect(created.email).to eql(email)
-      expect(described_class.find(created.id)).to eql created
+      expect(created).not_to be_persisted
     end    
   end
 end
