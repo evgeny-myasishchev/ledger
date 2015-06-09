@@ -29,8 +29,11 @@ class Currency
   end
   
   def to_s
-    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}" if unit.empty?
-    "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}, unit: #{unit}" unless unit.empty?
+    if unit.nil? || unit.blank?
+      "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}"
+    else
+      "numeric code: #{id}, alpha_code: #{code}, english_name: #{english_name}, unit: #{unit}"
+    end
   end
   
   private
