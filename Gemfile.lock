@@ -6,16 +6,16 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: fac0f5bf246e959a01d6dd47fd95252aff6d9215
+  revision: 0dcd2b74cceb3abfcb8ec097063117816a683ca9
   specs:
-    common-domain (3.0.1.b1)
+    common-domain (3.0.1.b2)
       event-store (~> 3)
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 25489c610ee494900a77a9add30ffab4445bc7fe
+  revision: 9139908b45d292bb087ca1beb47402195afc6187
   specs:
-    event-store (3.0.1.b1)
+    event-store (3.0.1.b2)
       sequel
 
 GEM
@@ -171,7 +171,7 @@ GEM
       rspec-mocks (~> 3.1.0)
       rspec-support (~> 3.1.0)
     rspec-support (3.1.1)
-    sequel (4.22.0)
+    sequel (4.23.0)
     spring (1.1.3)
     spring-commands-rspec (1.0.2)
       spring (>= 0.9.1)
