@@ -502,8 +502,8 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
     
     it 'should update transaction type' do
-      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, DateTime.new, [], ''
-      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, DateTime.new, [], ''
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, DateTime.now, [], ''
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, DateTime.now, [], ''
       
       subject.handle_message e::TransactionTypeConverted.new account1.aggregate_id, 't-1', income_id
       subject.handle_message e::TransactionTypeConverted.new account1.aggregate_id, 't-2', expense_id
@@ -518,7 +518,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:account2) { create_account_projection! 'account-2', authorized_user_ids: '{100}' }
     
     before(:each) do
-      date = DateTime.new
+      date = DateTime.now
       subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
       subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-3', expense_id, 2000, date - 110, ['t-4'], 'Comment 102'
