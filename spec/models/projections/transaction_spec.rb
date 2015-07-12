@@ -312,13 +312,13 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
     
     it "should mark the tag_ids as changed" do
-      subject.changed_attributes.clear
+      subject.clear_changes_information
       subject.add_tag 130
       expect(subject.tag_ids_changed?).to be_truthy
     end
     
     it "should not add the tag_id if already present" do
-      subject.changed_attributes.clear
+      subject.changes_applied
       subject.add_tag 100
       expect(subject.tag_ids).to eql('{100},{110},{120}')
       expect(subject.tag_ids_changed?).to be_falsey
@@ -329,7 +329,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     subject { p::Transaction.new }
     before(:each) do
       subject.tag_ids = "{100},{200},{300},{400},{500}"
-      subject.changed_attributes.clear
+      subject.clear_changes_information
       subject.remove_tag 100
     end
     
@@ -347,7 +347,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     
     it "should do nothing if no such tag" do
       subject.tag_ids = "{100}"
-      subject.changed_attributes.clear
+      subject.clear_changes_information
       subject.remove_tag 300
       expect(subject.tag_ids).to eql '{100}'
       expect(subject.tag_ids_changed?).to be_falsy
