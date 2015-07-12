@@ -55,6 +55,11 @@ describe("homeApp", function() {
 			initController();
 			expect(scope.accountsAvailable).toBeTruthy();
 		});
+
+		it('should assign categories', function() {
+			initController();
+			expect(scope.categories).toEqual([category1, category2]);
+		});
 		
 		it("should set active account from accessor", function() {
 			this.assignActiveAccount(account2);

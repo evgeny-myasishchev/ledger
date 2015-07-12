@@ -8,6 +8,7 @@ var homeApp = (function() {
 	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 
 	'ledgers', 'accounts', 'money', 'accountsState', 'search',
 	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
+		$scope.categories = accounts.getAllCategories();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
 		$scope.accountsAvailable = accounts.getAll().length > 0;
