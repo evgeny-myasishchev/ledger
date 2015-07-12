@@ -44,10 +44,11 @@ RSpec.describe Api::SessionsController, :type => :controller do
     end
     
     it 'should return authenticity token' do
+      expect(controller).to receive(:form_authenticity_token) { 'form-authenticity-token-10032'}
       post :create, format: :json, google_id_token: 'google id token 11241'
       expect(response).to have_http_status(:success)
       body_json = JSON.parse response.body
-      expect(body_json['form_authenticity_token']).to eql session[:_csrf_token]
+      expect(body_json['form_authenticity_token']).to eql 'form-authenticity-token-10032'
     end
   end
 end
