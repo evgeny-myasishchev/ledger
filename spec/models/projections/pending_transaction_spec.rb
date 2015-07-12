@@ -61,7 +61,7 @@ module Projections::PendingTransactionSpec
         t = described_class.find_by_transaction_id 't-101'
         expect(t.user_id).to eql event.user_id
         expect(t.amount).to eql event.amount
-        expect(t.date.to_datetime).to eql event.date.to_datetime
+        expect(t.date.httpdate).to eql event.date.httpdate
         expect(t.tag_ids).to eql '{t-1},{t-2}'
         expect(t.comment).to eql event.comment
         expect(t.account_id).to eql event.account_id
@@ -93,7 +93,7 @@ module Projections::PendingTransactionSpec
     
     describe 'on PendingTransactionAdjusted' do
       before do
-        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
+        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now.utc, type_id: 0
       end
       
       it 'should update attributes of the pending transaction' do
@@ -101,7 +101,7 @@ module Projections::PendingTransactionSpec
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.amount).to eql event.amount
-        expect(t.date.to_datetime).to eql event.date.to_datetime
+        expect(t.date.httpdate).to eql event.date.httpdate
         expect(t.tag_ids).to eql '{t-1},{t-2}'
         expect(t.comment).to eql event.comment
         expect(t.account_id).to eql event.account_id
