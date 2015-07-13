@@ -44,4 +44,17 @@ describe User do
       expect(secret2.secret).not_to be_nil
     end
   end
+
+  describe 'remove_device_secret' do
+    subject { User.create! email: 'fake@mail.com', password: 'fake-password' }
+    it 'should remove existing device secret by id' do
+      secret1 = subject.add_device_secret 'device-1', 'Device 1'
+      subject.remove_device_secret secret1.id
+      expect(DeviceSecret).not_to exist(secret1.id)
+    end
+
+    it 'should raise error if removing not existing device secret' do
+      expect { subject.remove_device_secret(100332) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
 end
