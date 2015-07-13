@@ -43,6 +43,7 @@ Rails.application.routes.draw do
   
   namespace :api do
     resources :sessions, only: [:create]
+    post 'devices/register' => 'devices#register'
   end
   
   # The priority is based upon order of creation: first created -> highest priority.
