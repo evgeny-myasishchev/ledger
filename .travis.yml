@@ -2,6 +2,7 @@ language: ruby
 cache: bundler
 rvm:
 - 2.1.1
+sudo: false
 addons:
   postgresql: "9.3"
 env: DB_CONFIG=config/database_postgres.yml
