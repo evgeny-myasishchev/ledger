@@ -1,3 +1,5 @@
+require 'openssl'
+
 class User < ActiveRecord::Base
   has_many :device_secrets
 
@@ -19,6 +21,9 @@ class User < ActiveRecord::Base
   end
 
   def add_device_secret(device_id, name)
-    
+    cipher = OpenSSL::Cipher::AES256.new(:CBC)
+    secret = DeviceSecret.new device_id: device_id, name: name, secret: cipher.random_key
+    device_secrets << secret
+    secret
   end
 end
