@@ -17,4 +17,31 @@ describe User do
       expect(created).not_to be_persisted
     end    
   end
+
+  describe "get_device_secret" do
+    subject { User.create! email: 'fake@mail.com', password: 'fake-password' }
+
+    it 'should return existing device secret' do
+      secret = DeviceSecret.create! user_id: subject.id, device_id: 'device-100', name: 'device-1', secret: 'secret-100'
+      expect(subject.get_device_secret('device-100')).to eql secret
+    end
+
+    it 'should return null if no device secret available' do
+      expect(subject.get_device_secret('secret-100')).to be_nil
+    end
+  end
+  
+  describe 'add_device_secret' do
+    subject { User.create! email: 'fake@mail.com', password: 'fake-password' }
+    
+    it 'should add new device secret to the users device secrets and return it' do
+      secret1 = subject.add_device_secret 'device-1', 'Device 1'
+      secret2 = subject.add_device_secret 'device-2', 'Device 2'
+      expect(subject.device_secrets.to_a).to eql [secret1, secret2]
+      expect(secret1).to be_persisted
+      expect(secret1.secret).not_to be_nil
+      expect(secret2).to be_persisted
+      expect(secret2.secret).not_to be_nil
+    end
+  end
 end
