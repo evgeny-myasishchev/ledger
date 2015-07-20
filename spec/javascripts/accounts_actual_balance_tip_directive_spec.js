@@ -37,11 +37,11 @@ describe('accounts.actualBalanceTip directive', function() {
 	it('should add tooltip if the account has a different currency than active ledger', function() {
 		scope.account = a1;
 		var element = compile();
-		expect(element.attr('title')).toEqual('100.00 UAH');
+		expect(element.attr('title')).toEqual('100.00 UAH (1 EUR = 16.22 UAH)');
 		
 		scope.account = a2;
 		var element = compile();
-		expect(element.attr('title')).toEqual('200.00 UAH');
+		expect(element.attr('title')).toEqual('200.00 UAH (1 USD = 12.93 UAH)');
 	});
 	
 	it('should not add the tooltip if the account has same currency as active ledger', function() {

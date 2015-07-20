@@ -179,7 +179,9 @@ var accountsApp = (function($) {
 				var ledger = ledgers.getActiveLedger();
 				if(account.currency_code != ledger.currency_code) {
 					ledgers.loadCurrencyRates().then(function(rates) {
-						element.attr('title', money.formatInteger(accounts.getActualBalance(account, rates)) + ' ' + ledger.currency_code);
+						var actualAmount = money.formatInteger(accounts.getActualBalance(account, rates));
+						var rateInfo = ' (1 ' + account.currency_code + ' = ' + rates[account.currency_code].rate + ' ' + ledger.currency_code + ')';
+						element.attr('title', actualAmount + ' ' + ledger.currency_code + rateInfo);
 					});
 				}
 			}
