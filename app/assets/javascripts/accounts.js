@@ -170,6 +170,22 @@ var accountsApp = (function($) {
 		}
 	}]);
 	
+	accountsApp.directive('actualBalanceTip', ['ledgers', 'accounts', 'money', function(ledgers, accounts, money) {
+		return {
+			restring: 'A',
+			link: function(scope, element, attrs) {
+				var that = this;
+				var account = scope.account;
+				var ledger = ledgers.getActiveLedger();
+				if(account.currency_code != ledger.currency_code) {
+					ledgers.loadCurrencyRates().then(function(rates) {
+						element.attr('title', money.formatInteger(accounts.getActualBalance(account, rates)) + ' ' + ledger.currency_code);
+					});
+				}
+			}
+		};
+	}]);
+	
 	accountsApp.filter('activateFirstAccount', ['accounts', '$location', function(accounts, $location) {
 		return function(account) {
 			var activeAccount = accounts.getActive();
