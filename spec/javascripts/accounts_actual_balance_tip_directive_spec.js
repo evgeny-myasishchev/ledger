@@ -44,7 +44,24 @@ describe('accounts.actualBalanceTip directive', function() {
 		expect(element.attr('title')).toEqual('200.00 UAH (1 USD = 12.93 UAH)');
 	});
 	
+	it('should calculate the rate if the account has unit', function() {
+		a1.unit = 'g';
+		accounts.getActualBalance.and.callFake(function(account, rates) {
+			return 84332;
+		});	
+		scope.account = a1;
+		var element = compile();
+		expect(element.attr('title')).toEqual('843.32 UAH (1g. EUR = 8.4332 UAH)');
+	});
+	
 	it('should not add the tooltip if the account has same currency as active ledger', function() {
+		scope.account = a3;
+		var element = compile();
+		expect(element.attr('title')).toBeUndefined();
+	});
+		
+	it('should not add the tooltip if the account is XXX', function() {
+		a3.currency_code = 'XXX';
 		scope.account = a3;
 		var element = compile();
 		expect(element.attr('title')).toBeUndefined();

@@ -177,11 +177,19 @@ var accountsApp = (function($) {
 				var that = this;
 				var account = scope.account;
 				var ledger = ledgers.getActiveLedger();
-				if(account.currency_code != ledger.currency_code) {
+				if(account.currency_code != ledger.currency_code && account.currency_code != 'XXX') {
 					ledgers.loadCurrencyRates().then(function(rates) {
-						var actualAmount = money.formatInteger(accounts.getActualBalance(account, rates));
-						var rateInfo = ' (1 ' + account.currency_code + ' = ' + rates[account.currency_code].rate + ' ' + ledger.currency_code + ')';
-						element.attr('title', actualAmount + ' ' + ledger.currency_code + rateInfo);
+						var integerActualAmount = accounts.getActualBalance(account, rates);
+						var actualAmount = money.formatInteger(integerActualAmount);
+						var rate = rates[account.currency_code].rate;
+						var title = [actualAmount, ' ', ledger.currency_code, ' (1'];
+						if(account.unit) {
+							rate = Math.round(integerActualAmount / account.balance * 10000) / 10000;
+							title.push(account.unit);
+							title.push('.');
+						}
+						title.splice(title.length, 0, ' ', account.currency_code, ' = ', rate, ' ', ledger.currency_code, ')');
+						element.attr('title', title.join(''));
 					});
 				}
 			}
