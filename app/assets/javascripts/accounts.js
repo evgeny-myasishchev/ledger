@@ -185,7 +185,6 @@ var accountsApp = (function($) {
 			var that = this;
 			ledgers.loadCurrencyRates().then(function(rates) {
 				var result = 0;
-				var activeLedger = ledgers.getActiveLedger();
 				$.each(accounts, function(index, account) {
 					var actualBalance = accountsService.getActualBalance(account, rates);
 					if(actualBalance) result += actualBalance;
