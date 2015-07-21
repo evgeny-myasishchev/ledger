@@ -1,16 +1,34 @@
-<table class='table table-stripped'>
-  <thead>
-    <tr>
-      <th>Device Id</th>
-      <th>Device name</th>
-      <th>Registered At</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>3432001</td>
-      <td>S860</td>
-      <td>21/07/2015 18:30</td>
-    </tr>
-  </tbody>
+<i class="help-block">
+	For each registered device (e.g. phone or tablet) a special secret key is generated. 
+	The key is used to encrypt any sensitive data that may be stored on the device. 
+	If your device (or data) has been stolen then please <strong>reset the secret key ASAP</strong>. 
+	This will make it impossible to decrypt your sensitive data.
+</i>
+
+<table class='table table-stripped' style='table-layout:auto; width: auto;'>
+	<thead>
+		<tr>
+			<th>Device name</th>
+			<th>Registered At</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>S860</td>
+			<td>21/07/2015 18:30</td>
+			<td>
+				<div class="btn-group">
+					<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class='glyphicon glyphicon-option-vertical'></i>
+					</button>
+					<ul class="dropdown-menu">
+						<li><a href="#"><i class="glyphicon glyphicon-edit"></i> Rename</a></li>
+						<li><a href="#"><i class="glyphicon glyphicon-refresh"></i> Reset secret key</a></li>
+						<li><a href="#"><i class="glyphicon glyphicon-trash"></i> Unregister</a></li>
+					</ul>
+				</div>
+			</td>
+		</tr>
+	</tbody>
 </table>
