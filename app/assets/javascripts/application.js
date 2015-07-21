@@ -24,5 +24,6 @@
 //= require node-uuid
 //= require home
 //= require transactions
+//= require profile
 //= require_tree .
 //= require_self
