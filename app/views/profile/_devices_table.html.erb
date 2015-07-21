@@ -14,9 +14,9 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr>
-			<td>S860</td>
-			<td>21/07/2015 18:30</td>
+		<tr ng-repeat="device in devices">
+			<td>{{device.name}}</td>
+			<td>{{device.created_at}}</td>
 			<td>
 				<div class="btn-group">
 					<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
