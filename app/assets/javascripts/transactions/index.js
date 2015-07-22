@@ -17,7 +17,7 @@ Transaction.l10n[Transaction.expenseKey] = 'Expense';
 Transaction.l10n[Transaction.refundKey] = 'Refund';
 Transaction.l10n[Transaction.transferKey] = 'Transfer';
 
-jQuery.each([Transaction.incomeKey, Transaction.expenseKey, Transaction.refundKey, Transaction.refundKey], function(i, key) {
+jQuery.each([Transaction.incomeKey, Transaction.expenseKey, Transaction.refundKey, Transaction.transferKey], function(i, key) {
 	var id = Transaction[key + 'Id'];
 	var type = {id: id, key: key, t: function() { return Transaction.l10n[key]; }};
 	Transaction.TypeIdByKey[key] = id;
