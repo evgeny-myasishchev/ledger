@@ -25,7 +25,7 @@
 				{{device.name}}
 				<div ng-show="device.has_been_reset"><label class='label label-success'>secret key has been reset</label></div>
 			</td>
-			<td>{{device.created_at}}</td>
+			<td>{{device.created_at | date:'medium'}}</td>
 			<td>
 				<div class="btn-group" ng-hide="device.is_resetting">
 					<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
