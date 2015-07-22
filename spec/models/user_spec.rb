@@ -45,6 +45,22 @@ describe User do
     end
   end
 
+  describe 'reset_device_secret' do
+    subject { User.create! email: 'fake@mail.com', password: 'fake-password' }
+    let(:device_secret) { subject.add_device_secret 'device-1', 'Device 1' }
+    it 'should regenerate net secret key' do
+      initial_secret = device_secret.secret
+      subject.reset_device_secret device_secret.id
+      device_secret.reload
+      expect(device_secret.secret).not_to eql initial_secret
+    end
+
+    it 'should raise error if removing not existing device secret' do
+      device_secret.delete
+      expect { subject.reset_device_secret(device_secret.id) }.to raise_error(ActiveRecord::RecordNotFound)
+    end
+  end
+
   describe 'remove_device_secret' do
     subject { User.create! email: 'fake@mail.com', password: 'fake-password' }
     it 'should remove existing device secret by id' do

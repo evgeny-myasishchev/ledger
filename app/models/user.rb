@@ -21,14 +21,24 @@ class User < ActiveRecord::Base
   end
 
   def add_device_secret(device_id, name)
-    cipher = OpenSSL::Cipher::AES256.new(:CBC)
-    secret = DeviceSecret.new device_id: device_id, name: name, secret: Base64.encode64(cipher.random_key)
+    secret = DeviceSecret.new device_id: device_id, name: name, secret: generate_new_secret
     device_secrets << secret
     secret
+  end
+
+  def reset_device_secret(id)
+    secret = device_secrets.find(id)
+    secret.secret = generate_new_secret
+    secret.save!
   end
 
   def remove_device_secret(id)
     secret = device_secrets.find(id)
     device_secrets.destroy secret
+  end
+
+  private def generate_new_secret
+    cipher = OpenSSL::Cipher::AES256.new(:CBC)
+    Base64.encode64(cipher.random_key)
   end
 end

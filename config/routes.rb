@@ -43,7 +43,9 @@ Rails.application.routes.draw do
   
   namespace :api do
     resources :sessions, only: [:create]
-    resources :devices, only: [:index, :destroy]
+    resources :devices, only: [:index, :destroy] do
+      put 'reset-secret-key' => 'devices#reset_secret_key', on: :member
+    end
     post 'devices/register' => 'devices#register'
   end
   

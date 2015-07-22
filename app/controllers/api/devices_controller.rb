@@ -12,6 +12,12 @@ class Api::DevicesController < ApplicationController
       format.json { render json: {secret: device_secret.secret} }
     end
   end
+  
+  def reset_secret_key
+    current_user.reset_device_secret(params[:id])
+    render nothing: true
+  end
+
 
   def destroy
     current_user.remove_device_secret(params[:id])
