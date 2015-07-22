@@ -14,19 +14,29 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="device in devices">
-			<td>{{device.name}}</td>
+		<tr ng-repeat="device in devices" style="position: relative;">
+			<td>
+				<div style='position: absolute; z-index: 1;' class='alert alert-danger' ng-show="device.is_confirming_reset">
+					<strong>Device: {{device.name}}</strong>					
+					<p>Are you sure you want to reset the secret key for this device?</p>
+					<button class='btn btn-danger' ng-click="resetSecretKey(device)">Yes, reset the secret key</button>
+					<button class='btn btn-default' ng-click="device.is_confirming_reset=false">No, not this time</button>
+				</div>
+				{{device.name}}
+				<div ng-show="device.has_been_reset"><label class='label label-success'>secret key has been reset</label></div>
+			</td>
 			<td>{{device.created_at}}</td>
 			<td>
-				<div class="btn-group">
+				<div class="btn-group" ng-hide="device.is_resetting">
 					<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						<i class='glyphicon glyphicon-option-vertical'></i>
 					</button>
 					<ul class="dropdown-menu">
-						<li><a href="#"><i class="glyphicon glyphicon-edit"></i> Rename</a></li>
-						<li><a href="#"><i class="glyphicon glyphicon-refresh"></i> Reset secret key</a></li>
-						<li><a href="#"><i class="glyphicon glyphicon-trash"></i> Unregister</a></li>
+						<li><a href="" ng-click="device.is_confirming_reset=true">Reset secret key</a></li>
 					</ul>
+				</div>
+				<div ng-show="device.is_resetting" style="padding-left: 5px;">
+					<i class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></i>
 				</div>
 			</td>
 		</tr>
