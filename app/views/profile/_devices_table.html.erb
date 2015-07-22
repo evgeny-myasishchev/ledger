@@ -14,7 +14,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="device in devices" style="position: relative;">
+		<tr ng-repeat="device in devices" style="position: relative;" data-id="{{device.id}}">
 			<td>
 				<div style='position: absolute; z-index: 1;' class='alert alert-danger' ng-show="device.is_confirming_reset">
 					<strong>Device: {{device.name}}</strong>					
