@@ -13,14 +13,14 @@
 			<th></th>
 		</tr>
 	</thead>
-	<tbody>
+	<tbody ng-if="devices.length">
 		<tr ng-repeat="device in devices" style="position: relative;" data-id="{{device.id}}">
 			<td>
 				<div style='position: absolute; z-index: 1;' class='alert alert-danger' ng-show="device.is_confirming_reset">
 					<strong>Device: {{device.name}}</strong>					
 					<p>Are you sure you want to reset the secret key for this device?</p>
-					<button class='btn btn-danger' ng-click="resetSecretKey(device)">Yes, reset the secret key</button>
-					<button class='btn btn-default' ng-click="device.is_confirming_reset=false">No, not this time</button>
+					<button class='btn btn-danger btn-xs' ng-click="resetSecretKey(device)">Yes, reset the secret key</button>
+					<button class='btn btn-default btn-xs' ng-click="device.is_confirming_reset=false">No, not this time</button>
 				</div>
 				{{device.name}}
 				<div ng-show="device.has_been_reset"><label class='label label-success'>secret key has been reset</label></div>
@@ -40,5 +40,11 @@
 				</div>
 			</td>
 		</tr>
+	</tbody>
+	<tbody ng-if="!devices">
+		<tr><td colspan="3"><i class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></i> Loading evices</td></tr>
+	</tbody>
+	<tbody ng-if="devices.length == 0">
+		<tr><td colspan="3"><div class="alert alert-info">No registered devices</div></td></tr>
 	</tbody>
 </table>
