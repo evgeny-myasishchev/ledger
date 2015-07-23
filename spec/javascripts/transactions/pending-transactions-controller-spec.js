@@ -2,11 +2,8 @@ describe('transactions.PendingTransactionsController', function() {
 	var scope, $httpBackend, transactions, subject;
 	var account1, account2, account3;
 	
-	beforeEach(module('transactionsApp'));
-	
-	beforeEach(inject(function(_$httpBackend_, $rootScope, _transactions_){
-		$httpBackend = _$httpBackend_;
-		transactions = _transactions_;
+	beforeEach(function() {
+		module('transactionsApp');
 		angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
 				account1 = {id: 1, aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, is_closed: false},
@@ -14,8 +11,12 @@ describe('transactions.PendingTransactionsController', function() {
 				account3 = {id: 3, aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, is_closed: false}
 			]);
 		}]);
-		$httpBackend.whenGET('pending-transactions.json').respond([]);
-	}));
+		inject(function(_$httpBackend_, $rootScope, _transactions_){
+			$httpBackend = _$httpBackend_;
+			transactions = _transactions_;
+			$httpBackend.whenGET('pending-transactions.json').respond([]);
+		});
+	});
 	
 	function initController() {
 		inject(function($rootScope, $controller) {
