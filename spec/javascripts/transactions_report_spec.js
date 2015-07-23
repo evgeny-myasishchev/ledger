@@ -13,9 +13,7 @@ describe("ReportTransactionsController", function() {
 		inject(function(_$httpBackend_) {
 			$httpBackend = _$httpBackend_;
 		});
-		activeAccount = account2;
 		HomeHelpers.include(this);
-		this.assignActiveAccount(activeAccount);
 	});
 	
 	function initController() {
@@ -26,9 +24,9 @@ describe("ReportTransactionsController", function() {
 	}
 	
 	it("should assign active account", function() {
-		activeAccount.balance = undefined;
+		this.assignActiveAccount(account2);
 		initController();
-		expect(scope.account).toEqual(activeAccount);
+		expect(scope.newTransaction.account).toEqual(account2);
 	});
 	
 	it("should assign open accounts", function() {
@@ -37,14 +35,14 @@ describe("ReportTransactionsController", function() {
 		expect(scope.accounts).toEqual([account1, account2]);
 	});
 
-	it("initializes initial scope", function() {
+	it("initializes initial attributes of the new transaction", function() {
 		initController();
 		var currentDate = new Date();
 		currentDate.setMilliseconds(0);
 		scope.newTransaction.date.setMilliseconds(0);
 		expect(scope.newTransaction.date.toJSON()).toEqual(currentDate.toJSON());
 		expect(scope.newTransaction).toEqual({
-			amount: null, tag_ids: [], type_id: Transaction.expenseId, date: scope.newTransaction.date, comment: null
+			account: null, amount: null, tag_ids: [], type_id: Transaction.expenseId, date: scope.newTransaction.date, comment: null
 		});
 	});
 	
@@ -78,6 +76,7 @@ describe("ReportTransactionsController", function() {
 		beforeEach(function() {
 			date = new Date();
 			initController();
+			scope.newTransaction.account = account2;
 			scope.newTransaction.amount = '10.5';
 			scope.newTransaction.tag_ids = [1, 2];
 			scope.newTransaction.date = date;
@@ -248,16 +247,23 @@ describe("ReportTransactionsController", function() {
 		
 			it('should reset the newTransaction model', function() {
 				doReport(Transaction.expenseId);
+				expect(scope.newTransaction.account).toBeNull();
 				expect(scope.newTransaction.amount).toBeNull();
 				expect(scope.newTransaction.tag_ids).toEqual([]);
 				expect(scope.newTransaction.comment).toBeNull();
+			});
+			
+			it('should assign active account value on reset', function() {
+				this.assignActiveAccount(account3);
+				doReport(Transaction.expenseId);
+				expect(scope.newTransaction.account).toEqual(account3);
 			});
 		});
 	
 		describe('on success update account balance', function() {
 			beforeEach(function() {
-				scope.account = account1;
-				scope.account.balance = 500;
+				scope.newTransaction.account = account1;
+				account1.balance = 500;
 			});
 		
 			function doReport(amount, typeId) {
@@ -272,27 +278,26 @@ describe("ReportTransactionsController", function() {
 		
 			it('should update the balance on income', function() {
 				doReport(100, Transaction.incomeId);
-				expect(scope.account.balance).toEqual(600);
+				expect(account1.balance).toEqual(600);
 			});
 		
 			it('should update the balance on expense', function() {
 				doReport(100, Transaction.expenseId);
-				expect(scope.account.balance).toEqual(400);
+				expect(account1.balance).toEqual(400);
 			});
 		
 			it('should update the balance on refund', function() {
 				doReport(100, Transaction.refundId);
-				expect(scope.account.balance).toEqual(600);
+				expect(account1.balance).toEqual(600);
 			});
 		
 			it('should update the balance on on transfer', function() {
-				var receivingAccount = scope.accounts[1];
-				receivingAccount.balance = 10000;
-				scope.newTransaction.receivingAccount = receivingAccount;
+				account2.balance = 10000;
+				scope.newTransaction.receivingAccount = account2;
 				scope.newTransaction.amount_received = '50';
 				doReport(100, Transaction.transferKey);
-				expect(scope.account.balance).toEqual(400);
-				expect(receivingAccount.balance).toEqual(15000);
+				expect(account1.balance).toEqual(400);
+				expect(account2.balance).toEqual(15000);
 			});
 		});
 	});

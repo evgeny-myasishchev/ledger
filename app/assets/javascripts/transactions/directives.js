@@ -283,4 +283,16 @@
 		}
 	}]);
 	
+	transactionsApp.directive('newTransactionDetails', [function() {
+		return {
+			restrict: 'E',
+			templateUrl: 'new-transaction-details.html',
+			scope: {
+				transaction: '='
+			},
+			link: function(scope, element, attrs) {
+			}
+		}
+	}]);
+	
 }(jQuery);

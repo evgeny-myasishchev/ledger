@@ -2,49 +2,7 @@
 	<div class="panel-heading">Report new transaction</div>
 	<div class="panel-body">
 		<form name='newTransactionForm' role="form" ng-submit='report()'>
-			<div class='form-group'>
-				<label class='control-label' for="type">Account</label>
-				<div class='form-inline'>
-					<select-account ng-model='account' />
-				</div>
-			</div>
-			<div class='form-group form-inline'>
-				<div class="form-group">
-					<input autofocus='newTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='newTransaction.amount' required>
-				</div>
-				<div class="form-group">
-					<label class='control-label' for="type">Type</label>
-					<select name="type" id="type" class='form-control' ng-model='newTransaction.type_id'>
-						<option value="1" ng-selected="newTransaction.type_id == 1">Income</option>
-						<option value="2" ng-selected="newTransaction.type_id == 2">Expence</option>
-						<option value="3" ng-selected="newTransaction.type_id == 3">Refund</option>
-						<option value="transfer" ng-selected="newTransaction.type_id == 'transfer'">Transfer</option>
-					</select>
-				</div>
-				<div class="form-group">
-					<label class='control-label' for="date">Date</label>
-					<ldr-datepicker ng-model='newTransaction.date' />
-				</div>
-			</div>
-			<div ng-if='newTransaction.type_id == "transfer"' class='form-group'>
-				<div class='form-group'>
-					<label class='control-label' for="type">To the account</label>
-					<div class='form-inline'>
-						<select-account ng-model='newTransaction.receivingAccount' except='account' />
-						<span class='help-block' style='display: inline-block'>An account that receives the transfer</span>
-					</div>
-				</div>
-				<div class='form-group form-inline'>
-					<input type="text" class="form-control" placeholder="Amount received" ng-model='newTransaction.amount_received' required>
-					<span class='help-block' style='display: inline-block'>An actual amount that will be added to the receiving account</span>
-				</div>
-			</div>
-			<div class="form-group">
-				<ledger-tags-input ng-model='newTransaction.tag_ids' />
-			</div>
-			<div class="form-group">
-				<input type="text" class="form-control" placeholder="Comment" ng-model='newTransaction.comment'>
-			</div>
+			<new-transaction-details transaction="newTransaction"></new-transaction-details>
 			<div class="form-group">
 				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
 				or 

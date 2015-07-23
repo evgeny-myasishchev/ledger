@@ -2,7 +2,6 @@
 	var transactionsApp = angular.module('transactionsApp');
 	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID', 'transactions',
 	function ($scope, $http, accounts, money, newUUID, transactions) {
-		$scope.account = accounts.getActive();
 		$scope.accounts = accounts.getAllOpen();
 		$scope.reportedTransactions = [];
 		//For testing purposes
@@ -22,6 +21,7 @@
 	
 		var resetNewTransaction = function() {
 			$scope.newTransaction = {
+				account: accounts.getActive(),
 				amount: null,
 				tag_ids: [],
 				type_id: Transaction.expenseId,
@@ -52,7 +52,7 @@
 				tag_ids: $scope.newTransaction.tag_ids,
 				comment: $scope.newTransaction.comment,
 				type_id: $scope.newTransaction.type_id,
-				account_id: $scope.account.aggregate_id
+				account_id: $scope.newTransaction.account.aggregate_id
 			};
 			var typeKey;
 			if($scope.newTransaction.type_id == Transaction.transferKey) {
@@ -69,7 +69,7 @@
 				typeKey = Transaction.TypeKeyById[$scope.newTransaction.type_id];
 				command.is_transfer = false;
 			}
-			$http.post('accounts/' + $scope.account.aggregate_id + '/transactions/report-' + typeKey, command).success(function() {
+			$http.post('accounts/' + $scope.newTransaction.account.aggregate_id + '/transactions/report-' + typeKey, command).success(function() {
 				resetNewTransaction();
 				processReportedTransaction(command);
 			});
