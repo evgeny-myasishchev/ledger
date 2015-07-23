@@ -16,26 +16,34 @@
 		$scope.adjustAndApprove = function() {
 			$scope.pendingTransaction.type_id = parseInt($scope.pendingTransaction.type_id);
 			if(!$scope.pendingTransaction.tag_ids) $scope.pendingTransaction.tag_ids = [];
-			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + '/adjust-and-approve', $scope.pendingTransaction)
+			
+			if($scope.pendingTransaction.account == null) throw new Error('Account should be specified');
+			
+			var commandData = jQuery.extend({
+				account_id: $scope.pendingTransaction.account.aggregate_id
+			}, $scope.pendingTransaction);
+			delete(commandData.account);
+			
+			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + '/adjust-and-approve', commandData)
 				.success(function() {
-					var transaction = $scope.pendingTransaction;
 					$scope.pendingTransaction = null;
-					transaction.amount = money.parse(transaction.amount);
-					$scope.approvedTransactions.unshift(transaction);
-					removePendingTransaction(transaction.transaction_id);
-					transactions.processApprovedTransaction(transaction);
+					commandData.amount = money.parse(commandData.amount);
+					$scope.approvedTransactions.unshift(commandData);
+					removePendingTransaction(commandData.transaction_id);
+					transactions.processApprovedTransaction(commandData);
 					$scope.$emit('pending-transactions-changed');
 				});
 		};
 		
 		$scope.startReview = function(transaction) {
+			var account = transaction.account_id == null ? null : accounts.getById(transaction.account_id);
 			$scope.pendingTransaction = {
 				transaction_id: transaction.transaction_id,
 				amount: transaction.amount,
 				date: transaction.date,
 				tag_ids: transaction.tag_ids,
 				comment: transaction.comment,
-				account_id: transaction.account_id,
+				account: account,
 				type_id: transaction.type_id
 			};
 		};

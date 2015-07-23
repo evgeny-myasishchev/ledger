@@ -75,8 +75,20 @@ describe('transactions.PendingTransactionsController', function() {
 			expect(scope.pendingTransaction.date).toEqual(transaction.date);
 			expect(scope.pendingTransaction.tag_ids).toEqual(transaction.tag_ids);
 			expect(scope.pendingTransaction.comment).toEqual(transaction.comment);
-			expect(scope.pendingTransaction.account_id).toEqual(transaction.account_id);
+			expect(scope.pendingTransaction.account).toEqual(account1);
 			expect(scope.pendingTransaction.type_id).toEqual(transaction.type_id);
+		});
+		
+		it('should leave the account null if pending transaction has no account assigned', function() {
+			scope.startReview(transaction = {
+				transaction_id: 't-332',
+				amount: '223.43',
+				date: new Date(),
+				comment: 'Comment 332',
+				account_id: null,
+				type_id: 2
+			});
+			expect(scope.pendingTransaction.account).toBeNull();
 		});
 	});
 	
@@ -89,16 +101,21 @@ describe('transactions.PendingTransactionsController', function() {
 				amount: '223.43',
 				date: new Date(),
 				comment: 'Comment 332',
-				account_id: account1.aggregate_id,
+				account: account1,
 				type_id: 2
 			};
 		});
 		
 		it("should submit the adjust-and-approve", function() {
 			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
+				var expectedCommand = jQuery.extend({
+					account_id: scope.pendingTransaction.account.aggregate_id
+				}, scope.pendingTransaction);
+				delete(expectedCommand.account);
+
 				var command = JSON.parse(data);
 				command.date = new Date(command.date);
-				expect(command).toEqual(scope.pendingTransaction);
+				expect(command).toEqual(expectedCommand);
 				return true;
 			}).respond();
 			scope.adjustAndApprove();
@@ -128,7 +145,7 @@ describe('transactions.PendingTransactionsController', function() {
 		});
 		
 		describe('on success', function() {
-			var changeEventEmitted;
+			var changeEventEmitted, approvedTransaction;
 			beforeEach(function() {
 				$httpBackend.flush();
 				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
@@ -140,11 +157,17 @@ describe('transactions.PendingTransactionsController', function() {
 				spyOn(transactions, 'processApprovedTransaction');
 				scope.adjustAndApprove();
 				$httpBackend.flush();
+				
+				approvedTransaction = jQuery.extend({
+					account_id: pendingTransaction.account.aggregate_id
+				}, pendingTransaction);
+				approvedTransaction.amount = 22343;
+				delete(approvedTransaction.account);
 			});
 			
 			it('should insert the transaction into the begining of approvedTransactions', function() {
 				expect(scope.approvedTransactions.length).toEqual(3);
-				expect(scope.approvedTransactions[0]).toEqual(pendingTransaction);
+				expect(scope.approvedTransactions[0]).toEqual(approvedTransaction);
 			});
 			
 			it('should convert amount to integer', function() {
@@ -165,7 +188,7 @@ describe('transactions.PendingTransactionsController', function() {
 			});
 			
 			it('should use transactions provider to process approved transaction', function() {
-				expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(scope.approvedTransactions[0]);
+				expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(approvedTransaction);
 			});
 		});
 	});

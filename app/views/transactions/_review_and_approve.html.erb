@@ -9,8 +9,7 @@
 				<div class='form-group'>
 					<label class='control-label' for="type">Account</label>
 					<div class='form-inline'>
-						<select ng-options='account.aggregate_id as account.name + " (" + (account.balance | money) + ")" for account in accounts | orderBy:"name"' class='form-control' ng-model='pendingTransaction.account_id' required>
-						</select>
+						<select-account ng-model='pendingTransaction.account' />
 					</div>
 				</div>
 				<div class='form-group form-inline'>
