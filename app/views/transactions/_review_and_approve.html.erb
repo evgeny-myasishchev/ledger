@@ -1,39 +1,12 @@
 <div class="modal fade">
-	<div class="modal-dialog">
+	<div class="modal-dialog modal-lg">
 		<form class="modal-content" name='approveTransactionForm' role="form" ng-submit='adjustAndApprove()'>
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<h4 class="modal-title">Approving transaction</h4>
 			</div>
 			<div class="modal-body">
-				<div class='form-group'>
-					<label class='control-label' for="type">Account</label>
-					<div class='form-inline'>
-						<select-account ng-model='pendingTransaction.account' />
-					</div>
-				</div>
-				<div class='form-group form-inline'>
-					<div class="form-group">
-						<input autofocus='pendingTransaction.amount == null' type="text" class="form-control" placeholder="Amount" ng-model='pendingTransaction.amount' required>
-					</div>
-					<div class="form-group">
-						<label class='control-label' for="type">Type</label>
-						<select name="type" id="type" class='form-control' ng-model='pendingTransaction.type_id'>
-							<option value="1" ng-selected="pendingTransaction.type_id == 1">Income</option>
-							<option value="2" ng-selected="pendingTransaction.type_id == 2">Expence</option>
-							<option value="3" ng-selected="pendingTransaction.type_id == 3">Refund</option>
-						</select>
-					</div>
-					<div class="form-group">
-						<ldr-datepicker ng-model='pendingTransaction.date' />
-					</div>
-				</div>
-				<div class="form-group">
-					<ledger-tags-input ng-model='pendingTransaction.tag_ids' />
-				</div>
-				<div class="form-group">
-					<input type="text" class="form-control" placeholder="Comment" ng-model='pendingTransaction.comment'>
-				</div>
+				<new-transaction-details transaction="pendingTransaction"></new-transaction-details>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
