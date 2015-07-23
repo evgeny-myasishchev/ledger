@@ -38,11 +38,6 @@
 			// 	comment: 'Hello world, this is test transaction'
 			// };
 		};
-		$scope.$watch('newTransaction.amount', function(newVal) {
-			if(!newVal) return;
-			if(newVal[0] == '-') $scope.newTransaction.type_id = Transaction.expenseId;
-			else if(newVal[0] == '+') $scope.newTransaction.type_id = Transaction.incomeId;
-		});
 		resetNewTransaction();
 		$scope.report = function() {
 			var command = {

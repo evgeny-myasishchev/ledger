@@ -45,31 +45,6 @@ describe("ReportTransactionsController", function() {
 			account: null, amount: null, tag_ids: [], type_id: Transaction.expenseId, date: scope.newTransaction.date, comment: null
 		});
 	});
-	
-	describe('newTransaction.amount changes', function() {
-		beforeEach(function() {
-			scope.newTransaction.type_id = null;
-			scope.newTransaction.amount = null;
-		});
-		
-		it('should set transaction type to income if amount is signed and positive', function() {
-			scope.newTransaction.amount = "+1000";
-			scope.$digest();
-			expect(scope.newTransaction.type_id).toEqual(Transaction.incomeId);
-		});
-		
-		it('should set transaction type to expense if amount is signed and negative', function() {
-			scope.newTransaction.amount = "-1000";
-			scope.$digest();
-			expect(scope.newTransaction.type_id).toEqual(Transaction.expenseId);
-		});
-		
-		it('should do nothing if amount has no sign', function() {
-			scope.newTransaction.amount = "1000";
-			scope.$digest();
-			expect(scope.newTransaction.type_id).toBeNull();
-		});
-	});
 
 	describe("report", function() {
 		var date;
