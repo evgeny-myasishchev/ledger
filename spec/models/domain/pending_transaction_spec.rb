@@ -163,11 +163,56 @@ module PendingTransactionSpec
         subject.approve account
         expect(subject).to have_one_uncommitted_event PendingTransactionApproved, aggregate_id: subject.aggregate_id
       end
+    end
+    
+    describe 'approve_transfer' do
+      let(:account) { Domain::Account.new.make_created 'account-100' }
+      let(:receiving_account) { Domain::Account.new.make_created 'account-110' }
       
-      it 'should set approved flag on approved' do
-        subject.apply_event PendingTransactionApproved.new subject.aggregate_id
-        expect(subject.is_approved).to be_truthy
+      it 'should fail if account_id is empty' do
+        subject.report user, 't-100', '10.5'
+        expect { subject.approve_transfer account, receiving_account, '100.30' }.to raise_error Errors::DomainError, 'account_id is empty.'
       end
+      
+      it 'should fail if receiving_account is nil' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        expect { subject.approve_transfer account, nil, '100.30' }.to raise_error Errors::DomainError, 'receiving_account is nil.'
+      end
+      
+      it 'should fail if amount_received is empty' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        expect { subject.approve_transfer account, receiving_account, nil }.to raise_error Errors::DomainError, 'amount_received is empty.'
+      end
+      
+      it 'should fail if account is wrong' do
+        subject.report user, 't-100', '10.5', account_id: 'account-101'
+        expect { subject.approve_transfer account, receiving_account, '100.30' }.to raise_error Errors::DomainError, "account is wrong. Expected account='account-101' but was account='account-100'."
+      end
+      
+      it 'should fail if already approved' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        subject.apply_event PendingTransactionApproved.new subject.aggregate_id
+        expect { subject.approve_transfer account, receiving_account, '100.30' }.to raise_error Errors::DomainError, "pending transaction id=(t-100) has already been approved."
+      end
+      
+      it 'should preform the transfer' do
+        make_reported subject, user, account_id: account.aggregate_id
+        expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id) { 'rt-220' }
+        expect(account).to receive(:send_transfer).with(subject.aggregate_id, receiving_account.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment) { 'st-221' }
+        expect(receiving_account).to receive(:receive_transfer).with('rt-220', account.aggregate_id, 'st-221', '3693.50', subject.date, subject.tag_ids, subject.comment)
+        subject.approve_transfer account, receiving_account, '3693.50'
+      end
+      
+      it 'should raise approved event' do
+        make_reported subject, user, account_id: account.aggregate_id
+        subject.approve_transfer account, receiving_account, '100.30'
+        expect(subject).to have_one_uncommitted_event PendingTransactionApproved, aggregate_id: subject.aggregate_id
+      end
+    end
+    
+    it 'should set approved flag on PendingTransactionApproved event' do
+      subject.apply_event PendingTransactionApproved.new subject.aggregate_id
+      expect(subject.is_approved).to be_truthy
     end
     
     describe 'reject' do
