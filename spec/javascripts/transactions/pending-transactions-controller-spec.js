@@ -122,6 +122,30 @@ describe('transactions.PendingTransactionsController', function() {
 			$httpBackend.flush();
 		});
 		
+		it("should submit the adjust-and-approve-transfer", function() {
+			scope.pendingTransaction.receivingAccount = account2;
+			scope.pendingTransaction.amount_received = '4432.03';
+			scope.pendingTransaction.type_id = Transaction.transferKey;
+			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve-transfer', function(data) {
+				var expectedCommand = jQuery.extend({
+					account_id: scope.pendingTransaction.account.aggregate_id,
+					sending_account_id: scope.pendingTransaction.account.aggregate_id,
+					receiving_account_id: scope.pendingTransaction.receivingAccount.aggregate_id,
+					is_transfer: true
+				}, scope.pendingTransaction);
+				expectedCommand.type_id = Transaction.expenseId;
+				delete(expectedCommand.account);
+				delete(expectedCommand.receivingAccount);
+
+				var command = JSON.parse(data);
+				command.date = new Date(command.date);
+				expect(command).toEqual(expectedCommand);
+				return true;
+			}).respond();
+			scope.adjustAndApprove();
+			$httpBackend.flush();
+		});
+		
 		it("convert null tags to empty array", function() {
 			$httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
 				var command = JSON.parse(data);
@@ -165,7 +189,7 @@ describe('transactions.PendingTransactionsController', function() {
 				delete(approvedTransaction.account);
 			});
 			
-			it('should insert the transaction into the begining of approvedTransactions', function() {
+			it('should insert the transaction into the beginning of approvedTransactions', function() {
 				expect(scope.approvedTransactions.length).toEqual(3);
 				expect(scope.approvedTransactions[0]).toEqual(approvedTransaction);
 			});
@@ -189,6 +213,24 @@ describe('transactions.PendingTransactionsController', function() {
 			
 			it('should use transactions provider to process approved transaction', function() {
 				expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(approvedTransaction);
+			});
+		});
+		
+		describe('on success transfer', function() {
+			beforeEach(function() {
+				pendingTransaction.type_id = Transaction.transferKey;
+				pendingTransaction.receivingAccount = account2;
+				pendingTransaction.amount_received = '1009.32'
+				$httpBackend.flush();
+				$httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve-transfer').respond();
+				scope.approvedTransactions = [{t1: true}, {t2: true}];
+				scope.transactions  = [{t1: true}, jQuery.extend({}, pendingTransaction), {t2: true}];
+				scope.adjustAndApprove();
+				$httpBackend.flush();
+			});
+			
+			it('should convert amount_received to integer', function() {
+				expect(scope.approvedTransactions[0].amount_received).toEqual(100932);
 			});
 		});
 	});

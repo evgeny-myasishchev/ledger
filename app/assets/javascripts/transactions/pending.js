@@ -14,9 +14,7 @@
 		});
 		
 		$scope.adjustAndApprove = function() {
-			$scope.pendingTransaction.type_id = parseInt($scope.pendingTransaction.type_id);
 			if(!$scope.pendingTransaction.tag_ids) $scope.pendingTransaction.tag_ids = [];
-			
 			if($scope.pendingTransaction.account == null) throw new Error('Account should be specified');
 			
 			var commandData = jQuery.extend({
@@ -24,10 +22,25 @@
 			}, $scope.pendingTransaction);
 			delete(commandData.account);
 			
-			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + '/adjust-and-approve', commandData)
+			var action = '/adjust-and-approve';
+			if(commandData.type_id == Transaction.transferKey) {
+				action += '-transfer';
+				commandData.type_id = Transaction.expenseId;
+				commandData.sending_account_id = commandData.account_id;
+				commandData.receiving_account_id = $scope.pendingTransaction.receivingAccount.aggregate_id;
+				delete(commandData.receivingAccount);
+				commandData.is_transfer = true;
+			} else {
+				commandData.type_id = parseInt($scope.pendingTransaction.type_id);
+			}
+			
+			$http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + action, commandData)
 				.success(function() {
 					$scope.pendingTransaction = null;
 					commandData.amount = money.parse(commandData.amount);
+					if(commandData.is_transfer) {
+						commandData.amount_received = money.parse(commandData.amount_received);
+					}
 					$scope.approvedTransactions.unshift(commandData);
 					removePendingTransaction(commandData.transaction_id);
 					transactions.processApprovedTransaction(commandData);
