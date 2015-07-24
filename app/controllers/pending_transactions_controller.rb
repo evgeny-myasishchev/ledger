@@ -32,6 +32,11 @@ class PendingTransactionsController < ApplicationController
     render nothing: true
   end
   
+  def adjust_and_approve_transfer
+    dispatch_command AdjustAndApprovePendingTransferTransaction.from_hash params
+    render nothing: true
+  end
+  
   def destroy
     dispatch_command RejectPendingTransaction.new params
     render nothing: true

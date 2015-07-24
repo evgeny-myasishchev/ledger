@@ -26,6 +26,22 @@ describe Application::Commands::PendingTransactionCommands do
     it_behaves_like :required_id_attribute
   end
   
+  describe described_class::AdjustAndApprovePendingTransferTransaction do
+    it_behaves_like :required_id_attribute
+    
+    it 'should validate presence of the receiving_account_id and amount_received attributes' do
+      subject = described_class.from_hash params
+      expect(subject).not_to be_valid
+      expect(subject.errors[:receiving_account_id]).to eql ["can't be blank"]
+      expect(subject.errors[:amount_received]).to eql ["can't be blank"]
+      
+      params[:receiving_account_id] = 'account-100'
+      params[:amount_received] = 100
+      subject = described_class.from_hash params
+      expect(subject).to be_valid
+    end
+  end
+  
   describe described_class::RejectPendingTransaction do
     it_behaves_like :required_id_attribute
   end

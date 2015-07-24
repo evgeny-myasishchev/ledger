@@ -113,6 +113,11 @@ module Application::Commands
     command :AdjustAndApprovePendingTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
     end
+    command :AdjustAndApprovePendingTransferTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id, :receiving_account_id, :amount_received do
+      include PendingTransactionCommand
+      validates :receiving_account_id, presence: true
+      validates :amount_received, presence: true
+    end
     command :RejectPendingTransaction, :id do
       include PendingTransactionCommand
     end

@@ -50,6 +50,10 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     raise_event PendingTransactionApproved.new aggregate_id
   end
   
+  def approve_transfer sending_account, receiving_account, ammount_received
+    
+  end
+  
   def reject
     return if @is_rejected
     Log.debug "Rejecting transaction id=#{aggregate_id}"
