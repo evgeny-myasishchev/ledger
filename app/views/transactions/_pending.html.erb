@@ -12,7 +12,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		<tr ng-repeat="transaction in transactions">
+		<tr ng-repeat="transaction in transactions | orderBy:'-date'">
 			<td style='width: 20px; white-space: nowrap; padding-right: 20px;'>
 				<button class='btn btn-success btn-xs' title='Review and Approve' ng-click='startReview(transaction)'><i class='glyphicon glyphicon-ok'></i></button>
 			</th>
