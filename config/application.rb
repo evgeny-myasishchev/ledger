@@ -37,7 +37,8 @@ module Ledger
       initialize_logging
     end
     
-    attr_accessor :skip_domain_context
+    config.skip_domain_context = false
+    
     attr_reader :domain_context
     initializer :initialize_domain_context do |app|
       @domain_context = DomainContext.new do |c|
@@ -50,7 +51,7 @@ module Ledger
         c.with_command_handlers
         c.with_command_dispatch_middleware
         c.with_dispatch_undispatched_commits
-      end unless skip_domain_context
+      end unless config.skip_domain_context
     end unless Rails.env.test?
     
     attr_accessor :currencies_store
