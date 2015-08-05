@@ -10,10 +10,13 @@ Backburner.configure do |config|
   config.respond_timeout  = 120
   config.default_worker   = Backburner::Workers::Simple
   config.logger           = Log4r::Logger.new('ledger::backburner')
-  config.primary_queue    = "default"
+  config.primary_queue    = 'default'
   config.priority_labels  = { :custom => 50, :useless => 1000 }
   config.reserve_timeout  = nil
 end
+
+Backburner.default_queues << 'default'
+Backburner.default_queues << 'mailers'
 
 ActiveJob::Base.queue_adapter = :backburner
 Rails.application.config.active_job.queue_adapter = :backburner
