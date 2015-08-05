@@ -1,0 +1,19 @@
+<!-- the config file for default environment -->
+<log4r_config>
+	<pre_config>
+		<global level="DEBUG"/>
+		<parameter name="log_file_path" value="log/backburner.log"/>
+	</pre_config>
+
+	<!--1 MB file is enough for development-->
+	<outputter type="FileOutputter" maxsize="1048576" name="log_file" filename="#{log_file_path}">
+		<formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
+	<outputter type="StdoutOutputter" name="console" level='INFO'>
+		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
+	</outputter>
+	<logger name="ledger" outputters="console"/>
+	<logger name="event-store" outputters="console" level='INFO'/>
+	<logger name="common-domain" outputters="console" level='INFO'/>
+	<logger name="common-domain::persistence" level='INFO'/>
+</log4r_config>

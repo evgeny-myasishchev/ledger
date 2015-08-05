@@ -57,3 +57,6 @@ group :development, :test do
   gem 'jasmine-rails'
   gem 'rest-client'
 end
+
+# Use backburner (beanstalkd) to run active jobs on production
+gem 'backburner', group: :production

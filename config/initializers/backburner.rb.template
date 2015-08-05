@@ -1,0 +1,19 @@
+# On production rename this file to just backburner.rb and adjust parameters
+
+Backburner.configure do |config|
+  config.beanstalk_url    = ["beanstalk://127.0.0.1"]
+  config.tube_namespace   = "my-ledger.com"
+  config.on_error         = lambda { |e| puts e }
+  config.max_job_retries  = 3 # default 0 retries
+  config.retry_delay      = 2 # default 5 seconds
+  config.default_priority = 65536
+  config.respond_timeout  = 120
+  config.default_worker   = Backburner::Workers::Simple
+  config.logger           = Log4r::Logger.new('ledger::backburner')
+  config.primary_queue    = "default"
+  config.priority_labels  = { :custom => 50, :useless => 1000 }
+  config.reserve_timeout  = nil
+end
+
+ActiveJob::Base.queue_adapter = :backburner
+Rails.application.config.active_job.queue_adapter = :backburner
