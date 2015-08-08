@@ -27,7 +27,7 @@ module Ledger
     
     config.autoload_paths += %W(#{config.root}/lib)
     
-    config.log_config_path = File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
+    config.log_config_path = ENV['LOG_CONFIG'] || File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
     
     config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap")
     config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap", "fonts")
@@ -58,6 +58,7 @@ module Ledger
     config.before_initialize { |app| app.currencies_store = {} }
     
     def initialize_logging
+      puts "Initializing logging. Using log config: #{config.log_config_path}"
       LogFactory.configure(log_file_path: config.paths['log'].first, app_root: config.root, config_file: config.log_config_path)
       config.logger = LogFactory.logger "ledger"
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
