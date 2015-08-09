@@ -58,7 +58,6 @@ module Ledger
     config.before_initialize { |app| app.currencies_store = {} }
     
     def initialize_logging
-      puts "Initializing logging. Using log config: #{config.log_config_path}"
       LogFactory.configure(log_file_path: config.paths['log'].first, app_root: config.root, config_file: config.log_config_path)
       config.logger = LogFactory.logger "ledger"
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
