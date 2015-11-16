@@ -16,6 +16,4 @@ namespace :users do
     repo.save ledger
     log.info "User registered."
   end
-  
-  
 end
