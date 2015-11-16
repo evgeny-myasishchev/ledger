@@ -53,7 +53,21 @@ describe('acounts', function() {
 				compile('<select-account except="otherAccount"></select-account>');
 				expect(scope.filterAccount(account1)).toBeTruthy();
 				expect(scope.filterAccount(account2)).toBeFalsy();
-				expect(scope.filterAccount(account3)).toBeTruthy(true);
+				expect(scope.filterAccount(account3)).toBeTruthy();
+			});
+
+			it('should handle except changes', function() {
+				outerScope.otherAccount = account2;
+				compile('<select-account except="otherAccount"></select-account>');
+				expect(scope.filterAccount(account1)).toBeTruthy();
+				expect(scope.filterAccount(account2)).toBeFalsy();
+				expect(scope.filterAccount(account3)).toBeTruthy();
+
+				outerScope.otherAccount = account1;
+				outerScope.$digest();
+				expect(scope.filterAccount(account1)).toBeFalsy();
+				expect(scope.filterAccount(account2)).toBeTruthy();
+				expect(scope.filterAccount(account3)).toBeTruthy();
 			});
 			
 			it('should return false if multiple except accounts provided', function() {
