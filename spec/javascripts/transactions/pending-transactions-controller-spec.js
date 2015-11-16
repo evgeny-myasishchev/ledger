@@ -234,4 +234,49 @@ describe('transactions.PendingTransactionsController', function() {
 			});
 		});
 	});
+
+	describe('reject', function() {
+		var pendingTransaction;
+		beforeEach(function() {
+			initController();
+			scope.pendingTransaction = pendingTransaction = {
+				transaction_id: 't-332',
+				amount: '223.43',
+				date: new Date(),
+				comment: 'Comment 332',
+				account: account1,
+				type_id: 2
+			};
+		});
+		
+		it("should send delete request", function() {
+			$httpBackend.expectDELETE('pending-transactions/t-332').respond();
+			scope.reject();
+			$httpBackend.flush();
+			expect(scope.pendingTransaction).toBeNull();
+		});
+		
+		describe('on success', function() {
+			var changeEventEmitted;
+			beforeEach(function() {
+				$httpBackend.flush();
+				$httpBackend.whenDELETE('pending-transactions/t-332').respond();
+				scope.transactions  = [{t1: true}, pendingTransaction, {t2: true}];
+				scope.$on('pending-transactions-changed', function() {
+					changeEventEmitted = true;
+				});
+				scope.reject();
+				$httpBackend.flush();
+			});
+			
+			it('should remove the transaction from pendingTransactions', function() {
+				expect(scope.transactions.length).toEqual(2);
+				expect(scope.transactions).toEqual([{t1: true}, {t2: true}]);
+			});
+			
+			it('should emit pending-transactions-changed event', function() {
+				expect(changeEventEmitted).toBeTruthy();
+			});
+		});
+	});
 });

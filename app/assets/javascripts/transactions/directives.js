@@ -268,10 +268,11 @@
 				element.modal({
 					show: false
 				});
+
 				element.on('shown.bs.modal', function() {
 					element.find('select:first').focus();
 				});
-				
+
 				scope.$watch('pendingTransaction', function(newVal) {
 					if(newVal) {
 						element.modal('show');

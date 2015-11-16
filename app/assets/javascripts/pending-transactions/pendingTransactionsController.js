@@ -53,6 +53,15 @@
           $scope.$emit('pending-transactions-changed');
         });
     };
+
+    $scope.reject = function() {
+      $http.delete('pending-transactions/' + $scope.pendingTransaction.transaction_id)
+        .success(function() {
+          removePendingTransaction($scope.pendingTransaction.transaction_id);
+          $scope.pendingTransaction = null;
+          $scope.$emit('pending-transactions-changed');
+        });
+    }
     
     $scope.startReview = function(transaction) {
       var account = transaction.account_id == null ? null : accounts.getById(transaction.account_id);
