@@ -1,7 +1,13 @@
 !function() {
-	var transactionsApp = angular.module('transactionsApp');
-	transactionsApp.controller('ReportTransactionsController', ['$scope', '$http', 'accounts', 'money', 'newUUID', 'transactions',
-	function ($scope, $http, accounts, money, newUUID, transactions) {
+	'use strict';
+	
+	angular
+		.module('transactionsApp')
+		.controller('ReportTransactionsController', ReportTransactionsController);
+
+	ReportTransactionsController.$inject = ['$scope', '$http', 'accounts', 'money', 'newUUID', 'transactions'];
+
+	function ReportTransactionsController($scope, $http, accounts, money, newUUID, transactions) {
 		$scope.accounts = accounts.getAllOpen();
 		$scope.reportedTransactions = [];
 		//For testing purposes
@@ -69,5 +75,5 @@
 				processReportedTransaction(command);
 			});
 		};
-	}]);
+	}
 }();

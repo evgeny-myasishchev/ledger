@@ -1,7 +1,12 @@
 !function($) {
-	var accountsApp = angular.module('accountsApp');
-	accountsApp.controller('NewAccountController', ['$scope', '$http', 'money', 'ledgers', 'accounts', 
-	function($scope, $http, money, ledgers, accounts) {
+	'use strict';
+	
+	angular.module('accountsApp')
+		.controller('NewAccountController', NewAccountController);
+
+	NewAccountController.$inject = ['$scope', '$http', 'money', 'ledgers', 'accounts'];
+
+	function NewAccountController($scope, $http, money, ledgers, accounts) {
 		var resetNewAccount = function() {
 			$scope.newAccount = {
 				name: null,
@@ -66,5 +71,5 @@
 				$scope.created = false;
 			});
 		};
-	}]);
+	}
 }(jQuery);

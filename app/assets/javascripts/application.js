@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require js/bootstrap.js
 //= require angular
+//= require angular-rails-templates
 //= require angular-route
 //= require ledger
 //= require moment
@@ -22,8 +23,9 @@
 //= require bootstrap-tagsinput
 //= require typeahead.bundle
 //= require node-uuid
-//= require home
+//= require app.module
 //= require transactions
 //= require profile
+//= require accounts/accounts
 //= require_tree .
 //= require_self

@@ -3,7 +3,7 @@
 
   'use strict';
   
-  angular.module('accountsApp')
+  angular.module('transactionsApp')
     .controller('PendingTransactionsController', PendingTransactionsController);
 
   PendingTransactionsController.$inject = ['$scope', '$http', 'accounts', 'money', 'transactions'];

@@ -1,13 +1,16 @@
-var homeApp = (function() {
-	var homeApp = angular.module('homeApp', ['ErrorHandler', 'ngRoute', 'ledgerDirectives', 'ledgersProvider', 'tagsProvider', 'accountsApp', 'transactionsApp', 'profileApp']);
-	
-	homeApp.config(["$httpProvider", function($httpProvider) {
-	  $httpProvider.defaults.headers.common['X-CSRF-Token'] = $('meta[name=csrf-token]').attr('content')
-	}]);
-	
-	homeApp.controller('HomeController', ['$scope', '$http', '$location', 'tagsHelper', 
-	'ledgers', 'accounts', 'money', 'accountsState', 'search',
-	function ($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
+(function() {
+	'use strict';
+
+	angular
+		.module('homeApp')
+		.controller('HomeController', HomeController);
+
+	HomeController.$inject = [
+		'$scope', '$http', '$location', 'tagsHelper', 
+		'ledgers', 'accounts', 'money', 'accountsState', 'search',
+	];
+
+	function HomeController($scope, $http, $location, tagsHelper, ledgers, accounts, money, accountsState, search) {
 		$scope.categories = accounts.getAllCategories();
 		var activeAccount = $scope.activeAccount = accounts.getActive();
 		var transactionsBasePath = activeAccount ? 'accounts/' + activeAccount.aggregate_id + '/' : '';
@@ -119,32 +122,5 @@ var homeApp = (function() {
 			}
 			$scope.fetch(0, {updateTotal: true});
 		};
-	}]);
-
-	homeApp.config(['$routeProvider', function($routeProvider) {
-			$routeProvider.when('/tags', {
-				templateUrl: "tags.html",
-				controller: 'TagsController'
-			})
-			.when('/categories', {
-				templateUrl: "categories.html",
-				controller: 'CategoriesController'
-			})
-			.when('/accounts', {
-				templateUrl: "accounts.html",
-				controller: 'HomeController'
-			}).when('/accounts/new', {
-				templateUrl: "new_account.html",
-				controller: 'NewAccountController'
-			})
-			.when('/accounts/:accountSequentialNumber', {
-				templateUrl: "accounts.html",
-				controller: 'HomeController'
-			}).otherwise({
-				redirectTo: '/accounts'
-			});
-		}
-	]);
-	
-	return homeApp;
+	}
 })();

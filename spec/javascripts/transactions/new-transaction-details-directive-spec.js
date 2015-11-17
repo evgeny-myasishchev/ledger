@@ -9,7 +9,7 @@ describe('transactions.newTransactionDetails directive', function() {
 		scope = $rootScope.$new();
 		$compile = _$compile_;
 		
-		transactionsApp.config(['accountsProvider', function(accountsProvider) {
+		angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
 				account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1, is_closed: false},
 				account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2, is_closed: false}

@@ -3,7 +3,7 @@ describe("TagsController", function() {
 	var controller, scope, tags;
 	beforeEach(function() {
 		module('homeApp');
-		homeApp.config(['tagsProvider', function(tagsProvider) {
+		angular.module('homeApp').config(['tagsProvider', function(tagsProvider) {
 			tagsProvider.assignTags([
 				tag1 = {tag_id: 110, name: 'Tag 110'}, tag2 = {tag_id: 120, name: 'Tag 120'}, tag3 = {tag_id: 130, name: 'Tag 130'}
 			]);
