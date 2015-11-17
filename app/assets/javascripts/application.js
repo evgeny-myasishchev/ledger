@@ -14,6 +14,7 @@
 //= require jquery_ujs
 //= require js/bootstrap.js
 //= require angular
+//= require angular-rails-templates
 //= require angular-route
 //= require ledger
 //= require moment
