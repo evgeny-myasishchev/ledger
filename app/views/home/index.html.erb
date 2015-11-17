@@ -1,47 +1,36 @@
 <div class='container-fluid' ng-app="homeApp">
-	<script type="text/ng-template" id='application-error.html'>
-	<%= render template: 'application-error' %>
-	</script>
-	<script type="text/ng-template" id='accounts.html'>
-	<%= render partial: 'accounts' %>
-	</script>
-	<script type="text/ng-template" id='accounts-panel.html'>
-	<%= render partial: 'accounts_panel' %>
-	</script>
-	<script type="text/ng-template" id='new_account.html'>
-	<%= render partial: 'new_account' %>
-	</script>
-	<script type="text/ng-template" id='tags.html'>
-	<%= render partial: 'tags' %>
-	</script>
-	<script type="text/ng-template" id='categories.html'>
-	<%= render partial: 'categories' %>
-	</script>
-	<script type="text/ng-template" id='pending-transactions-menu.html'>
-		<li>
-			<a href='#/pending-transactions'>Pending transactions <span class='label label-info'>{{count}}</span></a>
-		</li>
-	</script>
-	<script type="text/ng-template" id='pending-transactions.html'>
-	<%= render partial: 'transactions/pending' %>
-	</script>
-	<script type="text/ng-template" id='review-and-approve-pending-transaction.html'>
-	<%= render partial: 'transactions/review_and_approve' %>
-	</script>
-	<%= render partial: 'profile/templates_registration' %>
-	<%= render partial: 'transactions/templates_registration' %>
-	<script type="text/javascript">
-		angular.module('homeApp').config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'transactionsProvider',
-		function(ledgersProvider, accountsProvider, tagsProvider, transactionsProvider) {
-			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
-			accountsProvider.assignAccounts(<%= raw @accounts.to_json(methods: :currency) %>);
-			accountsProvider.assignCategories(<%= raw @categories.to_json %>);
-			tagsProvider.assignTags(<%= raw @tags.to_json %>);
-			transactionsProvider.setPendingTransactionsCount(<%= @pending_transactions_count %>);
-		}]);
-	</script>
-	<ldr-errors-notifier></ldr-errors-notifier>
-	<pending-transactions-menu-injector></pending-transactions-menu-injector>
-	<div ng-view class='row'>
-	</div>
+  <script type="text/ng-template" id='application-error.html'>
+  <%= render template: 'application-error' %>
+  </script>
+  <script type="text/ng-template" id='accounts.html'>
+  <%= render partial: 'accounts' %>
+  </script>
+  <script type="text/ng-template" id='accounts-panel.html'>
+  <%= render partial: 'accounts_panel' %>
+  </script>
+  <script type="text/ng-template" id='new_account.html'>
+  <%= render partial: 'new_account' %>
+  </script>
+  <script type="text/ng-template" id='tags.html'>
+  <%= render partial: 'tags' %>
+  </script>
+  <script type="text/ng-template" id='categories.html'>
+  <%= render partial: 'categories' %>
+  </script>
+  <%= render partial: 'profile/templates_registration' %>
+  <%= render partial: 'transactions/templates_registration' %>
+  <script type="text/javascript">
+  angular.module('homeApp').config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'transactionsProvider',
+  function(ledgersProvider, accountsProvider, tagsProvider, transactionsProvider) {
+    ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
+    accountsProvider.assignAccounts(<%= raw @accounts.to_json(methods: :currency) %>);
+    accountsProvider.assignCategories(<%= raw @categories.to_json %>);
+    tagsProvider.assignTags(<%= raw @tags.to_json %>);
+    transactionsProvider.setPendingTransactionsCount(<%= @pending_transactions_count %>);
+  }]);
+  </script>
+  <ldr-errors-notifier></ldr-errors-notifier>
+  <pending-transactions-menu-injector></pending-transactions-menu-injector>
+  <div ng-view class='row'>
+  </div>
 </div>

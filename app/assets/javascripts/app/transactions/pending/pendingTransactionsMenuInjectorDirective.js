@@ -16,7 +16,7 @@
     return {
       restrict: 'E',
       replace: true,
-      templateUrl: 'pending-transactions-menu.html',
+      templateUrl: 'app/transactions/pending/pending-transactions-menu.html',
       scope: {},
       link: function(scope, element, attrs) {
         angular.element('#main-navbar-right').prepend(element);

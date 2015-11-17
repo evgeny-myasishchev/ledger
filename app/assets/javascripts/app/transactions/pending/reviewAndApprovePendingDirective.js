@@ -11,7 +11,7 @@
     return {
       restrict: 'E',
       replace: true,
-      templateUrl: 'review-and-approve-pending-transaction.html',
+      templateUrl: 'app/transactions/pending/review-and-approve-pending-transaction.html',
       link: function(scope, element, attrs) {
         element.modal({
           show: false

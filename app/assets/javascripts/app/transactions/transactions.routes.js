@@ -18,7 +18,7 @@
         controller: 'ReportTransactionsController'
       })
       .when('/pending-transactions', {
-        templateUrl: "pending-transactions.html",
+        templateUrl: "app/transactions/pending/pending-transactions.html",
         controller: 'PendingTransactionsController'
       });
   }

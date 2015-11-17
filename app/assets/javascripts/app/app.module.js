@@ -10,7 +10,8 @@
       'tagsProvider', 
       'accountsApp', 
       'transactionsApp', 
-      'profileApp'
+      'profileApp',
+      'templates'
     ])
     .config(protectFromForgery);
 

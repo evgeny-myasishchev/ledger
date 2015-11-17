@@ -7,6 +7,7 @@
       'ngRoute', 
       'UUID', 
       'ledgerHelpers', 
-      'accountsApp'
+      'accountsApp',
+      'templates'
     ]);
 })();
