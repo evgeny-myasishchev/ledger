@@ -3,7 +3,7 @@ describe("CategoriesController", function() {
 	var controller, scope, accounts;
 	beforeEach(function() {
 		module('homeApp');
-		homeApp.config(['accountsProvider', function(accountsProvider) {
+		angular.module('homeApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignCategories([
 				category1 = {category_id: 110, name: 'Category 110', display_order: 1},
 				category2 = {category_id: 120, name: 'Category 120', display_order: 2},

@@ -23,8 +23,9 @@
 //= require bootstrap-tagsinput
 //= require typeahead.bundle
 //= require node-uuid
-//= require home
+//= require app.module
 //= require transactions
 //= require profile
+//= require accounts/accounts
 //= require_tree .
 //= require_self

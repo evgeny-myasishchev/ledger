@@ -1,7 +1,13 @@
 !function($) {
-	var homeApp = angular.module('homeApp');
-	
-	homeApp.controller('TagsController', ['$scope', '$http', 'tags', function($scope, $http, tags) {
+	'use strict';
+
+	angular
+		.module('homeApp')
+		.controller('TagsController', TagsController);
+
+	TagsController.$inject = ['$scope', '$http', 'tags'];
+
+	function TagsController($scope, $http, tags) {
 		$scope.tags = tags.getAll();
 		
 		$scope.create = function() {
@@ -19,5 +25,5 @@
 		$scope.removeTag = function(tag) {
 			tags.remove(tag.tag_id);
 		};
-	}]);
+	}
 }(jQuery);

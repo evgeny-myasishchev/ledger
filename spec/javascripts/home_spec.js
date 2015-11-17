@@ -6,7 +6,7 @@ describe("homeApp", function() {
 	beforeEach(function() {
 		module('homeApp');
 		scope = {};
-		homeApp.config(['accountsProvider', function(accountsProvider) {
+		angular.module('homeApp').config(['accountsProvider', function(accountsProvider) {
 			accountsProvider.assignAccounts([
 				account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000},
 				account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000},

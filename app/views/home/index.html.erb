@@ -31,7 +31,7 @@
 	<%= render partial: 'profile/templates_registration' %>
 	<%= render partial: 'transactions/templates_registration' %>
 	<script type="text/javascript">
-		homeApp.config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'transactionsProvider',
+		angular.module('homeApp').config(['ledgersProvider', 'accountsProvider', 'tagsProvider', 'transactionsProvider',
 		function(ledgersProvider, accountsProvider, tagsProvider, transactionsProvider) {
 			ledgersProvider.assignLedgers(<%= raw @ledgers.to_json %>);
 			accountsProvider.assignAccounts(<%= raw @accounts.to_json(methods: :currency) %>);
