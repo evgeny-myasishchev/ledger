@@ -102,9 +102,10 @@
         });
         vm.transactions = transactions;
         vm.accounts = accounts.getAllOpen();
+        
+        //For testing
+        // vm.startReview(vm.transactions[0]);
       });
     }
-    
-    // vm.startReview(transactions[0]);
   }
 })();

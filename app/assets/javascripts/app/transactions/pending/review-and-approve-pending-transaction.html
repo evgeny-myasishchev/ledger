@@ -8,9 +8,24 @@
       <div class="modal-body">
         <new-transaction-details transaction="vm.pendingTransaction"></new-transaction-details>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Approve</button>
+      <div class="modal-footer clearfix" ng-init='confirmingRejection=false'>
+        
+        <div ng-show='!confirmingRejection'>
+          <button type="button" class="btn btn-default pull-left" ng-click='confirmingRejection=true'>
+            <i class='glyphicon glyphicon-trash'></i> Reject
+          </button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Approve</button>
+        </div>
+        
+        <!-- Reject confirmation -->
+        <div ng-show='confirmingRejection' class='ng-hide'>
+          <div class='alert alert-danger text-left' style='margin-bottom: 0px;'>
+            The transaction will be rejected. Continue?
+            <button type='button' class='btn btn-sm btn-danger' ng-click='vm.reject()'>Yes</button>
+            <button type='button' class='btn btn-sm btn-default' ng-click='confirmingRejection=false'>No</button>
+          </div>
+        </div>
       </div>
     </form>
   </div>
