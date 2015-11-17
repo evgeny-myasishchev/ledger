@@ -19,7 +19,8 @@
       })
       .when('/pending-transactions', {
         templateUrl: "app/transactions/pending/pending-transactions.html",
-        controller: 'PendingTransactionsController'
+        controller: 'PendingTransactionsController',
+        controllerAs: 'vm'
       });
   }
 })();

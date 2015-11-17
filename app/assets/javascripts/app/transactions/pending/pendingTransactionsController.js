@@ -9,23 +9,29 @@
   PendingTransactionsController.$inject = ['$scope', '$http', 'accounts', 'money', 'transactions'];
 
   function PendingTransactionsController($scope, $http, accounts, money, transactions) {
-    $scope.approvedTransactions = [];
-    $http.get('pending-transactions.json').success(function(data) {
-      var transactions = data;
-      jQuery.each(transactions, function(i, t) {
-        if(t.date) t.date = new Date(t.date);
-      });
-      $scope.transactions = transactions;
-      $scope.accounts = accounts.getAllOpen();
-    });
+    var vm = this;
     
-    $scope.adjustAndApprove = function() {
-      if(!$scope.pendingTransaction.tag_ids) $scope.pendingTransaction.tag_ids = [];
-      if($scope.pendingTransaction.account == null) throw new Error('Account should be specified');
+    vm.adjustAndApprove = adjustAndApprove;
+    vm.reject = reject;
+    vm.startReview = startReview;
+    vm.stopReview = stopReview;
+    
+    vm.accounts = [];
+    vm.approvedTransactions = [];
+    vm.pendingTransaction = null;
+    vm.transactions = [];
+    
+    loadPendingTransactions();
+    
+    ////////////
+    
+    function adjustAndApprove() {
+      if(!vm.pendingTransaction.tag_ids) vm.pendingTransaction.tag_ids = [];
+      if(vm.pendingTransaction.account == null) throw new Error('Account should be specified');
       
       var commandData = jQuery.extend({
-        account_id: $scope.pendingTransaction.account.aggregate_id
-      }, $scope.pendingTransaction);
+        account_id: vm.pendingTransaction.account.aggregate_id
+      }, vm.pendingTransaction);
       delete(commandData.account);
       
       var action = '/adjust-and-approve';
@@ -33,39 +39,39 @@
         action += '-transfer';
         commandData.type_id = Transaction.expenseId;
         commandData.sending_account_id = commandData.account_id;
-        commandData.receiving_account_id = $scope.pendingTransaction.receivingAccount.aggregate_id;
+        commandData.receiving_account_id = vm.pendingTransaction.receivingAccount.aggregate_id;
         delete(commandData.receivingAccount);
         commandData.is_transfer = true;
       } else {
-        commandData.type_id = parseInt($scope.pendingTransaction.type_id);
+        commandData.type_id = parseInt(vm.pendingTransaction.type_id);
       }
       
-      $http.post('pending-transactions/' + $scope.pendingTransaction.transaction_id + action, commandData)
+      $http.post('pending-transactions/' + vm.pendingTransaction.transaction_id + action, commandData)
         .success(function() {
-          $scope.pendingTransaction = null;
+          vm.pendingTransaction = null;
           commandData.amount = money.parse(commandData.amount);
           if(commandData.is_transfer) {
             commandData.amount_received = money.parse(commandData.amount_received);
           }
-          $scope.approvedTransactions.unshift(commandData);
+          vm.approvedTransactions.unshift(commandData);
           removePendingTransaction(commandData.transaction_id);
           transactions.processApprovedTransaction(commandData);
           $scope.$emit('pending-transactions-changed');
         });
     };
 
-    $scope.reject = function() {
-      $http.delete('pending-transactions/' + $scope.pendingTransaction.transaction_id)
+    function reject() {
+      $http.delete('pending-transactions/' + vm.pendingTransaction.transaction_id)
         .success(function() {
-          removePendingTransaction($scope.pendingTransaction.transaction_id);
-          $scope.pendingTransaction = null;
+          removePendingTransaction(vm.pendingTransaction.transaction_id);
+          vm.pendingTransaction = null;
           $scope.$emit('pending-transactions-changed');
         });
     }
     
-    $scope.startReview = function(transaction) {
+    function startReview(transaction) {
       var account = transaction.account_id == null ? null : accounts.getById(transaction.account_id);
-      $scope.pendingTransaction = {
+      vm.pendingTransaction = {
         transaction_id: transaction.transaction_id,
         amount: transaction.amount,
         date: transaction.date,
@@ -74,20 +80,31 @@
         account: account,
         type_id: transaction.type_id
       };
-    };
+    }
     
-    $scope.stopReview = function() {
-      $scope.pendingTransaction = null;
-    };
+    function stopReview() {
+      vm.pendingTransaction = null;
+    }
     
-    var removePendingTransaction = function(transaction_id) {
-      var transaction = jQuery.grep($scope.transactions, function(t) {
+    function removePendingTransaction(transaction_id) {
+      var transaction = jQuery.grep(vm.transactions, function(t) {
         return t.transaction_id == transaction_id;
       })[0];
-      var index = $scope.transactions.indexOf(transaction);
-      $scope.transactions.splice(index, 1);
-    };
+      var index = vm.transactions.indexOf(transaction);
+      vm.transactions.splice(index, 1);
+    }
     
-    // $scope.startReview(transactions[0]);
+    function loadPendingTransactions() {
+      $http.get('pending-transactions.json').success(function(data) {
+        var transactions = data;
+        jQuery.each(transactions, function(i, t) {
+          if(t.date) t.date = new Date(t.date);
+        });
+        vm.transactions = transactions;
+        vm.accounts = accounts.getAllOpen();
+      });
+    }
+    
+    // vm.startReview(transactions[0]);
   }
 })();

@@ -21,7 +21,7 @@
           element.find('select:first').focus();
         });
 
-        scope.$watch('pendingTransaction', function(newVal) {
+        scope.$watch('vm.pendingTransaction', function(newVal) {
           if(newVal) {
             element.modal('show');
           } else {
