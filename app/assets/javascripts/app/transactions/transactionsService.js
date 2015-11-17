@@ -8,6 +8,8 @@
   function transactionsProvider() {
     this.$get = transactionsService;
     this.setPendingTransactionsCount = setPendingTransactionsCount;
+    
+    transactionsService.$inject = ['$http', 'accounts'];
 
     function transactionsService($http, accounts) {
       var service = {
