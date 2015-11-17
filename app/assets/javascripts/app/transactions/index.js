@@ -1,4 +1,4 @@
-//= require transactions/transactions.module.js
+//= require app/transactions/transactions.module.js
 //= require_self
 //= require_tree .
 
