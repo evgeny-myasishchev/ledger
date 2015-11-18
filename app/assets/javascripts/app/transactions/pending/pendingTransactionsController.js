@@ -46,7 +46,7 @@
         commandData.type_id = parseInt(vm.pendingTransaction.type_id);
       }
       
-      $http.post('pending-transactions/' + vm.pendingTransaction.transaction_id + action, commandData)
+      return $http.post('pending-transactions/' + vm.pendingTransaction.transaction_id + action, commandData)
         .success(function() {
           vm.pendingTransaction = null;
           commandData.amount = money.parse(commandData.amount);
@@ -61,7 +61,7 @@
     };
 
     function reject() {
-      $http.delete('pending-transactions/' + vm.pendingTransaction.transaction_id)
+      return $http.delete('pending-transactions/' + vm.pendingTransaction.transaction_id)
         .success(function() {
           removePendingTransaction(vm.pendingTransaction.transaction_id);
           vm.pendingTransaction = null;
