@@ -1,18 +1,18 @@
-<div class="panel panel-default" id='report-new-transaction-container'>
-	<div class="panel-heading">Report new transaction</div>
-	<div class="panel-body">
-		<form name='newTransactionForm' role="form" ng-submit='vm.report()'>
-			<new-transaction-details transaction="vm.newTransaction"></new-transaction-details>
-			<div class="form-group">
-				<button class="btn btn-primary"	type='submit'>Report this transaction</button>
-				or 
-				<a href='#/accounts/{{vm.account.sequential_number}}'>I'm done reporting</a>
-			</div>
-		</form>
-	</div>
+<div class="panel panel-default" id='report-new-transaction-container' ng-init='reportStatus = {}'>
+  <div class="panel-heading">Report new transaction</div>
+  <div class="panel-body">
+    <form name='newTransactionForm' role="form" ng-submit='vm.report() | promiseStatus:reportStatus'>
+      <new-transaction-details transaction="vm.newTransaction"></new-transaction-details>
+      <div class="form-group">
+        <button ng-disabled='reportStatus.inProgress' class="btn btn-primary" type='submit'>Report this transaction</button>
+        or 
+        <a href='#/accounts/{{vm.account.sequential_number}}'>I'm done reporting</a>
+      </div>
+    </form>
+  </div>
 </div>
 
 <fieldset ng-show="vm.reportedTransactions.length">
-	<legend>Reported transactions</legend>
-	<transactions-list data='vm.reportedTransactions' show-account='true' />
+  <legend>Reported transactions</legend>
+  <transactions-list data='vm.reportedTransactions' show-account='true' />
 </fieldset>
