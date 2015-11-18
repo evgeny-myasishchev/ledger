@@ -10,7 +10,7 @@
   function newTransactionDetails() {
     return {
       restrict: 'E',
-      templateUrl: 'new-transaction-details.html',
+      templateUrl: 'app/transactions/report/new-transaction-details.html',
       scope: {
         transaction: '='
       },

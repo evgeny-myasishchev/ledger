@@ -10,12 +10,14 @@
   function config($routeProvider) {
     $routeProvider
       .when('/report', {
-        templateUrl: "report-transactions.html",
-        controller: 'ReportTransactionsController'
+        templateUrl: 'app/transactions/report/report.html',
+        controller: 'ReportTransactionsController',
+        controllerAs: 'vm'
       })
       .when('/accounts/:accountSequentialNumber/report', {
-        templateUrl: "report-transactions.html",
-        controller: 'ReportTransactionsController'
+        templateUrl: 'app/transactions/report/report.html',
+        controller: 'ReportTransactionsController',
+        controllerAs: 'vm'
       })
       .when('/pending-transactions', {
         templateUrl: "app/transactions/pending/pending-transactions.html",
