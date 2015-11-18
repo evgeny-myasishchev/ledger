@@ -23,6 +23,7 @@
 
         scope.$watch('vm.pendingTransaction', function(newVal) {
           if(newVal) {
+            scope.confirmingRejection = false;
             element.modal('show');
           } else {
             element.modal('hide');

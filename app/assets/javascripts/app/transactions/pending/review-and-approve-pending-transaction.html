@@ -8,7 +8,7 @@
       <div class="modal-body">
         <new-transaction-details transaction="vm.pendingTransaction"></new-transaction-details>
       </div>
-      <fieldset class="modal-footer clearfix" ng-init='confirmingRejection=false; actionStatus = {}' ng-disabled='actionStatus.inProgress'>
+      <fieldset class="modal-footer clearfix" ng-init='actionStatus = {}' ng-disabled='actionStatus.inProgress'>
         
         <div ng-show='!confirmingRejection'>
           <button type="button" class="btn btn-default pull-left" ng-click='confirmingRejection=true'>
