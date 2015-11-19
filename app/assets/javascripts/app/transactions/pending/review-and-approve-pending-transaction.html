@@ -1,6 +1,6 @@
 <div class="modal fade">
   <div class="modal-dialog modal-lg">
-    <form class="modal-content" name='approveTransactionForm' role="form" ng-submit='vm.adjustAndApprove() | promiseStatus:actionStatus'>
+    <form class="modal-content" name='approveTransactionForm' role="form" ng-submit='actionStatus = (vm.adjustAndApprove() | promiseStatus)'>
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Approving transaction</h4>
@@ -8,7 +8,7 @@
       <div class="modal-body">
         <new-transaction-details transaction="vm.pendingTransaction"></new-transaction-details>
       </div>
-      <fieldset class="modal-footer clearfix" ng-init='actionStatus = {}' ng-disabled='actionStatus.inProgress'>
+      <fieldset class="modal-footer clearfix" ng-disabled='actionStatus.inProgress'>
         
         <div ng-show='!confirmingRejection'>
           <button type="button" class="btn btn-default pull-left" ng-click='confirmingRejection=true'>
@@ -22,7 +22,7 @@
         <div ng-show='confirmingRejection' class='ng-hide'>
           <div class='alert alert-danger text-left' style='margin-bottom: 0px;'>
             The transaction will be rejected. Continue?
-            <button type='button' class='btn btn-sm btn-danger' ng-click='vm.reject() | promiseStatus:actionStatus'>Yes</button>
+            <button type='button' class='btn btn-sm btn-danger' ng-click='actionStatus = (vm.reject() | promiseStatus)'>Yes</button>
             <button type='button' class='btn btn-sm btn-default' ng-click='confirmingRejection=false'>No</button>
           </div>
         </div>

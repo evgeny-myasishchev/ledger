@@ -1,4 +1,5 @@
-(function () {  
+// Copied from https://github.com/evgeny-myasishchev/angular-promise-status
+(function () {
   'use strict';
 
   angular
@@ -6,10 +7,12 @@
     .filter('promiseStatus', promiseStatus);
 
   function promiseStatus() {
-    return function(promise, status) {
-      status.inProgress = true;
-      status.resolved = false;
-      status.rejected = false;
+    return function(promise) {
+      var status = {
+        inProgress: true,
+        resolved: false,
+        rejected: false
+      };
       promise
         .then(function() {
           status.resolved = true;
@@ -20,6 +23,7 @@
         .finally(function() {
           status.inProgress = false;
         });
+      return status;
     }
   }
 })();
