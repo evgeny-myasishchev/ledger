@@ -75,14 +75,14 @@
         comment: null
       };
       //For testing purposes
-      vm.newTransaction = {
-        account: vm.accounts[0],
-        amount: '332.03',
-        tag_ids: [1, 2],
-        type_id: Transaction.expenseId,
-        date: new Date(),
-        comment: 'Hello world, this is test transaction'
-      };
+      // vm.newTransaction = {
+      //   account: vm.accounts[0],
+      //   amount: '332.03',
+      //   tag_ids: [1, 2],
+      //   type_id: Transaction.expenseId,
+      //   date: new Date(),
+      //   comment: 'Hello world, this is test transaction'
+      // };
     };
     resetNewTransaction();
   }
