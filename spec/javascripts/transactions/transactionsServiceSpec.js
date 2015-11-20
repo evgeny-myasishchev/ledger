@@ -96,6 +96,14 @@ describe('transactions.transactionsService', function() {
       expect(subject.getPendingCount()).toEqual(31);
     });
   });
+  
+  describe('processRejectedPendingTransaction', function() {
+    it('should decrement count by one', function() {
+      var pendingCount = subject.getPendingCount();
+      subject.processRejectedPendingTransaction({id: 100});
+      expect(subject.getPendingCount()).toEqual(pendingCount-1);
+    });
+  });
 
   describe('moveTo', function() {
     var transaction, sourceAccount, targetAccount;

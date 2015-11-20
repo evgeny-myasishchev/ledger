@@ -16,6 +16,7 @@
         getPendingCount: getPendingCount,
         processReportedTransaction: processReportedTransaction,
         processApprovedTransaction: processApprovedTransaction,
+        processRejectedPendingTransaction: processRejectedPendingTransaction,
         moveTo: moveTo,
         convertType: convertType
       };
@@ -45,6 +46,10 @@
       
       function processApprovedTransaction(transaction) {
         this.processReportedTransaction(transaction);
+        pendingTransactionsCount--;
+      }
+      
+      function processRejectedPendingTransaction(transaction) {
         pendingTransactionsCount--;
       }
       
