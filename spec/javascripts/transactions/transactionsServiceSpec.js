@@ -1,4 +1,4 @@
-describe('transactions.transactionsProvider', function() {
+describe('transactions.transactionsService', function() {
   var subject;
   var account1, account2, account3;
 	
