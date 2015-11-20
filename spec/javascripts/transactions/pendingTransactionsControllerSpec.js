@@ -1,7 +1,7 @@
 describe('transactions.PendingTransactionsController', function() {
   var scope, $httpBackend, transactions, subject;
   var account1, account2, account3;
-	
+
   beforeEach(function() {
     module('transactionsApp');
     angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
@@ -17,14 +17,14 @@ describe('transactions.PendingTransactionsController', function() {
       $httpBackend.whenGET('pending-transactions.json').respond([]);
     });
   });
-	
+
   function initController() {
     inject(function($rootScope, $controller) {
       scope = $rootScope.$new();
       subject = $controller('PendingTransactionsController', {$scope: scope});
     });
   };
-	
+
   it('should fetch pending transactions', function() {
     $httpBackend.expectGET('pending-transactions.json').respond(
       [{t1: true}, {t2: true}, {t3: true}]
@@ -33,7 +33,7 @@ describe('transactions.PendingTransactionsController', function() {
     $httpBackend.flush();
     expect(subject.transactions).toEqual([{t1: true}, {t2: true}, {t3: true}]);
   });
-	
+
   it("should have dates converted to date object", function() {
     date = new Date();
     $httpBackend.expectGET('pending-transactions.json').respond(
@@ -45,7 +45,7 @@ describe('transactions.PendingTransactionsController', function() {
       expect(t.date).toEqual(date);
     });
   });
-	
+
   it("should assign open accounts", function() {
     $httpBackend.expectGET('pending-transactions.json').respond([]);
     account3.is_closed = true;
@@ -53,12 +53,12 @@ describe('transactions.PendingTransactionsController', function() {
     $httpBackend.flush();
     expect(subject.accounts).toEqual([account1, account2]);
   });
-	
+
   describe('startReview', function() {
     beforeEach(function() {
       initController();
     });
-		
+
     it('should initialize pending transaction', function() {
       var transaction;
       subject.startReview(transaction = {
@@ -69,7 +69,7 @@ describe('transactions.PendingTransactionsController', function() {
         account_id: account1.aggregate_id,
         type_id: 2
       });
-			
+
       expect(subject.pendingTransaction.transaction_id).toEqual(transaction.transaction_id);
       expect(subject.pendingTransaction.amount).toEqual(transaction.amount);
       expect(subject.pendingTransaction.date).toEqual(transaction.date);
@@ -78,7 +78,7 @@ describe('transactions.PendingTransactionsController', function() {
       expect(subject.pendingTransaction.account).toEqual(account1);
       expect(subject.pendingTransaction.type_id).toEqual(transaction.type_id);
     });
-		
+
     it('should leave the account null if pending transaction has no account assigned', function() {
       subject.startReview(transaction = {
         transaction_id: 't-332',
@@ -91,7 +91,7 @@ describe('transactions.PendingTransactionsController', function() {
       expect(subject.pendingTransaction.account).toBeNull();
     });
   });
-	
+
   describe('adjustAndApprove', function() {
     var pendingTransaction;
     beforeEach(function() {
@@ -105,7 +105,7 @@ describe('transactions.PendingTransactionsController', function() {
         type_id: 2
       };
     });
-		
+
     it("should submit the adjust-and-approve", function() {
       $httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
         var expectedCommand = jQuery.extend({
@@ -121,7 +121,7 @@ describe('transactions.PendingTransactionsController', function() {
       subject.adjustAndApprove();
       $httpBackend.flush();
     });
-		
+
     it("should submit the adjust-and-approve-transfer", function() {
       subject.pendingTransaction.receivingAccount = account2;
       subject.pendingTransaction.amount_received = '4432.03';
@@ -145,7 +145,7 @@ describe('transactions.PendingTransactionsController', function() {
       subject.adjustAndApprove();
       $httpBackend.flush();
     });
-		
+
     it("convert null tags to empty array", function() {
       $httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
         var command = JSON.parse(data);
@@ -156,7 +156,7 @@ describe('transactions.PendingTransactionsController', function() {
       subject.adjustAndApprove();
       $httpBackend.flush();
     });
-		
+
     it("convert type_id to integer", function() {
       $httpBackend.expectPOST('pending-transactions/t-332/adjust-and-approve', function(data) {
         var command = JSON.parse(data);
@@ -167,7 +167,7 @@ describe('transactions.PendingTransactionsController', function() {
       subject.adjustAndApprove();
       $httpBackend.flush();
     });
-		
+
     describe('on success', function() {
       var changeEventEmitted, approvedTransaction;
       beforeEach(function() {
@@ -181,41 +181,41 @@ describe('transactions.PendingTransactionsController', function() {
         spyOn(transactions, 'processApprovedTransaction');
         subject.adjustAndApprove();
         $httpBackend.flush();
-				
+
         approvedTransaction = jQuery.extend({
           account_id: pendingTransaction.account.aggregate_id
         }, pendingTransaction);
         approvedTransaction.amount = 22343;
         delete(approvedTransaction.account);
       });
-			
+
       it('should insert the transaction into the beginning of approvedTransactions', function() {
         expect(subject.approvedTransactions.length).toEqual(3);
         expect(subject.approvedTransactions[0]).toEqual(approvedTransaction);
       });
-			
+
       it('should convert amount to integer', function() {
         expect(subject.approvedTransactions[0].amount).toEqual(22343);
       });
-			
+
       it('should clear the pending transaction', function() {
         expect(subject.pendingTransaction).toBeNull();
       });
-			
+
       it('should remove the transaction from pendingTransactions', function() {
         expect(subject.transactions.length).toEqual(2);
         expect(subject.transactions).toEqual([{t1: true}, {t2: true}]);
       });
-			
+
       it('should emit pending-transactions-changed event', function() {
         expect(changeEventEmitted).toBeTruthy();
       });
-			
+
       it('should use transactions provider to process approved transaction', function() {
         expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(approvedTransaction);
       });
     });
-		
+
     describe('on success transfer', function() {
       beforeEach(function() {
         pendingTransaction.type_id = Transaction.transferKey;
@@ -228,7 +228,7 @@ describe('transactions.PendingTransactionsController', function() {
         subject.adjustAndApprove();
         $httpBackend.flush();
       });
-			
+
       it('should convert amount_received to integer', function() {
         expect(subject.approvedTransactions[0].amount_received).toEqual(100932);
       });
@@ -248,14 +248,14 @@ describe('transactions.PendingTransactionsController', function() {
         type_id: 2
       };
     });
-		
+
     it("should send delete request", function() {
       $httpBackend.expectDELETE('pending-transactions/t-332').respond();
       subject.reject();
       $httpBackend.flush();
       expect(subject.pendingTransaction).toBeNull();
     });
-		
+
     describe('on success', function() {
       var changeEventEmitted;
       beforeEach(function() {
@@ -268,12 +268,12 @@ describe('transactions.PendingTransactionsController', function() {
         subject.reject();
         $httpBackend.flush();
       });
-			
+
       it('should remove the transaction from pendingTransactions', function() {
         expect(subject.transactions.length).toEqual(2);
         expect(subject.transactions).toEqual([{t1: true}, {t2: true}]);
       });
-			
+
       it('should emit pending-transactions-changed event', function() {
         expect(changeEventEmitted).toBeTruthy();
       });
