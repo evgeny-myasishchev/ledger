@@ -64,6 +64,7 @@
       return $http.delete('pending-transactions/' + vm.pendingTransaction.transaction_id)
         .success(function() {
           removePendingTransaction(vm.pendingTransaction.transaction_id);
+          transactions.processRejectedPendingTransaction(vm.pendingTransaction);
           vm.pendingTransaction = null;
           $scope.$emit('pending-transactions-changed');
         });

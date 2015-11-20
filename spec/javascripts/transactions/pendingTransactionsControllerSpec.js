@@ -265,6 +265,7 @@ describe('transactions.PendingTransactionsController', function() {
         scope.$on('pending-transactions-changed', function() {
           changeEventEmitted = true;
         });
+        spyOn(transactions, 'processRejectedPendingTransaction');
         subject.reject();
         $httpBackend.flush();
       });
@@ -272,6 +273,10 @@ describe('transactions.PendingTransactionsController', function() {
       it('should remove the transaction from pendingTransactions', function() {
         expect(subject.transactions.length).toEqual(2);
         expect(subject.transactions).toEqual([{t1: true}, {t2: true}]);
+      });
+      
+      it('should process rejected pending transaction with service', function() {
+        expect(transactions.processRejectedPendingTransaction).toHaveBeenCalledWith(pendingTransaction);
       });
 
       it('should emit pending-transactions-changed event', function() {
