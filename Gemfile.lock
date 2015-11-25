@@ -6,18 +6,16 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: 41f6373f958d61330548f468a7d591161a766c25
-  ref: 41f6373f958d61330548f468a7d591161a766c25
+  revision: 41958b8402274b739315f4075b4f552e9bc9de7d
   specs:
-    common-domain (3.0.1.b2)
-      event-store (~> 3)
+    common-domain (4.0.1.b2)
+      event-store (~> 4)
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 9139908b45d292bb087ca1beb47402195afc6187
-  ref: 9139908b45d292bb087ca1beb47402195afc6187
+  revision: b71098605ceacba58a3fccc45be2a94e7ba10680
   specs:
-    event-store (3.0.1.b2)
+    event-store (4.0.1.b1)
       sequel
 
 GEM

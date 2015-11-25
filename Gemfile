@@ -34,8 +34,8 @@ gem 'omniauth-google-oauth2'
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
-gem 'event-store', github: 'evgeny-myasishchev/event-store', ref: '9139908b45d292bb087ca1beb47402195afc6187'
-gem 'common-domain', github: 'evgeny-myasishchev/common-domain', ref: '41f6373f958d61330548f468a7d591161a766c25'
+gem 'event-store', github: 'evgeny-myasishchev/event-store'
+gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
