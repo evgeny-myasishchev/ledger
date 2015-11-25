@@ -69,8 +69,8 @@ RSpec.describe Application::AccountsService, :type => :model do
   describe "ReportTransfer" do
     let(:date) { DateTime.now }
     before(:each) do
-      expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-      expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
     end
     
     it "should use source and target accounts to perform transfer" do
@@ -92,7 +92,7 @@ RSpec.describe Application::AccountsService, :type => :model do
   describe "AdjustAmount" do
     it "should use the account to adjust the amount of the transaction" do
       expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
-      expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers)
       expect(account).to receive(:adjust_amount).with('t-1', 221190)
       subject.handle_message c::AdjustAmount.new attributes: {transaction_id: 't-1', amount: 221190}, headers: dummy_headers
     end
@@ -102,7 +102,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     describe "regular transaction" do
       it "should get the transaction and use the account to adjust the comment" do
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
-        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers)
         expect(account).to receive(:adjust_comment).with('t-1', 'New comment')
         subject.handle_message c::AdjustComment.new attributes: {transaction_id: 't-1', comment: 'New comment'}, headers: dummy_headers
       end
@@ -113,8 +113,8 @@ RSpec.describe Application::AccountsService, :type => :model do
         sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
         expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
-        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
         expect(sending_account).to receive(:adjust_comment).with('t-1', 'New comment')
         expect(receiving_account).to receive(:adjust_comment).with('t-2', 'New comment')
         subject.handle_message c::AdjustComment.new attributes: {transaction_id: 't-1', comment: 'New comment'}, headers: dummy_headers
@@ -126,7 +126,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     describe "regular transaction" do
       it "should get the transaction and use the account to adjust the date" do
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
-        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers)
         expect(account).to receive(:adjust_date).with('t-1', 'new-date')
         subject.handle_message c::AdjustDate.new attributes: {transaction_id: 't-1', date: 'new-date'}, headers: dummy_headers
       end
@@ -137,8 +137,8 @@ RSpec.describe Application::AccountsService, :type => :model do
         sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
         expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
-        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
         expect(sending_account).to receive(:adjust_date).with('t-1', 'New comment')
         expect(receiving_account).to receive(:adjust_date).with('t-2', 'New comment')
         subject.handle_message c::AdjustDate.new attributes: {transaction_id: 't-1', date: 'New comment'}, headers: dummy_headers
@@ -150,7 +150,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     describe "regular transaction" do
       it "should get the transaction and use the account to adjust the date" do
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
-        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers)
         expect(account).to receive(:adjust_tags).with('t-1', [100, 110])
         subject.handle_message c::AdjustTags.new attributes: {transaction_id: 't-1', tag_ids: [100, 110]}, headers: dummy_headers
       end
@@ -161,8 +161,8 @@ RSpec.describe Application::AccountsService, :type => :model do
         sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
         expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
-        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
         expect(sending_account).to receive(:adjust_tags).with('t-1', [100, 110])
         expect(receiving_account).to receive(:adjust_tags).with('t-2', [100, 110])
         subject.handle_message c::AdjustTags.new attributes: {transaction_id: 't-1', tag_ids: [100, 110]}, headers: dummy_headers
@@ -185,7 +185,7 @@ RSpec.describe Application::AccountsService, :type => :model do
     describe "regular transaction" do
       it "should get the transaction and use the account to remove it" do
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { p::Transaction.new account_id: 'a-1' }
-        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'a-1').and_return(account).and_save(with_dummy_headers)
         expect(account).to receive(:remove_transaction).with('t-1')
         subject.handle_message c::RemoveTransaction.new attributes: {transaction_id: 't-1'}, headers: dummy_headers
       end
@@ -196,8 +196,8 @@ RSpec.describe Application::AccountsService, :type => :model do
         sending = p::Transaction.new account_id: 'src-110', transaction_id: 't-1', is_transfer: true
         expect(p::Transaction).to receive(:find_by_transaction_id).with('t-1') { sending }
         expect(sending).to receive(:get_transfer_counterpart) { p::Transaction.new account_id: 'dst-210', transaction_id: 't-2', is_transfer: true }
-        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+        expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+        expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
         expect(sending_account).to receive(:remove_transaction).with('t-1')
         expect(receiving_account).to receive(:remove_transaction).with('t-2')
         subject.handle_message c::RemoveTransaction.new attributes: {transaction_id: 't-1'}, headers: dummy_headers
@@ -212,8 +212,8 @@ RSpec.describe Application::AccountsService, :type => :model do
     
     before(:each) do
       expect(p::Transaction).to receive(:find_by_transaction_id).with('t-100') { p::Transaction.new account_id: 'src-110' }
-      expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers, with_dummy_transaction_context)
-      expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers, with_dummy_transaction_context)
+      expect(repository).to get_by_id(Domain::Account, 'src-110').and_return(sending_account).and_save(with_dummy_headers)
+      expect(repository).to get_by_id(Domain::Account, 'dst-210').and_return(receiving_account).and_save(with_dummy_headers)
     end
     
     it "should use source and target accounts to perform transfer" do

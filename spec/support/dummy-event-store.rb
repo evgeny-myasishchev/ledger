@@ -5,9 +5,6 @@ module DummyEventStore
     end
   end
   
-  class DummyTransactionContext < EventStore::Persistence::PersistenceEngine::TransactionContext
-  end
-  
   class Base < EventStore::Base
     def initialize
       @persistence_engine = DummyPersistenceEngine.new
@@ -24,7 +21,7 @@ module DummyEventStore
     end
   
     def transaction(&block)
-      yield DummyTransactionContext.new
+      yield
     end
   
     def purge
@@ -43,7 +40,7 @@ module DummyEventStore
     def get_by_id(aggregate_class, id)
     end
     
-    def save(aggregate, headers = {}, transaction = nil)
+    def save(aggregate, headers = {})
     end
   end
   
@@ -61,13 +58,5 @@ module DummyEventStore
   
   def create_dummy_repo_factory
     DummyRepositoryFactory.new
-  end
-  
-  def dummy_transaction_context
-    DummyTransactionContext.new
-  end
-    
-  def with_dummy_transaction_context
-    kind_of(DummyTransactionContext)
   end
 end
