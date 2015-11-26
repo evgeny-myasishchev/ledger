@@ -1,7 +1,6 @@
 class Application::PendingTransactionsService < CommonDomain::CommandHandler
   include Domain
   include Application::Commands
-  include CommonDomain::UnitOfWork::Atomic
   
   on PendingTransactionCommands::ReportPendingTransaction do |cmd|
     begin_unit_of_work cmd.headers do |uow|

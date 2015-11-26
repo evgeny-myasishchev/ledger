@@ -44,7 +44,7 @@ module DummyEventStore
     end
   end
   
-  class DummyRepositoryFactory < CommonDomain::Persistence::EventStore::RepositoryFactory
+  class DummyRepositoryFactory < CommonDomain::PersistenceFactory
     attr_reader :repository
     
     def initialize

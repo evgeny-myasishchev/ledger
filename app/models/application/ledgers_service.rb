@@ -1,6 +1,5 @@
 class Application::LedgersService < CommonDomain::CommandHandler
   include Application::Commands
-  include CommonDomain::UnitOfWork::Atomic
   
   on LedgerCommands::CreateNewAccount do |command|
     begin_unit_of_work command.headers do |uow|
