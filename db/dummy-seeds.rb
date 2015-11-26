@@ -54,7 +54,7 @@ fake_transactions_data = [
 include Application::Commands
 
 def new_id
-  CommonDomain::Infrastructure::AggregateId.new_id
+  CommonDomain::Aggregate.new_id
 end
 
 def create_account(ledger, name, currency, &block)

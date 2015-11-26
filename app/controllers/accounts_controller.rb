@@ -11,7 +11,7 @@ class AccountsController < ApplicationController
   
   def new
     @currencies = Currency.known
-    @new_account_id = CommonDomain::Infrastructure::AggregateId.new_id
+    @new_account_id = CommonDomain::Aggregate.new_id
     respond_to do |format|
       format.json {
         render json: {currencies: @currencies, new_account_id: @new_account_id}

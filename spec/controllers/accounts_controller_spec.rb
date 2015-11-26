@@ -5,7 +5,7 @@ RSpec.describe AccountsController, :type => :controller do
     Module.new do
       include Application::Commands::LedgerCommands
       include Application::Commands::AccountCommands
-      include CommonDomain::Infrastructure
+      include CommonDomain
     end
   }
   include AuthenticationHelper
@@ -65,7 +65,7 @@ RSpec.describe AccountsController, :type => :controller do
     end
       
     it "should generate and assign new account_id" do
-      expect(i::AggregateId).to receive(:new_id).and_return('new-account-223')
+      expect(i::Aggregate).to receive(:new_id).and_return('new-account-223')
       get :new, ledger_id: 221, format: :json
       expect(response.status).to eql 200
       expect(assigns(:new_account_id)).to eql 'new-account-223'

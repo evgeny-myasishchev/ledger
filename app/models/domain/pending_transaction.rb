@@ -1,6 +1,6 @@
 class Domain::PendingTransaction < CommonDomain::Aggregate
   include Loggable
-  include CommonDomain::Infrastructure
+  include CommonDomain
   include Domain::Events
   
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
@@ -62,7 +62,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
       date,
       tag_ids,
       comment
-    receiving_account.receive_transfer AggregateId.new_id, account.aggregate_id, sending_transaction_id,
+    receiving_account.receive_transfer Aggregate.new_id, account.aggregate_id, sending_transaction_id,
       amount_received,
       date,
       tag_ids,

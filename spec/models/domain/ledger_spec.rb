@@ -19,7 +19,7 @@ describe Domain::Ledger do
   
   describe "create" do
     it "should raise LedgerCreated event" do
-      expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('ledger-1')
+      expect(CommonDomain::Aggregate).to receive(:new_id).and_return('ledger-1')
       subject.create 100, 'Ledger 1', currency
       expect(subject).to have_one_uncommitted_event I::LedgerCreated, aggregate_id: 'ledger-1', user_id: 100, name: 'Ledger 1', currency_code: currency.code
     end

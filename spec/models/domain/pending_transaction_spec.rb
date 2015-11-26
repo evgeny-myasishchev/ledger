@@ -197,7 +197,7 @@ module PendingTransactionSpec
       
       it 'should preform the transfer' do
         make_reported subject, user, account_id: account.aggregate_id
-        expect(CommonDomain::Infrastructure::AggregateId).to receive(:new_id) { 'rt-220' }
+        expect(CommonDomain::Aggregate).to receive(:new_id) { 'rt-220' }
         expect(account).to receive(:send_transfer).with(subject.aggregate_id, receiving_account.aggregate_id, subject.amount, subject.date, subject.tag_ids, subject.comment) { 'st-221' }
         expect(receiving_account).to receive(:receive_transfer).with('rt-220', account.aggregate_id, 'st-221', '3693.50', subject.date, subject.tag_ids, subject.comment)
         subject.approve_transfer account, receiving_account, '3693.50'

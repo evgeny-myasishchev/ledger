@@ -339,7 +339,7 @@ describe Domain::Account do
 
   describe "send_transfer" do
     before(:each) { subject.make_created.apply_event I::AccountBalanceChanged.new subject.aggregate_id, 'transaction-100', 5073 }
-    before(:each) { allow(CommonDomain::Infrastructure::AggregateId).to receive(:new_id).and_return('transaction-110') }
+    before(:each) { allow(CommonDomain::Aggregate).to receive(:new_id).and_return('transaction-110') }
 
     it "should raise TransferSent and AccountBalanceChanged events" do      
       date = DateTime.now
