@@ -1,6 +1,6 @@
 Rails.application.configure do |app|
   app.class_eval do
-    attr_reader :command_dispatch_middleware
+    attr_reader :command_dispatch_app
     
     begin
       event_store = EventStore.bootstrap do |with|
@@ -20,7 +20,7 @@ Rails.application.configure do |app|
       end
     
       dispatch = CommonDomain::DispatchCommand::Middleware::Dispatch.new(command_dispatcher)
-      @command_dispatch_middleware = CommonDomain::DispatchCommand::Middleware::Stack.new(dispatch) do |stack|
+      @command_dispatch_app = CommonDomain::DispatchCommand::Middleware::Stack.new(dispatch) do |stack|
         stack.with CommonDomain::DispatchCommand::Middleware::ValidateCommands
         stack.with CommonDomain::DispatchCommand::Middleware::TrackUser
       end

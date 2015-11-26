@@ -1,15 +1,13 @@
-module CommonDomain::DispatchCommand::DispatchContext
-  class Base
-    def user_id
-      raise 'Not implemented'
-    end
+class CommonDomain::DispatchCommand::DispatchContext
+  def user_id
+    raise 'Not implemented'
+  end
     
-    def remote_ip
-      raise 'Not implemented'
-    end
+  def remote_ip
+    raise 'Not implemented'
   end
   
-  class StaticDispatchContext
+  class StaticDispatchContext < self
     attr_reader :user_id, :remote_ip
     
     def initialize user_id, remote_ip
@@ -18,7 +16,7 @@ module CommonDomain::DispatchCommand::DispatchContext
     end
   end
   
-  class ControllerDispatchContext < Base
+  class ControllerDispatchContext < self
     def initialize controller, options = {}
       @controller = controller
       @options = {
