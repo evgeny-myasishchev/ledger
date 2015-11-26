@@ -1,19 +1,17 @@
 # This file contains initialization of the dummy data that is used for development purposes
 
-include CommonDomain::UnitOfWork::Atomic
-
 log = Rails.logger
 @log = log
-@context = Rails.application.domain_context
-def repository_factory
-  @context.repository_factory
-end
+@app = Rails.application
+@persistence_factory = @app.persistence_factory
 
 log.info 'Loadding dummy seeds...'
 
 log.debug 'Doing existing data clenup...'
-@context.event_store.purge
-@context.projections.for_each { |projection| projection.cleanup! }
+@app.event_store.purge
+
+#TODO Purge projections
+# @app.projections.for_each { |projection| projection.cleanup! }
 
 dummy_user_name = ENV['DUMMY_USER_NAME'] || 'dev@domain.com'
 log.info "Creating user #{dummy_user_name}"
@@ -22,14 +20,14 @@ user = User.create_with(password: 'password').find_or_create_by! email: dummy_us
 @dispatch_context = CommonDomain::DispatchCommand::DispatchContext::StaticDispatchContext.new user.id, '127.0.0.1'
 
 def dispatch command
-  @context.command_dispatch_middleware.call command, @dispatch_context
+  @app.command_dispatch_app.call command, @dispatch_context
 end
 
 uah = Currency['UAH']
 
 log.info 'Creating ledger for the user'
 tag_ids_by_name = {}
-ledger = begin_unit_of_work({}) do |work|
+ledger = @persistence_factory.begin_unit_of_work({}) do |work|
   l = work.add_new Domain::Ledger.new.create user.id, 'Family', uah
   tag_ids_by_name['food'] = l.create_tag 'Food'
   tag_ids_by_name['lunch'] = l.create_tag 'Lunch'
@@ -81,7 +79,7 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
   report_expense account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
   
   # Reporting in bulk directly. It just works faster.
-  begin_unit_of_work({}) do |work|
+  @persistence_factory.begin_unit_of_work({}) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
@@ -98,7 +96,7 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
   report_income account_id, '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
   report_income account_id, '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
   
-  begin_unit_of_work({}) do |work|
+  @persistence_factory.begin_unit_of_work({}) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
@@ -118,4 +116,5 @@ dispatch AccountCommands::ReportTransfer.new account_id: pb_credit_account_id, s
 dispatch AccountCommands::ReportTransfer.new account_id: pb_credit_account_id, sending_transaction_id: new_id, receiving_account_id: pb_deposit_id, receiving_transaction_id: new_id,
   amount_sent: '5000.00', amount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
-@context.event_store.dispatcher.wait_pending
+# TODO: Make sure projections are updated
+# @app.event_store.dispatcher.wait_pending
