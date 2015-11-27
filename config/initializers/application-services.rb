@@ -29,11 +29,11 @@ Rails.application.configure do |app|
       stack.with CommonDomain::DispatchCommand::Middleware::TrackUser
     end
 
-    @event_store_client.subscribe_handler ::Projections::Ledger.create_projection
-    @event_store_client.subscribe_handler ::Projections::Account.create_projection
-    @event_store_client.subscribe_handler ::Projections::Transaction.create_projection
-    @event_store_client.subscribe_handler ::Projections::PendingTransaction.create_projection
-    @event_store_client.subscribe_handler ::Projections::Tag.create_projection
-    @event_store_client.subscribe_handler ::Projections::Category.create_projection
+    @event_store_client.subscribe_handler ::Projections::Ledger.create_projection, group: :projections
+    @event_store_client.subscribe_handler ::Projections::Account.create_projection, group: :projections
+    @event_store_client.subscribe_handler ::Projections::Transaction.create_projection, group: :projections
+    @event_store_client.subscribe_handler ::Projections::PendingTransaction.create_projection, group: :projections
+    @event_store_client.subscribe_handler ::Projections::Tag.create_projection, group: :projections
+    @event_store_client.subscribe_handler ::Projections::Category.create_projection, group: :projections
   end unless Rails.env.test?
 end
