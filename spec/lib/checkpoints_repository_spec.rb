@@ -1,3 +1,5 @@
+require 'rails_helper'
+
 describe CheckpointsRepository do
   shared_examples 'checkpoints repository' do
     it 'should return nil if no checkpoint for given identifier' do
