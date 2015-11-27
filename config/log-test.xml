@@ -12,7 +12,7 @@
     <formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
   </outputter>
   <logger name="ledger" outputters="log_file"/>
-  <logger name="event-store" outputters="log_file" level='INFO'/>
-  <logger name="common-domain" outputters="log_file" level='DEBUG'/>
-  <logger name="common-domain::persistence" level='INFO'/>
+  <logger name="EventStore" outputters="log_file" level='INFO'/>
+  <logger name="CommonDomain" outputters="log_file" level='DEBUG'/>
+  <logger name="CommonDomain::Persistence" level='INFO'/>
 </log4r_config> 
