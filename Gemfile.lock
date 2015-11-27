@@ -6,14 +6,14 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/common-domain.git
-  revision: c6b0caa17a3a56d4911e4949d908f3c3277dd633
+  revision: d94f98f03e12f065e0299eaabd7e89d4e1695d8b
   specs:
     common-domain (4.0.1.b2)
       event-store (~> 4)
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 3e622d2b47cbe1593702654aed41c76fe070142d
+  revision: 3ba4c0297afdaa30318c02ad6376f3dd0b3c0937
   specs:
     event-store (4.0.1.b1)
       sequel
