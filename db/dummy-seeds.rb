@@ -8,7 +8,10 @@ log = Rails.logger
 log.info 'Loadding dummy seeds...'
 
 log.debug 'Doing existing data clenup...'
-@app.event_store.purge
+@app.event_store.purge!
+@app.event_store_client
+  .subscribed_handlers(group: :projections)
+  .each { |projection| projection.purge! }
 
 #TODO Purge projections
 # @app.projections.for_each { |projection| projection.cleanup! }

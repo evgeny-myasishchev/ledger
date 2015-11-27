@@ -22,24 +22,18 @@ namespace :ledger do
     end
   end
   
-  task :purge do
+  task :purge => :environment do
     Rake::Task["ledger:purge_events_and_projections"].invoke
     CurrencyRate.delete_all
     User.delete_all
   end
   
-  task :purge_events_and_projections do
-    app = init_app_skiping_domain_context
-    context = DomainContext.new do |c|
-      c.with_database_configs app.config.database_configuration, Rails.env
-      c.with_event_bus
-      c.with_projections
-      c.with_event_store
-    end
-    context.event_store.purge
-    context.projections.for_each do |p|
-      p.cleanup!
-    end
+  task :purge_events_and_projections => :environment do
+    app = Rails.application
+    app.event_store.purge!
+    app.event_store_client
+      .subscribed_handlers(group: :projections)
+      .each { |projection| projection.purge! }
   end
   
   task :rebuild_projections do
@@ -71,12 +65,5 @@ namespace :ledger do
     rates.each { |rate| 
       puts rate.to_json
     }
-  end
-  
-  def init_app_skiping_domain_context
-    app = Rails.application
-    app.skip_domain_context = true
-    app.initialize!
-    app
   end
 end
