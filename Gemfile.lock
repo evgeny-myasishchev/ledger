@@ -13,7 +13,7 @@ GIT
 
 GIT
   remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 0d985562bd96f6a80f4dec6edd669d39f7c5e894
+  revision: 3e622d2b47cbe1593702654aed41c76fe070142d
   specs:
     event-store (4.0.1.b1)
       sequel
