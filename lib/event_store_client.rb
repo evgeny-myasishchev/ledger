@@ -1,18 +1,27 @@
 class EventStoreClient
   include Loggable
 
-  def initialize(event_store, checkpoints_repo)
+  def initialize event_store, checkpoints_repo
     raise ArgumentError, 'event_store can not be nil' if event_store.nil?
     raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
     @event_store, @checkpoints_repo = event_store, checkpoints_repo
     @subscriptions = []
+    @subscriptions_by_group = {}
+  end
+  
+  def subscriptions group: nil
+    group.nil? ? @subscriptions : @subscriptions_by_group.fetch(group, [])
   end
 
-  def subscribe_handler handler
+  def subscribed_handlers group: nil
+    subscriptions(group: group).map(&:handlers).flatten
+  end
+
+  def subscribe_handler handler, group: nil
     log.debug "Subscribing handler: #{handler}"
     subscription = build_subscription(handler.class.name)
     subscription.add_handler(handler)
-    @subscriptions << subscription
+    register_subscription subscription, group: group
   end
 
   def pull_subscriptions
@@ -23,6 +32,11 @@ class EventStoreClient
   def build_subscription identifier
     PersistentSubscription.new identifier, @event_store, @checkpoints_repo
   end
+  
+  private def register_subscription subscription, group: nil
+    @subscriptions << subscription
+    (@subscriptions_by_group[group] ||= []) << subscription unless group.nil?
+  end
 
   #
   # The subscription will persist checkpoint of last commit that has been successfully handled by all handlers.
@@ -30,8 +44,10 @@ class EventStoreClient
   #
   class PersistentSubscription
     include Loggable
+    
+    attr_reader :handlers
 
-    def initialize(identifier, event_store, checkpoints_repo)
+    def initialize identifier, event_store, checkpoints_repo
       raise ArgumentError, 'identifier can not be nil' if identifier.nil?
       raise ArgumentError, 'event_store can not be nil' if event_store.nil?
       raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?

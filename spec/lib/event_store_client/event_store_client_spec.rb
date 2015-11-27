@@ -24,7 +24,7 @@ module EventStoreClientSpec
       end
 
       it 'should derive identifier from subscription class' do
-        expect(subject).to receive(:build_subscription).with('EventStoreClientSpec::DummyHandler') { subscription }        
+        expect(subject).to receive(:build_subscription).with('EventStoreClientSpec::DummyHandler') { subscription }
         subject.subscribe_handler DummyHandler.new
       end
 
@@ -32,6 +32,27 @@ module EventStoreClientSpec
         handler = DummyHandler.new
         expect(subscription).to receive(:add_handler).with(handler)
         subject.subscribe_handler handler
+      end
+      
+      it 'should allow grouping subscriptions' do
+        allow(subject).to receive(:build_subscription).and_call_original
+        
+        default1, default2 = DummyHandler.new, DummyHandler.new
+        grp11, grp12 = DummyHandler.new, DummyHandler.new
+        grp21, grp22 = DummyHandler.new, DummyHandler.new
+        subject.subscribe_handler default1
+        subject.subscribe_handler default2
+        subject.subscribe_handler grp11, group: :grp1
+        subject.subscribe_handler grp12, group: :grp1
+        subject.subscribe_handler grp21, group: :grp2
+        subject.subscribe_handler grp22, group: :grp2
+        
+        expect(subject.subscriptions.map(&:handlers).flatten).to eql [default1, default2, grp11, grp12, grp21, grp22]
+        expect(subject.subscribed_handlers).to eql [default1, default2, grp11, grp12, grp21, grp22]
+        expect(subject.subscriptions(group: :grp1).map(&:handlers).flatten).to eql [grp11, grp12]
+        expect(subject.subscribed_handlers(group: :grp1)).to eql [grp11, grp12]
+        expect(subject.subscriptions(group: :grp2).map(&:handlers).flatten).to eql [grp21, grp22]
+        expect(subject.subscribed_handlers(group: :grp2)).to eql [grp21, grp22]
       end
     end
 
