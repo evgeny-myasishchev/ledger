@@ -24,8 +24,9 @@ class EventStoreClient
     register_subscription subscription, group: group
   end
 
+  #TODO: Add pull specified groups only
   def pull_subscriptions
-    log.debug 'Pulling subscriptions...'
+    log.info 'Pulling subscriptions...'
     @subscriptions.each { |s| s.pull }
   end
 

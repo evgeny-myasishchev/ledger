@@ -24,4 +24,6 @@ class CheckpointsRepository
       @store[identifier] = checkpoint
     end
   end
+  
+  # TODO: Implement AR based repo
 end
