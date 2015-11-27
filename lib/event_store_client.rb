@@ -1,11 +1,25 @@
 class EventStoreClient
+  include Loggable
+
   def initialize(event_store, checkpoints_repo)
+    @event_store, @checkpoints_repo = event_store, checkpoints_repo
+    @subscriptions = []
   end
 
   def subscribe_handler handler
+    log.debug "Subscribing handler: #{handler}"
+    subscription = self.class.build_subscription(handler.class.name)
+    subscription.add_handler(handler)
+    @subscriptions << subscription
   end
 
   def pull_subscriptions
+    log.debug 'Pulling subscriptions...'
+    @subscriptions.each { |s| s.pull }
+  end
+
+  def self.build_subscription identifier
+    PersistentSubscription.new identifier, @event_store, @checkpoints_repo
   end
 
   #
@@ -27,7 +41,7 @@ class EventStoreClient
     # Pull all commits starting from the checkpoint for given identifier
     # and deliver each event of the commit to handlers that can handle it.
     # New checkpoint will be saved when all events are handled successfully for the commit.
-    def pull
+    def pull      
       checkpoint = @last_handled_checkpoint ||= @checkpoints_repo.get_checkpoint(@identifier)
       log.debug "Pulling commits for subscription '#{@identifier}' starting from checkpoint '#{checkpoint}'."
       @event_store.for_each_commit(checkpoint: checkpoint) do |commit|

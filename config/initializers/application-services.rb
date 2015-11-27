@@ -1,15 +1,18 @@
 Rails.application.configure do |app|
   singleton_class.class_eval do
-    attr_reader :event_store, :command_dispatch_app, :persistence_factory
+    attr_reader :event_store, :event_store_client, :command_dispatch_app, :persistence_factory
   end
   
   app.instance_eval do
     @event_store = EventStore.bootstrap do |with|
       with.log4r_logging
       with
-      .sql_persistence(app.config.database_configuration['event-store'])
-      .compress
+        .sql_persistence(app.config.database_configuration['event-store'])
+        .compress
     end
+
+    #TODO: Implement real (AR based) checkpoints repo
+    @event_store_client = EventStoreClient.new(@event_store, CheckpointsRepository::InMemory.new)
     
     aggregates_builder = CommonDomain::Persistence::AggregatesBuilder.new
     @persistence_factory = CommonDomain::PersistenceFactory.new(@event_store, aggregates_builder, Snapshot)
@@ -25,13 +28,12 @@ Rails.application.configure do |app|
       stack.with CommonDomain::DispatchCommand::Middleware::ValidateCommands
       stack.with CommonDomain::DispatchCommand::Middleware::TrackUser
     end
-    
-    # TODO: Implement projections handling
-    #     projections.register :ledgers, ::Projections::Ledger.create_projection
-    #     projections.register :accounts, ::Projections::Account.create_projection
-    #     projections.register :transactions, ::Projections::Transaction.create_projection
-    #     projections.register :pending_transactions, ::Projections::PendingTransaction.create_projection
-    #     projections.register :tags, ::Projections::Tag.create_projection
-    #     projections.register :categories, ::Projections::Category.create_projection
+
+    @event_store_client.subscribe_handler ::Projections::Ledger.create_projection
+    @event_store_client.subscribe_handler ::Projections::Account.create_projection
+    @event_store_client.subscribe_handler ::Projections::Transaction.create_projection
+    @event_store_client.subscribe_handler ::Projections::PendingTransaction.create_projection
+    @event_store_client.subscribe_handler ::Projections::Tag.create_projection
+    @event_store_client.subscribe_handler ::Projections::Category.create_projection
   end unless Rails.env.test?
 end

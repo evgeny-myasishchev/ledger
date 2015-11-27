@@ -116,5 +116,4 @@ dispatch AccountCommands::ReportTransfer.new account_id: pb_credit_account_id, s
 dispatch AccountCommands::ReportTransfer.new account_id: pb_credit_account_id, sending_transaction_id: new_id, receiving_account_id: pb_deposit_id, receiving_transaction_id: new_id,
   amount_sent: '5000.00', amount_received: '5000.00', date: DateTime.now, tag_ids: tag_ids_by_name['deposits'], comment: 'Putting some money on deposit'
 
-# TODO: Make sure projections are updated
-# @app.event_store.dispatcher.wait_pending
+@app.event_store_client.pull_subscriptions
