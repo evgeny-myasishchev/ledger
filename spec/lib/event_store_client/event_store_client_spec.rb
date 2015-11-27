@@ -17,14 +17,14 @@ module EventStoreClientSpec
 
     subject { described_class.new(event_store, checkpoints_repo) }
 
-    describe 'subscribe_handler' do    
+    describe 'subscribe_handler' do
       let(:subscription) { instance_double(EventStoreClient::PersistentSubscription, add_handler: nil) }
       before do
-        allow(described_class).to receive(:build_subscription) { subscription }
+        allow(subject).to receive(:build_subscription) { subscription }
       end
 
       it 'should derive identifier from subscription class' do
-        expect(described_class).to receive(:build_subscription).with('EventStoreClientSpec::DummyHandler') { subscription }        
+        expect(subject).to receive(:build_subscription).with('EventStoreClientSpec::DummyHandler') { subscription }        
         subject.subscribe_handler DummyHandler.new
       end
 
@@ -41,7 +41,7 @@ module EventStoreClientSpec
       let(:subscription3) { instance_double(EventStoreClient::PersistentSubscription, add_handler: nil) }
 
       before do
-        allow(described_class).to receive(:build_subscription).and_return(subscription1, subscription2, subscription3)
+        allow(subject).to receive(:build_subscription).and_return(subscription1, subscription2, subscription3)
         subject.subscribe_handler DummyHandler.new
         subject.subscribe_handler DummyHandler.new
         subject.subscribe_handler DummyHandler.new

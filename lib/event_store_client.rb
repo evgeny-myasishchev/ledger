@@ -2,13 +2,15 @@ class EventStoreClient
   include Loggable
 
   def initialize(event_store, checkpoints_repo)
+    raise ArgumentError, 'event_store can not be nil' if event_store.nil?
+    raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
     @event_store, @checkpoints_repo = event_store, checkpoints_repo
     @subscriptions = []
   end
 
   def subscribe_handler handler
     log.debug "Subscribing handler: #{handler}"
-    subscription = self.class.build_subscription(handler.class.name)
+    subscription = build_subscription(handler.class.name)
     subscription.add_handler(handler)
     @subscriptions << subscription
   end
@@ -18,7 +20,7 @@ class EventStoreClient
     @subscriptions.each { |s| s.pull }
   end
 
-  def self.build_subscription identifier
+  def build_subscription identifier
     PersistentSubscription.new identifier, @event_store, @checkpoints_repo
   end
 
@@ -30,6 +32,9 @@ class EventStoreClient
     include Loggable
 
     def initialize(identifier, event_store, checkpoints_repo)
+      raise ArgumentError, 'identifier can not be nil' if identifier.nil?
+      raise ArgumentError, 'event_store can not be nil' if event_store.nil?
+      raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
       @identifier, @event_store, @checkpoints_repo = identifier, event_store, checkpoints_repo
       @handlers = []
     end
