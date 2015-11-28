@@ -4,6 +4,7 @@ log = Rails.logger
 @log = log
 @app = Rails.application
 @persistence_factory = @app.persistence_factory
+@app.config.pull_subscriptions_on_commit = false
 
 log.info 'Loadding dummy seeds...'
 
