@@ -63,7 +63,7 @@ module Ledger
     
     def initialize_logging
       LogFactory.configure(log_file_path: config.paths['log'].first, app_root: config.root, config_file: config.log_config_path)
-      config.logger = LogFactory.logger "ledger"
+      config.logger = LogFactory.logger 'Ledger'
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
     end
   end

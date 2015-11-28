@@ -18,7 +18,7 @@
 	<outputter type="StderrOutputter" name="console" level='INFO'>
 		<formatter type="PatternFormatter" date_pattern="%H:%M:%S" pattern="[%d %C %l]: %m" />
 	</outputter>
-	<logger name="ledger" outputters="log_file, console"/>
+	<logger name="Ledger" outputters="log_file, console"/>
 	<logger name="EventStore" outputters="log_file" level='INFO'/>
 	<logger name="CommonDomain" outputters="log_file" level='DEBUG'/>
 	<logger name="CommonDomain::Persistence" level='INFO'/>

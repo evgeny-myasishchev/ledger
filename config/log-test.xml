@@ -11,7 +11,7 @@
   <outputter type="FileOutputter" maxsize="5242880" name="log_file" filename="#{log_file_path}">
     <formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
   </outputter>
-  <logger name="ledger" outputters="log_file"/>
+  <logger name="Ledger" outputters="log_file"/>
   <logger name="EventStore" outputters="log_file" level='INFO'/>
   <logger name="CommonDomain" outputters="log_file" level='DEBUG'/>
   <logger name="CommonDomain::Persistence" level='INFO'/>
