@@ -19,13 +19,13 @@ class Domain::Account < CommonDomain::Aggregate
   
   def rename name
     return if @name == name
-    log.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{name}'"
+    logger.debug "Renaming account aggregate_id='#{aggregate_id}. New name: #{name}'"
     raise_event AccountRenamed.new aggregate_id, name
   end
   
   def set_unit unit
     return if @unit == unit
-    log.debug "Assigning account unit aggregate_id='#{aggregate_id}. New unit: #{unit}'"
+    logger.debug "Assigning account unit aggregate_id='#{aggregate_id}. New unit: #{unit}'"
     raise_event AccountUnitAdjusted.new aggregate_id, unit
   end
   
@@ -46,7 +46,7 @@ class Domain::Account < CommonDomain::Aggregate
   end
   
   def report_income transaction_id, amount, date, tag_ids = nil, comment = nil
-    log.debug "Reporting #{amount} of income for account aggregate_id='#{aggregate_id}'"
+    logger.debug "Reporting #{amount} of income for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     amount = Money.parse(amount, @currency)
     balance = @balance + amount.integer_amount
@@ -57,7 +57,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def report_expense transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
-    log.debug "Reporting #{amount} of expense for account aggregate_id='#{aggregate_id}'"
+    logger.debug "Reporting #{amount} of expense for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - amount.integer_amount
@@ -67,7 +67,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def report_refund transaction_id, amount, date, tag_ids = [], comment = nil
     amount = Money.parse(amount, @currency)
-    log.debug "Reporting #{amount} of refund for account aggregate_id='#{aggregate_id}'"
+    logger.debug "Reporting #{amount} of refund for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + amount.integer_amount
@@ -78,7 +78,7 @@ class Domain::Account < CommonDomain::Aggregate
   def send_transfer(transaction_id, receiving_account_id, amount, date, tag_ids = [], comment = nil)
     amount = Money.parse(amount, @currency)
     raise ArgumentError.new "Can not send transfer onto the same account '#{aggregate_id}'." if aggregate_id == receiving_account_id
-    log.debug "Sending #{amount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
+    logger.debug "Sending #{amount} of transfer. Sender aggregate_id='#{aggregate_id}'. Receiver aggregate_id='#{receiving_account_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance - amount.integer_amount
@@ -89,7 +89,7 @@ class Domain::Account < CommonDomain::Aggregate
 
   def receive_transfer(transaction_id, sending_account_id, sending_transaction_id, amount, date, tag_ids = [], comment = nil)
     amount = Money.parse(amount, @currency)
-    log.debug "Receiving #{amount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
+    logger.debug "Receiving #{amount} of transfer. Sender aggregate_id='#{sending_account_id}'. Receiver aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     tag_ids = normalize_tag_ids tag_ids
     balance = @balance + amount.integer_amount
@@ -101,9 +101,9 @@ class Domain::Account < CommonDomain::Aggregate
     new_amount = Money.parse(amount, @currency)
     transaction = get_transaction! transaction_id
     original_integer_amount = transaction[:amount]
-    log.debug "Adjusting amount of transaction_id='#{transaction_id}' to #{new_amount} of account aggregate_id='#{aggregate_id}'."
+    logger.debug "Adjusting amount of transaction_id='#{transaction_id}' to #{new_amount} of account aggregate_id='#{aggregate_id}'."
     if(original_integer_amount == new_amount.integer_amount)
-      log.debug "The amount is the same. Further processing skipped."
+      logger.debug "The amount is the same. Further processing skipped."
       return 
     end
     new_balance = @balance
@@ -114,7 +114,7 @@ class Domain::Account < CommonDomain::Aggregate
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
     end
-    log.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
+    logger.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
     raise_event TransactionAmountAdjusted.new aggregate_id, transaction_id, new_amount.integer_amount
     raise_balance_changed transaction_id, new_balance
   end
@@ -142,7 +142,7 @@ class Domain::Account < CommonDomain::Aggregate
   
   def remove_transaction transaction_id
     return unless @transactions.key?(transaction_id)
-    log.debug "Removing transaction id='#{transaction_id}' from account aggregate_id='#{aggregate_id}'"
+    logger.debug "Removing transaction id='#{transaction_id}' from account aggregate_id='#{aggregate_id}'"
     transaction = @transactions[transaction_id]
     amount = transaction[:amount]
     new_balance = @balance
@@ -153,7 +153,7 @@ class Domain::Account < CommonDomain::Aggregate
     else
       raise "Unknown transaction type: #{transaction[:type_id]}"
     end
-    log.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
+    logger.debug "Original balance was '#{@balance}', new balance is '#{new_balance}' for account aggregate_id='#{aggregate_id}'"
     raise_event TransactionRemoved.new aggregate_id, transaction_id
     raise_balance_changed transaction_id, new_balance
   end
@@ -161,14 +161,14 @@ class Domain::Account < CommonDomain::Aggregate
   def move_transaction_to transaction_id, target_account
     transaction = get_transaction!(transaction_id)
     raise ArgumentError.new "Can not move transaction '#{transaction_id}' onto the same account." if self.aggregate_id == target_account.aggregate_id
-    log.debug "Moving transaction id='#{transaction_id}' from account id='#{aggregate_id}' to account id=#{target_account.aggregate_id}"
+    logger.debug "Moving transaction id='#{transaction_id}' from account id='#{aggregate_id}' to account id=#{target_account.aggregate_id}"
     remove_transaction transaction_id
     target_account.accept_moved_transaction_from self, transaction
     raise_event TransactionMovedTo.new aggregate_id, target_account.aggregate_id, transaction_id
   end
   
   def accept_moved_transaction_from sending_account, transaction
-    log.debug "Accepting moved transaction transaction id='#{transaction[:id]}' from account id='#{sending_account.aggregate_id}' to account id=#{aggregate_id}"
+    logger.debug "Accepting moved transaction transaction id='#{transaction[:id]}' from account id='#{sending_account.aggregate_id}' to account id=#{aggregate_id}"
     if transaction[:is_transfer]
       send_transfer transaction[:id], 
         transaction[:receiving_account_id], 
@@ -201,17 +201,17 @@ class Domain::Account < CommonDomain::Aggregate
     raise ArgumentError.new "Transfer transaction '#{transaction_id}' can not be converted." if transaction[:is_transfer]
     raise ArgumentError.new "Transaction type '#{type_id}' is not a valid integer." unless type_id.is_a?(Integer)
     return if transaction[:type_id] == type_id
-    log.debug "Converting transaction '#{transaction_id}' of type '#{transaction[:type_id]}' to type '#{type_id}'."
+    logger.debug "Converting transaction '#{transaction_id}' of type '#{transaction[:type_id]}' to type '#{type_id}'."
     new_balance = @balance
     if (transaction[:type_id] == Transaction::IncomeTypeId || transaction[:type_id] == Transaction::RefundTypeId) && 
       type_id == Transaction::ExpenseTypeId
       new_balance -= transaction[:amount] * 2
-      log.debug "Current balance: #{@balance}, new balance: #{new_balance}"
+      logger.debug "Current balance: #{@balance}, new balance: #{new_balance}"
     elsif transaction[:type_id] == Transaction::ExpenseTypeId
       new_balance += transaction[:amount] * 2
-      log.debug "Current balance: #{@balance}, new balance: #{new_balance}"
+      logger.debug "Current balance: #{@balance}, new balance: #{new_balance}"
     else
-      log.warn "Unexpected conversion. The balance wasn't changed."
+      logger.warn "Unexpected conversion. The balance wasn't changed."
     end
     raise_event TransactionTypeConverted.new aggregate_id, transaction_id, type_id
     raise_event AccountBalanceChanged.new aggregate_id, transaction_id, new_balance unless new_balance == @balance

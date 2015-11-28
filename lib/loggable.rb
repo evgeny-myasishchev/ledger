@@ -1,13 +1,13 @@
 module Loggable
   module ClassMethods
-    def log
+    def logger
       @log ||= LogFactory.logger_for_class self
     end
   end
   
   module InstanceMethods
-    def log
-      self.class.log
+    def logger
+      self.class.logger
     end
   end
   

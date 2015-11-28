@@ -18,7 +18,7 @@ class EventStoreClient
   end
 
   def subscribe_handler handler, group: nil
-    log.debug "Subscribing handler: #{handler}"
+    logger.debug "Subscribing handler: #{handler}"
     subscription = build_subscription(handler.class.name)
     subscription.add_handler(handler)
     register_subscription subscription, group: group
@@ -26,7 +26,7 @@ class EventStoreClient
 
   #TODO: Add pull specified groups only
   def pull_subscriptions group: nil
-    log.info "Pulling subscriptions. Group: '#{group}'."
+    logger.info "Pulling subscriptions. Group: '#{group}'."
     subscriptions(group: group).each { |s| s.pull }
   end
 
@@ -65,7 +65,7 @@ class EventStoreClient
     # New checkpoint will be saved when all events are handled successfully for the commit.
     def pull
       checkpoint = @last_handled_checkpoint ||= @checkpoints_repo.get_checkpoint(@identifier)
-      log.debug "Pulling commits for subscription '#{@identifier}' starting from checkpoint '#{checkpoint}'."
+      logger.debug "Pulling commits for subscription '#{@identifier}' starting from checkpoint '#{checkpoint}'."
       @event_store.for_each_commit(checkpoint: checkpoint) do |commit|
         headers = commit.headers.dup
         headers[:$commit_timestamp] = commit.commit_timestamp
@@ -74,7 +74,7 @@ class EventStoreClient
             handler.handle_message(event, headers) if handler.can_handle_message?(event)
           }
         }
-        log.debug "Commit handled. Remembering checkpoint '#{commit.checkpoint}'."
+        logger.debug "Commit handled. Remembering checkpoint '#{commit.checkpoint}'."
         @checkpoints_repo.save_checkpoint(@identifier, commit.checkpoint)
         @last_handled_checkpoint = commit.checkpoint
       end

@@ -4,24 +4,24 @@ class Domain::Ledger < CommonDomain::Aggregate
   include Domain::Events
   
   def create owner_user_id, name, default_currency
-    log.debug "Creating ledger: #{name}"
+    logger.debug "Creating ledger: #{name}"
     raise_event LedgerCreated.new Aggregate.new_id, owner_user_id, name, default_currency.code
   end
   
   def rename name
-    log.debug "Renaming account '#{aggregate_id}'. New name: #{name}"
+    logger.debug "Renaming account '#{aggregate_id}'. New name: #{name}"
     raise_event LedgerRenamed.new aggregate_id, name
   end
   
   def share user
     return if @shared_with.include?(user.id)
-    log.debug "Sharing account '#{aggregate_id}' with user id=#{user.id}"
+    logger.debug "Sharing account '#{aggregate_id}' with user id=#{user.id}"
     raise_event LedgerShared.new aggregate_id, user.id
   end
   
   def create_new_account id, initial_data
     raise ArgumentError.new "account_id='#{id}' is not unique" if @all_accounts.include?(id)
-    log.debug "Creating new account ledger_id='#{aggregate_id}' id='#{id}' '#{initial_data}'"
+    logger.debug "Creating new account ledger_id='#{aggregate_id}' id='#{id}' '#{initial_data}'"
     account = Domain::Account.new
     account.create aggregate_id, Domain::Account::AccountId.new(id, @account_sequential_number), initial_data
     raise_event AccountAddedToLedger.new aggregate_id, account.aggregate_id
@@ -29,7 +29,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def set_account_category account, category_id
-    log.debug "Assigning account id='#{account.aggregate_id}' to category '#{category_id}'"
+    logger.debug "Assigning account id='#{account.aggregate_id}' to category '#{category_id}'"
     ensure_known! account
     raise "Category id='#{category_id}' is not from ledger '#{@name}'." unless @known_categories.include?(category_id)
     raise_event AccountCategoryAssigned.new aggregate_id, account.aggregate_id, category_id unless 
@@ -37,7 +37,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def close_account account
-    log.debug "Closing account id='#{account.aggregate_id}'"
+    logger.debug "Closing account id='#{account.aggregate_id}'"
     ensure_known! account
     if @open_accounts.include?(account.aggregate_id)
       account.close
@@ -46,7 +46,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def reopen_account account
-    log.debug "Reopening account id='#{account.aggregate_id}'"
+    logger.debug "Reopening account id='#{account.aggregate_id}'"
     ensure_known! account
     ensure_closed! account
     account.reopen
@@ -54,7 +54,7 @@ class Domain::Ledger < CommonDomain::Aggregate
   end
   
   def remove_account account
-    log.debug "Removing account id='#{account.aggregate_id}'"
+    logger.debug "Removing account id='#{account.aggregate_id}'"
     ensure_known! account
     ensure_closed! account
     account.remove
@@ -63,45 +63,45 @@ class Domain::Ledger < CommonDomain::Aggregate
   
   def create_tag name
     tag_id = @last_tag_id + 1
-    log.debug "Creating tag '#{name}' tag_id='#{tag_id}'"
+    logger.debug "Creating tag '#{name}' tag_id='#{tag_id}'"
     raise_event TagCreated.new aggregate_id, tag_id, name
     tag_id
   end
   
   def import_tag_with_id tag_id, name
-    log.debug "Importing tag '#{name}' with tag_id='#{tag_id}'"
+    logger.debug "Importing tag '#{name}' with tag_id='#{tag_id}'"
     raise_event TagCreated.new aggregate_id, tag_id, name
   end
   
   def rename_tag tag_id, name
-    log.debug "Renaming the tag with tag_id='#{tag_id}' to '#{name}"
+    logger.debug "Renaming the tag with tag_id='#{tag_id}' to '#{name}"
     raise_event TagRenamed.new aggregate_id, tag_id, name
   end
   
   def remove_tag tag_id
-    log.debug "Renaming the tag with tag_id='#{tag_id}'"
+    logger.debug "Renaming the tag with tag_id='#{tag_id}'"
     raise_event TagRemoved.new aggregate_id, tag_id
   end
     
   def create_category name
     category_id = @last_category_id + 1
-    log.debug "Creating category '#{name}' category_id='#{category_id}'"
+    logger.debug "Creating category '#{name}' category_id='#{category_id}'"
     raise_event CategoryCreated.new aggregate_id, category_id, @max_category_display_order + 1, name
     category_id
   end
       
   def import_category category_id, display_order, name
-    log.debug "Importing category '#{name}', category_id='#{category_id}', display_order='#{display_order}"
+    logger.debug "Importing category '#{name}', category_id='#{category_id}', display_order='#{display_order}"
     raise_event CategoryCreated.new aggregate_id, category_id, display_order, name
   end
   
   def rename_category category_id, name
-    log.debug "Renaming the category with category_id='#{category_id}' to '#{name}"
+    logger.debug "Renaming the category with category_id='#{category_id}' to '#{name}"
     raise_event CategoryRenamed.new aggregate_id, category_id, name
   end
   
   def remove_category category_id
-    log.debug "Renaming the category with category_id='#{category_id}'"
+    logger.debug "Renaming the category with category_id='#{category_id}'"
     raise_event CategoryRemoved.new aggregate_id, category_id
   end
   

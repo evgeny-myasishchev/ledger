@@ -6,9 +6,9 @@ log = Rails.logger
 @persistence_factory = @app.persistence_factory
 @app.config.pull_subscriptions_on_commit = false
 
-log.info 'Loadding dummy seeds...'
+logger.info 'Loadding dummy seeds...'
 
-log.debug 'Doing existing data clenup...'
+logger.debug 'Doing existing data clenup...'
 @app.event_store.purge!
 @app.event_store_client
   .subscribed_handlers(group: :projections)
@@ -18,7 +18,7 @@ log.debug 'Doing existing data clenup...'
 # @app.projections.for_each { |projection| projection.cleanup! }
 
 dummy_user_name = ENV['DUMMY_USER_NAME'] || 'dev@domain.com'
-log.info "Creating user #{dummy_user_name}"
+logger.info "Creating user #{dummy_user_name}"
 user = User.create_with(password: 'password').find_or_create_by! email: dummy_user_name
 
 @dispatch_context = CommonDomain::DispatchCommand::DispatchContext::StaticDispatchContext.new user.id, '127.0.0.1'
@@ -29,7 +29,7 @@ end
 
 uah = Currency['UAH']
 
-log.info 'Creating ledger for the user'
+logger.info 'Creating ledger for the user'
 tag_ids_by_name = {}
 ledger = @persistence_factory.begin_unit_of_work({}) do |work|
   l = work.add_new Domain::Ledger.new.create user.id, 'Family', uah
@@ -60,7 +60,7 @@ def new_id
 end
 
 def create_account(ledger, name, currency, &block)
-  @log.info "Creating new account: #{name}"
+  @logger.info "Creating new account: #{name}"
   account_id = new_id
   dispatch LedgerCommands::CreateNewAccount.new ledger_id: ledger.aggregate_id, account_id: account_id, name: name, initial_balance: 0, currency_code: currency.code, unit: nil
   if block_given? 

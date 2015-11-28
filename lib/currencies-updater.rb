@@ -15,11 +15,11 @@ class CurrenciesUpdater
   end
   
   def update
-    log.info "Updating currencies."
+    logger.info "Updating currencies."
     currencies_xml = get_currencies_xml URI.parse(@options[:data_uri])
     currencies = parse_currencies_xml currencies_xml
     write currencies, @options[:output]
-    log.info 'Currencies updated.'
+    logger.info 'Currencies updated.'
   end
   
   private
@@ -28,7 +28,7 @@ class CurrenciesUpdater
     end
     
     def get_currencies_xml(data_uri)
-      log.debug "Downloading currencies from #{data_uri}"
+      logger.debug "Downloading currencies from #{data_uri}"
       response = Net::HTTP.get_response(data_uri)
       if response.code != "200"
         raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
@@ -37,7 +37,7 @@ class CurrenciesUpdater
     end
     
     def parse_currencies_xml(xml)
-      log.debug "Parsing currencies xml..."
+      logger.debug "Parsing currencies xml..."
       xml.root.get_elements('CcyTbl/CcyNtry')
         .select { |currency_data| !currency_data.get_text('Ccy').nil? }
         .map { |currency_data|
@@ -48,7 +48,7 @@ class CurrenciesUpdater
             id: currency_data.get_text('CcyNbr').value
           }
         rescue
-          log.error "Failed to parse currency xml data:\n #{currency_data}."
+          logger.error "Failed to parse currency xml data:\n #{currency_data}."
           raise
         end
       }
@@ -58,7 +58,7 @@ class CurrenciesUpdater
     OzCurrencies = Set.new(['XAU', 'XAG', 'XPD', 'XPT'])
     
     def write(currencies, output)
-      log.debug "Writting parsed currencies. Output: #{output}"
+      logger.debug "Writting parsed currencies. Output: #{output}"
       registered = Set.new
       File.open output, 'w' do |file|
         file.write "#\n"

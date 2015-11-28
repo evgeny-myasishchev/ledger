@@ -1,6 +1,6 @@
 class Domain::PendingTransaction < CommonDomain::Aggregate
+  include Loggable
   include CommonDomain
-  include CommonDomain::Loggable
   include Domain::Events
   
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
