@@ -49,6 +49,7 @@ module DummyEventStore
     
     def initialize
       @repository = DummyRepository.new
+      super(nil, nil)
     end
     
     def create_repository
