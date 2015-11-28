@@ -17,3 +17,6 @@
 
 # Ignore app env.
 .env
+
+# Ignoring RubyMine stuff. It will autogenerate it anyway.
+/.idea
