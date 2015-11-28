@@ -17,7 +17,7 @@ namespace :ledger do
     end
     log.info "Generating dummy pending transactions for user: #{user.inspect}"
     
-    generator = Dev::DummyPendingTransactionsGenerator.new user, Rails.application.domain_context
+    generator = Dev::DummyPendingTransactionsGenerator.new user, Rails.application
     generator.generate 10
   end
 end

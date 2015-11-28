@@ -1,6 +1,6 @@
 class Domain::PendingTransaction < CommonDomain::Aggregate
-  include Loggable
   include CommonDomain
+  include CommonDomain::Loggable
   include Domain::Events
   
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
@@ -8,7 +8,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   
   def report user, transaction_id, amount, date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil
     type_id = type_id.blank? ? Domain::Transaction::ExpenseTypeId : type_id
-    Log.debug "Reporting new pending transaction id=#{transaction_id} by user: #{user.id}"
+    logger.debug "Reporting new pending transaction id=#{transaction_id} by user: #{user.id}"
     raise ArgumentError.new 'transaction_id can not be empty.' if transaction_id.blank?
     raise ArgumentError.new 'amount can not be empty.' if amount.blank?
     raise ArgumentError.new 'date can not be empty.' if date.blank?
@@ -16,7 +16,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
   
   def adjust amount: nil, date: nil, tag_ids: nil, comment: nil, account_id: nil, type_id: nil
-    Log.debug "Adjusting transaction id=#{aggregate_id}"
+    logger.debug "Adjusting transaction id=#{aggregate_id}"
     event = PendingTransactionAdjusted.new aggregate_id,
       amount || self.amount,
       date || self.date,
@@ -34,7 +34,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
   
   def approve account
-    Log.debug "Approving transaction id=#{aggregate_id}"
+    logger.debug "Approving transaction id=#{aggregate_id}"
     raise Errors::DomainError.new 'account_id is empty.' if account_id.blank?
     raise Errors::DomainError.new "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
     raise Errors::DomainError.new "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
@@ -51,7 +51,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
   
   def approve_transfer account, receiving_account, amount_received
-    Log.debug "Approving transfer transaction id=#{aggregate_id}"
+    logger.debug "Approving transfer transaction id=#{aggregate_id}"
     raise Errors::DomainError.new 'account_id is empty.' if account_id.blank?
     raise Errors::DomainError.new 'receiving_account is nil.' if receiving_account.blank?
     raise Errors::DomainError.new 'amount_received is empty.' if amount_received.blank?
@@ -72,7 +72,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   
   def reject
     return if @is_rejected
-    Log.debug "Rejecting transaction id=#{aggregate_id}"
+    logger.debug "Rejecting transaction id=#{aggregate_id}"
     raise_event PendingTransactionRejected.new aggregate_id
   end
   
