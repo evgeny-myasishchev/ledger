@@ -41,7 +41,7 @@ module EventStoreClientPersistentSubscriptionSpec
         subject.add_handler handler2
       end
 
-      it 'should deliver all events starting from begining to handlers' do
+      it 'should deliver all events starting from beginning to handlers' do
         evt11, evt12 = DummyEvent.new('evt11'), DummyEvent.new('evt12')
         commit1 = event_store.create_stream('stream-1')
           .add(evt11).add(evt12).commit_changes
