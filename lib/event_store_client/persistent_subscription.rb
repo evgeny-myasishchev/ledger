@@ -2,21 +2,13 @@
 # The subscription will persist checkpoint of last commit that has been successfully handled by all handlers.
 # It does not automatically know if new commits are available so pull must be called explicitly.
 #
-class EventStoreClient::PersistentSubscription
-  include Loggable
-  
-  attr_reader :handlers
-
-  def initialize identifier, event_store, checkpoints_repo
+class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
+  def initialize(identifier, event_store, checkpoints_repo)
     raise ArgumentError, 'identifier can not be nil' if identifier.nil?
     raise ArgumentError, 'event_store can not be nil' if event_store.nil?
     raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
     @identifier, @event_store, @checkpoints_repo = identifier, event_store, checkpoints_repo
-    @handlers = []
-  end
-
-  def add_handler handler
-    @handlers << handler
+    super()
   end
 
   # Pull all commits starting from the checkpoint for given identifier
