@@ -61,18 +61,28 @@ module EventStoreClientSpec
       let(:subscription2) { instance_double(EventStoreClient::PersistentSubscription, add_handler: nil) }
       let(:subscription3) { instance_double(EventStoreClient::PersistentSubscription, add_handler: nil) }
 
-      before do
+      it 'should pull each subscription' do
         allow(subject).to receive(:build_subscription).and_return(subscription1, subscription2, subscription3)
         subject.subscribe_handler DummyHandler.new
         subject.subscribe_handler DummyHandler.new
         subject.subscribe_handler DummyHandler.new
-      end
-
-      it 'should pull each subscription' do
+        
         expect(subscription1).to receive(:pull)
         expect(subscription2).to receive(:pull)
         expect(subscription3).to receive(:pull)
         subject.pull_subscriptions
+      end
+      
+      it 'should pull specified groups only' do
+        allow(subject).to receive(:build_subscription).and_return(subscription1, subscription2, subscription3)
+        subject.subscribe_handler DummyHandler.new
+        subject.subscribe_handler DummyHandler.new, group: :group1
+        subject.subscribe_handler DummyHandler.new, group: :group1
+        
+        expect(subscription1).not_to receive(:pull)
+        expect(subscription2).to receive(:pull)
+        expect(subscription3).to receive(:pull)
+        subject.pull_subscriptions group: :group1
       end
     end
   end
