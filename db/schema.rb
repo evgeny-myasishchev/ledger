@@ -11,7 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150712130741) do
+ActiveRecord::Schema.define(version: 20151128001436) do
+
+  create_table "checkpoints", force: :cascade do |t|
+    t.string  "identifier",                  null: false
+    t.integer "checkpoint_number", limit: 8, null: false
+  end
+
+  add_index "checkpoints", ["identifier"], name: "index_checkpoints_on_identifier"
 
   create_table "currency_rates", force: :cascade do |t|
     t.string   "from",       null: false
