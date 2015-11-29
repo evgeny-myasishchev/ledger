@@ -3,6 +3,9 @@
 # It does not automatically know if new commits are available so pull must be called explicitly.
 #
 class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
+
+  attr_reader :identifier
+
   def initialize(identifier, event_store, checkpoints_repo)
     raise ArgumentError, 'identifier can not be nil' if identifier.nil?
     raise ArgumentError, 'event_store can not be nil' if event_store.nil?
@@ -21,7 +24,7 @@ class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
       headers = commit.headers.dup
       headers[:$commit_timestamp] = commit.commit_timestamp
       @handlers.each { |handler|
-        commit.events.each { |event|  
+        commit.events.each { |event|
           handler.handle_message(event, headers) if handler.can_handle_message?(event)
         }
       }

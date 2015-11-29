@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe EventStoreClient::ConcurrentSubscription do
-  let(:target) { instance_double(EventStoreClient::PersistentSubscription) }
+  let(:target) { instance_double(EventStoreClient::PersistentSubscription, identifier: 'persistent-subscription') }
   subject { described_class.new(target) }
 
   it 'should delegate add_handler and handlers to target' do

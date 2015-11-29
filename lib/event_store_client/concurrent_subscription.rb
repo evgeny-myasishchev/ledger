@@ -26,14 +26,20 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
 
   def init_worker
     Thread.new(logger) do |logger|
-      loop do
-        @monitor.synchronize do
-          logger.debug 'Waiting for pull request...'
-          @pull_requested_cond.wait_until { @pull_requested }
-          @pull_requested = false
+      begin
+        Thread.current[:name] = @target.identifier
+        loop do
+          @monitor.synchronize do
+            logger.debug 'Waiting for pull request...'
+            @pull_requested_cond.wait_until { @pull_requested }
+            @pull_requested = false
+          end
+          logger.debug 'Pull operation requested. Pulling target.'
+          @target.pull
         end
-        logger.debug 'Pull operation requested. Pulling target.'
-        @target.pull
+      rescue Exception => e
+        # In prod error mailer is configured so email will be sent
+        logger.fatal "Pull failed.\n  #{e}\n  #{e.backtrace.join('  \n')}"
       end
     end
   end
