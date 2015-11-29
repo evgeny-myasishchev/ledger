@@ -40,24 +40,6 @@ module Ledger
       initialize_logging
     end
     
-    config.skip_domain_context = false
-
-    # TODO: Move to individual initializers and remove
-    # attr_reader :domain_context
-    # initializer :initialize_domain_context do |app|
-    #   @domain_context = DomainContext.new do |c|
-    #     c.with_database_configs app.config.database_configuration, Rails.env
-    #     c.with_event_bus
-    #     c.with_projections
-    #     c.with_event_store
-    #     c.with_snapshots Snapshot
-    #     c.with_services
-    #     c.with_command_handlers
-    #     c.with_command_dispatch_middleware
-    #     c.with_dispatch_undispatched_commits
-    #   end unless config.skip_domain_context
-    # end unless Rails.env.test?
-    
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }
     
