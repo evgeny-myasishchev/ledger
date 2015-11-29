@@ -11,7 +11,7 @@ namespace :ledger do
   end
   
   desc "Pull all projections to ensure all commits are handled"
-  task :pull_projections => :environment do
+  task :pull_subscriptions => :environment do
     #TODO: Pull projections group only
     Rails.application.event_store_client.pull_subscriptions
   end
