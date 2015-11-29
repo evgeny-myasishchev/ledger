@@ -1,39 +1,39 @@
 class EventStoreClient
   include Loggable
 
-  def initialize event_store, checkpoints_repo
+  def initialize(event_store, checkpoints_repo)
     raise ArgumentError, 'event_store can not be nil' if event_store.nil?
     raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
     @event_store, @checkpoints_repo = event_store, checkpoints_repo
     @subscriptions = []
     @subscriptions_by_group = {}
   end
-  
-  def subscriptions group: nil
+
+  def subscriptions(group: nil)
     group.nil? ? @subscriptions : @subscriptions_by_group.fetch(group, [])
   end
 
-  def subscribed_handlers group: nil
+  def subscribed_handlers(group: nil)
     subscriptions(group: group).map(&:handlers).flatten
   end
 
-  def subscribe_handler handler, group: nil
+  def subscribe_handler(handler, group: nil)
     logger.debug "Subscribing handler: #{handler}"
     subscription = build_subscription(handler.class.name)
     subscription.add_handler(handler)
     register_subscription subscription, group: group
   end
 
-  def pull_subscriptions group: nil
+  def pull_subscriptions(group: nil)
     logger.info "Pulling subscriptions. Group: '#{group}'."
     subscriptions(group: group).each { |s| s.pull }
   end
 
-  def build_subscription identifier
+  def build_subscription(identifier)
     ConcurrentSubscription.new(PersistentSubscription.new(identifier, @event_store, @checkpoints_repo))
   end
-  
-  private def register_subscription subscription, group: nil
+
+  private def register_subscription(subscription, group: nil)
     @subscriptions << subscription
     (@subscriptions_by_group[group] ||= []) << subscription unless group.nil?
   end
