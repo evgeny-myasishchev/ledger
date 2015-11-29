@@ -39,7 +39,7 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
         end
       rescue Exception => e
         # In prod error mailer is configured so email will be sent
-        logger.fatal "Pull failed.\n  #{e}\n  #{e.backtrace.join('  \n')}"
+        logger.fatal %{Pull failed: #{e}\n#{e.backtrace.join("\n")}}
       end
     end
   end
