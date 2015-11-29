@@ -14,6 +14,6 @@ namespace :users do
 
     repo = context.repository_factory.create_repository
     repo.save ledger
-    log.info "User registered."
+    log.info 'User registered.'
   end
 end
