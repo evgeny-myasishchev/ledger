@@ -30,7 +30,7 @@ class EventStoreClient
   end
 
   def build_subscription identifier
-    PersistentSubscription.new identifier, @event_store, @checkpoints_repo
+    ConcurrentSubscription.new(PersistentSubscription.new(identifier, @event_store, @checkpoints_repo))
   end
   
   private def register_subscription subscription, group: nil
