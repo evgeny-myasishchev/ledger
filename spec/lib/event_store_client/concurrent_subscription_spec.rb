@@ -15,6 +15,18 @@ describe EventStoreClient::ConcurrentSubscription do
 
   describe 'pull' do
     it 'should schedule pulling of a target subscription in a separate thread' do
+      mutex = Mutex.new
+      pulled_condition = ConditionVariable.new
+      @target_pulled = false
+      expect(target).to receive(:pull) do
+        mutex.synchronize {
+          @target_pulled = true
+          pulled_condition.signal
+        }
+      end
+      subject.pull
+      mutex.synchronize { pulled_condition.wait(mutex, 3) }
+      expect(@target_pulled).to be_truthy
     end
   end
 end
