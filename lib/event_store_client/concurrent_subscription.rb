@@ -7,29 +7,37 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
   def initialize(target)
     @target = target
     super()
-    @queue = init_worker_queue
+    @mutex = Mutex.new
+    @pull_requested_cond = ConditionVariable.new
+    @pull_requested = false
+    init_worker
   end
 
   def pull
-    @queue.enq :pull
+    logger.debug 'Requesting pull...'
+    @mutex.synchronize do
+      @pull_requested = true
+      @pull_requested_cond.signal
+      logger.debug 'Pull requested.'
+    end
   end
 
   private
 
-  def init_worker_queue
-    queue = Queue.new
-    Thread.new do
+  def init_worker
+    Thread.new(logger) do |logger|
       loop do
-        op = queue.deq
-        if op == :pull
-          logger.debug 'Pull operation requested. Pulling target.'
-          @target.pull
-        else
-          logger.warn "Unexpected op: #{op}"
+        @mutex.synchronize do
+          unless @pull_requested
+            logger.debug 'Waiting for pull request...'
+            @pull_requested_cond.wait(@mutex)
+          end
+          @pull_requested = false
         end
+        logger.debug 'Pull operation requested. Pulling target.'
+        @target.pull
       end
     end
-    queue
   end
 
 end
