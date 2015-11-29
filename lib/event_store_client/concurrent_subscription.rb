@@ -27,7 +27,7 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
   def init_worker
     Thread.new(logger) do |logger|
       begin
-        Thread.current[:name] = @target.identifier
+        Thread.current[:name] = @target.identifier #To simplify diagnostics
         loop do
           @monitor.synchronize do
             logger.debug 'Waiting for pull request...'
