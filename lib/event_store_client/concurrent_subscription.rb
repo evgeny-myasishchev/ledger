@@ -7,15 +7,15 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
   def initialize(target)
     @target = target
     super()
-    @mutex = Mutex.new
-    @pull_requested_cond = ConditionVariable.new
+    @monitor = Monitor.new
+    @pull_requested_cond = @monitor.new_cond
     @pull_requested = false
     init_worker
   end
 
   def pull
     logger.debug 'Requesting pull...'
-    @mutex.synchronize do
+    @monitor.synchronize do
       @pull_requested = true
       @pull_requested_cond.signal
       logger.debug 'Pull requested.'
@@ -27,11 +27,9 @@ class EventStoreClient::ConcurrentSubscription < EventStoreClient::Subscription
   def init_worker
     Thread.new(logger) do |logger|
       loop do
-        @mutex.synchronize do
-          unless @pull_requested
-            logger.debug 'Waiting for pull request...'
-            @pull_requested_cond.wait(@mutex)
-          end
+        @monitor.synchronize do
+          logger.debug 'Waiting for pull request...'
+          @pull_requested_cond.wait_until { @pull_requested }
           @pull_requested = false
         end
         logger.debug 'Pull operation requested. Pulling target.'
