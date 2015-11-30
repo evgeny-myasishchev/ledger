@@ -62,6 +62,10 @@ describe EventStoreClient::ConcurrentSubscription do
       }
       logger.debug 'Waiting for pulled condition...'
       mutex.synchronize { pulled_condition.wait(mutex, 3) }
+      mutex.synchronize {
+        pulled_multiple_condition.signal
+        pulled_condition.wait(mutex, 1)
+      }
       expect(@pull_count).to eql 2
     end
   end
