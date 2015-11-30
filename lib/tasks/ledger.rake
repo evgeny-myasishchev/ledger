@@ -8,6 +8,8 @@ namespace :ledger do
   desc "Pull all subscriptions to ensure all commits are handled"
   task :pull_subscriptions => :environment do
     Rails.application.event_store_client.pull_subscriptions
+    puts 'Please make sure all subscriptions have finished pulling and press any Ctrl+C.'
+    STDIN.getc
   end
   
   task :purge => :environment do
