@@ -34,6 +34,10 @@ gem 'omniauth-google-oauth2'
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+# Handling concurrency with concurrent gem
+gem 'concurrent-ruby'
+gem 'concurrent-ruby-ext'
+
 gem 'event-store', github: 'evgeny-myasishchev/event-store'
 gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 
