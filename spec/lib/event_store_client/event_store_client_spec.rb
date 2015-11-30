@@ -5,7 +5,6 @@ module EventStoreClientSpec
   class DummyHandler
   end
 
-
   describe EventStoreClient do
     let(:event_store) {  
       EventStore.bootstrap do |with|

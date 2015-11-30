@@ -1,10 +1,13 @@
+require 'concurrent'
+
 class EventStoreClient
   include Loggable
 
-  def initialize(event_store, checkpoints_repo)
+  def initialize(event_store, checkpoints_repo, pool: Concurrent::FixedThreadPool.new(1))
     raise ArgumentError, 'event_store can not be nil' if event_store.nil?
     raise ArgumentError, 'checkpoints_repo can not be nil' if checkpoints_repo.nil?
-    @event_store, @checkpoints_repo = event_store, checkpoints_repo
+    raise ArgumentError, 'pool can not be nil' if pool.nil?
+    @event_store, @checkpoints_repo, @pool = event_store, checkpoints_repo, pool
     @subscriptions = []
     @subscriptions_by_group = {}
   end
@@ -30,7 +33,7 @@ class EventStoreClient
   end
 
   def build_subscription(identifier)
-    ConcurrentSubscription.new(PersistentSubscription.new(identifier, @event_store, @checkpoints_repo))
+    ConcurrentSubscription.new(PersistentSubscription.new(identifier, @event_store, @checkpoints_repo), pool: @pool)
   end
 
   private def register_subscription(subscription, group: nil)
