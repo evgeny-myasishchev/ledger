@@ -4,32 +4,40 @@ namespace :ledger do
     require 'currencies-updater'
     CurrenciesUpdater.update
   end
-  
+
   desc "Pull all subscriptions to ensure all commits are handled"
   task :pull_subscriptions => :environment do
     Rails.application.event_store_client.pull_subscriptions
     puts 'Please make sure all subscriptions have finished pulling and press any Ctrl+C.'
     STDIN.getc
   end
-  
+
   task :purge => :environment do
-    Rake::Task["ledger:purge_events_and_projections"].invoke
+    Rake::Task["ledger:purge_events"].invoke
+    Rake::Task["ledger:purge_projections"].invoke
     CurrencyRate.delete_all
     User.delete_all
   end
-  
-  task :purge_events_and_projections => :environment do
+
+  task :purge_events => :environment do
     app = Rails.application
     app.event_store.purge!
-    app.event_store_client
-      .subscribed_handlers(group: :projections)
-      .each { |projection| projection.purge! }
   end
-  
+
+  task :purge_projections => :environment do
+    app = Rails.application
+    app.event_store_client
+      .subscriptions(group: :projections)
+      .each do |subscription|
+        subscription.handlers.map(&:purge!)
+        Checkpoint.where(identifier: subscription.identifier).delete_all
+      end
+  end
+
   task :discard_snapshots => :environment do
     Snapshot.delete_all
   end
-  
+
   # To be used for mostly for testing purposes.
   desc "Get currency rates for given ledger.aggregate_id"
   task :get_currency_rates, [:aggregate_id] do |t, a|
@@ -38,7 +46,7 @@ namespace :ledger do
     user = User.find ledger.owner_user_id
     rates = ledger.get_rates user
     puts "Retrieved rates:"
-    rates.each { |rate| 
+    rates.each { |rate|
       puts rate.to_json
     }
   end
