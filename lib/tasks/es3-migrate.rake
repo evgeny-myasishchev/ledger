@@ -40,6 +40,7 @@ namespace :es3_migrate do
   desc '#3 - init checkpoints'
   task :init_checkpoints do
     require 'log_factory'
+    require 'mailer_log_outputter'
     app = Rails.application
     logger = LogFactory.configure(app.config)
     es_db = Sequel.connect app.config.database_configuration['event-store']
