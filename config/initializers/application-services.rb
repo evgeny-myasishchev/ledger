@@ -13,7 +13,7 @@ Rails.application.configure do |app|
         .compress
     end
 
-    @event_store_client = EventStoreClient.new(@event_store, Checkpoint::Repository.new)
+    @event_store_client = EventStoreClient.new(@event_store, Checkpoint::Repository.new, pool: app.config.event_store_client.pool)
     
     aggregates_builder = CommonDomain::Persistence::AggregatesBuilder.new
     @persistence_factory = CommonDomain::PersistenceFactory.new(@event_store, aggregates_builder, Snapshot)

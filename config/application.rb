@@ -7,6 +7,7 @@ require 'rails/all'
 Bundler.require(*Rails.groups)
 
 require 'dotenv'
+require 'concurrent'
 Dotenv.load
 
 module Ledger
@@ -49,5 +50,7 @@ module Ledger
       CommonDomain::Logger.factory = CommonDomain::Logger::Log4rFactory.new
       ActiveRecord::Base.logger = LogFactory.logger 'ActiveRecord'
     end
+
+    config.event_store_client = Struct.new(:pool).new(nil)
   end
 end
