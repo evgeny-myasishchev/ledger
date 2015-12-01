@@ -3,6 +3,7 @@ namespace :es3_migrate do
   desc '#1 - rename es table to es3'
   task :rename_es_table do
     require 'log_factory'
+    require 'mailer_log_outputter'
     app = Rails.application
     logger = LogFactory.configure(app.config)
     es_db_config = app.config.database_configuration['event-store']
