@@ -1,5 +1,13 @@
 # On production rename this file to just backburner.rb and adjust parameters
 
+class BackburnerWorker < Backburner::Workers::Simple
+  def start(*args)
+    log_info 'Pulling subscriptions on start...'
+    Rails.application.event_store_client.pull_subscriptions
+    super
+  end
+end
+
 Backburner.configure do |config|
   config.beanstalk_url    = ["beanstalk://127.0.0.1"]
   config.tube_namespace   = "my-ledger.com"
@@ -8,8 +16,8 @@ Backburner.configure do |config|
   config.retry_delay      = 2 # default 5 seconds
   config.default_priority = 65536
   config.respond_timeout  = 120
-  config.default_worker   = Backburner::Workers::Simple
-  config.logger           = Log4r::Logger.new('ledger::backburner')
+  config.default_worker   = BackburnerWorker
+  config.logger           = Log4r::Logger.new('Ledger::Backburner')
   config.primary_queue    = 'default'
   config.priority_labels  = { :custom => 50, :useless => 1000 }
   config.reserve_timeout  = nil
