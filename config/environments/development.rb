@@ -38,4 +38,7 @@ Rails.application.configure do
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
+
+  # Using single threaded pool in dev env since sqlite doesn't deal well with concurrency
+  config.event_store_client.pool = Concurrent::SingleThreadExecutor.new
 end
