@@ -75,4 +75,7 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  # It makes sense to have a pool size same as a number of esc subscriptions
+  config.event_store_client.pool = Concurrent::ThreadPoolExecutor.new max_threads: 6
 end

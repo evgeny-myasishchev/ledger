@@ -33,6 +33,8 @@ Rails.application.configure do |app|
       stack.with CommonDomain::DispatchCommand::Middleware::TrackUser
     end
 
+    # Please make sure that esc pool size is equals to number of subscriptions.
+    # Also please make sure that pull size of the database config is bigger than esc pool size.
     @event_store_client.subscribe_handler ::Projections::Ledger.create_projection, group: :projections
     @event_store_client.subscribe_handler ::Projections::Account.create_projection, group: :projections
     @event_store_client.subscribe_handler ::Projections::Transaction.create_projection, group: :projections
