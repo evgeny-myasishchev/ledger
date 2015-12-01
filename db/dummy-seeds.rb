@@ -1,7 +1,7 @@
 # This file contains initialization of the dummy data that is used for development purposes
 
-log = Rails.logger
-@log = log
+logger = Rails.logger
+@logger = logger
 @app = Rails.application
 @persistence_factory = @app.persistence_factory
 @app.config.pull_subscriptions_on_commit = false
