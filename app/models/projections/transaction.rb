@@ -9,7 +9,7 @@ class Projections::Transaction < ActiveRecord::Base
   def get_transfer_counterpart
     raise "Transaction '#{transaction_id}' is not involved in transfer." unless is_transfer
     
-    # This ons is receving. Finding sending
+    # This ons is receiving. Finding sending
     return self.class.find_by transaction_id: sending_transaction_id unless transaction_id == sending_transaction_id
     
     # This one is sending. Finding receiving
@@ -21,7 +21,7 @@ class Projections::Transaction < ActiveRecord::Base
     if !self.tag_ids.nil? && self.tag_ids.include?(wrapped_tag_id)
       return
     end
-    self.tag_ids ||= ""
+    self.tag_ids ||= ''
     self.tag_ids << ',' unless self.tag_ids.blank?
     self.tag_ids << wrapped_tag_id
     self.tag_ids_will_change!
@@ -62,23 +62,23 @@ class Projections::Transaction < ActiveRecord::Base
   # * amount - exact amount to find
   # * from - date from
   # * to - date to
-  def self.build_search_query user, account, criteria: {}
+  def self.build_search_query(user, account, criteria: {})
     raise 'User or Account should be provided.' if user.nil? && account.nil?
     criteria = criteria || {}
     query = account.nil? ? Transaction.joins(:account).where('projections_accounts.authorized_user_ids LIKE ?', "%{#{user.id}}%")
-      : Transaction.where(account_id: account.aggregate_id)
-    query = query.select(:id, :transaction_id, :account_id, :type_id, :amount, :tag_ids, :comment, :date, 
-        :is_transfer, :sending_account_id, :sending_transaction_id, 
-        :receiving_account_id, :receiving_transaction_id)
+    : Transaction.where(account_id: account.aggregate_id)
+    query = query.select(:id, :transaction_id, :account_id, :type_id, :amount, :tag_ids, :comment, :date,
+                         :is_transfer, :sending_account_id, :sending_transaction_id,
+                         :receiving_account_id, :receiving_transaction_id)
     query = query.order(date: :desc)
     if criteria[:tag_ids]
-      tag_ids_serach_query = ''
-      criteria[:tag_ids].each { |tag_id|
-        tag_ids_serach_query << ' or ' unless tag_ids_serach_query.empty?
-        tag_ids_serach_query << 'tag_ids like ?'
+      tag_ids_search_query = ''
+      criteria[:tag_ids].each { |_|
+        tag_ids_search_query << ' or ' unless tag_ids_search_query.empty?
+        tag_ids_search_query << 'tag_ids like ?'
       }
-      query = query.where [tag_ids_serach_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
-    end 
+      query = query.where [tag_ids_search_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
+    end
     query = query.where Transaction.arel_table[:comment].matches("%#{criteria[:comment]}%") if criteria[:comment]
     query = query.where amount: criteria[:amount] if criteria[:amount]
     query = query.where 'date >= ?', criteria[:from] if criteria[:from]
@@ -159,17 +159,17 @@ class Projections::Transaction < ActiveRecord::Base
       end
     end
     
-    private def build_transaction event
+    private def build_transaction(event)
       t = Transaction.new account_id: event.aggregate_id,
-        transaction_id: event.transaction_id,
-        amount: event.amount,
-        comment: event.comment,
-        date: event.date
+                          transaction_id: event.transaction_id,
+                          amount: event.amount,
+                          comment: event.comment,
+                          date: event.date
       assign_tags event, t
       t
     end
     
-    private def assign_tags event, transaction
+    private def assign_tags(event, transaction)
       event.tag_ids.each { |tag_id| transaction.add_tag tag_id }
     end
   end
