@@ -377,6 +377,20 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.date.to_datetime.to_json).to eql date2.utc.to_json
     end
 
+    it 'should record user and reported date' do
+      user = create(:user)
+      commit_timestamp = DateTime.now - 100
+      headers = {
+          user_id: user.id,
+          :$commit_timestamp => commit_timestamp
+      }
+      subject.handle_message e::TransactionReported.new('account-1', 't-1', income_id, 10523, DateTime.now, [], nil), headers
+      t1 = described_class.find_by_transaction_id('t-1')
+      expect(t1.reported_by_id).to eql user.id
+      expect(t1.reported_by).to eql user.email
+      expect(t1.reported_at.to_datetime.to_json).to eql commit_timestamp.utc.to_json
+    end
+
     it 'should be idempotent' do
       subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, DateTime.now, [], nil
       expect {
@@ -387,11 +401,14 @@ RSpec.describe Projections::Transaction, :type => :model do
 
   describe 'transfer' do
     let(:date) { DateTime.now - 100 }
-    let(:t1) { described_class.find_by_transaction_id 't-1' }
-    let(:t2) { described_class.find_by_transaction_id 't-2' }
+    let(:t1) { described_class.find_by_transaction_id('t-1') }
+    let(:t2) { described_class.find_by_transaction_id('t-2') }
+    let(:commit_timestamp) { DateTime.now - 100 }
+    let(:user) { create(:user) }
+    let(:headers) { {user_id: user.id, :$commit_timestamp => commit_timestamp} }
     before(:each) do
-      subject.handle_message e::TransferSent.new 'account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'
-      subject.handle_message e::TransferReceived.new 'account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'
+      subject.handle_message e::TransferSent.new('account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
+      subject.handle_message e::TransferReceived.new('account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
     end
 
     describe 'on TransferSent' do
@@ -410,6 +427,12 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t1.sending_account_id).to eql('account-1')
         expect(t1.sending_transaction_id).to eql('t-1')
         expect(t1.receiving_account_id).to eql('account-2')
+      end
+
+      it 'should record user and reported date' do
+        expect(t1.reported_by_id).to eql user.id
+        expect(t1.reported_by).to eql user.email
+        expect(t1.reported_at.to_datetime.to_json).to eql commit_timestamp.utc.to_json
       end
 
       it 'should be idempotent' do
@@ -436,6 +459,12 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t2.sending_transaction_id).to eql('t-1')
         expect(t2.receiving_account_id).to eql('account-2')
         expect(t2.receiving_transaction_id).to eql('t-2')
+      end
+
+      it 'should record user and reported date' do
+        expect(t1.reported_by_id).to eql user.id
+        expect(t1.reported_by).to eql user.email
+        expect(t1.reported_at.to_datetime.to_json).to eql commit_timestamp.utc.to_json
       end
 
       it 'should be idempotent' do

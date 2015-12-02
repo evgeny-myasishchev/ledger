@@ -91,17 +91,17 @@ class Projections::Transaction < ActiveRecord::Base
       Transaction.where(account_id: event.aggregate_id).delete_all
     end
     
-    on TransactionReported do |event|
+    on TransactionReported do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
-        t = build_transaction(event)
+        t = build_transaction(event, headers)
         t.type_id = event.type_id
         t.save!
       end
     end
     
-    on TransferSent do |event|
+    on TransferSent do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
-        t = build_transaction(event)
+        t = build_transaction(event, headers)
         t.is_transfer = true
         t.type_id = Domain::Transaction::ExpenseTypeId
         t.sending_account_id = event.aggregate_id
@@ -111,9 +111,9 @@ class Projections::Transaction < ActiveRecord::Base
       end
     end
         
-    on TransferReceived do |event|
+    on TransferReceived do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
-        t = build_transaction(event)
+        t = build_transaction(event, headers)
         t.is_transfer = true
         t.type_id = Domain::Transaction::IncomeTypeId
         t.receiving_account_id = event.aggregate_id
@@ -159,13 +159,18 @@ class Projections::Transaction < ActiveRecord::Base
       end
     end
     
-    private def build_transaction(event)
+    private def build_transaction(event, headers)
       t = Transaction.new account_id: event.aggregate_id,
                           transaction_id: event.transaction_id,
                           amount: event.amount,
                           comment: event.comment,
                           date: event.date
       assign_tags event, t
+      if headers.key?(:user_id)
+        t.reported_by_id = headers[:user_id]
+        t.reported_by = User.where(id: headers[:user_id]).pluck(:email).first
+      end
+      t.reported_at = headers[:$commit_timestamp]
       t
     end
     
