@@ -60,10 +60,15 @@ group :development, :test do
   gem 'rspec-core', '>= 3.0'
   gem 'rspec-rails', '>= 3.0'
   gem 'puma'
-  gem "spring"
-  gem "spring-commands-rspec"
+  gem 'spring'
+  gem 'spring-commands-rspec'
   gem 'jasmine-rails'
   gem 'rest-client'
+end
+
+group :test do
+  gem 'factory_girl_rails'
+  gem 'ffaker'
 end
 
 # Use backburner (beanstalkd) to run active jobs on production
