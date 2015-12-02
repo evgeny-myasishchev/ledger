@@ -36,7 +36,7 @@ module CommonDomain::DispatchCommand
       #     @app.call(command, context)
       #   end
       # end
-      def with middleware_class, *args
+      def with(middleware_class, *args)
         @next = middleware_class.new @next, *args
       end
     end
