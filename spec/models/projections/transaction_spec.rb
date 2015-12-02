@@ -295,7 +295,8 @@ RSpec.describe Projections::Transaction, :type => :model do
   def expect_required_attributes(transaction)
     expect(transaction.attributes.keys).to eql %w(
     id transaction_id account_id type_id amount tag_ids comment date
-    is_transfer sending_account_id sending_transaction_id receiving_account_id receiving_transaction_id)
+    is_transfer sending_account_id sending_transaction_id receiving_account_id receiving_transaction_id
+    reported_by reported_at)
   end
 
   describe 'add_tag' do
