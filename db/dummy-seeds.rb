@@ -22,6 +22,7 @@ logger.info "Creating user #{dummy_user_name}"
 user = User.create_with(password: 'password').find_or_create_by! email: dummy_user_name
 
 @dispatch_context = CommonDomain::DispatchCommand::DispatchContext::StaticDispatchContext.new user.id, '127.0.0.1'
+@headers = {user_id: user.id, ip_address: '127.0.0.1'}
 
 def dispatch command
   @app.command_dispatch_app.call command, @dispatch_context
@@ -83,7 +84,7 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
   report_expense account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
   
   # Reporting in bulk directly. It just works faster.
-  @persistence_factory.begin_unit_of_work({}) do |work|
+  @persistence_factory.begin_unit_of_work(@headers) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
@@ -100,7 +101,7 @@ pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_
   report_income account_id, '33448.57', date - 90, tag_ids_by_name['passive income'], 'Monthly income'
   report_income account_id, '43448.57', date - 80, tag_ids_by_name['passive income'], 'Monthly income'
   
-  @persistence_factory.begin_unit_of_work({}) do |work|
+  @persistence_factory.begin_unit_of_work(@headers) do |work|
     account = work.get_by_id Domain::Account, account_id
     100.times do
       data = fake_transactions_data[rand(fake_transactions_data.length)]
