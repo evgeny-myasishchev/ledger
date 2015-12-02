@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151128001436) do
+ActiveRecord::Schema.define(version: 20151202132044) do
 
   create_table "checkpoints", force: :cascade do |t|
     t.string  "identifier",                  null: false
@@ -121,9 +121,13 @@ ActiveRecord::Schema.define(version: 20151128001436) do
     t.string   "sending_transaction_id"
     t.string   "receiving_account_id"
     t.string   "receiving_transaction_id"
+    t.string   "reported_by"
+    t.integer  "reported_by_id"
+    t.datetime "reported_at"
   end
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
+  add_index "projections_transactions", ["reported_by_id"], name: "index_projections_transactions_on_reported_by_id"
   add_index "projections_transactions", ["transaction_id"], name: "index_projections_transactions_on_transaction_id", unique: true
 
   create_table "snapshots", force: :cascade do |t|
