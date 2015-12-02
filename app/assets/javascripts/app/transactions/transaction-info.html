@@ -1,0 +1,18 @@
+<div>
+  <label style='display: block'>
+    <i class='{{transaction | tti}}'></i>
+    <span ng-if='transaction.type_id == 1 && !transaction.is_transfer'>Income transaction</span>
+    <span ng-if='transaction.type_id == 2 && !transaction.is_transfer'>Expense transaction</span>
+    <span ng-if='transaction.type_id == 3 && !transaction.is_transfer'>Refund transaction</span>
+    <span ng-if='transaction.is_transfer'>Transfer transaction</span>
+  </label>
+
+  <div ng-if='transaction.is_transfer'>
+    <div style='text-align: left;'>Transfered from account: <label>{{transaction.sending_account_id | accountById | nameWithBalance}}</label></div>
+    <div style='text-align: left;'>Transfered to account: <label>{{transaction.receiving_account_id | accountById | nameWithBalance}}</label></div>
+  </div>
+
+  <!--User info-->
+  <div ng-if='transaction.reported_by' style='text-align: left;'>Reported by: <label>{{transaction.reported_by}}</label></div>
+  <div ng-if='transaction.reported_at' style='text-align: left;'>Reported at: <label>{{transaction.reported_at | date:'short'}}</label></div>
+</div>
