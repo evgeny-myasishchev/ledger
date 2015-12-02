@@ -10,7 +10,7 @@
   function transactionsList($http, accounts, tagsHelper, money) {
     return {
       restrict: 'E',
-      templateUrl: 'transactions-list.html',
+      templateUrl: 'app/transactions/transactions-list.html',
       scope: {
         showAccount: '=',
         transactions: '=data'
