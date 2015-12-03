@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151202132044) do
+ActiveRecord::Schema.define(version: 20151203223902) do
 
   create_table "checkpoints", force: :cascade do |t|
     t.string  "identifier",                  null: false
@@ -43,17 +43,18 @@ ActiveRecord::Schema.define(version: 20151202132044) do
   add_index "device_secrets", ["user_id"], name: "index_device_secrets_on_user_id"
 
   create_table "projections_accounts", force: :cascade do |t|
-    t.string  "ledger_id",           null: false
-    t.string  "aggregate_id",        null: false
-    t.integer "sequential_number",   null: false
-    t.integer "owner_user_id",       null: false
-    t.string  "authorized_user_ids", null: false
+    t.string  "ledger_id",                       null: false
+    t.string  "aggregate_id",                    null: false
+    t.integer "sequential_number",               null: false
+    t.integer "owner_user_id",                   null: false
+    t.string  "authorized_user_ids",             null: false
     t.integer "category_id"
-    t.string  "currency_code",       null: false
-    t.string  "name",                null: false
+    t.string  "currency_code",                   null: false
+    t.string  "name",                            null: false
     t.string  "unit"
-    t.integer "balance",             null: false
-    t.boolean "is_closed",           null: false
+    t.integer "balance",                         null: false
+    t.boolean "is_closed",                       null: false
+    t.integer "pending_balance",     default: 0, null: false
   end
 
   add_index "projections_accounts", ["aggregate_id"], name: "index_projections_accounts_on_aggregate_id", unique: true
@@ -124,6 +125,7 @@ ActiveRecord::Schema.define(version: 20151202132044) do
     t.string   "reported_by"
     t.integer  "reported_by_id"
     t.datetime "reported_at"
+    t.boolean  "is_pending",               default: false, null: false
   end
 
   add_index "projections_transactions", ["account_id"], name: "index_projections_transactions_on_account_id"
