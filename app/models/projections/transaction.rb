@@ -2,20 +2,20 @@ class Projections::Transaction < ActiveRecord::Base
   include CommonDomain::Projections::ActiveRecord
   include Domain::Events
   include Projections
-  
+
   belongs_to :account, primary_key: :aggregate_id
-  
+
   # Gets transfer counterpart. For sending transaction that would be the receiving and vice versa.
   def get_transfer_counterpart
     raise "Transaction '#{transaction_id}' is not involved in transfer." unless is_transfer
-    
+
     # This ons is receiving. Finding sending
     return self.class.find_by transaction_id: sending_transaction_id unless transaction_id == sending_transaction_id
-    
+
     # This one is sending. Finding receiving
     return self.class.find_by 'sending_transaction_id = ? AND receiving_transaction_id = transaction_id', sending_transaction_id
   end
-  
+
   def add_tag(the_id)
     wrapped_tag_id = "{#{the_id}}"
     if !self.tag_ids.nil? && self.tag_ids.include?(wrapped_tag_id)
@@ -26,36 +26,36 @@ class Projections::Transaction < ActiveRecord::Base
     self.tag_ids << wrapped_tag_id
     self.tag_ids_will_change!
   end
-  
+
   def remove_tag(tag_id)
     wrapped = "{#{tag_id}}"
     index = self.tag_ids.index(wrapped)
     replacement = (index && index > 0 && (index + wrapped.length < self.tag_ids.length)) ? ',' : ''
     self.tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
   end
-  
+
   def self.get_root_data(user, account_id, limit: 25)
     account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
     transactions = build_search_query user, account
     root_data = {
-      transactions_total: transactions.count(:id),
-      transactions_limit: limit,
-      transactions: transactions.take(limit)
+        transactions_total: transactions.count(:id),
+        transactions_limit: limit,
+        transactions: transactions.take(limit)
     }
     root_data[:account_balance] = account.balance if account
     root_data
   end
-  
+
   def self.search(user, account_id, criteria: {}, offset: 0, limit: 25, with_total: false)
     account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
     query = build_search_query(user, account, criteria: criteria)
     result = {
-      transactions: query.offset(offset).take(limit)
+        transactions: query.offset(offset).take(limit)
     }
     result[:transactions_total] = query.count(:id) if with_total
     result
   end
-  
+
   # criteria is a hash that accepts following keys
   # * tag_ids - array of tag ids
   # * comment
@@ -85,20 +85,39 @@ class Projections::Transaction < ActiveRecord::Base
     query = query.where 'date <= ?', criteria[:to] if criteria[:to]
     query
   end
-  
+
   projection do
     on AccountRemoved do |event|
       Transaction.where(account_id: event.aggregate_id).delete_all
     end
-    
-    on TransactionReported do |event, headers|
-      unless Transaction.exists?(transaction_id: event.transaction_id)
+
+    on PendingTransactionReported do |event, headers|
+      unless Transaction.exists?(transaction_id: event.aggregate_id) || event.account_id.nil?
         t = build_transaction(event, headers)
+        t.account_id = event.account_id
+        t.transaction_id = event.aggregate_id
         t.type_id = event.type_id
+        t.is_pending = true
         t.save!
       end
     end
-    
+
+    on TransactionReported do |event, headers|
+      transaction = Transaction.find_by transaction_id: event.transaction_id
+
+      if transaction.nil?
+        transaction = build_transaction(event, headers)
+        transaction.type_id = event.type_id
+        transaction.save!
+      elsif transaction.is_pending
+        transaction.attributes = build_transaction_attributes(event, headers)
+        transaction.type_id = event.type_id
+        transaction.tag_ids = nil
+        assign_tags(event, transaction)
+        transaction.save!
+      end
+    end
+
     on TransferSent do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
         t = build_transaction(event, headers)
@@ -110,7 +129,7 @@ class Projections::Transaction < ActiveRecord::Base
         t.save!
       end
     end
-        
+
     on TransferReceived do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
         t = build_transaction(event, headers)
@@ -123,58 +142,67 @@ class Projections::Transaction < ActiveRecord::Base
         t.save!
       end
     end
-    
+
     on TransactionAmountAdjusted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all amount: event.amount
     end
-    
+
     on TransactionCommentAdjusted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all comment: event.comment
     end
-    
+
     on TransactionDateAdjusted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all date: event.date
     end
-        
+
     on TransactionTagged do |event|
       transaction = Transaction.find_by_transaction_id(event.transaction_id)
       transaction.add_tag event.tag_id
       transaction.save!
     end
-    
+
     on TransactionUntagged do |event|
       transaction = Transaction.find_by_transaction_id(event.transaction_id)
       transaction.remove_tag event.tag_id
       transaction.save!
     end
-    
-    on TransactionTypeConverted do |event| 
+
+    on TransactionTypeConverted do |event|
       Transaction.where(transaction_id: event.transaction_id).update_all type_id: event.type_id
     end
-        
+
     on TransactionRemoved do |event|
       if Transaction.exists?(transaction_id: event.transaction_id)
         transaction = Transaction.find_by_transaction_id(event.transaction_id)
         transaction.delete
       end
     end
-    
-    private def build_transaction(event, headers)
-      t = Transaction.new account_id: event.aggregate_id,
-                          transaction_id: event.transaction_id,
-                          amount: event.amount,
-                          comment: event.comment,
-                          date: event.date
+
+    private
+
+    def build_transaction(event, headers)
+      t = Transaction.new build_transaction_attributes(event, headers)
       assign_tags event, t
-      if headers.key?(:user_id)
-        t.reported_by_id = headers[:user_id]
-        t.reported_by = User.where(id: headers[:user_id]).pluck(:email).first
-      end
-      t.reported_at = headers[:$commit_timestamp]
       t
     end
-    
-    private def assign_tags(event, transaction)
+
+    def build_transaction_attributes(event, headers)
+      attrs = {
+          account_id: event.aggregate_id,
+          amount: event.amount,
+          comment: event.comment,
+          date: event.date
+      }
+      attrs[:transaction_id] = event.transaction_id if event.respond_to?(:transaction_id)
+      if headers.key?(:user_id)
+        attrs[:reported_by_id] = headers[:user_id]
+        attrs[:reported_by] = User.where(id: headers[:user_id]).pluck(:email).first
+      end
+      attrs[:reported_at] = headers[:$commit_timestamp]
+      attrs
+    end
+
+    def assign_tags(event, transaction)
       event.tag_ids.each { |tag_id| transaction.add_tag tag_id }
     end
   end
