@@ -16,4 +16,9 @@ RSpec.describe PullSubscriptionsJob, type: :job do
     expect(event_store_client).to receive(:pull_subscriptions).with(group: :group100)
     subject.perform(group: :group100)
   end
+
+  it 'should convert group from string to sym' do
+    expect(event_store_client).to receive(:pull_subscriptions).with(group: :group100)
+    subject.perform(group: 'group100')
+  end
 end
