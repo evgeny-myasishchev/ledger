@@ -47,7 +47,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     else
       raise Errors::DomainError, "unknown type: #{type_id}"
     end
-    raise_event PendingTransactionApproved.new aggregate_id
+    raise_event PendingTransactionApproved.new(aggregate_id)
   end
 
   def approve_transfer(account, receiving_account, amount_received)
