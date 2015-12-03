@@ -6,10 +6,19 @@ namespace :ledger do
   end
 
   desc 'Pull all subscriptions to ensure all commits are handled'
-  task :pull_subscriptions => :environment do
-    Rails.application.event_store_client.pull_subscriptions
-    puts 'Please make sure all subscriptions have finished pulling and press any Ctrl+C.'
-    STDIN.getc
+  task :pull_subscriptions, [:strategy] => :environment do |_, a|
+    raise ArgumentError, 'Please provide strategy' unless a.strategy
+    strategy = a.strategy.to_sym
+    case
+      when strategy == :in_proc
+        Rails.application.event_store_client.pull_subscriptions
+        puts 'Please make sure all subscriptions have finished pulling and press any key.'
+        STDIN.getc
+      when strategy == :job
+        PullSubscriptionsJob.perform_later(group: 'projections')
+      else
+        puts "Unknown strategy. Expected :in_proc or :job, got: #{strategy}"
+    end
   end
 
   task :purge => :environment do
@@ -56,7 +65,7 @@ namespace :ledger do
     Snapshot.delete_all
   end
 
-  # To be used for mostly for testing purposes.
+# To be used for mostly for testing purposes.
   desc 'Get currency rates for given ledger.aggregate_id'
   task :get_currency_rates, [:aggregate_id] do |t, a|
     raise 'Please provide ledger.aggregate_id' unless a.aggregate_id
