@@ -45,7 +45,7 @@ class Domain::Account < CommonDomain::Aggregate
     raise_event AccountRemoved.new aggregate_id
   end
   
-  def report_income transaction_id, amount, date, tag_ids = nil, comment = nil
+  def report_income(transaction_id, amount, date, tag_ids = nil, comment = nil)
     logger.debug "Reporting #{amount} of income for account aggregate_id='#{aggregate_id}'"
     ensure_transaction_id_unique! transaction_id
     amount = Money.parse(amount, @currency)
