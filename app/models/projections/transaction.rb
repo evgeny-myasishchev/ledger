@@ -114,6 +114,14 @@ class Projections::Transaction < ActiveRecord::Base
       end
     end
 
+    on PendingTransactionApproved do |event, headers|
+      Transaction.where(transaction_id: event.aggregate_id).update_all(is_pending: false)
+    end
+
+    on PendingTransactionRejected do |event, headers|
+      Transaction.where(transaction_id: event.aggregate_id).delete_all
+    end
+
     on TransactionReported do |event, headers|
       transaction = Transaction.find_by transaction_id: event.transaction_id
 

@@ -488,6 +488,34 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
 
+  describe 'on PendingTransactionApproved' do
+    it 'should reset pending flag' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionApproved.new('t-1')
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.is_pending).to be_falsy
+    end
+  end
+
+  describe 'on PendingTransactionRejected' do
+    it 'should remove pending transaction' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionRejected.new('t-1')
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1).to be_nil
+    end
+
+    it 'should be idempotent' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionRejected.new('t-1')
+      expect {
+        subject.handle_message e::PendingTransactionRejected.new('t-1')
+      }.not_to change { described_class.count }
+    end
+  end
+
   describe 'on TransactionReported' do
     it 'should record the transaction' do
       date1 = DateTime.now - 100
