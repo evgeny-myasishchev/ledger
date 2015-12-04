@@ -42,7 +42,9 @@ class Application::PendingTransactionsService < CommonDomain::CommandHandler
   
   handle(PendingTransactionCommands::RejectPendingTransaction).with(Domain::PendingTransaction).using(:reject)
   
-  private def adjust_pending_transaction transaction, cmd
+  private
+
+  def adjust_pending_transaction(transaction, cmd)
     transaction.adjust amount: cmd.amount, date: cmd.date, tag_ids: cmd.tag_ids, comment: cmd.comment, account_id: cmd.account_id, type_id: cmd.type_id
   end
 end
