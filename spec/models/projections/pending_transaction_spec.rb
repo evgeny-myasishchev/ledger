@@ -7,15 +7,15 @@ module Projections::PendingTransactionSpec
   RSpec.describe Projections::PendingTransaction, :type => :model do
     subject { described_class.create_projection }
     
-    def new_reported_event user_id: 33222, transaction_id: 't-101', amount: '1003.32', 
-        date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
-        account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
+    def new_reported_event(user_id: 33222, transaction_id: 't-101', amount: '1003.32',
+                           date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101',
+                           account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId)
       PendingTransactionReported.new transaction_id, user_id, amount, date, tag_ids, comment, account_id, type_id
     end
     
-    def new_adjusted_event transaction_id: 't-101', amount: '1003.32', 
-        date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101', 
-        account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId
+    def new_adjusted_event(transaction_id: 't-101', amount: '1003.32',
+                           date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101',
+                           account_id: 'a-100', type_id: Domain::Transaction::ExpenseTypeId)
       PendingTransactionAdjusted.new transaction_id, amount, date, tag_ids, comment, account_id, type_id
     end
     
@@ -42,7 +42,7 @@ module Projections::PendingTransactionSpec
         
         it 'should include allowed attributes only' do
           transaction = described_class.get_pending_transactions(user_1).first
-          expect(transaction.attribute_names).to eql ['id', 'transaction_id', 'amount', 'date', 'tag_ids', 'comment', 'account_id', 'type_id']
+          expect(transaction.attribute_names).to eql %w(id transaction_id amount date tag_ids comment account_id type_id)
         end
       end
         
@@ -126,7 +126,7 @@ module Projections::PendingTransactionSpec
         expect(described_class.find_by_transaction_id('t-101')).to be_nil
       end
       
-      it "should be idempotent" do
+      it 'should be idempotent' do
         subject.handle_message PendingTransactionApproved.new 't-101'
         expect { subject.handle_message PendingTransactionApproved.new 't-101' }.not_to change { described_class.count }
       end
@@ -142,7 +142,7 @@ module Projections::PendingTransactionSpec
         expect(described_class.find_by_transaction_id('t-101')).to be_nil
       end
       
-      it "should be idempotent" do
+      it 'should be idempotent' do
         subject.handle_message PendingTransactionRejected.new 't-101'
         expect { subject.handle_message PendingTransactionRejected.new 't-101' }.not_to change { described_class.count }
       end

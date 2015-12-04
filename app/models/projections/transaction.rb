@@ -93,12 +93,24 @@ class Projections::Transaction < ActiveRecord::Base
 
     on PendingTransactionReported do |event, headers|
       unless Transaction.exists?(transaction_id: event.aggregate_id) || event.account_id.nil?
-        t = build_transaction(event, headers)
-        t.account_id = event.account_id
-        t.transaction_id = event.aggregate_id
-        t.type_id = event.type_id
-        t.is_pending = true
-        t.save!
+        transaction = build_pending_transaction(event, headers)
+        transaction.is_pending = true
+        transaction.save!
+      end
+    end
+
+    on PendingTransactionAdjusted do |event, headers|
+      transaction = Transaction.find_by transaction_id: event.aggregate_id
+      if transaction.nil?
+        build_pending_transaction(event, headers).save! unless event.account_id.nil?
+      elsif event.account_id.nil?
+        transaction.delete
+      else
+        transaction.attributes = build_transaction_attributes(event, headers)
+        transaction.account_id = event.account_id
+        transaction.tag_ids = nil
+        assign_tags(event, transaction)
+        transaction.save!
       end
     end
 
@@ -107,11 +119,9 @@ class Projections::Transaction < ActiveRecord::Base
 
       if transaction.nil?
         transaction = build_transaction(event, headers)
-        transaction.type_id = event.type_id
         transaction.save!
       elsif transaction.is_pending
         transaction.attributes = build_transaction_attributes(event, headers)
-        transaction.type_id = event.type_id
         transaction.tag_ids = nil
         assign_tags(event, transaction)
         transaction.save!
@@ -120,26 +130,26 @@ class Projections::Transaction < ActiveRecord::Base
 
     on TransferSent do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
-        t = build_transaction(event, headers)
-        t.is_transfer = true
-        t.type_id = Domain::Transaction::ExpenseTypeId
-        t.sending_account_id = event.aggregate_id
-        t.sending_transaction_id = event.transaction_id
-        t.receiving_account_id = event.receiving_account_id
-        t.save!
+        transaction = build_transaction(event, headers)
+        transaction.is_transfer = true
+        transaction.type_id = Domain::Transaction::ExpenseTypeId
+        transaction.sending_account_id = event.aggregate_id
+        transaction.sending_transaction_id = event.transaction_id
+        transaction.receiving_account_id = event.receiving_account_id
+        transaction.save!
       end
     end
 
     on TransferReceived do |event, headers|
       unless Transaction.exists?(transaction_id: event.transaction_id)
-        t = build_transaction(event, headers)
-        t.is_transfer = true
-        t.type_id = Domain::Transaction::IncomeTypeId
-        t.receiving_account_id = event.aggregate_id
-        t.receiving_transaction_id = event.transaction_id
-        t.sending_transaction_id = event.sending_transaction_id
-        t.sending_account_id = event.sending_account_id
-        t.save!
+        transaction = build_transaction(event, headers)
+        transaction.is_transfer = true
+        transaction.type_id = Domain::Transaction::IncomeTypeId
+        transaction.receiving_account_id = event.aggregate_id
+        transaction.receiving_transaction_id = event.transaction_id
+        transaction.sending_transaction_id = event.sending_transaction_id
+        transaction.sending_account_id = event.sending_account_id
+        transaction.save!
       end
     end
 
@@ -181,9 +191,18 @@ class Projections::Transaction < ActiveRecord::Base
     private
 
     def build_transaction(event, headers)
-      t = Transaction.new build_transaction_attributes(event, headers)
-      assign_tags event, t
-      t
+      transaction = Transaction.new build_transaction_attributes(event, headers)
+      assign_tags event, transaction
+      transaction
+    end
+
+    def build_pending_transaction(event, headers)
+      transaction = Transaction.new build_transaction_attributes(event, headers)
+      transaction.account_id = event.account_id
+      transaction.transaction_id = event.aggregate_id
+      transaction.is_pending = true
+      assign_tags event, transaction
+      transaction
     end
 
     def build_transaction_attributes(event, headers)
@@ -194,6 +213,7 @@ class Projections::Transaction < ActiveRecord::Base
           date: event.date
       }
       attrs[:transaction_id] = event.transaction_id if event.respond_to?(:transaction_id)
+      attrs[:type_id] = event.type_id if event.respond_to?(:type_id)
       if headers.key?(:user_id)
         attrs[:reported_by_id] = headers[:user_id]
         attrs[:reported_by] = User.where(id: headers[:user_id]).pluck(:email).first

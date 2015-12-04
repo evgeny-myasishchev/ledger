@@ -354,6 +354,79 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
 
+  describe 'on PendingTransactionAdjusted' do
+    it 'should insert new transaction with pending flag' do
+      date1 = DateTime.now - 100
+      date2 = date1 - 100
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-2', 2000, date2, ['t-3', 't-4'], 'Comment 101', 'account-1', expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.account_id).to eql('account-1')
+      expect(t1.type_id).to eql(income_id)
+      expect(t1.amount).to eql(10523)
+      expect(t1.tag_ids).to eql '{t-1},{t-2}'
+      expect(t1.comment).to eql 'Comment 100'
+      expect(t1.date.to_datetime.to_json).to eql date1.utc.to_json
+      expect(t1.is_pending).to be_truthy
+
+      t2 = described_class.find_by_transaction_id 't-2'
+      expect(t2.account_id).to eql('account-1')
+      expect(t2.type_id).to eql(expense_id)
+      expect(t2.amount).to eql(2000)
+      expect(t2.tag_ids).to eql '{t-3},{t-4}'
+      expect(t2.comment).to eql 'Comment 101'
+      expect(t2.date.to_datetime.to_json).to eql date2.utc.to_json
+      expect(t2.is_pending).to be_truthy
+    end
+
+    it 'should update existing transaction' do
+      date1 = DateTime.now - 100
+      date2 = date1 - 100
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 2000, date2, ['t-3', 't-4'], 'Comment 101', 'account-2', expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.account_id).to eql('account-2')
+      expect(t1.type_id).to eql(expense_id)
+      expect(t1.amount).to eql(2000)
+      expect(t1.tag_ids).to eql '{t-3},{t-4}'
+      expect(t1.comment).to eql 'Comment 101'
+      expect(t1.date.to_datetime.to_json).to eql date2.utc.to_json
+      expect(t1.is_pending).to be_truthy
+    end
+
+    it 'should not insert if account_id is null' do
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', nil, income_id)
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1).to be_nil
+    end
+
+    it 'should delete if account_id got null' do
+      date1 = DateTime.now - 100
+      date2 = date1 - 100
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 2000, date2, ['t-3', 't-4'], 'Comment 101', nil, expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1).to be_nil
+    end
+
+    it 'should record user and reported date' do
+      user = create(:user)
+      commit_timestamp = DateTime.now - 100
+      headers = {
+          user_id: user.id,
+          :$commit_timestamp => commit_timestamp
+      }
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-100', income_id), headers
+      t1 = described_class.find_by_transaction_id('t-1')
+      expect(t1.reported_by_id).to eql user.id
+      expect(t1.reported_by).to eql user.email
+      expect(t1.reported_at.to_datetime.to_json).to eql commit_timestamp.utc.to_json
+    end
+  end
+
   describe 'on PendingTransactionReported' do
     it 'should insert new transaction with pending flag' do
       date1 = DateTime.now - 100
