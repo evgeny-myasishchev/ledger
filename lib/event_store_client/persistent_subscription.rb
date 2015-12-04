@@ -25,7 +25,10 @@ class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
       headers[:$commit_timestamp] = commit.commit_timestamp
       @handlers.each { |handler|
         commit.events.each { |event|
-          handler.handle_message(event, headers) if handler.can_handle_message?(event)
+          if handler.can_handle_message?(event)
+            logger.debug "Handling event: #{event.class} with handler: #{handler}"
+            handler.handle_message(event, headers)
+          end
         }
       }
       logger.debug "Commit handled. Remembering checkpoint '#{commit.checkpoint}'."
