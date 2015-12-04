@@ -488,36 +488,6 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
   end
 
-  describe 'on PendingTransactionApproved' do
-    it 'should remove pending transactions' do
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::PendingTransactionReported.new('t-2', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::PendingTransactionApproved.new('t-1')
-      subject.handle_message e::PendingTransactionApproved.new('t-2')
-
-      t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1).to be_nil
-
-      t2 = described_class.find_by_transaction_id 't-2'
-      expect(t2).to be_nil
-    end
-
-    it 'do nothing if there is no pending flag' do
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      described_class.find_by_transaction_id('t-1').update_attributes(is_pending: false)
-      subject.handle_message e::PendingTransactionReported.new('t-2', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      described_class.find_by_transaction_id('t-2').update_attributes(is_pending: false)
-      subject.handle_message e::PendingTransactionApproved.new('t-1')
-      subject.handle_message e::PendingTransactionApproved.new('t-2')
-
-      t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1).not_to be_nil
-
-      t2 = described_class.find_by_transaction_id 't-2'
-      expect(t2).not_to be_nil
-    end
-  end
-
   describe 'on PendingTransactionRejected' do
     it 'should remove pending transaction' do
       subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
@@ -594,6 +564,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.tag_ids).to eql '{t-3},{t-4}'
       expect(t1.comment).to eql 'Comment 101'
       expect(t1.date.to_datetime.to_json).to eql date2.utc.to_json
+      expect(t1.is_pending).to be_falsy
     end
   end
 

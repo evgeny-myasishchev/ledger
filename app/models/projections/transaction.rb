@@ -114,11 +114,7 @@ class Projections::Transaction < ActiveRecord::Base
       end
     end
 
-    on PendingTransactionApproved do |event, headers|
-      Transaction.where(transaction_id: event.aggregate_id, is_pending: true).delete_all
-    end
-
-    on PendingTransactionRejected do |event, headers|
+    on PendingTransactionRejected do |event, _|
       Transaction.where(transaction_id: event.aggregate_id).delete_all
     end
 
@@ -131,6 +127,7 @@ class Projections::Transaction < ActiveRecord::Base
       elsif transaction.is_pending
         transaction.attributes = build_transaction_attributes(event, headers)
         transaction.tag_ids = nil
+        transaction.is_pending = false
         assign_tags(event, transaction)
         transaction.save!
       end
