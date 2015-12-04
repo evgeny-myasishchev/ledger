@@ -52,7 +52,7 @@ class Money
     end
     
     private 
-      def parse_string amount, currency
+      def parse_string(amount, currency)
         separator = I18n.t :'number.currency.format.separator'
         delimiter = I18n.t :'number.currency.format.delimiter'
         parts = amount.gsub(/\s+/, '').split(separator)
@@ -65,7 +65,7 @@ class Money
         return new((integer + fraction.ljust(2, '0')).to_i, currency)
       end
         
-      def parse_float amount, currency
+      def parse_float(amount, currency)
         str_amount = amount.to_s
         separator = I18n.t :'number.currency.format.separator'
         str_amount.gsub!('.', separator) unless separator == '.'
