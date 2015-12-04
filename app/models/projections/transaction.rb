@@ -137,15 +137,15 @@ class Projections::Transaction < ActiveRecord::Base
     end
 
     on TransferSent do |event, headers|
-      unless Transaction.exists?(transaction_id: event.transaction_id)
-        transaction = build_transaction(event, headers)
-        transaction.is_transfer = true
-        transaction.type_id = Domain::Transaction::ExpenseTypeId
-        transaction.sending_account_id = event.aggregate_id
-        transaction.sending_transaction_id = event.transaction_id
-        transaction.receiving_account_id = event.receiving_account_id
-        transaction.save!
-      end
+      transaction = Transaction.find_by transaction_id: event.transaction_id
+      return if !transaction.nil? && !transaction.is_pending #Adjusting pending transactions only
+      transaction = build_transaction(event, headers) if transaction.nil?
+      transaction.is_transfer = true
+      transaction.type_id = Domain::Transaction::ExpenseTypeId
+      transaction.sending_account_id = event.aggregate_id
+      transaction.sending_transaction_id = event.transaction_id
+      transaction.receiving_account_id = event.receiving_account_id
+      transaction.save!
     end
 
     on TransferReceived do |event, headers|

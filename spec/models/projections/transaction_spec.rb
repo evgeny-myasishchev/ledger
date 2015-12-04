@@ -600,6 +600,17 @@ RSpec.describe Projections::Transaction, :type => :model do
         expect(t1.date.to_datetime.to_json).to eql date.utc.to_json
       end
 
+      it 'should convert pending transaction to transfer' do
+        subject.handle_message e::PendingTransactionReported.new('t-3', 100, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+        subject.handle_message e::TransferSent.new('account-1', 't-3', 'account-2', 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100')
+        t3 = described_class.find_by transaction_id: 't-3'
+        expect(t3.type_id).to eql(expense_id)
+        expect(t3.is_transfer).to be_truthy
+        expect(t3.sending_account_id).to eql('account-1')
+        expect(t3.sending_transaction_id).to eql('t-3')
+        expect(t3.receiving_account_id).to eql('account-2')
+      end
+
       it 'should record transfer related attributes' do
         expect(t1.is_transfer).to be_truthy
         expect(t1.sending_account_id).to eql('account-1')
