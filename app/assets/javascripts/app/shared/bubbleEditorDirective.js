@@ -15,6 +15,10 @@
     ///////////////
 
     function linkFn(scope, element, attrs) {
+      if(attrs.editable != null && !scope.$eval(attrs.editable)) {
+        return;
+      }
+
       var editorType = attrs.ldrBubbleEditor || 'default';
       var initialized, showing, shown;
       var editor = null;

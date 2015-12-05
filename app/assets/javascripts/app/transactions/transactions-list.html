@@ -17,23 +17,26 @@
             <div class='jumbotron' style="margin-bottom: 0">No transactions fetched</div>
         </td>
     </tr>
-    <tr ng-if="transactions.length" ng-repeat="transaction in transactions" ng-class='{"bg-success": transaction.has_been_moved}'>
+    <tr ng-if="transactions.length" ng-repeat="transaction in transactions" ng-class='{"bg-success": transaction.has_been_moved, "warning": transaction.is_pending}'>
         <td show-transaction-info>
             <i class='{{transaction | tti}}'></i>
         </td>
-        <td ldr-bubble-editor format='money' submit='adjustAmount(transaction, newValue)' value="transaction.amount">
+        <td ldr-bubble-editor format='money' editable="!transaction.is_pending" submit='adjustAmount(transaction, newValue)' value="transaction.amount">
             {{getTransferAmountSign(transaction)}}{{transaction.amount | money}} <sup ng-if='showAccount'>{{(transaction.account_id | accountById).currency_code}}</sup>
         </td>
         <td ng-if='showAccount'>{{(transaction.account_id | accountById).name}}</td>
-        <td ldr-bubble-editor='tags' value='transaction.tag_ids' submit='adjustTags(transaction, newValue)'><ledger-tags ng-model="transaction.tag_ids" /></td>
-        <td ldr-bubble-editor='date' value='transaction.date' submit='adjustDate(transaction, newValue)'>{{transaction.date.toLocaleDateString()}}</td>
-        <td ldr-bubble-editor submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>
+        <td ldr-bubble-editor='tags' editable="!transaction.is_pending" value='transaction.tag_ids' submit='adjustTags(transaction, newValue)'><ledger-tags ng-model="transaction.tag_ids" /></td>
+        <td ldr-bubble-editor='date' editable="!transaction.is_pending" value='transaction.date' submit='adjustDate(transaction, newValue)'>{{transaction.date.toLocaleDateString()}}</td>
+        <td ldr-bubble-editor editable="!transaction.is_pending" submit='adjustComment(transaction, newValue)' value="transaction.comment">{{transaction.comment}}</td>
         <td style="padding-top: 3px; padding-bottom: 3px;">
             <div ng-show="confirmRemoval" class="alert alert-danger" style="margin-bottom: 0px; position: absolute; right: 40px; z-index: 100; white-space: nowrap; margin-top: -4px; padding-top: 3px; padding-bottom: 3px;">The transaction will be removed. Continue?
                 <button ng-click="removeTransaction(transaction)" class="btn btn-danger btn-xs">Yes</button>
                 <button ng-click="confirmRemoval = false" class="btn btn-default btn-xs">No</button>
             </div>
-            <div class="btn-group">
+            <div class="btn-group" ng-if="transaction.is_pending">
+                <i title="The transaction is pending" data-toggle='tooltip' class="glyphicon glyphicon-exclamation-sign"></i>
+            </div>
+            <div class="btn-group" ng-if="!transaction.is_pending">
                 <button style='padding-top: 2px;' type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
                     <i class='glyphicon glyphicon-option-vertical'></i>
                 </button>
