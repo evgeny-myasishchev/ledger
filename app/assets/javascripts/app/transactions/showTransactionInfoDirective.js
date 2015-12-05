@@ -5,9 +5,9 @@
     .module('transactionsApp')
     .directive('showTransactionInfo', showTransactionInfo);
 
-  showTransactionInfo.$inject = ['$templateCache', '$compile', 'accounts', 'transactions'];
+  showTransactionInfo.$inject = ['$templateCache', '$compile', 'transactions'];
 
-  function showTransactionInfo($templateCache, $compile, accounts, transactions) {
+  function showTransactionInfo($templateCache, $compile, transactions) {
     var template = $templateCache.get('app/transactions/transaction-info.html');
     var templateLink = $compile(template);
     var handleMouseEvents = function(scope, element) {
@@ -33,7 +33,7 @@
       scope.$on('$destroy', function() {
         element.tooltip('destroy');
       });
-    }
+    };
 
     return {
       restrict: 'A',

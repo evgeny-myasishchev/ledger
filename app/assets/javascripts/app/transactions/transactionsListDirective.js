@@ -36,7 +36,6 @@
         };
     
         scope.adjustDate = function(transaction, date) {
-          var jsonDate = date.toJSON();
           return $http.post('transactions/' + transaction.transaction_id + '/adjust-date', {
             date: date.toJSON()
           }).success(function() {
