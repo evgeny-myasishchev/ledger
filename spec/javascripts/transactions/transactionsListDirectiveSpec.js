@@ -7,6 +7,7 @@ describe('transactions.transactionsList', function() {
 	beforeEach(inject(function(_$httpBackend_, _$compile_, $rootScope){
 		$httpBackend = _$httpBackend_;
 		scope = $rootScope.$new();
+		scope.transactions = [];
 		$compile = _$compile_;
 		
 		angular.module('transactionsApp').config(['accountsProvider', function(accountsProvider) {
@@ -47,17 +48,15 @@ describe('transactions.transactionsList', function() {
 			transaction = {
 				transaction_id: 't-223',
 				account_id: 'a-1',
-				amount: '100.23',
+				amount: 10023,
 				tag_ids: [20],
 				date: date.toJSON(),
 				comment: 'Original comment'
 			};
-			
-			scope.transactions = [
-				{transaction1: true, date: date.toJSON()},
-				{transaction2: true, date: date.toJSON()},
-				transaction
-			];
+
+			scope.transactions.push({transaction1: true, date: date.toJSON()});
+			scope.transactions.push({transaction2: true, date: date.toJSON()});
+			scope.transactions.push(transaction);
 		});
 		
 		describe('adjustComment', function() {
@@ -67,7 +66,7 @@ describe('transactions.transactionsList', function() {
 					expect(command.comment).toEqual('New comment 223');
 					return true;
 				}).respond(200);
-				var result = scope.adjustComment(transaction, 'New comment 223');
+				var result = scope.vm.adjustComment(transaction, 'New comment 223');
 				$httpBackend.flush();
 				expect(transaction.comment).toEqual('New comment 223');
 				expect(result.then).toBeDefined();
@@ -81,7 +80,7 @@ describe('transactions.transactionsList', function() {
 					expect(command.tag_ids).toEqual([10, 20, 40]);
 					return true;
 				}).respond(200);
-				var result = scope.adjustTags(transaction, [10, 20, 40]);
+				var result = scope.vm.adjustTags(transaction, [10, 20, 40]);
 				$httpBackend.flush();
 				expect(transaction.tag_ids).toEqual('{10},{20},{40}');
 				expect(result.then).toBeDefined();
@@ -96,7 +95,7 @@ describe('transactions.transactionsList', function() {
 					expect(command.date).toEqual(newDate.toJSON());
 					return true;
 				}).respond(200);
-				var result = scope.adjustDate(transaction, newDate);
+				var result = scope.vm.adjustDate(transaction, newDate);
 				$httpBackend.flush();
 				expect(transaction.date).toEqual(newDate);
 				expect(result.then).toBeDefined();
@@ -110,7 +109,7 @@ describe('transactions.transactionsList', function() {
 
 			it('should DELETE destroy for given transaction', function() {
 				$httpBackend.expectDELETE('transactions/t-223').respond(200);
-				var result = scope.removeTransaction(transaction);
+				var result = scope.vm.removeTransaction(transaction);
 				$httpBackend.flush();
 				expect(result.then).toBeDefined();
 			});
@@ -123,26 +122,26 @@ describe('transactions.transactionsList', function() {
 
 				it('should subtract for income or refund', function() {
 					transaction.type_id = Transaction.incomeId;
-					scope.removeTransaction(transaction);
+					scope.vm.removeTransaction(transaction);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(4000);
 
 					transaction.type_id = Transaction.refundId;
-					scope.removeTransaction(transaction);
+					scope.vm.removeTransaction(transaction);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(3000);
 				});
 
 				it('should add for expense', function() {
 					transaction.type_id = Transaction.expenseId;
-					scope.removeTransaction(transaction);
+					scope.vm.removeTransaction(transaction);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(6000);
 				});
 			})
 
 			it('should remove the transaction from scope on success', function() {
-				scope.removeTransaction(transaction);
+				scope.vm.removeTransaction(transaction);
 				$httpBackend.flush();
 				expect(scope.transactions).not.toContain(transaction);
 			});
@@ -155,7 +154,7 @@ describe('transactions.transactionsList', function() {
 					expect(command.amount).toEqual(20043);
 					return true;
 				}).respond(200);
-				var result = scope.adjustAmount(transaction, 20043);
+				var result = scope.vm.adjustAmount(transaction, 20043);
 				$httpBackend.flush();
 				expect(transaction.amount).toEqual(20043);
 				expect(result.then).toBeDefined();
@@ -167,7 +166,7 @@ describe('transactions.transactionsList', function() {
 					expect(command.amount).toEqual(20043);
 					return true;
 				}).respond(200);
-				var result = scope.adjustAmount(transaction, '200.43');
+				var result = scope.vm.adjustAmount(transaction, '200.43');
 				$httpBackend.flush();
 				expect(transaction.amount).toEqual(20043);
 			});
@@ -181,21 +180,21 @@ describe('transactions.transactionsList', function() {
 
 				it('should update the balance for income transaction', function() {
 					transaction.type_id = Transaction.incomeId;
-					scope.adjustAmount(transaction, 100);
+					scope.vm.adjustAmount(transaction, 100);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(300);
 				});
 
 				it('should update the balance for refund transaction', function() {
 					transaction.type_id = Transaction.refundId;
-					scope.adjustAmount(transaction, 100);
+					scope.vm.adjustAmount(transaction, 100);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(300);
 				});
 
 				it('should update the balance for expense transaction', function() {
 					transaction.type_id = Transaction.expenseId;
-					scope.adjustAmount(transaction, 100);
+					scope.vm.adjustAmount(transaction, 100);
 					$httpBackend.flush();
 					expect(account1.balance).toEqual(200);
 				});
@@ -212,18 +211,18 @@ describe('transactions.transactionsList', function() {
 
 		it("should return + sign for transfer income", function() {
 			transaction.type_id = 1;
-			expect(scope.getTransferAmountSign(transaction)).toEqual('+');
+			expect(scope.vm.getTransferAmountSign(transaction)).toEqual('+');
 		});
 
 		it("should return - sign for transfer expense", function() {
 			transaction.type_id = 2;
-			expect(scope.getTransferAmountSign(transaction)).toEqual('-');
+			expect(scope.vm.getTransferAmountSign(transaction)).toEqual('-');
 		});
 
 		it("should return empty for other transactions", function() {
 			transaction.type_id = 2;
 			transaction.is_transfer = false;
-			expect(scope.getTransferAmountSign(transaction)).toBeNull();
+			expect(scope.vm.getTransferAmountSign(transaction)).toBeNull();
 		});
 	});
 	
