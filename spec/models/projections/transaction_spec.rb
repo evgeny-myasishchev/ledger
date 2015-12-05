@@ -383,6 +383,19 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.is_pending).to be_truthy
     end
 
+    it 'should parse the amount string using Money and Currency' do
+      date1 = DateTime.now - 100
+      date2 = date1 - 100
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, '105.23', date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-2', 110, '2000', date2, ['t-3', 't-4'], 'Comment 101', account1.aggregate_id, expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.amount).to eql(10523)
+
+      t2 = described_class.find_by_transaction_id 't-2'
+      expect(t2.amount).to eql(200000)
+    end
+
     it 'should not insert if account_id is null' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
@@ -444,6 +457,17 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.is_pending).to be_truthy
     end
 
+    it 'should parse the amount string using Money and Currency when inserting' do
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', '105.23', DateTime.now, [], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-2', '2000', DateTime.now, [], 'Comment 101', account1.aggregate_id, expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.amount).to eql(10523)
+
+      t2 = described_class.find_by_transaction_id 't-2'
+      expect(t2.amount).to eql(200000)
+    end
+
     it 'should update existing transaction' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
@@ -458,6 +482,20 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.comment).to eql 'Comment 101'
       expect(t1.date.to_datetime.to_json).to eql date2.utc.to_json
       expect(t1.is_pending).to be_truthy
+    end
+
+    it 'should parse the amount string using Money and Currency when updating' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 50001, DateTime.now, [], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-2', 100, 50002, DateTime.now, [], 'Comment 100', account1.aggregate_id, income_id)
+
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', '105.23', DateTime.now, [], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-2', '2000', DateTime.now, [], 'Comment 101', account1.aggregate_id, expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.amount).to eql(10523)
+
+      t2 = described_class.find_by_transaction_id 't-2'
+      expect(t2.amount).to eql(200000)
     end
 
     it 'should not insert if account_id is null' do
@@ -483,7 +521,7 @@ RSpec.describe Projections::Transaction, :type => :model do
           user_id: user.id,
           :$commit_timestamp => commit_timestamp
       }
-      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-100', income_id), headers
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id), headers
       t1 = described_class.find_by_transaction_id('t-1')
       expect(t1.reported_by_id).to eql user.id
       expect(t1.reported_by).to eql user.email

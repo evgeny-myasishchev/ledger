@@ -93,7 +93,7 @@ class Projections::Transaction < ActiveRecord::Base
 
     on PendingTransactionReported do |event, headers|
       unless Transaction.exists?(transaction_id: event.aggregate_id) || event.account_id.nil?
-        transaction = build_pending_transaction(event, headers)
+        transaction = build_pending_transaction(event, headers) { |t| t.amount = parse_amount(event) }
         transaction.is_pending = true
         transaction.save!
       end
@@ -102,11 +102,11 @@ class Projections::Transaction < ActiveRecord::Base
     on PendingTransactionAdjusted do |event, headers|
       transaction = Transaction.find_by transaction_id: event.aggregate_id
       if transaction.nil?
-        build_pending_transaction(event, headers).save! unless event.account_id.nil?
+        build_pending_transaction(event, headers) { |t| t.amount = parse_amount(event) }.save! unless event.account_id.nil?
       elsif event.account_id.nil?
         transaction.delete
       else
-        transaction.attributes = build_transaction_attributes(event, headers)
+        transaction.attributes = build_transaction_attributes(event, headers) { |attr| attr[:amount] = parse_amount(event) }
         transaction.account_id = event.account_id
         transaction.tag_ids = nil
         assign_tags(event, transaction)
@@ -195,6 +195,11 @@ class Projections::Transaction < ActiveRecord::Base
 
     private
 
+    def parse_amount(event)
+      account = Projections::Account.select(:currency_code).find_by(aggregate_id: event.account_id)
+      Money.parse(event.amount, Currency[account.currency_code]).integer_amount
+    end
+
     def build_transaction(event, headers)
       transaction = Transaction.new build_transaction_attributes(event, headers)
       assign_tags event, transaction
@@ -207,6 +212,7 @@ class Projections::Transaction < ActiveRecord::Base
       transaction.transaction_id = event.aggregate_id
       transaction.is_pending = true
       assign_tags event, transaction
+      yield(transaction) if block_given?
       transaction
     end
 
@@ -224,6 +230,7 @@ class Projections::Transaction < ActiveRecord::Base
         attrs[:reported_by] = User.where(id: headers[:user_id]).pluck(:email).first
       end
       attrs[:reported_at] = headers[:$commit_timestamp]
+      yield(attrs) if block_given?
       attrs
     end
 
