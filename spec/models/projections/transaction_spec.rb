@@ -6,6 +6,9 @@ RSpec.describe Projections::Transaction, :type => :model do
   let(:p) { Projections }
   let(:income_id) { Domain::Transaction::IncomeTypeId }
   let(:expense_id) { Domain::Transaction::ExpenseTypeId }
+  let(:account1) { create(:projections_account, currency_code: 'UAH') }
+  let(:account2) { create(:projections_account, currency_code: 'USD') }
+
   include AccountHelpers::P
 
   describe 'get_transfer_counterpart' do
@@ -51,7 +54,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       u
     }
     let(:date) { DateTime.now }
-    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    let(:account) { create(:projections_account, authorized_user_ids: '{100},{2233},{12233}') }
     before(:each) do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-1', income_id, 10523, date - 100, ['t-1', 't-2'], 'Comment 101'
@@ -107,7 +110,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   describe 'self.search' do
     let(:user) { User.new id: 2233 }
     let(:date) { DateTime.now }
-    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    let(:account) { create(:projections_account, authorized_user_ids: '{100},{2233},{12233}') }
     let(:query) { double(:query) }
     before(:each) do
       subject.handle_message e::TransactionReported.new account.aggregate_id, 't-3', expense_id, 2000, date - 120, ['t-4'], 'Comment 103'
@@ -154,7 +157,7 @@ RSpec.describe Projections::Transaction, :type => :model do
   describe 'self.build_search_query' do
     let(:date) { DateTime.now }
     let(:user) { User.new id: 2233 }
-    let(:account) { create_account_projection! 'account-1', authorized_user_ids: '{100},{2233},{12233}' }
+    let(:account) { create(:projections_account, authorized_user_ids: '{100},{2233},{12233}') }
 
     before(:each) do
       allow(p::Account).to receive(:ensure_authorized!) { account }
@@ -178,7 +181,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
 
     it 'should get all transactions of the user if no account provided' do
-      a2 = create_account_projection! 'account-2', authorized_user_ids: '{2233},{993}'
+      a2 = create(:projections_account, authorized_user_ids: '{2233},{993}')
       subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-1', expense_id, 0, date, ['tag-1'], ''
       subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-2', expense_id, 0, date, ['tag-1'], ''
       subject.handle_message e::TransactionReported.new a2.aggregate_id, 'ta-3', expense_id, 0, date, ['tag-1'], ''
@@ -358,11 +361,11 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should insert new transaction with pending flag' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::PendingTransactionAdjusted.new('t-2', 2000, date2, ['t-3', 't-4'], 'Comment 101', 'account-1', expense_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 10523, date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-2', 2000, date2, ['t-3', 't-4'], 'Comment 101', account1.aggregate_id, expense_id)
 
       t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1.account_id).to eql('account-1')
+      expect(t1.account_id).to eql(account1.aggregate_id)
       expect(t1.type_id).to eql(income_id)
       expect(t1.amount).to eql(10523)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
@@ -371,7 +374,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.is_pending).to be_truthy
 
       t2 = described_class.find_by_transaction_id 't-2'
-      expect(t2.account_id).to eql('account-1')
+      expect(t2.account_id).to eql(account1.aggregate_id)
       expect(t2.type_id).to eql(expense_id)
       expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
@@ -383,11 +386,11 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should update existing transaction' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 2000, date2, ['t-3', 't-4'], 'Comment 101', 'account-2', expense_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', 2000, date2, ['t-3', 't-4'], 'Comment 101', account2.aggregate_id, expense_id)
 
       t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1.account_id).to eql('account-2')
+      expect(t1.account_id).to eql(account2.aggregate_id)
       expect(t1.type_id).to eql(expense_id)
       expect(t1.amount).to eql(2000)
       expect(t1.tag_ids).to eql '{t-3},{t-4}'
@@ -405,7 +408,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should delete if account_id got null' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
       subject.handle_message e::PendingTransactionAdjusted.new('t-1', 2000, date2, ['t-3', 't-4'], 'Comment 101', nil, expense_id)
 
       t1 = described_class.find_by_transaction_id 't-1'
@@ -431,11 +434,11 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should insert new transaction with pending flag' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::PendingTransactionReported.new('t-2', 110, 2000, date2, ['t-3', 't-4'], 'Comment 101', 'account-1', expense_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-2', 110, 2000, date2, ['t-3', 't-4'], 'Comment 101', account1.aggregate_id, expense_id)
 
       t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1.account_id).to eql('account-1')
+      expect(t1.account_id).to eql(account1.aggregate_id)
       expect(t1.type_id).to eql(income_id)
       expect(t1.amount).to eql(10523)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
@@ -444,7 +447,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.is_pending).to be_truthy
 
       t2 = described_class.find_by_transaction_id 't-2'
-      expect(t2.account_id).to eql('account-1')
+      expect(t2.account_id).to eql(account1.aggregate_id)
       expect(t2.type_id).to eql(expense_id)
       expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
@@ -473,7 +476,7 @@ RSpec.describe Projections::Transaction, :type => :model do
           user_id: user.id,
           :$commit_timestamp => commit_timestamp
       }
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id), headers
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id), headers
       t1 = described_class.find_by_transaction_id('t-1')
       expect(t1.reported_by_id).to eql user.id
       expect(t1.reported_by).to eql user.email
@@ -481,16 +484,16 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
 
     it 'should be idempotent' do
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, [], '', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, [], '', account1.aggregate_id, income_id)
       expect {
-        subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, [], '', 'account-1', income_id)
+        subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.new, [], '', account1.aggregate_id, income_id)
       }.not_to change { described_class.count }
     end
   end
 
   describe 'on PendingTransactionRejected' do
     it 'should remove pending transaction' do
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
       subject.handle_message e::PendingTransactionRejected.new('t-1')
 
       t1 = described_class.find_by_transaction_id 't-1'
@@ -498,7 +501,7 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
 
     it 'should be idempotent' do
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, DateTime.now, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
       subject.handle_message e::PendingTransactionRejected.new('t-1')
       expect {
         subject.handle_message e::PendingTransactionRejected.new('t-1')
@@ -510,11 +513,11 @@ RSpec.describe Projections::Transaction, :type => :model do
     it 'should record the transaction' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, date1, ['t-1', 't-2'], 'Comment 100'
-      subject.handle_message e::TransactionReported.new 'account-1', 't-2', expense_id, 2000, date2, ['t-3', 't-4'], 'Comment 101'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', income_id, 10523, date1, ['t-1', 't-2'], 'Comment 100'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-2', expense_id, 2000, date2, ['t-3', 't-4'], 'Comment 101'
 
       t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1.account_id).to eql('account-1')
+      expect(t1.account_id).to eql(account1.aggregate_id)
       expect(t1.type_id).to eql(income_id)
       expect(t1.amount).to eql(10523)
       expect(t1.tag_ids).to eql '{t-1},{t-2}'
@@ -522,7 +525,7 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t1.date.to_datetime.to_json).to eql date1.utc.to_json
 
       t2 = described_class.find_by_transaction_id 't-2'
-      expect(t2.account_id).to eql('account-1')
+      expect(t2.account_id).to eql(account1.aggregate_id)
       expect(t2.type_id).to eql(expense_id)
       expect(t2.amount).to eql(2000)
       expect(t2.tag_ids).to eql '{t-3},{t-4}'
@@ -537,7 +540,7 @@ RSpec.describe Projections::Transaction, :type => :model do
           user_id: user.id,
           :$commit_timestamp => commit_timestamp
       }
-      subject.handle_message e::TransactionReported.new('account-1', 't-1', income_id, 10523, DateTime.now, [], nil), headers
+      subject.handle_message e::TransactionReported.new(account1.aggregate_id, 't-1', income_id, 10523, DateTime.now, [], nil), headers
       t1 = described_class.find_by_transaction_id('t-1')
       expect(t1.reported_by_id).to eql user.id
       expect(t1.reported_by).to eql user.email
@@ -545,20 +548,20 @@ RSpec.describe Projections::Transaction, :type => :model do
     end
 
     it 'should be idempotent' do
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, DateTime.now, [], nil
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', income_id, 10523, DateTime.now, [], nil
       expect {
-        subject.handle_message e::TransactionReported.new 'account-1', 't-1', income_id, 10523, DateTime.now, [], nil
+        subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', income_id, 10523, DateTime.now, [], nil
       }.not_to change { described_class.count }
     end
 
     it 'should update existing pending transaction' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
-      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-      subject.handle_message e::TransactionReported.new('account-2', 't-1', expense_id, 2000, date2, ['t-3', 't-4'], 'Comment 101')
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 10523, date1, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::TransactionReported.new(account2.aggregate_id, 't-1', expense_id, 2000, date2, ['t-3', 't-4'], 'Comment 101')
 
       t1 = described_class.find_by_transaction_id 't-1'
-      expect(t1.account_id).to eql('account-2')
+      expect(t1.account_id).to eql(account2.aggregate_id)
       expect(t1.type_id).to eql(expense_id)
       expect(t1.amount).to eql(2000)
       expect(t1.tag_ids).to eql '{t-3},{t-4}'
@@ -576,13 +579,13 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:user) { create(:user) }
     let(:headers) { {user_id: user.id, :$commit_timestamp => commit_timestamp} }
     before(:each) do
-      subject.handle_message e::TransferSent.new('account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
-      subject.handle_message e::TransferReceived.new('account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
+      subject.handle_message e::TransferSent.new(account1.aggregate_id, 't-1', account2.aggregate_id, 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
+      subject.handle_message e::TransferReceived.new(account2.aggregate_id, 't-2', account1.aggregate_id, 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'), headers
     end
 
     describe 'on TransferSent' do
       it 'should record the transaction as expense' do
-        expect(t1.account_id).to eql('account-1')
+        expect(t1.account_id).to eql(account1.aggregate_id)
         expect(t1.transaction_id).to eql('t-1')
         expect(t1.type_id).to eql(expense_id)
         expect(t1.amount).to eql(10523)
@@ -592,21 +595,21 @@ RSpec.describe Projections::Transaction, :type => :model do
       end
 
       it 'should convert pending transaction to transfer' do
-        subject.handle_message e::PendingTransactionReported.new('t-3', 100, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100', 'account-1', income_id)
-        subject.handle_message e::TransferSent.new('account-1', 't-3', 'account-2', 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100')
+        subject.handle_message e::PendingTransactionReported.new('t-3', 100, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100', account1.aggregate_id, income_id)
+        subject.handle_message e::TransferSent.new(account1.aggregate_id, 't-3', account2.aggregate_id, 10523, DateTime.new, ['t-1', 't-2'], 'Comment 100')
         t3 = described_class.find_by transaction_id: 't-3'
         expect(t3.type_id).to eql(expense_id)
         expect(t3.is_transfer).to be_truthy
-        expect(t3.sending_account_id).to eql('account-1')
+        expect(t3.sending_account_id).to eql(account1.aggregate_id)
         expect(t3.sending_transaction_id).to eql('t-3')
-        expect(t3.receiving_account_id).to eql('account-2')
+        expect(t3.receiving_account_id).to eql(account2.aggregate_id)
       end
 
       it 'should record transfer related attributes' do
         expect(t1.is_transfer).to be_truthy
-        expect(t1.sending_account_id).to eql('account-1')
+        expect(t1.sending_account_id).to eql(account1.aggregate_id)
         expect(t1.sending_transaction_id).to eql('t-1')
-        expect(t1.receiving_account_id).to eql('account-2')
+        expect(t1.receiving_account_id).to eql(account2.aggregate_id)
       end
 
       it 'should record user and reported date' do
@@ -617,14 +620,14 @@ RSpec.describe Projections::Transaction, :type => :model do
 
       it 'should be idempotent' do
         expect {
-          subject.handle_message e::TransferSent.new 'account-1', 't-1', 'account-2', 10523, date, ['t-1', 't-2'], 'Comment 100'
+          subject.handle_message e::TransferSent.new account1.aggregate_id, 't-1', account2.aggregate_id, 10523, date, ['t-1', 't-2'], 'Comment 100'
         }.not_to change { described_class.count }
       end
     end
 
     describe 'on TransferReceived' do
       it 'should record the transaction as income' do
-        expect(t2.account_id).to eql('account-2')
+        expect(t2.account_id).to eql(account2.aggregate_id)
         expect(t2.transaction_id).to eql('t-2')
         expect(t2.type_id).to eql(income_id)
         expect(t2.amount).to eql(10523)
@@ -635,9 +638,9 @@ RSpec.describe Projections::Transaction, :type => :model do
 
       it 'should record transfer related attributes' do
         expect(t2.is_transfer).to be_truthy
-        expect(t2.sending_account_id).to eql('account-1')
+        expect(t2.sending_account_id).to eql(account1.aggregate_id)
         expect(t2.sending_transaction_id).to eql('t-1')
-        expect(t2.receiving_account_id).to eql('account-2')
+        expect(t2.receiving_account_id).to eql(account2.aggregate_id)
         expect(t2.receiving_transaction_id).to eql('t-2')
       end
 
@@ -649,7 +652,7 @@ RSpec.describe Projections::Transaction, :type => :model do
 
       it 'should be idempotent' do
         expect {
-          subject.handle_message e::TransferReceived.new 'account-2', 't-2', 'account-1', 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'
+          subject.handle_message e::TransferReceived.new account2.aggregate_id, 't-2', account1.aggregate_id, 't-1', 10523, date, ['t-1', 't-2'], 'Comment 100'
         }.not_to change { described_class.count }
       end
     end
@@ -659,55 +662,55 @@ RSpec.describe Projections::Transaction, :type => :model do
     let(:date) { DateTime.now - 100 }
     let(:t1) { p::Transaction.find_by_transaction_id 't-1' }
     before(:each) do
-      subject.handle_message e::TransactionReported.new 'account-1', 't-1', expense_id, 2000, date, [100, 200], 'Comment 1'
+      subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, date, [100, 200], 'Comment 1'
     end
 
     it 'should update amount on TransactionAmountAdjusted' do
-      subject.handle_message e::TransactionAmountAdjusted.new 'account-1', 't-1', 1900
+      subject.handle_message e::TransactionAmountAdjusted.new account1.aggregate_id, 't-1', 1900
       expect(t1.amount).to eql 1900
     end
 
     it 'should update comment on TransactionCommentAdjusted' do
-      subject.handle_message e::TransactionCommentAdjusted.new 'account-1', 't-1', 'New comment 1'
+      subject.handle_message e::TransactionCommentAdjusted.new account1.aggregate_id, 't-1', 'New comment 1'
       expect(t1.comment).to eql 'New comment 1'
     end
 
     it 'should update date on TransactionDateAdjusted' do
       updated_date = date - 110
-      subject.handle_message e::TransactionDateAdjusted.new 'account-1', 't-1', updated_date
+      subject.handle_message e::TransactionDateAdjusted.new account1.aggregate_id, 't-1', updated_date
       expect(t1.date.to_datetime.to_json).to eql updated_date.utc.to_json
     end
 
     it 'should add new tag on TransactionTagged' do
-      subject.handle_message e::TransactionTagged.new 'account-1', 't-1', 110
+      subject.handle_message e::TransactionTagged.new account1.aggregate_id, 't-1', 110
       expect(t1.tag_ids).to eql '{100},{200},{110}'
     end
 
     it 'should add new tag on TransactionUntagged' do
-      subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 100
+      subject.handle_message e::TransactionUntagged.new account1.aggregate_id, 't-1', 100
       expect(t1.tag_ids).to eql '{200}'
-      subject.handle_message e::TransactionUntagged.new 'account-1', 't-1', 200
+      subject.handle_message e::TransactionUntagged.new account1.aggregate_id, 't-1', 200
       t1.reload
       expect(t1.tag_ids).to eql ''
     end
 
     describe 'on TransactionRemoved' do
       it 'should remove the transaction' do
-        subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+        subject.handle_message e::TransactionRemoved.new account1.aggregate_id, 't-1'
         expect(t1).to be_nil
       end
 
       it 'should be idempotent' do
-        subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+        subject.handle_message e::TransactionRemoved.new account1.aggregate_id, 't-1'
         expect {
-          subject.handle_message e::TransactionRemoved.new 'account-1', 't-1'
+          subject.handle_message e::TransactionRemoved.new account1.aggregate_id, 't-1'
         }.not_to change { described_class.count }
       end
     end
   end
 
   describe 'on TransactionTypeConverted' do
-    let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
+    let(:account1) { create(:projections_account, authorized_user_ids: '{100}') }
 
     it 'should update transaction type' do
       subject.handle_message e::TransactionReported.new account1.aggregate_id, 't-1', expense_id, 2000, DateTime.now, [], ''
@@ -722,8 +725,8 @@ RSpec.describe Projections::Transaction, :type => :model do
   end
 
   describe 'on AccountRemoved' do
-    let(:account1) { create_account_projection! 'account-1', authorized_user_ids: '{100}' }
-    let(:account2) { create_account_projection! 'account-2', authorized_user_ids: '{100}' }
+    let(:account1) { create(:projections_account, authorized_user_ids: '{100}') }
+    let(:account2) { create(:projections_account, authorized_user_ids: '{100}') }
 
     before(:each) do
       date = DateTime.now
