@@ -34,7 +34,7 @@
                 <button ng-click="confirmRemoval = false" class="btn btn-default btn-xs">No</button>
             </div>
             <div class="btn-group" ng-if="transaction.is_pending">
-                <i title="The transaction is pending" data-toggle='tooltip' class="glyphicon glyphicon-exclamation-sign"></i>
+                <i data-title="The transaction is pending" data-toggle='tooltip' data-container='body' data-placement='left' class="glyphicon glyphicon-exclamation-sign"></i>
             </div>
             <div class="btn-group" ng-show="!transaction.is_pending">
                 <button style='padding-top: 2px;' type="button" class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">

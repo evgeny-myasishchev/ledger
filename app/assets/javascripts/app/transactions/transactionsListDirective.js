@@ -92,6 +92,16 @@
       if(typeof(attrs.data) == 'undefined') {
         throw 'Failed to initialize transactions list: data attribute is required.';
       }
+      element.on('mouseenter', '[data-toggle=tooltip]', function(evt) {
+        var element = jQuery(evt.target);
+        element.tooltip('show');
+        element.on('hidden.bs.tooltip', function(e) {
+          element.tooltip('destroy');
+        });
+        scope.$on('$destroy', function() {
+          element.tooltip('destroy');
+        });
+      });
     };
   }
 })();
