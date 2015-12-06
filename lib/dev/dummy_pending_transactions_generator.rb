@@ -24,15 +24,19 @@ class Dev::DummyPendingTransactionsGenerator
       account_number = SecureRandom.random_number(accounts.length + 1)
       account = account_number == accounts.length ? nil : accounts[account_number]
       Rails.logger.info "Generating pending transaction. Data: #{fake_data}, account: #{account}"
-      dispatch ReportPendingTransaction.new id: Aggregate.new_id,
-                                            user: @user,
-                                            amount: fake_data[:amount],
-                                            date: DateTime.now,
-                                            tag_ids: [],
-                                            comment: fake_data[:comment],
-                                            account_id: account.try(:aggregate_id),
-                                            type_id: fake_data[:type_id]
+      report_pending_transaction account_id: account.try(:aggregate_id), amount: fake_data[:amount], comment: fake_data[:comment], type_id: fake_data[:type_id]
     end
+  end
+
+  def report_pending_transaction(account_id: nil, amount: nil, comment: nil, type_id: nil)
+    dispatch ReportPendingTransaction.new id: Aggregate.new_id,
+                                          user: @user,
+                                          amount: amount,
+                                          date: DateTime.now,
+                                          tag_ids: [],
+                                          comment: comment,
+                                          account_id: account_id,
+                                          type_id: type_id
   end
 
   private
