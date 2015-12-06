@@ -24,7 +24,23 @@ class Projections::Account < ActiveRecord::Base
   def currency
     Currency[currency_code]
   end
-  
+
+  def on_pending_transaction_reported(amount, type_id)
+    
+  end
+
+  def on_pending_transaction_adjusted(old_amount, old_type_id, new_amount, new_type_id)
+
+  end
+
+  def on_pending_transaction_approved(amount, type_id)
+
+  end
+
+  def on_pending_transaction_rejected(amount, type_id)
+
+  end
+
   projection do
     on LedgerShared do |event|
       Account.where(ledger_id: event.aggregate_id).each { |a|

@@ -2,6 +2,8 @@ class Projections::PendingTransaction < ActiveRecord::Base
   include CommonDomain::Projections::ActiveRecord
   include Domain::Events
   include Projections
+
+  belongs_to :user
   
   def self.get_pending_transactions user
     where(user_id: user.id).select(:id, :transaction_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id).all
@@ -23,6 +25,11 @@ class Projections::PendingTransaction < ActiveRecord::Base
         account_id: event.account_id,
         type_id: event.type_id
       )
+      if event.account_id
+        account = Projections::Account.find_by aggregate_id: event.account_id
+        account.on_pending_transaction_reported event.amount, event.type_id
+        account.save!
+      end
     end
     
     on PendingTransactionAdjusted do |event|
