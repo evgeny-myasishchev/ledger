@@ -75,7 +75,13 @@ RSpec.describe Projections::Account, :type => :model do
   end
 
   describe 'on_pending_transaction_adjusted' do
-    it 'should be implemented'
+    let(:account) { create(:projections_account, pending_balance: 40100) }
+
+    it 'should reject old data and report new data' do
+      expect(account).to receive(:on_pending_transaction_rejected).with('100.25', Domain::Transaction::IncomeTypeId)
+      expect(account).to receive(:on_pending_transaction_reported).with('200.75', Domain::Transaction::RefundTypeId)
+      account.on_pending_transaction_adjusted('100.25', Domain::Transaction::IncomeTypeId, '200.75', Domain::Transaction::RefundTypeId)
+    end
   end
 
   describe 'on_pending_transaction_approved' do
