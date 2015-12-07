@@ -69,11 +69,25 @@ class Projections::PendingTransaction < ActiveRecord::Base
     end
 
     on PendingTransactionApproved do |event|
-      PendingTransaction.delete_all transaction_id: event.aggregate_id
+      transaction = PendingTransaction.find_by transaction_id: event.aggregate_id
+      PendingTransaction.transaction do
+        notify_account_projection :on_pending_transaction_approved,
+                                  transaction.account_id,
+                                  transaction.amount,
+                                  transaction.type_id if transaction.account_id
+        PendingTransaction.delete_all transaction_id: event.aggregate_id
+      end if transaction
     end
 
     on PendingTransactionRejected do |event|
-      PendingTransaction.delete_all transaction_id: event.aggregate_id
+      transaction = PendingTransaction.find_by transaction_id: event.aggregate_id
+      PendingTransaction.transaction do
+        notify_account_projection :on_pending_transaction_rejected,
+                                  transaction.account_id,
+                                  transaction.amount,
+                                  transaction.type_id if transaction.account_id
+        PendingTransaction.delete_all transaction_id: event.aggregate_id
+      end if transaction
     end
 
     private

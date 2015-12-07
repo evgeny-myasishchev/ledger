@@ -196,34 +196,56 @@ module Projections::PendingTransactionSpec
     end
 
     describe 'on PendingTransactionApproved' do
-      before do
-        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
-      end
+      let(:transaction) { create(:projections_pending_transaction) }
 
       it 'should remove the pending transaction' do
-        subject.handle_message PendingTransactionApproved.new 't-101'
-        expect(described_class.find_by_transaction_id('t-101')).to be_nil
+        subject.handle_message PendingTransactionApproved.new transaction.transaction_id
+        expect(described_class.find_by_transaction_id(transaction.transaction_id)).to be_nil
       end
 
       it 'should be idempotent' do
-        subject.handle_message PendingTransactionApproved.new 't-101'
-        expect { subject.handle_message PendingTransactionApproved.new 't-101' }.not_to change { described_class.count }
+        subject.handle_message PendingTransactionApproved.new transaction.transaction_id
+        expect { subject.handle_message PendingTransactionApproved.new transaction.transaction_id }.not_to change { described_class.count }
+      end
+
+      it 'should notify account that the transaction has been approved' do
+        account = create(:projections_account)
+        transaction.update_attributes account_id: account.aggregate_id
+        event = PendingTransactionApproved.new transaction.transaction_id
+
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: account.aggregate_id) { account }
+
+        expect(account).to receive(:on_pending_transaction_approved).with(transaction.amount, transaction.type_id)
+        expect(account).to receive(:save!)
+
+        subject.handle_message event
       end
     end
 
     describe 'on PendingTransactionRejected' do
-      before do
-        described_class.create! transaction_id: 't-101', user_id: 33222, amount: '0', date: DateTime.now, type_id: 0
-      end
+      let(:transaction) { create(:projections_pending_transaction) }
 
       it 'should remove the pending transaction' do
-        subject.handle_message PendingTransactionRejected.new 't-101'
-        expect(described_class.find_by_transaction_id('t-101')).to be_nil
+        subject.handle_message PendingTransactionRejected.new transaction.transaction_id
+        expect(described_class.find_by_transaction_id(transaction.transaction_id)).to be_nil
       end
 
       it 'should be idempotent' do
-        subject.handle_message PendingTransactionRejected.new 't-101'
-        expect { subject.handle_message PendingTransactionRejected.new 't-101' }.not_to change { described_class.count }
+        subject.handle_message PendingTransactionRejected.new transaction.transaction_id
+        expect { subject.handle_message PendingTransactionRejected.new transaction.transaction_id }.not_to change { described_class.count }
+      end
+
+      it 'should notify account that the transaction has been approved' do
+        account = create(:projections_account)
+        transaction.update_attributes account_id: account.aggregate_id
+        event = PendingTransactionRejected.new transaction.transaction_id
+
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: account.aggregate_id) { account }
+
+        expect(account).to receive(:on_pending_transaction_rejected).with(transaction.amount, transaction.type_id)
+        expect(account).to receive(:save!)
+
+        subject.handle_message event
       end
     end
   end
