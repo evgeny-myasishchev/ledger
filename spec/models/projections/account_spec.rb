@@ -58,6 +58,55 @@ RSpec.describe Projections::Account, :type => :model do
       expect(subject.ensure_authorized!(User.new(id: 23))).to be subject
     end
   end
+
+  describe 'on_pending_transaction_reported' do
+    let(:account) { create(:projections_account, pending_balance: 10000) }
+
+    it 'should parse the ammount and add it to the pending_balance for income or refund transactions' do
+      account.on_pending_transaction_reported '100.25', Domain::Transaction::IncomeTypeId
+      account.on_pending_transaction_reported '200.75', Domain::Transaction::RefundTypeId
+      expect(account.pending_balance).to eql 40100
+    end
+
+    it 'should parse the ammount and subtract it from the pending_balance for expense transactions' do
+      account.on_pending_transaction_reported '50.25', Domain::Transaction::ExpenseTypeId
+      expect(account.pending_balance).to eql 4975
+    end
+  end
+
+  describe 'on_pending_transaction_adjusted' do
+    it 'should be implemented'
+  end
+
+  describe 'on_pending_transaction_approved' do
+    let(:account) { create(:projections_account, pending_balance: 40100) }
+
+    it 'should parse the ammount and subtract it from the pending_balance for income or refund transactions' do
+      account.on_pending_transaction_approved '100.25', Domain::Transaction::IncomeTypeId
+      account.on_pending_transaction_approved '200.75', Domain::Transaction::RefundTypeId
+      expect(account.pending_balance).to eql 10000
+    end
+
+    it 'should parse the ammount and add it to the pending_balance for expense transactions' do
+      account.on_pending_transaction_approved '50.25', Domain::Transaction::ExpenseTypeId
+      expect(account.pending_balance).to eql 45125
+    end
+  end
+
+  describe 'on_pending_transaction_rejected' do
+    let(:account) { create(:projections_account, pending_balance: 40100) }
+
+    it 'should parse the ammount and subtract it from the pending_balance for income or refund transactions' do
+      account.on_pending_transaction_rejected '100.25', Domain::Transaction::IncomeTypeId
+      account.on_pending_transaction_rejected '200.75', Domain::Transaction::RefundTypeId
+      expect(account.pending_balance).to eql 10000
+    end
+
+    it 'should parse the ammount and add it to the pending_balance for expense transactions' do
+      account.on_pending_transaction_rejected '50.25', Domain::Transaction::ExpenseTypeId
+      expect(account.pending_balance).to eql 45125
+    end
+  end
   
   describe "get_user_accounts" do
     let(:user) { User.new id: 100 }

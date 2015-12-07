@@ -26,7 +26,10 @@ class Projections::Account < ActiveRecord::Base
   end
 
   def on_pending_transaction_reported(amount, type_id)
-    
+    pending_amount = parse_pending_amount(amount)
+    self.pending_balance += pending_amount if type_id == Domain::Transaction::IncomeTypeId
+    self.pending_balance += pending_amount if type_id == Domain::Transaction::RefundTypeId
+    self.pending_balance -= pending_amount if type_id == Domain::Transaction::ExpenseTypeId
   end
 
   def on_pending_transaction_adjusted(old_amount, old_type_id, new_amount, new_type_id)
@@ -34,11 +37,20 @@ class Projections::Account < ActiveRecord::Base
   end
 
   def on_pending_transaction_approved(amount, type_id)
-
+    pending_amount = parse_pending_amount(amount)
+    self.pending_balance -= pending_amount if type_id == Domain::Transaction::IncomeTypeId
+    self.pending_balance -= pending_amount if type_id == Domain::Transaction::RefundTypeId
+    self.pending_balance += pending_amount if type_id == Domain::Transaction::ExpenseTypeId
   end
 
   def on_pending_transaction_rejected(amount, type_id)
+    on_pending_transaction_approved amount, type_id
+  end
 
+  private
+
+  def parse_pending_amount(amount)
+    Money.parse(amount, currency).integer_amount
   end
 
   projection do
