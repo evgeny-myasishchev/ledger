@@ -42,7 +42,10 @@ class Projections::Transaction < ActiveRecord::Base
         transactions_limit: limit,
         transactions: transactions.take(limit)
     }
-    root_data[:account_balance] = account.balance if account
+    if account
+      root_data[:account_balance] = account.balance
+      root_data[:pending_balance] = account.pending_balance
+    end
     root_data
   end
 

@@ -75,6 +75,13 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(data[:account_balance]).to eql(2233119)
     end
 
+    it 'should include account pending_balance' do
+      account.pending_balance = 2233119
+      account.save!
+      data = described_class.get_root_data user, account.aggregate_id
+      expect(data[:pending_balance]).to eql(2233119)
+    end
+
     it 'should get all transactions for the user using query builder' do
       query = double(:query)
       allow(query).to receive(:take) { query }

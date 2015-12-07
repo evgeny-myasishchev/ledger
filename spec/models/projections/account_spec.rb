@@ -124,6 +124,7 @@ RSpec.describe Projections::Account, :type => :model do
       
       @user_accounts = p::Account.get_user_accounts user
     end
+
     it "should return authorized accounts for specified user" do
       expect(@user_accounts.length).to eql 3
       expect(@user_accounts.detect { |a| a.aggregate_id == 'a1' }).not_to be_nil
@@ -133,7 +134,7 @@ RSpec.describe Projections::Account, :type => :model do
     
     it "should skip system fields that can lead to information flow" do
       actual_a1 = @user_accounts.detect { |a| a.aggregate_id == @a1.aggregate_id }
-      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'currency_code', 'unit', 'sequential_number', 'category_id', 'is_closed', 'id'])
+      expect(actual_a1.attribute_names).to eql(['aggregate_id', 'name', 'balance', 'pending_balance', 'currency_code', 'unit', 'sequential_number', 'category_id', 'is_closed', 'id'])
       expect(actual_a1.id).to be_nil #it's present somehow even if not specified
     end
   end
