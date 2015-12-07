@@ -31,25 +31,25 @@ class Projections::Account < ActiveRecord::Base
     self.pending_balance += pending_amount if type_id == Domain::Transaction::IncomeTypeId
     self.pending_balance += pending_amount if type_id == Domain::Transaction::RefundTypeId
     self.pending_balance -= pending_amount if type_id == Domain::Transaction::ExpenseTypeId
-    logger.debug "Pending transaction '#{amount}' of type #{type_id} reported. Pending balance was '#{self.pending_balance_was}' and now '#{self.pending_balance}'"
+    logger.debug "Pending transaction '#{amount}' of type #{type_id} reported. Pending balance was #{self.pending_balance_was} and now #{self.pending_balance}"
   end
 
   def on_pending_transaction_adjusted(old_amount, old_type_id, new_amount, new_type_id)
     logger.debug 'Pending transaction adjusted. First rejecting it and then reporting again...'
     on_pending_transaction_rejected(old_amount, old_type_id)
     on_pending_transaction_reported(new_amount, new_type_id)
-    logger.debug "Pending transaction adjusted. Pending balance was '#{self.pending_balance_was}' and now '#{self.pending_balance}'"
+    logger.debug "Pending transaction adjusted. Pending balance was #{self.pending_balance_was} and now #{self.pending_balance}"
   end
 
   def on_pending_transaction_approved(amount, type_id)
     undo_pending_transaction(amount, type_id)
-    logger.debug "Pending transaction '#{amount}' of type #{type_id} approved. Pending balance was '#{self.pending_balance_was}' and now '#{self.pending_balance}'"
+    logger.debug "Pending transaction '#{amount}' of type #{type_id} approved. Pending balance was #{self.pending_balance_was} and now #{self.pending_balance}"
   end
 
 
   def on_pending_transaction_rejected(amount, type_id)
     undo_pending_transaction(amount, type_id)
-    logger.debug "Pending transaction '#{amount}' of type #{type_id} rejected. Pending balance was '#{self.pending_balance_was}' and now '#{self.pending_balance}'"
+    logger.debug "Pending transaction '#{amount}' of type #{type_id} rejected. Pending balance was #{self.pending_balance_was} and now #{self.pending_balance}"
   end
 
   private
@@ -62,7 +62,9 @@ class Projections::Account < ActiveRecord::Base
   end
 
   def parse_pending_amount(amount)
-    Money.parse(amount, currency).integer_amount
+    integer_amount = Money.parse(amount, currency).integer_amount
+    logger.debug "Pending amount '#{amount}' parsed. Integer amount #{integer_amount}"
+    integer_amount
   end
 
   projection do
