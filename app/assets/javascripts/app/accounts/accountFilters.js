@@ -42,7 +42,7 @@
   
   function nameWithBalance(money) {
     return function(account) {
-      return account.name + ' (' + money(account.balance) + ' ' + account.currency_code + ')';
+      return account.name + ' (' + money(account.balance + account.pending_balance) + ' ' + account.currency_code + ')';
     }
   }
 

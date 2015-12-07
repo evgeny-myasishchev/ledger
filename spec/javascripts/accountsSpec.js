@@ -8,10 +8,10 @@ describe('acounts', function() {
 			module('accountsApp');
 			accountsApp.config(['accountsProvider', function(accountsProvider) {
 				accountsProvider.assignAccounts([
-					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, category_id: 1, is_closed: false},
-					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, category_id: 2, is_closed: false},
-					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, category_id: null, is_closed: false},
-					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, category_id: null, is_closed: false}
+					account1 = {aggregate_id: 'a-1', sequential_number: 201, 'name': 'Cache UAH', 'balance': 10000, pending_balance: 0, category_id: 1, is_closed: false},
+					account2 = {aggregate_id: 'a-2', sequential_number: 202, 'name': 'PC Credit J', 'balance': 20000, pending_balance: 0, category_id: 2, is_closed: false},
+					account3 = {aggregate_id: 'a-3', sequential_number: 203, 'name': 'VAB Visa', 'balance': 443200, pending_balance: 0, category_id: null, is_closed: false},
+					account4 = {aggregate_id: 'a-4', sequential_number: 204, 'name': 'Cache USD', 'balance': 754, pending_balance: 0, category_id: null, is_closed: false}
 				]);
 				accountsProvider.assignCategories([
 					category1 = {id: 1, category_id: 100, display_order: 1, name: 'Category 1'},
@@ -157,23 +157,51 @@ describe('acounts', function() {
 				}]);
 			});
 
-			it('should return the balance as is if curency_code is same as ledger has', function() {
-				expect(subject.getActualBalance(account1, rates)).toEqual(account1.balance);
+			describe('currency_code is same as ledger has', function() {
+				it('should return the balance as is', function() {
+					expect(subject.getActualBalance(account1, rates)).toEqual(account1.balance);
+				});
+
+				it('should return the balance and pending_balance', function() {
+					account1.pending_balance = 20032;
+					expect(subject.getActualBalance(account1, rates)).toEqual(account1.balance + 20032);
+				});
 			});
 
-			it('should convert the balance using units service if account unit is different from currency', inject(['units', function(units) {
-				spyOn(units, 'convert').and.returnValue(332223);
-				account1.currency.unit = 'unit-1';
-				account1.unit = 'unit-2';
-				expect(subject.getActualBalance(account1, rates)).toEqual(332223);
-				expect(units.convert).toHaveBeenCalledWith('unit-2', 'unit-1', account1.balance);
-			}]));
+			describe('account unit is different from currency', function() {
+				it('should convert the balance using units service', inject(['units', function(units) {
+					spyOn(units, 'convert').and.returnValue(332223);
+					account1.currency.unit = 'unit-1';
+					account1.unit = 'unit-2';
+					expect(subject.getActualBalance(account1, rates)).toEqual(332223);
+					expect(units.convert).toHaveBeenCalledWith('unit-2', 'unit-1', account1.balance);
+				}]));
 
-			it('should multiply the balance by rate if ledger currency is different', function() {
-				account1.currency_code = 'EUR';
-				account1.balance = 10044;
-				var result = subject.getActualBalance(account1, rates);
-				expect(result).toEqual(162913);
+				it('should include pending_balance when converting', inject(['units', function(units) {
+					spyOn(units, 'convert').and.returnValue(332223);
+					account1.currency.unit = 'unit-1';
+					account1.unit = 'unit-2';
+					account1.pending_balance = 2000;
+					expect(subject.getActualBalance(account1, rates)).toEqual(332223);
+					expect(units.convert).toHaveBeenCalledWith('unit-2', 'unit-1', (account1.balance + account1.pending_balance));
+				}]));
+			});
+
+			describe('ledger currency is different', function() {
+				it('should multiply the balance by rate', function() {
+					account1.currency_code = 'EUR';
+					account1.balance = 10044;
+					var result = subject.getActualBalance(account1, rates);
+					expect(result).toEqual(162913);
+				});
+
+				it('should include pending_balance when multiplying', function() {
+					account1.currency_code = 'EUR';
+					account1.balance = 10044;
+					account1.pending_balance = 2000;
+					var result = subject.getActualBalance(account1, rates);
+					expect(result).toEqual(195353);
+				});
 			});
 		})
 	});
@@ -333,8 +361,8 @@ describe('acounts', function() {
 		var subject, money;
 		beforeEach(function() {
 			module('accountsApp');
-			a1 = {name: 'Account 1', balance: 10000, currency_code: 'UAH'};
-			a2 = {name: 'Account 2', balance: 20000, currency_code: 'EUR'};
+			a1 = {name: 'Account 1', balance: 10000, pending_balance: 0, currency_code: 'UAH'};
+			a2 = {name: 'Account 2', balance: 20000, pending_balance: 0, currency_code: 'EUR'};
 
 			inject(['nameWithBalanceFilter', 'moneyFilter', function(filter, _money_) {
 				subject = filter;
@@ -345,6 +373,13 @@ describe('acounts', function() {
 		it('should return account name with balance and currency code', function() {
 			expect(subject(a1)).toEqual('Account 1 (' + money(a1.balance) + ' UAH)');
 			expect(subject(a2)).toEqual('Account 2 (' + money(a2.balance) + ' EUR)');
+		});
+
+		it('should also include pending balance', function() {
+			a1.pending_balance = -200;
+			a2.pending_balance = -300;
+			expect(subject(a1)).toEqual('Account 1 (' + money(a1.balance + a1.pending_balance) + ' UAH)');
+			expect(subject(a2)).toEqual('Account 2 (' + money(a2.balance + a2.pending_balance) + ' EUR)');
 		});
 	});
 

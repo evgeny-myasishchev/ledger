@@ -78,9 +78,9 @@
         },
         getActualBalance: function(account, rates) {
           var activeLedger = ledgers.getActiveLedger();
-          var balance = account.balance;
+          var balance = account.balance + account.pending_balance;
           if(account.unit != account.currency.unit) {
-            balance = units.convert(account.unit, account.currency.unit, account.balance);
+            balance = units.convert(account.unit, account.currency.unit, balance);
           }
           if(activeLedger.currency_code == account.currency_code) {
             return balance;
