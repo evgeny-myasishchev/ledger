@@ -24,7 +24,8 @@
 		<h2 style='margin-top: 0'>
 			<small ng-show='activeAccount.is_closed'><span class='glyphicon glyphicon-lock'></span></small>
 			<small>
-				{{activeAccount.balance | money}}
+        <small ng-if="activeAccount.pending_balance">({{activeAccount.pending_balance | money}} pending)</small>
+				{{activeAccount.full_balance | money}}
 				<small ng-if='activeAccount.unit'>{{activeAccount.unit}}.</small>
 				<sup>{{activeAccount.currency_code}}</sup>
 			</small> 

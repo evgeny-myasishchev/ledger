@@ -2,5 +2,5 @@
 <a href='#/accounts/{{account.sequential_number}}'>
 	{{(account).name}}
 </a>
-<span class='pull-right' actual-balance-tip><strong>{{account.balance | money }}</strong> <sup class='currency-code'>{{account.currency_code}}</sup></span> 
+<span class='pull-right' actual-balance-tip><strong>{{account.full_balance | money }}</strong> <sup class='currency-code'>{{account.currency_code}}</sup></span>
 <hidden name='account.aggregate-id' value="{{account.aggregate_id}}" />

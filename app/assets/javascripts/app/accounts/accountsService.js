@@ -1,6 +1,6 @@
 !function() {
   'use strict';
-  
+
   angular
     .module('accountsApp')
     .provider('accounts', accountsProvider);
@@ -18,7 +18,7 @@
           return accounts;
         },
         getAllOpen: function() {
-          return $.grep(accounts || [], function(account) { 
+          return $.grep(accounts || [], function(account) {
             return !account.is_closed;
           });
         },
@@ -40,7 +40,7 @@
           return activeAccount;
         },
         getById: function(accountId) {
-          var result = $.grep(accounts, function(account) { 
+          var result = $.grep(accounts, function(account) {
             return account.aggregate_id == accountId;
           });
           if(result.length == 0) throw 'Unknown account id=' + accountId;
@@ -78,7 +78,7 @@
         },
         getActualBalance: function(account, rates) {
           var activeLedger = ledgers.getActiveLedger();
-          var balance = account.balance + account.pending_balance;
+          var balance = account.full_balance;
           if(account.unit != account.currency.unit) {
             balance = units.convert(account.unit, account.currency.unit, balance);
           }
@@ -95,15 +95,25 @@
     }
 
     var accounts, categories;
+
     function assignAccounts(value) {
+      value.forEach(function(account) {
+        Object.defineProperty(account, 'full_balance', {
+          get: function() {
+            return account.balance + account.pending_balance;
+          }
+        });
+      });
       accounts = value;
     };
     function assignCategories(value) {
       categories = value;
     };
     var getActiveAccountFromRoute = function(sequential_number) {
-      return jQuery.grep(accounts, function(a) { return a.sequential_number == sequential_number; })[0];
+      return jQuery.grep(accounts, function(a) {
+        return a.sequential_number == sequential_number;
+      })[0];
     };
   }
-  
+
 }();

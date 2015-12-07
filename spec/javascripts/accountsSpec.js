@@ -35,6 +35,17 @@ describe('acounts', function() {
 			expect(subject.getAll()).toEqual([account1, account2, account3, account4]);
 		});
 
+		it('should assign full_balance getter property', function() {
+			account1.pending_balance = 100;
+			account2.pending_balance = 200;
+			account3.pending_balance = 300;
+			account4.pending_balance = 400;
+			expect(account1.full_balance).toEqual(account1.pending_balance + account1.balance);
+			expect(account2.full_balance).toEqual(account2.pending_balance + account2.balance);
+			expect(account3.full_balance).toEqual(account3.pending_balance + account3.balance);
+			expect(account4.full_balance).toEqual(account4.pending_balance + account4.balance);
+		});
+
 		it('should return all open accounts on getAllOpen', function() {
 			account3.is_closed = true;
 			account4.is_closed = true;
@@ -361,8 +372,8 @@ describe('acounts', function() {
 		var subject, money;
 		beforeEach(function() {
 			module('accountsApp');
-			a1 = {name: 'Account 1', balance: 10000, pending_balance: 0, currency_code: 'UAH'};
-			a2 = {name: 'Account 2', balance: 20000, pending_balance: 0, currency_code: 'EUR'};
+			a1 = {name: 'Account 1', full_balance: 10000, currency_code: 'UAH'};
+			a2 = {name: 'Account 2', full_balance: 20000, currency_code: 'EUR'};
 
 			inject(['nameWithBalanceFilter', 'moneyFilter', function(filter, _money_) {
 				subject = filter;
@@ -371,15 +382,8 @@ describe('acounts', function() {
 		});
 
 		it('should return account name with balance and currency code', function() {
-			expect(subject(a1)).toEqual('Account 1 (' + money(a1.balance) + ' UAH)');
-			expect(subject(a2)).toEqual('Account 2 (' + money(a2.balance) + ' EUR)');
-		});
-
-		it('should also include pending balance', function() {
-			a1.pending_balance = -200;
-			a2.pending_balance = -300;
-			expect(subject(a1)).toEqual('Account 1 (' + money(a1.balance + a1.pending_balance) + ' UAH)');
-			expect(subject(a2)).toEqual('Account 2 (' + money(a2.balance + a2.pending_balance) + ' EUR)');
+			expect(subject(a1)).toEqual('Account 1 (' + money(a1.full_balance) + ' UAH)');
+			expect(subject(a2)).toEqual('Account 2 (' + money(a2.full_balance) + ' EUR)');
 		});
 	});
 
