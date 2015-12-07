@@ -68,6 +68,8 @@ class Projections::Account < ActiveRecord::Base
   end
 
   projection do
+    include Loggable
+    
     on LedgerShared do |event|
       Account.where(ledger_id: event.aggregate_id).each { |a|
         a.authorize_user event.user_id
@@ -113,6 +115,12 @@ class Projections::Account < ActiveRecord::Base
 
     on AccountCategoryAssigned do |event|
       Account.where(ledger_id: event.aggregate_id, aggregate_id: event.account_id).update_all category_id: event.category_id
+    end
+
+    def purge!
+      # TODO: Get rid of this dependency
+      logger.warn 'Please make sure pending transactions is purged as well since they are dependant'
+      super
     end
   end
 end

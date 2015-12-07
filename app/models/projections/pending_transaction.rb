@@ -29,9 +29,9 @@ class Projections::PendingTransaction < ActiveRecord::Base
       )
       PendingTransaction.transaction do
         notify_account_projection :on_pending_transaction_reported,
-                                  event.account_id,
-                                  event.amount,
-                                  event.type_id if event.account_id
+                                  transaction.account_id,
+                                  transaction.amount,
+                                  transaction.type_id if transaction.account_id
         transaction.save!
       end
     end
@@ -88,6 +88,12 @@ class Projections::PendingTransaction < ActiveRecord::Base
                                   transaction.type_id if transaction.account_id
         PendingTransaction.delete_all transaction_id: event.aggregate_id
       end if transaction
+    end
+
+    def purge!
+      # TODO: Get rid of this dependency
+      logger.warn 'Please make sure accounts projection is purged as well since they are dependant'
+      super
     end
 
     private
