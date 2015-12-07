@@ -144,8 +144,52 @@ module Projections::PendingTransactionSpec
         event = new_adjusted_event account_id: account.aggregate_id, transaction_id: transaction.transaction_id, amount: '223.43'
 
         expect(Projections::Account).to receive(:find_by).with(aggregate_id: account.aggregate_id) { account }
-        expect(account).to receive(:on_pending_transaction_adjusted).with(evt.amount, evt.type_id)
+        expect(account).to receive(:on_pending_transaction_adjusted).with(transaction.amount, transaction.type_id, event.amount, event.type_id)
         expect(account).to receive(:save!)
+
+        subject.handle_message event
+      end
+
+      it 'should notify old account as well as new if account has changed' do
+        old_account = create(:projections_account)
+        new_account = create(:projections_account)
+        transaction.update_attributes account_id: old_account.aggregate_id
+        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id, amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
+
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: old_account.aggregate_id) { old_account }
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: new_account.aggregate_id) { new_account }
+
+        expect(old_account).to receive(:on_pending_transaction_rejected).with(transaction.amount, transaction.type_id)
+        expect(old_account).to receive(:save!)
+
+        expect(new_account).to receive(:on_pending_transaction_reported).with(event.amount, event.type_id)
+        expect(new_account).to receive(:save!)
+
+        subject.handle_message event
+      end
+
+      it 'should notify just old account if account has been cleared' do
+        old_account = create(:projections_account)
+        transaction.update_attributes account_id: old_account.aggregate_id
+        event = new_adjusted_event account_id: nil, transaction_id: transaction.transaction_id
+
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: old_account.aggregate_id) { old_account }
+
+        expect(old_account).to receive(:on_pending_transaction_rejected).with(transaction.amount, transaction.type_id)
+        expect(old_account).to receive(:save!)
+
+        subject.handle_message event
+      end
+
+      it 'should notify just new account if the account has been assigned' do
+        new_account = create(:projections_account)
+        transaction.update_attributes account_id: nil
+        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id, amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
+
+        expect(Projections::Account).to receive(:find_by).with(aggregate_id: new_account.aggregate_id) { new_account }
+
+        expect(new_account).to receive(:on_pending_transaction_reported).with(event.amount, event.type_id)
+        expect(new_account).to receive(:save!)
 
         subject.handle_message event
       end
