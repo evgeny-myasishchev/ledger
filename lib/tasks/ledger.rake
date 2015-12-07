@@ -12,7 +12,7 @@ namespace :ledger do
     case
       when strategy == :in_proc
         Rails.application.event_store_client.pull_subscriptions
-        puts 'Please make sure all subscriptions have finished pulling and press any key.'
+        print 'Please make sure all subscriptions have finished pulling and press any key.'
         STDIN.getc
       when strategy == :job
         PullSubscriptionsJob.perform_later(group: 'projections')
