@@ -97,7 +97,7 @@ describe('transactions.transactionsService', function() {
     });
 
     it('should decrement pending transactions count', function() {
-      var transaction = doProcess(100, Transaction.incomeId, 100, Transaction.incomeId);
+      doProcess(100, Transaction.incomeId, 100, Transaction.incomeId);
       expect(subject.getPendingCount()).toEqual(31);
     });
   });
