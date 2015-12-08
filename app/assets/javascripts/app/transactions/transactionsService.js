@@ -9,9 +9,9 @@
     this.$get = transactionsService;
     this.setPendingTransactionsCount = setPendingTransactionsCount;
     
-    transactionsService.$inject = ['$http', 'accounts'];
+    transactionsService.$inject = ['$http', 'accounts', 'money'];
 
-    function transactionsService($http, accounts) {
+    function transactionsService($http, accounts, money) {
       var service = {
         getPendingCount: getPendingCount,
         processReportedTransaction: processReportedTransaction,
@@ -45,11 +45,20 @@
       }
       
       function processApprovedTransaction(pendingTransaction, approvedTransaction) {
-        this.processReportedTransaction(approvedTransaction);
-        pendingTransactionsCount--;
+        service.processRejectedPendingTransaction(pendingTransaction);
+        service.processReportedTransaction(approvedTransaction);
       }
       
       function processRejectedPendingTransaction(transaction) {
+        if(transaction.account_id) {
+          var account = accounts.getById(transaction.account_id);
+          var amount = money.parse(transaction.amount);
+          if(transaction.type_id == Transaction.incomeId || transaction.type_id == Transaction.refundId) {
+            account.pending_balance -= amount;
+          } else if(transaction.type_id == Transaction.expenseId) {
+            account.pending_balance += amount;
+          }
+        }
         pendingTransactionsCount--;
       }
       

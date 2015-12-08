@@ -96,6 +96,15 @@ describe('transactions.transactionsService', function() {
       expect(subject.processReportedTransaction).toHaveBeenCalledWith(transaction);
     });
 
+    it('should process pendingTransaction with processRejectedPendingTransaction', function() {
+      spyOn(subject, 'processRejectedPendingTransaction');
+      var pendingTransaction;
+      doProcess(100, Transaction.incomeId, 100, Transaction.incomeId, function(pt) {
+        pendingTransaction = pt;
+      });
+      expect(subject.processRejectedPendingTransaction).toHaveBeenCalledWith(pendingTransaction);
+    });
+
     it('should decrement pending transactions count', function() {
       doProcess(100, Transaction.incomeId, 100, Transaction.incomeId);
       expect(subject.getPendingCount()).toEqual(31);
@@ -107,6 +116,32 @@ describe('transactions.transactionsService', function() {
       var pendingCount = subject.getPendingCount();
       subject.processRejectedPendingTransaction({id: 100});
       expect(subject.getPendingCount()).toEqual(pendingCount-1);
+    });
+
+    describe('with account', function() {
+      var pendingTransaction;
+      beforeEach(function() {
+        account2.pending_balance = 150000;
+        pendingTransaction = { account_id: account2.aggregate_id, amount: '500.25' };
+      });
+
+      it('should add amount to pending_balance for expense transactions', function() {
+        pendingTransaction.type_id = Transaction.expenseId;
+        subject.processRejectedPendingTransaction(pendingTransaction);
+        expect(account2.pending_balance).toEqual(150000 + 50025)
+      });
+
+      it('should subtract amount from pending_balance for income transactions', function() {
+        pendingTransaction.type_id = Transaction.incomeId;
+        subject.processRejectedPendingTransaction(pendingTransaction);
+        expect(account2.pending_balance).toEqual(150000 - 50025)
+      });
+
+      it('should subtract amount from pending_balance for refund transactions', function() {
+        pendingTransaction.type_id = Transaction.refundId;
+        subject.processRejectedPendingTransaction(pendingTransaction);
+        expect(account2.pending_balance).toEqual(150000 - 50025)
+      });
     });
   });
 
