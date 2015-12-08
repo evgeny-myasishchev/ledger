@@ -44,8 +44,8 @@
         }).join(',');
       }
       
-      function processApprovedTransaction(transaction) {
-        this.processReportedTransaction(transaction);
+      function processApprovedTransaction(pendingTransaction, approvedTransaction) {
+        this.processReportedTransaction(approvedTransaction);
         pendingTransactionsCount--;
       }
       

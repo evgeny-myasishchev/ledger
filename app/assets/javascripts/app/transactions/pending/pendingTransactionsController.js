@@ -54,8 +54,8 @@
             commandData.amount_received = money.parse(commandData.amount_received);
           }
           vm.approvedTransactions.unshift(commandData);
-          removePendingTransaction(commandData.transaction_id);
-          transactions.processApprovedTransaction(commandData);
+          var pendingTransaction = removePendingTransaction(commandData.transaction_id);
+          transactions.processApprovedTransaction(pendingTransaction, commandData);
           $scope.$emit('pending-transactions-changed');
         });
     };
@@ -92,7 +92,7 @@
         return t.transaction_id == transaction_id;
       })[0];
       var index = vm.transactions.indexOf(transaction);
-      vm.transactions.splice(index, 1);
+      return vm.transactions.splice(index, 1)[0];
     }
     
     function loadPendingTransactions() {

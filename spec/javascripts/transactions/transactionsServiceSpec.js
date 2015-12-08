@@ -73,26 +73,31 @@ describe('transactions.transactionsService', function() {
 
   describe('processApprovedTransaction', function() {
 
-    function doProcess(amount, typeId, initializer) {
-      var transaction = {
+    function doProcess(amountWas, typeIdWas, amount, typeId, initializer) {
+      var pendingTransaction = {
+        account_id: account1.aggregate_id,
+        type_id: typeIdWas,
+        amount: amountWas
+      };
+      var approvedTransaction = {
         account_id: account1.aggregate_id,
         type_id: typeId,
         amount: amount,
         tag_ids: []
       };
-      if(initializer) initializer(transaction);
-      subject.processApprovedTransaction(transaction);
-      return transaction;
+      if(initializer) initializer(pendingTransaction, approvedTransaction);
+      subject.processApprovedTransaction(pendingTransaction, approvedTransaction);
+      return approvedTransaction;
     };
 
     it('should processReportedTransaction', function() {
       spyOn(subject, 'processReportedTransaction');
-      var transaction = doProcess(100, Transaction.incomeId);
+      var transaction = doProcess(100, Transaction.incomeId, 100, Transaction.incomeId);
       expect(subject.processReportedTransaction).toHaveBeenCalledWith(transaction);
     });
 
     it('should decrement pending transactions count', function() {
-      doProcess(100, Transaction.incomeId);
+      var transaction = doProcess(100, Transaction.incomeId, 100, Transaction.incomeId);
       expect(subject.getPendingCount()).toEqual(31);
     });
   });

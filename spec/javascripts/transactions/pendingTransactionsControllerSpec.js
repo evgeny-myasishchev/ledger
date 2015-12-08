@@ -174,7 +174,7 @@ describe('transactions.PendingTransactionsController', function() {
         $httpBackend.flush();
         $httpBackend.whenPOST('pending-transactions/t-332/adjust-and-approve').respond();
         subject.approvedTransactions = [{t1: true}, {t2: true}];
-        subject.transactions  = [{t1: true}, jQuery.extend({}, pendingTransaction), {t2: true}];
+        subject.transactions  = [{t1: true}, pendingTransaction = jQuery.extend({}, pendingTransaction), {t2: true}];
         scope.$on('pending-transactions-changed', function() {
           changeEventEmitted = true;
         });
@@ -183,7 +183,8 @@ describe('transactions.PendingTransactionsController', function() {
         $httpBackend.flush();
 
         approvedTransaction = jQuery.extend({
-          account_id: pendingTransaction.account.aggregate_id
+          account_id: pendingTransaction.account.aggregate_id,
+          tag_ids: []
         }, pendingTransaction);
         approvedTransaction.amount = 22343;
         delete(approvedTransaction.account);
@@ -212,7 +213,7 @@ describe('transactions.PendingTransactionsController', function() {
       });
 
       it('should use transactions provider to process approved transaction', function() {
-        expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(approvedTransaction);
+        expect(transactions.processApprovedTransaction).toHaveBeenCalledWith(pendingTransaction, approvedTransaction);
       });
     });
 
