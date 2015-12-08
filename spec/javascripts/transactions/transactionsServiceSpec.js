@@ -91,7 +91,7 @@ describe('transactions.transactionsService', function() {
       expect(subject.processReportedTransaction).toHaveBeenCalledWith(transaction);
     });
 
-    it('should decrement pending transactions cound', function() {
+    it('should decrement pending transactions count', function() {
       doProcess(100, Transaction.incomeId);
       expect(subject.getPendingCount()).toEqual(31);
     });
