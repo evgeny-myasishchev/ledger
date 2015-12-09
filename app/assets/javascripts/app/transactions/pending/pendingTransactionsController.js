@@ -10,18 +10,17 @@
 
   function PendingTransactionsController($scope, $http, accounts, money, transactions) {
     var vm = this;
-    
+
     vm.adjustAndApprove = adjustAndApprove;
     vm.reject = reject;
     vm.startReview = startReview;
     vm.stopReview = stopReview;
+    vm.loadPendingTransactions = loadPendingTransactions;
     
-    vm.accounts = [];
+    vm.accounts = accounts.getAllOpen();
     vm.approvedTransactions = [];
     vm.pendingTransaction = null;
     vm.transactions = [];
-    
-    loadPendingTransactions();
     
     ////////////
     
@@ -91,6 +90,8 @@
       var transaction = jQuery.grep(vm.transactions, function(t) {
         return t.transaction_id == transaction_id;
       })[0];
+      if(!transaction)
+        throw new Error("Transaction '" + transaction_id + "' not found.");
       var index = vm.transactions.indexOf(transaction);
       return vm.transactions.splice(index, 1)[0];
     }
@@ -102,7 +103,6 @@
           if(t.date) t.date = new Date(t.date);
         });
         vm.transactions = transactions;
-        vm.accounts = accounts.getAllOpen();
         
         //For testing
         // vm.startReview(vm.transactions[0]);
