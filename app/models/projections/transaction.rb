@@ -141,6 +141,7 @@ class Projections::Transaction < ActiveRecord::Base
       return if !transaction.nil? && !transaction.is_pending #Adjusting pending transactions only
       transaction = build_transaction(event, headers) if transaction.nil?
       transaction.is_transfer = true
+      transaction.is_pending = false
       transaction.type_id = Domain::Transaction::ExpenseTypeId
       transaction.sending_account_id = event.aggregate_id
       transaction.sending_transaction_id = event.transaction_id

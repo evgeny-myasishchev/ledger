@@ -666,6 +666,7 @@ RSpec.describe Projections::Transaction, :type => :model do
         t3 = described_class.find_by transaction_id: 't-3'
         expect(t3.type_id).to eql(expense_id)
         expect(t3.is_transfer).to be_truthy
+        expect(t3.is_pending).to be_falsy
         expect(t3.sending_account_id).to eql(account1.aggregate_id)
         expect(t3.sending_transaction_id).to eql('t-3')
         expect(t3.receiving_account_id).to eql(account2.aggregate_id)
