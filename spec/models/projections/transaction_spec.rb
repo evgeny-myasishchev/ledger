@@ -390,6 +390,13 @@ RSpec.describe Projections::Transaction, :type => :model do
       expect(t2.is_pending).to be_truthy
     end
 
+    it 'should ignore nil tags' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, '105.23', DateTime.now, nil, 'Comment 100', account1.aggregate_id, income_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.tag_ids).to be_nil
+    end
+
     it 'should parse the amount string using Money and Currency' do
       date1 = DateTime.now - 100
       date2 = date1 - 100
@@ -503,6 +510,20 @@ RSpec.describe Projections::Transaction, :type => :model do
 
       t2 = described_class.find_by_transaction_id 't-2'
       expect(t2.amount).to eql(200000)
+    end
+
+    it 'should ignore nil tags' do
+      subject.handle_message e::PendingTransactionReported.new('t-1', 100, 50001, DateTime.now, [], 'Comment 100', nil, income_id)
+      subject.handle_message e::PendingTransactionReported.new('t-2', 100, 50002, DateTime.now, [], 'Comment 100', account1.aggregate_id, income_id)
+
+      subject.handle_message e::PendingTransactionAdjusted.new('t-1', '105.23', DateTime.now, nil, 'Comment 100', account1.aggregate_id, income_id)
+      subject.handle_message e::PendingTransactionAdjusted.new('t-2', '2000', DateTime.now, nil, 'Comment 101', account1.aggregate_id, expense_id)
+
+      t1 = described_class.find_by_transaction_id 't-1'
+      expect(t1.tag_ids).to be_nil
+
+      t2 = described_class.find_by_transaction_id 't-2'
+      expect(t2.tag_ids).to be_nil
     end
 
     it 'should not insert if account_id is null' do

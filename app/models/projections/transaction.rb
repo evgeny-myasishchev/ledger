@@ -238,7 +238,7 @@ class Projections::Transaction < ActiveRecord::Base
     end
 
     def assign_tags(event, transaction)
-      event.tag_ids.each { |tag_id| transaction.add_tag tag_id }
+      event.tag_ids.each { |tag_id| transaction.add_tag tag_id } unless event.tag_ids.nil?
     end
   end
 end
