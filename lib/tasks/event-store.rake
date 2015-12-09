@@ -46,9 +46,7 @@ namespace :es do
                     commit_sequence: commit.commit_sequence,
                     stream_revision: commit.stream_revision,
                     commit_timestamp: commit.commit_timestamp,
-                    events: commit.events.map { |e|
-                      e.body
-                    },
+                    events: commit.events,
                     headers: commit.headers
                 })
   end
