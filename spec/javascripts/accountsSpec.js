@@ -39,11 +39,11 @@ describe('acounts', function() {
 			account1.pending_balance = 100;
 			account2.pending_balance = 200;
 			account3.pending_balance = 300;
-			account4.pending_balance = 400;
+			account4.pending_balance = undefined;
 			expect(account1.full_balance).toEqual(account1.pending_balance + account1.balance);
 			expect(account2.full_balance).toEqual(account2.pending_balance + account2.balance);
 			expect(account3.full_balance).toEqual(account3.pending_balance + account3.balance);
-			expect(account4.full_balance).toEqual(account4.pending_balance + account4.balance);
+			expect(account4.full_balance).toEqual(account4.balance);
 		});
 
 		it('should return all open accounts on getAllOpen', function() {

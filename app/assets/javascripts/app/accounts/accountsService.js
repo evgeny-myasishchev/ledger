@@ -100,7 +100,7 @@
       value.forEach(function(account) {
         Object.defineProperty(account, 'full_balance', {
           get: function() {
-            return account.balance + account.pending_balance;
+            return account.balance + (account.pending_balance || 0);
           }
         });
       });
