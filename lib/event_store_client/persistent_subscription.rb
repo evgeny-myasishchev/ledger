@@ -18,7 +18,7 @@ class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
   # and deliver each event of the commit to handlers that can handle it.
   # New checkpoint will be saved when all events are handled successfully for the commit.
   def pull
-    checkpoint = @last_handled_checkpoint ||= @checkpoints_repo.get_checkpoint(@identifier)
+    checkpoint = @checkpoints_repo.get_checkpoint(@identifier)
     logger.debug "Pulling commits for subscription '#{@identifier}' starting from checkpoint '#{checkpoint}'."
     @event_store.for_each_commit(checkpoint: checkpoint) do |commit|
       headers = commit.headers.dup
@@ -33,7 +33,6 @@ class EventStoreClient::PersistentSubscription < EventStoreClient::Subscription
       }
       logger.debug "Commit handled. Remembering checkpoint '#{commit.checkpoint}'."
       @checkpoints_repo.save_checkpoint(@identifier, commit.checkpoint)
-      @last_handled_checkpoint = commit.checkpoint
     end
   end
 end
