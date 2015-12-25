@@ -1,0 +1,6 @@
+/tmp/*
+!/tmp
+/test
+/spec
+/log/*.log
+/db/*.sqlite*
