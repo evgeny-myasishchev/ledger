@@ -17,6 +17,8 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
 
   def adjust(amount: nil, date: nil, tag_ids: nil, comment: nil, account_id: nil, type_id: nil)
     logger.debug "Adjusting transaction id=#{aggregate_id}"
+    ensure_not_approved!
+    ensure_not_rejected!
     event = PendingTransactionAdjusted.new(aggregate_id,
                                            amount || self.amount,
                                            date || self.date,
@@ -35,9 +37,10 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
 
   def approve(account)
     logger.debug "Approving transaction id=#{aggregate_id}"
-    raise Errors::DomainError, 'account_id is empty.' if account_id.blank?
-    raise Errors::DomainError, "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
-    raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
+    validate_account_id_presence! account_id
+    ensure_account_is_same! account_id, account
+    ensure_not_approved!
+    ensure_not_rejected!
     if type_id == Domain::Transaction::IncomeTypeId
       account.report_income aggregate_id, amount, date, tag_ids, comment
     elsif type_id == Domain::Transaction::ExpenseTypeId
@@ -52,11 +55,12 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
 
   def approve_transfer(account, receiving_account, amount_received)
     logger.debug "Approving transfer transaction id=#{aggregate_id}"
-    raise Errors::DomainError, 'account_id is empty.' if account_id.blank?
+    validate_account_id_presence! account_id
     raise Errors::DomainError, 'receiving_account is nil.' if receiving_account.blank?
     raise Errors::DomainError, 'amount_received is empty.' if amount_received.blank?
-    raise Errors::DomainError, "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
-    raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
+    ensure_account_is_same! account_id, account
+    ensure_not_approved!
+    ensure_not_rejected!
     sending_transaction_id = account.send_transfer(aggregate_id,
                                                    receiving_account.aggregate_id,
                                                    amount,
@@ -97,12 +101,30 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     @is_rejected = true
   end
 
-  private def update_attributes(event)
+  private 
+  
+  def update_attributes(event)
     @amount = event.amount
     @date = event.date
     @tag_ids = event.tag_ids
     @comment = event.comment
     @account_id = event.account_id
     @type_id = event.type_id
+  end
+  
+  def validate_account_id_presence! account_id
+    raise Errors::DomainError, 'account_id is empty.' if account_id.blank?
+  end
+  
+  def ensure_account_is_same! account_id, account
+    raise Errors::DomainError, "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
+  end
+  
+  def ensure_not_approved!
+    raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
+  end
+  
+  def ensure_not_rejected!
+    raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has been rejected." if @is_rejected
   end
 end
