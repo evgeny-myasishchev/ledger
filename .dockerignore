@@ -4,3 +4,4 @@
 /spec
 /log/*.log
 /db/*.sqlite*
+/docker
