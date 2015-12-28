@@ -77,6 +77,20 @@ module PendingTransactionSpec
         make_reported subject, user, date: date
       end
       
+      it 'should fail if already approved' do
+        subject.apply_event PendingTransactionApproved.new subject.aggregate_id
+        expect { 
+          subject.adjust
+        }.to raise_error Errors::DomainError, "pending transaction id=(#{subject.aggregate_id}) has already been approved."
+      end
+      
+      it 'should fail if rejected' do
+        subject.apply_event PendingTransactionRejected.new subject.aggregate_id
+        expect { 
+          subject.adjust
+        }.to raise_error Errors::DomainError, "pending transaction id=(#{subject.aggregate_id}) has been rejected."
+      end
+      
       it 'should raise adjusted event with changed attributes' do
         subject.adjust amount: '10.05', date: adjusted_date, tag_ids: ['t-21', 't-22'], comment: 'Expence 10.05', account_id: 'a-200', type_id: Domain::Transaction::ExpenseTypeId
         expect(subject).to have_one_uncommitted_event PendingTransactionAdjusted, 
@@ -130,6 +144,14 @@ module PendingTransactionSpec
         subject.report user, 't-100', '10.5', account_id: account.aggregate_id
         subject.apply_event PendingTransactionApproved.new subject.aggregate_id
         expect { subject.approve account }.to raise_error Errors::DomainError, "pending transaction id=(t-100) has already been approved."
+      end
+      
+      it 'should fail if rejected' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        subject.apply_event PendingTransactionRejected.new subject.aggregate_id
+        expect { 
+          subject.approve account
+        }.to raise_error Errors::DomainError, "pending transaction id=(#{subject.aggregate_id}) has been rejected."
       end
       
       it 'should report income' do
@@ -193,6 +215,14 @@ module PendingTransactionSpec
         subject.report user, 't-100', '10.5', account_id: account.aggregate_id
         subject.apply_event PendingTransactionApproved.new subject.aggregate_id
         expect { subject.approve_transfer account, receiving_account, '100.30' }.to raise_error Errors::DomainError, "pending transaction id=(t-100) has already been approved."
+      end
+      
+      it 'should fail if rejected' do
+        subject.report user, 't-100', '10.5', account_id: account.aggregate_id
+        subject.apply_event PendingTransactionRejected.new subject.aggregate_id
+        expect { 
+          subject.approve_transfer account, receiving_account, '100.30'
+        }.to raise_error Errors::DomainError, "pending transaction id=(#{subject.aggregate_id}) has been rejected."
       end
       
       it 'should preform the transfer' do
