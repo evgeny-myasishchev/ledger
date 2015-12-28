@@ -1,7 +1,5 @@
-/tmp/*
-!/tmp
-/test
-/spec
-/log/*.log
-/db/*.sqlite*
-/docker
+tmp
+test
+spec
+log/*.log
+db/*.sqlite*

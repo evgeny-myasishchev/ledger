@@ -71,5 +71,10 @@ group :test do
   gem 'ffaker'
 end
 
-# Use backburner (beanstalkd) to run active jobs on production
-gem 'backburner', group: :production
+group :production do
+  # Use backburner (beanstalkd) to run active jobs on production
+  gem 'backburner'
+  
+  # Use passenger as an application server
+  gem 'passenger'
+end

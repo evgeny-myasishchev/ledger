@@ -172,6 +172,9 @@ GEM
       oauth2 (~> 1.0)
       omniauth (~> 1.2)
     orm_adapter (0.5.0)
+    passenger (5.0.23)
+      rack
+      rake (>= 0.8.1)
     pg (0.18.4)
     phantomjs (1.9.8.0)
     puma (2.15.3)
@@ -287,6 +290,7 @@ DEPENDENCIES
   log4r!
   momentjs-rails (~> 2.5.0)
   omniauth-google-oauth2
+  passenger
   pg
   puma
   rails (~> 4)

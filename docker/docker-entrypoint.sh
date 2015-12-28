@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-echo 'Hello from entry point. The command is below:'
-echo "$@"
+if [ "$1" = 'passenger-start' ]; then
+  echo 'Starting passenger'
+  passenger start
+fi
 
 exec "$@"

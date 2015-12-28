@@ -4,18 +4,26 @@ FROM ruby:2.2
 RUN apt-get update && apt-get install node -y && apt-get install vim -y
 RUN mkdir /apps
 RUN useradd -d /apps/ledger --create-home -s /bin/bash -U ledger
+
 WORKDIR /apps/ledger
 RUN mkdir -p app shared/bundle
 
-# Caching bundle install
-ADD Gemfile app/Gemfile
-ADD Gemfile.lock app/Gemfile.lock
-RUN cd app && bundle install --gemfile=Gemfile --deployment --path ~/shared/bundle --without development test
-
-ADD . app
-ENV BUNDLE_APP_CONFIG ~/.bundle
 # ENV RAILS_ENV=production
 
-COPY docker/docker-entrypoint.sh /apps/ledger
+# Caching bundle install
+WORKDIR app
+ADD Gemfile Gemfile
+ADD Gemfile.lock Gemfile.lock
+RUN bundle install --gemfile=Gemfile --deployment --path ~/shared/bundle --without development test
 
-ENTRYPOINT ["/apps/ledger/docker-entrypoint.sh"]
+# Making sure passenger native support is built
+RUN passenger-config build-native-support
+RUN passenger-config install-standalone-runtime
+
+# Adding app sources and making assets ready
+ADD . .
+RUN rake assets:precompile
+
+ENTRYPOINT ["docker/docker-entrypoint.sh"]
+EXPOSE 3000
+CMD ["passenger-start"]
