@@ -1,4 +1,8 @@
-ledger:
+ledgerdb:
+  image: postgres
+ledgerweb:
   build: ../
   ports:
    - "3000:3000"
+  links:
+   - ledgerdb
