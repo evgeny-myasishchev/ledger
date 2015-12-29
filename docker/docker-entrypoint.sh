@@ -3,7 +3,7 @@ set -e
 
 if [ "$1" = 'passenger-start' ]; then
   echo 'Starting passenger'
-  passenger start
+  passenger start --user ledger
 fi
 
 exec "$@"

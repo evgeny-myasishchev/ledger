@@ -14,7 +14,7 @@ RUN mkdir -p app shared/bundle
 WORKDIR app
 ADD Gemfile Gemfile
 ADD Gemfile.lock Gemfile.lock
-RUN bundle install --gemfile=Gemfile --deployment --path ~/shared/bundle --without development test
+RUN bundle install --gemfile=Gemfile --deployment --path shared/bundle --without development test
 
 # Making sure passenger native support is built
 RUN passenger-config build-native-support
