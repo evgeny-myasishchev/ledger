@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  host: ledgerdb
+  port: 5432
+  user: ledger
+  pool: 10
+  timeout: 10000
+  encoding: unicode
+
+development:
+  <<: *default
+  database: ledger_development
+  
+test:
+  <<: *default
+  database: ledger_test
+
+production:
+  <<: *default
+  database: ledger
+  
+event-store:
+  <<: *default
+  database: ledger_<%= Rails.env %>

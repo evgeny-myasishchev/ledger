@@ -6,3 +6,5 @@ ledgerweb:
    - "3000:3000"
   links:
    - ledgerdb
+  environment:
+    DB_CONFIG: 'docker/database.yml'
