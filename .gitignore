@@ -20,3 +20,6 @@
 
 # Ignoring RubyMine stuff. It will autogenerate it anyway.
 /.idea
+
+# Ignoring precompiled assets
+/public/assets
