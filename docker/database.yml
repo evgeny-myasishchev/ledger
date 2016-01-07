@@ -7,18 +7,17 @@ default: &default
   timeout: 10000
   encoding: unicode
 
-development:
+development: &development
   <<: *default
   database: ledger_development
   
-test:
+test: &test
   <<: *default
   database: ledger_test
 
-production:
+production: &production
   <<: *default
   database: ledger
   
 event-store:
-  <<: *default
-  database: ledger_<%= Rails.env %>
+  <<: *<%= Rails.env %>
