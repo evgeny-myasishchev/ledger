@@ -4,7 +4,7 @@ set -e
 if [ "$1" = 'passenger-start' ]; then
   echo 'Making sure the database is up to date...'
   cd /apps/ledger/app
-  bundle exec rake db:migrate
+  gosu ledger bundle exec rake db:migrate
 
   echo 'Starting passenger'
   passenger start --user ledger
@@ -25,8 +25,8 @@ elif [ "$1" = 'db-setup' ]; then
   "
   psql -h ledgerdb -U postgres -c "${CREATE_ROLE_SQL}"
   cd /apps/ledger/app
-  bundle exec rake db:create
-  bundle exec rake db:setup
+  gosu ledger bundle exec rake db:create
+  gosu ledger bundle exec rake db:setup
 else
   exec "$@"
 fi

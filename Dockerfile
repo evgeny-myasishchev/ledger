@@ -2,6 +2,8 @@
 FROM debian
 FROM ruby:2.2
 RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt-get install postgresql-client -y
+RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.0/gosu' \
+	&& chmod +x /usr/local/bin/gosu
 RUN mkdir /apps
 RUN useradd -d /apps/ledger --create-home -s /bin/bash -U ledger
 
@@ -30,6 +32,9 @@ ADD . .
 RUN mkdir tmp
 RUN chown -R ledger tmp
 RUN chown -R ledger log
+
+# TODO: This must be only for dev/test env
+RUN chmod o+w db/schema.rb
 
 ENTRYPOINT ["docker/docker-entrypoint.sh"]
 EXPOSE 3000
