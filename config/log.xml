@@ -8,7 +8,6 @@
     <!--<parameter name="log_file_path" value="#{log_file_path}"/>-->
   </pre_config>
 
-  <!--1 MB file is enough for development-->
   <outputter type="FileOutputter" maxsize="1048576" name="log_file" filename="#{log_file_path}">
     <formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
   </outputter>
