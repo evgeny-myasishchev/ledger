@@ -78,4 +78,7 @@ Rails.application.configure do
 
   # It makes sense to have a pool size same as a number of esc subscriptions
   config.event_store_client.pool = Concurrent::ThreadPoolExecutor.new max_threads: 6
+  
+  #Using prod specific log config
+  config.log_config_path = File.join(config.root, 'config', 'log-prod.xml')
 end

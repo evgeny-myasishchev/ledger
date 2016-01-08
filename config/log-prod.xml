@@ -1,0 +1,14 @@
+<log4r_config>
+    <pre_config>
+        <global level="DEBUG"/>
+    </pre_config>
+
+    <outputter type="StdoutOutputter" name="std_out">
+        <formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
+    </outputter>
+    <logger name="Ledger" outputters="std_out"/>
+    <logger name="ActiveRecord" outputters="std_out"/>
+    <logger name="EventStore" outputters="std_out" level='DEBUG'/>
+    <logger name="CommonDomain" outputters="std_out" level='DEBUG'/>
+    <logger name="CommonDomain::Persistence" level='DEBUG'/>
+</log4r_config>

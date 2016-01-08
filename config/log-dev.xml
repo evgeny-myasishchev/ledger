@@ -1,4 +1,3 @@
-<!-- the config file for default environment -->
 <log4r_config>
   <pre_config>
     <global level="DEBUG"/>

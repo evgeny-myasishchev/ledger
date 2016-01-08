@@ -31,22 +31,18 @@ module Ledger
     
     config.autoload_paths += %W(#{config.root}/lib)
     
-    config.log_config_path = ENV['LOG_CONFIG'] || File.join(config.root, 'config', 'log.xml') unless config.respond_to?(:log_config_path)
+    config.log_config_path = ENV['LOG_CONFIG'] || File.join(config.root, 'config', 'log-dev.xml') unless config.respond_to?(:log_config_path)
     
     config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap")
     config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap", "fonts")
     config.assets.precompile += %w( *.eot *.svg *.ttf *.woff *.woff2 )
     
     initializer :initialize_log4r, {:before => :initialize_logger} do
-      initialize_logging
+      LogFactory.configure(config)
     end
     
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }
-    
-    def initialize_logging
-      LogFactory.configure(config)
-    end
 
     config.event_store_client = Struct.new(:pool).new(nil)
   end
