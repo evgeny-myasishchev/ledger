@@ -27,8 +27,6 @@ module Ledger
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
     
-    self.paths['config/database'] = ENV['DB_CONFIG'] if ENV.key?('DB_CONFIG')
-    
     config.autoload_paths += %W(#{config.root}/lib)
     
     config.log_config_path = ENV['LOG_CONFIG'] || File.join(config.root, 'config', 'log-dev.xml') unless config.respond_to?(:log_config_path)
