@@ -44,6 +44,9 @@ gem 'common-domain', github: 'evgeny-myasishchev/common-domain'
 # Log with log4r
 gem 'log4r', github: 'colbygk/log4r'
 
+# Use backburner (beanstalkd) to run active jobs on production
+gem 'backburner'
+
 gem 'dotenv-rails' #Store ENV in .env
 
 group :development do
@@ -72,9 +75,6 @@ group :test do
 end
 
 group :production do
-  # Use backburner (beanstalkd) to run active jobs on production
-  gem 'backburner'
-  
   # Use passenger as an application server
   gem 'passenger'
 end
