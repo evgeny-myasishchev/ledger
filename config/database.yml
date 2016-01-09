@@ -5,7 +5,7 @@ development:
   pool: 10
   timeout: 10000
 
-development:
+production:
   adapter: postgresql
   encoding: unicode
   database: ledger
