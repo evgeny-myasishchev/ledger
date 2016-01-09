@@ -9,7 +9,7 @@ Rails.application.configure do |app|
     @event_store = EventStore.bootstrap do |with|
       with.log4r_logging
       with
-        .sql_persistence(app.config.database_configuration['event-store'])
+        .sql_persistence(app.config.database_configuration[Rails.env])
         .compress
     end
 
