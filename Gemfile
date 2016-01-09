@@ -57,6 +57,9 @@ group :development do
 
   gem 'web-console', '~> 2.0'
   gem 'responders', '~> 2.0'
+  
+  # Using foreman to run app processes in dev
+  gem 'foreman'
 end
 
 group :development, :test do
