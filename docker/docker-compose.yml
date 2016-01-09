@@ -1,5 +1,7 @@
 ledgerdb:
   image: postgres
+#TODO: Implement and add beanstalkd image
+#TODO: Implement and add backburner worker
 ledgerweb:
   build: ../
   ports:
