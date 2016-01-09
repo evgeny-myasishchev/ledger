@@ -3,9 +3,8 @@ source 'https://rubygems.org'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '~> 4'
 
-# Use sqlite3 as the database for Active Record
-gem 'sqlite3'
-gem 'pg', group: :production
+# Use postgres as the database for Active Record
+gem 'pg'
 
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier'
