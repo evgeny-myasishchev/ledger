@@ -23,7 +23,7 @@ elif [ "$1" = 'db-setup' ]; then
   END
   \$body\$;
   "
-  psql -h ledgerdb -U postgres -c "${CREATE_ROLE_SQL}"
+  psql -h ${POSTGRES_HOST} -U postgres -c "${CREATE_ROLE_SQL}"
   cd /apps/ledger/app
   gosu ledger bundle exec rake db:create
   gosu ledger bundle exec rake db:setup
