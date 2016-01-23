@@ -1,0 +1,6 @@
+# To create the container: 
+# - docker create --name ledger-beanstalkd-dev --net ledger_dev_br --hostname=beanstalkd beanstalkd
+# Note: replace name and network with appropriate values
+FROM debian
+RUN apt-get update && apt-get install -y beanstalkd
+CMD ["beanstalkd"]
