@@ -1,9 +1,9 @@
 # Docker configuration file for production deployment
 # To initialize database run it like this:
 # docker run -it --net ledger_dev_br --rm=true -e "DATABASE_URL=postgresql://pg-ledger-staging/ledger" -e "POSTGRES_HOST=pg-ledger-staging" ledger db-setup
-# Then to start a server:
-# docker run -d -p 3000:3000 --net ledger_dev_br -e "DATABASE_URL=postgresql://pg-ledger-staging/ledger" --name ledger ledger
-# TODO: Start backburner worker
+# Then to create web worker:
+# docker create -p 3000:3000 --net ledger_dev_br --env-file=.env --name ledger-web ledger
+# docker create --net ledger_dev_br --env-file=.env --name ledger-worker ledger gosu ledger backburner
 
 FROM debian
 FROM ruby:2.2
