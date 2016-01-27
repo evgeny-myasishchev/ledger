@@ -29,7 +29,7 @@ RUN bundle install --gemfile=Gemfile --without development test --deployment --p
 RUN passenger-config build-native-support
 RUN passenger-config install-standalone-runtime
 
-# Adding app sources and making assets ready
+# Adding app sources
 ADD . .
 RUN mkdir tmp
 RUN chown -R ledger tmp
