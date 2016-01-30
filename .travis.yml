@@ -16,5 +16,5 @@ before_script:
 script: bundle exec rspec spec
 after_success:
   - docker build -t evgenymyasishchev/ledger .
-  - docker login -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
+  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
   - docker push evgenymyasishchev/ledger
