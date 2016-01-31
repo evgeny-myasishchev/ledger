@@ -16,4 +16,4 @@ before_script:
   - bundle exec rake db:setup
 script: bundle exec rspec spec
 after_success:
-- ./docker/build-and-publish.sh -b docker -n ${TRAVIS_BUILD_NUMBER} -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
+- ./docker/build-and-publish.sh -b docker -r ${TRAVIS_BRANCH} -n ${TRAVIS_BUILD_NUMBER} -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}

@@ -9,14 +9,17 @@ build_number=""
 docker_email=""
 docker_user=""
 docker_password=""
+current_branch=`git rev-parse --abbrev-ref HEAD`
 
-while getopts "h?b:n:e:u:p:" opt; do
+while getopts "h?b:r:n:e:u:p:" opt; do
     case "$opt" in
     h|\?)
         echo 'Showing help'
         exit 0
         ;;
     b)  publish_branch=$OPTARG
+        ;;
+    r)  current_branch=$OPTARG
         ;;
     n)  build_number=$OPTARG
         ;;
@@ -30,7 +33,6 @@ while getopts "h?b:n:e:u:p:" opt; do
 done
 
 commit_hash=`git rev-parse --short HEAD`
-current_branch=`git rev-parse --abbrev-ref HEAD`
 
 #Using project root as a working dir
 cd `dirname $0`/..
