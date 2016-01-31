@@ -7,11 +7,11 @@ set -e
 cd `dirname $0`/..
 
 : "${TRAVIS_BUILD_NUMBER:?TRAVIS_BUILD_NUMBER env has not been assigned.}"
+: "${TRAVIS_COMMIT:?TRAVIS_COMMIT env has not been assigned.}"
 : "${DOCKER_EMAIL:?DOCKER_EMAIL env has not been assigned.}"
 : "${DOCKER_USER:?DOCKER_USER env has not been assigned.}"
 : "${DOCKER_PASSWORD:?DOCKER_PASSWORD env has not been assigned.}"
-HEAD_HASH=`git rev-parse --short HEAD`
-IMAGE_TAG=v${TRAVIS_BUILD_NUMBER}.${HEAD_HASH}
+IMAGE_TAG=v${TRAVIS_BUILD_NUMBER}.${TRAVIS_COMMIT}
 
 RAILS_ENV=production rake assets:precompile
 docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .
