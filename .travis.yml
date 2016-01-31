@@ -15,10 +15,5 @@ before_script:
   - psql -c 'create database ledger_event_store;' -U postgres 
   - bundle exec rake db:setup
 script: bundle exec rspec spec
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: ./docker/build-and-publish.sh
-  on:
-    branch: docker #TODO: New special branch for releases must be created (like stable)
-    rvm: 2.2
+after_success:
+- ./docker/build-and-publish.sh -b docker -n ${TRAVIS_BUILD_NUMBER} -e ${DOCKER_EMAIL} -u ${DOCKER_USER} -p ${DOCKER_PASSWORD}
