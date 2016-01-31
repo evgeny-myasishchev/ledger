@@ -15,6 +15,7 @@ cd `dirname $0`/..
 : "${DOCKER_PASSWORD:?DOCKER_PASSWORD env has not been assigned.}"
 IMAGE_TAG=v${TRAVIS_BUILD_NUMBER}.${TRAVIS_COMMIT}
 
+rvm use `cat .ruby-version` #Correct ruby is not automatically used
 RAILS_ENV=production rake assets:precompile
 docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .
 docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
