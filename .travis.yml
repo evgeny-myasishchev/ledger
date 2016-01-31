@@ -14,8 +14,8 @@ before_script:
   - psql -c 'create database ledger_event_store;' -U postgres 
   - bundle exec rake db:setup
 script: bundle exec rspec spec
-after_success:
-  - RAILS_ENV=production rake assets:precompile
-  - docker build -t evgenymyasishchev/ledger .
-  - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USER" -p="$DOCKER_PASSWORD"
-  - docker push evgenymyasishchev/ledger
+deploy:
+  provider: script
+  script: ./docker/build-and-publish.sh
+  on:
+    branch: docker #TODO: New special branch for releases must be created (like stable)
