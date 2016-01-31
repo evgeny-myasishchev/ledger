@@ -29,7 +29,7 @@ while getopts "h?b:n:e:u:p:" opt; do
     esac
 done
 
-commit_hash=`git rev-parse --short master`
+commit_hash=`git rev-parse --short HEAD`
 current_branch=`git rev-parse --abbrev-ref HEAD`
 
 #Using project root as a working dir
