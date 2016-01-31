@@ -21,3 +21,4 @@ deploy:
   script: ./docker/build-and-publish.sh
   on:
     branch: docker #TODO: New special branch for releases must be created (like stable)
+    rvm: 2.2
