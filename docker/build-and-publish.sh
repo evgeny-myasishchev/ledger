@@ -52,6 +52,6 @@ fi
 IMAGE_TAG=v${build_number}.${commit_hash}
 
 rake assets:precompile
-docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .
+docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" -t evgenymyasishchev/ledger:latest .
 docker login -e="$docker_email" -u="$docker_user" -p="$docker_password"
 docker push evgenymyasishchev/ledger:"${IMAGE_TAG}"
