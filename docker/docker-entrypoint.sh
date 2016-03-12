@@ -3,7 +3,7 @@ set -e
 
 : "${PGHOST:?PGHOST needs to be provided.}"
 : "${LEDGER_PGPASS:?LEDGER_PGPASS needs to be provided.}"
-DATABASE_URL=postgresql://ledger:${LEDGER_PGPASS}@${PGHOST}/ledger
+export DATABASE_URL=postgresql://ledger:${LEDGER_PGPASS}@${PGHOST}/ledger
 
 if [ "$1" = 'passenger-start' ]; then
   echo 'Making sure the database is up to date...'
@@ -11,7 +11,9 @@ if [ "$1" = 'passenger-start' ]; then
   gosu ledger bundle exec rake db:migrate
 
   echo 'Starting passenger'
-  passenger start --user ledger
+  passenger start --user ledger -p 3000
+elif [ "$1" = 'backburner' ]; then
+  gosu ledger backburner
 elif [ "$1" = 'db-setup' ]; then
   echo 'doing db setup...'
   : "${PGPASSWORD:?PGPASSWORD needs to be provided.}"
