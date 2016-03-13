@@ -11,13 +11,16 @@ postgres_version=9.5.0
 env_name=''
 env_file=''
 
-while getopts "e:f:h" opt; do
+while getopts "e:f:p:h" opt; do
   case $opt in
     e)
       env_name=$OPTARG
       ;;
     f)
       env_file=$OPTARG
+      ;;
+    p)
+      web_port=$OPTARG
       ;;
     h)
       usage
@@ -28,6 +31,7 @@ done
 
 : "${env_name:?-e <name> needs to be provided. Use -h for more details.}"
 : "${env_file:?-f <path> needs to be provided. Use -h for more details.}"
+: "${web_port:?-p <port> needs to be provided. Use -h for more details.}"
 
 network_name=${env_name}
 postgres_image=postgres:${postgres_version}
@@ -40,6 +44,9 @@ worker_name=${env_name}-worker
 
 . ${env_file}
 : "${LEDGER_PGPASS:?LEDGER_PGPASS is not assigned. Please generate and add to ${env_file}}"
+#TODO: Validate other required env
+
+DATABASE_URL=postgresql://ledger:${LEDGER_PGPASS}@${postgres_name}/ledger
 
 echo "Creating docker network ${network_name}"
 if [ `docker network ls | awk '{ print $2 }' | grep -w ${network_name} | wc -l` -eq 1 ]; then
@@ -59,18 +66,17 @@ else
 fi
 
 create_docker_container ${beanstalkd_name} ${beanstalkd_image}
-create_docker_container ${worker_name} evgenymyasishchev/ledger "--env-file=${env_file}"
-create_docker_container ${web_name} evgenymyasishchev/ledger "--env-file=${env_file}"
+create_docker_container ${worker_name} "evgenymyasishchev/ledger backburner" "--env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
+create_docker_container ${web_name} evgenymyasishchev/ledger "-p ${web_port}:3000 --env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
 
 echo "Containers created."
 echo "Used passwords:"
 echo "* postgres: ${PGPASSWORD}"
 echo "* ledger(pg user): ${LEDGER_PGPASS}"
 echo "Use following snippets to init containers:"
-echo " docker run --rm -it --env-file=${env_file} -e POSTGRES_PASSWORD=${PGPASSWORD} ${postgres_volumes} ${postgres_image}"
+echo " docker run --rm -it --env-file=${env_file} -e PGHOST=${postgres_name} -e POSTGRES_PASSWORD=${PGPASSWORD} ${postgres_volumes} ${postgres_image}"
 echo " docker start ${postgres_name}"
 echo " docker run --rm -it --env-file=${env_file} -e PGHOST=${postgres_name} -e PGPASSWORD=${PGPASSWORD} --net=ledger-staging evgenymyasishchev/ledger db-setup"
-echo " docker run --rm -it --env-file=${env_file} --net=${network_name} evgenymyasishchev/ledger db-setup"
 echo "Use following helpers to start them:"
 echo " docker start ${postgres_name}"
 echo " docker start ${beanstalkd_name}"

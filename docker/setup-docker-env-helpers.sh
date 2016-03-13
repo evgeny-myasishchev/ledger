@@ -10,6 +10,7 @@ function usage {
   echo "Options:"
   echo "  -e <name>   name of the environment. Example: ledger-staging."
   echo "  -f <path>   file path with environment variables for web and worker containers."
+  echo "  -p <port>   port to publish for web worker."
   echo "  -h          show this help message."
 }
 
