@@ -51,7 +51,7 @@ fi
 
 IMAGE_TAG=v${build_number}.${commit_hash}
 
-rake assets:precompile
+SKIP_SERVICES=true RAILS_ENV=production rake assets:precompile
 docker -v
 docker build -t evgenymyasishchev/ledger:latest .
 docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .

@@ -1,4 +1,8 @@
 Rails.application.configure do |app|
+  def skip_services?
+    Rails.env.test? || ENV.key?('SKIP_SERVICES')
+  end
+  
   singleton_class.class_eval do
     attr_reader :event_store, :event_store_client, :command_dispatch_app, :persistence_factory
   end
@@ -41,5 +45,5 @@ Rails.application.configure do |app|
     @event_store_client.subscribe_handler ::Projections::PendingTransaction.create_projection, group: :projections
     @event_store_client.subscribe_handler ::Projections::Tag.create_projection, group: :projections
     @event_store_client.subscribe_handler ::Projections::Category.create_projection, group: :projections
-  end unless Rails.env.test?
+  end unless skip_services?
 end
