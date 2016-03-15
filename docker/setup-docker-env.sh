@@ -43,8 +43,14 @@ web_name=${env_name}-web
 worker_name=${env_name}-worker
 
 . ${env_file}
+: "${GOAUTH_CLIENT_ID:?GOAUTH_CLIENT_ID is not assigned. Please add it to ${env_file}}"
+: "${GOAUTH_CLIENT_SECRET:?GOAUTH_CLIENT_SECRET is not assigned. Please add it to ${env_file}}"
+: "${DEVISE_SECRET_KEY:?DEVISE_SECRET_KEY is not assigned. Please add it to ${env_file}}"
+: "${SECRET_KEY_BASE:?SECRET_KEY_BASE is not assigned. Please add it to ${env_file}}"
+: "${SMTP_HOST:?SMTP_HOST is not assigned. Please add it to ${env_file}}"
+: "${SMTP_PORT:?SMTP_PORT is not assigned. Please add it to ${env_file}}"
+: "${BEANSTALKD_URL:?BEANSTALKD_URL is not assigned. Please add it to ${env_file}}"
 : "${LEDGER_PGPASS:?LEDGER_PGPASS is not assigned. Please generate and add to ${env_file}}"
-#TODO: Validate other required env
 
 DATABASE_URL=postgresql://ledger:${LEDGER_PGPASS}@${postgres_name}/ledger
 
