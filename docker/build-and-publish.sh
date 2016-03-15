@@ -51,10 +51,16 @@ fi
 
 IMAGE_TAG=v${build_number}.${commit_hash}
 
-SKIP_SERVICES=true RAILS_ENV=production rake assets:precompile
+echo "Precompiling assets"
+# Additional env has to be here to prevent errors
+GOAUTH_CLIENT_ID=fake GOAUTH_CLIENT_SECRET=fake DEVISE_SECRET_KEY=fake SECRET_KEY_BASE=fake SKIP_SERVICES=true RAILS_ENV=production rake assets:precompile
 docker -v
+echo "Building latest image"
 docker build -t evgenymyasishchev/ledger:latest .
+echo "Building ${IMAGE_TAG} image"
 docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .
 docker login -e="$docker_email" -u="$docker_user" -p="$docker_password"
+echo "Pushing latest image"
 docker push evgenymyasishchev/ledger:latest
+echo "Pushing ${IMAGE_TAG} image"
 docker push evgenymyasishchev/ledger:"${IMAGE_TAG}"
