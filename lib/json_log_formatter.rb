@@ -4,6 +4,7 @@ require 'json'
 class JsonLogFormatter < ::Log4r::Formatter
   def format(event)
     output = {
+      time: DateTime.now,
       name: event.fullname,
       level: ::Log4r::LNAMES[event.level],
       message: event.data
