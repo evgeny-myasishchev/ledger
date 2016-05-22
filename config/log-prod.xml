@@ -4,7 +4,7 @@
     </pre_config>
 
     <outputter type="StdoutOutputter" name="std_out">
-        <formatter type="PatternFormatter" date_pattern="%Y-%m-%d %H:%M:%S" pattern="[%d %C %l]: %m" />
+        <formatter type="JsonLogFormatter" />
     </outputter>
     <logger name="Ledger" outputters="std_out"/>
     <logger name="ActiveRecord" outputters="std_out"/>
