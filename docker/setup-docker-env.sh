@@ -10,14 +10,18 @@ postgres_version=9.5.0
 
 env_name=''
 env_file=''
+ledger_image='evgenymyasishchev/ledger'
 
-while getopts "e:f:p:h" opt; do
+while getopts "e:i:f:p:h" opt; do
   case $opt in
     e)
       env_name=$OPTARG
       ;;
     f)
       env_file=$OPTARG
+      ;;
+    i)
+      ledger_image=$OPTARG
       ;;
     p)
       web_port=$OPTARG
@@ -72,8 +76,8 @@ else
 fi
 
 create_docker_container ${beanstalkd_name} ${beanstalkd_image}
-create_docker_container ${worker_name} "evgenymyasishchev/ledger backburner" "--env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
-create_docker_container ${web_name} evgenymyasishchev/ledger "-p ${web_port}:3000 --env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
+create_docker_container ${worker_name} "${ledger_image} backburner" "--env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
+create_docker_container ${web_name} ${ledger_image} "-p ${web_port}:3000 --env-file=${env_file} -e DATABASE_URL=${DATABASE_URL}"
 
 echo "Containers created."
 echo "Used passwords:"
