@@ -23,3 +23,27 @@ Create container: ```docker run --net ledger-prod --name beanstalkd-prod -d bean
 Create ledger database
 * role - ```docker exec -it pg-prod psql -d postgres -U postgres -c "CREATE ROLE ledger LOGIN PASSWORD 'password'"```
 * database - ```docker exec -it pg-prod psql -d postgres -U postgres -c "CREATE DATABASE ledger OWNER ledger"```
+
+### Ledger Containers
+
+Prepare env file with contents like below:
+```
+DATABASE_URL=postgres://ledger:password@pg-prod/ledger
+GOAUTH_CLIENT_ID=TODO
+GOAUTH_CLIENT_SECRET=TODO
+DEVISE_SECRET_KEY=TODO
+SECRET_KEY_BASE=TODO
+SMTP_HOST=TODO
+SMTP_PORT=TODO
+SMTP_DOMAIN=OPTIONAL
+SMTP_USER_NAME=OPTIONAL
+SMTP_PASSWORD=OPTIONAL
+BEANSTALKD_URL=beanstalk://beanstalkd-prod
+BACKBURNER_TUBE_NS=prod.my-ledger.com
+```
+
+Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
+
+Create and start web container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
+
+Create and start worker container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
