@@ -6,7 +6,7 @@ Personal accounting book
 
 This section contains some hints to setup production|staging environment.
 
-For each container a restart policy like ```--restart=on-failure:10``` may need to be added.
+For each container a restart policy like ```--restart=unless-stopped``` may need to be added.
 
 To simplify service discovery a user defined bridge network can be used:
 ```docker network create -d=bridge ledger-prod```
