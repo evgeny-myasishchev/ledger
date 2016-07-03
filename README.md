@@ -40,6 +40,7 @@ SMTP_USER_NAME=OPTIONAL
 SMTP_PASSWORD=OPTIONAL
 BEANSTALKD_URL=beanstalk://beanstalkd-prod
 BACKBURNER_TUBE_NS=prod.my-ledger.com
+FULL_HOST=https://my-ledger.com.com
 ```
 
 Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
