@@ -2,16 +2,14 @@
 lock '3.4.0'
 
 set :application, 'ledger'
-set :repo_url, 'https://github.com/evgeny-myasishchev/ledger.git'
+set :docker_repo, 'evgenymyasishchev/ledger'
+server 'my-ledger.com', roles: %w(app), user: fetch(:local_user), port: 2200
 
-# Default branch is :master
-# ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
-
-# Default deploy_to directory is /var/www/my_app_name
-# set :deploy_to, '/var/www/my_app_name'
-
-# Default value for :scm is :git
-# set :scm, :git
+# set config below on a per stage basis
+# set :config_root, './ledger/env'
+# set :web_container, 'ledger-env-web'
+# set :web_container_port, 6000
+# set :worker_container, 'ledger-env-worker'
 
 # Default value for :format is :pretty
 # set :format, :pretty
@@ -22,47 +20,63 @@ set :repo_url, 'https://github.com/evgeny-myasishchev/ledger.git'
 # Default value for :pty is false
 # set :pty, true
 
-# Default value for :linked_files is []
-set :linked_files, %w{.env config/database.yml}
-
-set :bundle_binstubs, nil
-
-# Default value for linked_dirs is []
-set :linked_dirs, %w{log tmp/pids tmp/cache tmp/sockets vendor/bundle public/system}
-
-# Default value for default_env is {}
-# set :default_env, { path: "/opt/ruby/bin:$PATH" }
-
-# Default value for keep_releases is 5
-# set :keep_releases, 5
-
 namespace :deploy do
-
-  desc 'Restart application'
-  task :restart do
-    on roles(:app), in: :sequence, wait: 5 do
-      # Your restart mechanism here, for example:
-      execute :touch, release_path.join('tmp/restart.txt')
-    end
+  desc 'Restart containers'
+  task restart: [:stop, :start] do
   end
 
-  after :publishing, :restart
+  task :start do
+    invoke 'deploy:worker:start'
+    invoke 'deploy:web:start'
+  end
 
-  after :restart, :clear_cache do
-    on roles(:web), in: :groups, limit: 3, wait: 10 do
-      # Here we can do anything such as:
-      within release_path do
-        execute :rake, 'tmp:clear'
+  task :stop do
+    invoke 'deploy:worker:stop'
+    invoke 'deploy:web:stop'
+  end
+
+  namespace :worker do
+    desc 'Stop worker container'
+    task :stop do
+      on roles(:app) do
+        execute 'docker', 'stop', fetch(:worker_container)
+      end
+    end
+
+    desc 'Start worker container'
+    task :start do
+      on roles(:app) do
+        execute 'docker', 'start', fetch(:worker_container)
       end
     end
   end
-  
-  namespace :check do
-    after :make_linked_dirs, :ensure_linked_files do
-      on roles(:web), in: :groups, limit: 3, wait: 10 do
-        execute "cd #{shared_path} && [[ -f .env ]] || touch .env"
-        execute "cd #{shared_path} && [[ -f config/database.yml ]] || touch config/database.yml"
+
+  namespace :web do
+    desc 'Stop web container'
+    task :stop do
+      on roles(:app) do
+        execute 'docker', 'stop', fetch(:web_container)
+      end
+    end
+
+    desc 'Start web container'
+    task :start do
+      on roles(:app) do
+        execute 'docker', 'start', fetch(:web_container)
       end
     end
   end
 end
+
+# def createContainer
+#   envFile = shipit.config.workspace + '/app.env'
+#   port = shipit.config.port
+#   repo = shipit.config.dockerRepository
+#   container = shipit.config.container
+#   shipit.remote([
+#     'docker run -d --restart=unless-stopped',
+#     '--env-file', envFile,
+#     '-p ' + port + ':3000',
+#     '--name ', container, repo
+#   ].join(' '))
+# end
