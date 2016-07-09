@@ -48,6 +48,8 @@ gem 'backburner'
 
 gem 'dotenv-rails' # Store ENV in .env
 
+gem 'jwt'
+
 group :development, :test do
   # Use Capistrano for deployment
   gem 'capistrano'

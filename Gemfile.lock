@@ -302,6 +302,7 @@ DEPENDENCIES
   foreman
   jasmine-rails
   jquery-rails
+  jwt
   log4r!
   momentjs-rails (~> 2.5.0)
   omniauth-google-oauth2
