@@ -1,10 +1,9 @@
-require 'google-id-token-extractor'
+require 'google_id_token_extractor'
 
 class Api::SessionsController < ApplicationController
-  
   skip_filter :authenticate_user!
   protect_from_forgery except: :create
-  
+
   def create
     if params[:google_id_token]
       begin
@@ -20,13 +19,13 @@ class Api::SessionsController < ApplicationController
       end
     end
     respond_to do |format|
-      format.json {
+      format.json do
         if user_signed_in?
-          render json: {form_authenticity_token: form_authenticity_token}
+          render json: { form_authenticity_token: form_authenticity_token }
         else
           render nothing: true, status: :unauthorized
         end
-      }
+      end
     end
   end
 end
