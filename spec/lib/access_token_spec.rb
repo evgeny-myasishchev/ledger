@@ -3,6 +3,7 @@ require 'rails_helper'
 describe AccessToken do
   let(:rsa_private) { OpenSSL::PKey::RSA.generate 2048 }
   let(:rsa_public) { rsa_private.public_key }
+  let(:subject) { described_class.new payload }
 
   let(:payload) do
     {
@@ -10,11 +11,14 @@ describe AccessToken do
     }
   end
 
-  describe 'ensure_audience!' do
+  describe 'validate_audience!' do
     it 'should raise error if audience mismatch' do
+      expect(-> { subject.validate_audience!('invlaid audience') })
+        .to raise_error AccessToken::TokenError
     end
 
     it 'should return self if audience match' do
+      expect(subject.validate_audience!(payload['aud'])).to be(subject)
     end
   end
 
@@ -46,7 +50,7 @@ describe AccessToken do
     it 'should raise error if certificates does not match' do
       expect(lambda do
         described_class.extract raw_jwt_token, [invalid_cert]
-      end).to raise_error(JWT::VerificationError)
+      end).to raise_error(AccessToken::TokenError)
     end
   end
 end
