@@ -8,7 +8,8 @@ class AccessToken
   end
 
   def validate_audience!(aud)
-    raise TokenError, 'Invalid audience' unless @payload['aud'] == aud
+    aud = [aud] unless aud.respond_to?(:each)
+    raise TokenError, 'Invalid audience' unless aud.detect { |a| @payload['aud'] == a }
     self
   end
 

@@ -17,6 +17,10 @@ describe AccessToken do
         .to raise_error AccessToken::TokenError
     end
 
+    it 'validate audience as an array' do
+      expect(subject.validate_audience!(['invalid aud 1', 'invalid aud 2', payload['aud']])).to be(subject)
+    end
+
     it 'should return self if audience match' do
       expect(subject.validate_audience!(payload['aud'])).to be(subject)
     end
