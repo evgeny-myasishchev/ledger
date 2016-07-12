@@ -74,6 +74,8 @@ group :development, :test do
   gem 'ffaker'
 
   gem 'rubocop', require: false
+
+  gem 'webmock'
 end
 
 group :production do
