@@ -1,4 +1,6 @@
 class AccessToken
+  GOOGLE_CERTS_URI = 'https://www.googleapis.com/oauth2/v1/certs'.freeze
+
   class TokenError < StandardError
   end
 
@@ -24,6 +26,23 @@ class AccessToken
         end
       end
       new decoded_token[0]
+    end
+
+    def google_certificates
+      # This should be converted to providers some day
+      @google_certificates ||= begin
+        uri = URI(GOOGLE_CERTS_URI)
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        res = http.request(Net::HTTP::Get.new(uri.request_uri))
+        raise "Failed to get certificates: #{res.code} - #{res.message}" unless res.is_a?(Net::HTTPSuccess)
+        new_certs = MultiJson.load(res.body)
+        new_certs.map { |_k, v| OpenSSL::X509::Certificate.new(v) }
+      end
+    end
+
+    def forget_google_certificates
+      @google_certificates = nil
     end
   end
 end

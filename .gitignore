@@ -23,3 +23,6 @@
 
 # Ignoring precompiled assets
 /public/assets
+
+# Ignore rubocop todo
+.rubocop_todo.yml
