@@ -40,6 +40,9 @@ guard :rspec, cmd: 'bin/rspec' do
   ruby = dsl.ruby
   dsl.watch_spec_files_for(ruby.lib_files)
 
+  # Lib
+  watch(%r{^app/lib/(?<path>.+)\.rb$}) { |m| "spec/lib/#{m[:path]}_spec.rb" }
+
   # Rails files
   rails = dsl.rails(view_extensions: %w(erb haml slim))
   dsl.watch_spec_files_for(rails.app_files)
