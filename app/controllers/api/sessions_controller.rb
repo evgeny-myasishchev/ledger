@@ -5,19 +5,7 @@ class Api::SessionsController < ApplicationController
   protect_from_forgery except: :create
 
   def create
-    if params[:google_id_token]
-      begin
-        token = GoogleIDToken::Extractor.extract(params[:google_id_token])
-        user = User.find_by email: token['email']
-        if user
-          sign_in :user, user
-        else
-          logger.debug "Authentication failed. User #{token['email']} not found."
-        end
-      rescue GoogleIDToken::InvalidTokenException => e
-        logger.warn "Failed to extract the google_id_token: #{e.inspect}"
-      end
-    end
+    sign_in_with_token params[:google_id_token] if params[:google_id_token]
     respond_to do |format|
       format.json do
         if user_signed_in?
@@ -27,5 +15,20 @@ class Api::SessionsController < ApplicationController
         end
       end
     end
+  end
+
+  private
+
+  def sign_in_with_token(raw_token)
+    token = GoogleIDToken::Extractor.extract(raw_token)
+    user = User.find_by email: token['email']
+    if user
+      logger.info "User found (id='#{user.id}', email='#{token['email']}'). Authenticating..."
+      sign_in :user, user
+    else
+      logger.info "Authentication failed. User #{token['email']} not found."
+    end
+  rescue GoogleIDToken::InvalidTokenException => e
+    logger.warn "Failed to extract the google_id_token: #{e.inspect}"
   end
 end
