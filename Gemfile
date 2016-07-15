@@ -76,6 +76,8 @@ group :development, :test do
   gem 'rubocop', require: false
 
   gem 'webmock'
+
+  gem 'guard-rspec', require: false
 end
 
 group :production do
