@@ -20,7 +20,7 @@ class Api::SessionsController < ApplicationController
   private
 
   def sign_in_with_token(raw_token)
-    token = GoogleIDToken::Extractor.extract(raw_token)
+    token = AccessToken.extract(raw_token, AccessToken.google_certificates)
     user = User.find_by email: token['email']
     if user
       logger.info "User found (id='#{user.id}', email='#{token['email']}'). Authenticating..."
@@ -28,7 +28,7 @@ class Api::SessionsController < ApplicationController
     else
       logger.info "Authentication failed. User #{token['email']} not found."
     end
-  rescue GoogleIDToken::InvalidTokenException => e
+  rescue AccessToken::TokenError => e
     logger.warn "Failed to extract the google_id_token: #{e.inspect}"
   end
 end
