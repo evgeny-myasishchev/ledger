@@ -11,6 +11,10 @@ class AccessToken
     @payload = payload
   end
 
+  def email
+    payload['email']
+  end
+
   def validate_audience!(aud)
     aud = [aud] unless aud.respond_to?(:each)
     raise TokenError, 'Invalid audience' unless aud.detect { |a| @payload['aud'] == a }

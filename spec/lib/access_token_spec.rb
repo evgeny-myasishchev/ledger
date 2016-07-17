@@ -8,8 +8,13 @@ describe AccessToken do
 
   let(:payload) do
     {
-      'aud' => FFaker::Internet.domain_name
+      'aud' => FFaker::Internet.domain_name,
+      'email' => FFaker::Internet.email
     }
+  end
+
+  it 'should provide email accessor' do
+    expect(described_class.new(payload).email).to eql(payload['email'])
   end
 
   describe 'validate_audience!' do

@@ -15,12 +15,13 @@ RSpec.describe Api::SessionsController, type: :controller do
     let(:token_data) do
       { 'email' => dummy_user.email }
     end
+    let(:token) { AccessToken.new token_data }
     let(:dummy_certificates) do
       [:cert1, :cert2, :cert3]
     end
     before(:each) do
       allow(AccessToken).to receive(:google_certificates) { dummy_certificates }
-      allow(AccessToken).to receive(:extract).with(raw_google_id_token, dummy_certificates) { token_data }
+      allow(AccessToken).to receive(:extract).with(raw_google_id_token, dummy_certificates) { token }
     end
 
     it 'should return 401 if no google_id_token present in params' do
