@@ -30,12 +30,14 @@ RSpec.describe Api::SessionsController, type: :controller do
       allow(AccessToken).to receive(:extract).and_raise AccessToken::TokenError.new 'invalid token'
       post :create, format: :json, google_id_token: raw_google_id_token
       expect(response).to have_http_status(:unauthorized)
+      expect(JSON.parse(response.body)).to eql('error' => { 'code' => 'invalid-token' })
     end
 
     it 'should return 401 if no user with such email' do
       token_data['email'] = FFaker::Internet.email('not-existing-user')
       post :create, format: :json, google_id_token: raw_google_id_token
       expect(response).to have_http_status(:unauthorized)
+      expect(JSON.parse(response.body)).to eql('error' => { 'code' => 'invalid-token' })
     end
 
     it 'should authenticate the user based on the email from token' do
@@ -44,6 +46,13 @@ RSpec.describe Api::SessionsController, type: :controller do
       expect(response).to have_http_status(:success)
       expect(controller.current_user).to be dummy_user
       expect(AccessToken).to have_received(:extract).with(raw_google_id_token, dummy_certificates)
+    end
+
+    it 'should return 401 and token-expired error code if the token has expired' do
+      expect(AccessToken).to receive(:extract) { raise JWT::ExpiredSignature, 'Token expired' }
+      post :create, format: :json, google_id_token: raw_google_id_token
+      expect(response).to have_http_status(:unauthorized)
+      expect(JSON.parse(response.body)).to eql('error' => { 'code' => 'token-expired' })
     end
 
     describe 'token validation' do
