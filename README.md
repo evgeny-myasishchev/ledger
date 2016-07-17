@@ -10,6 +10,7 @@ Ledger expects following environment variables to be initialized. It will automa
 DATABASE_URL=postgres://ledger:password@pg-prod/ledger
 GOAUTH_CLIENT_ID=TODO: Google Client ID of the web application
 GOAUTH_CLIENT_SECRET=TODO: Client Secret
+JWT_ACCEPTED_AUD=OPTIONAL: Coma separated list of accepted jwt aud values
 DEVISE_SECRET_KEY=TODO: Use to generate random tokens by devise
 SECRET_KEY_BASE=TODO: Used by rails
 SMTP_HOST=TODO: host of the SMTP server
@@ -22,6 +23,9 @@ BACKBURNER_TUBE_NS=prod.my-ledger.com
 FULL_HOST=https://my-ledger.com.com
 ```
 
+**Note:**
+
+* **JWT_ACCEPTED_AUD** - GOAUTH_CLIENT_ID will be added automatically to this list.
 
 ## Docker Environment Setup
 
