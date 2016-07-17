@@ -27,6 +27,12 @@ describe AccessToken do
       expect(subject.validate_audience!(['invalid aud 1', 'invalid aud 2', payload['aud']])).to be(subject)
     end
 
+    it 'validate audience as a set' do
+      expect(subject.validate_audience!(Set.new(['invalid aud 1', 'invalid aud 2', payload['aud']]))).to be(subject)
+      expect(-> { subject.validate_audience!(Set.new(['invalid aud 1', 'invalid aud 2'])) })
+        .to raise_error AccessToken::TokenError
+    end
+
     it 'should return self if audience match' do
       expect(subject.validate_audience!(payload['aud'])).to be(subject)
     end

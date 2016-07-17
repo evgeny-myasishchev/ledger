@@ -17,7 +17,7 @@ class AccessToken
 
   def validate_audience!(aud)
     aud = [aud] unless aud.respond_to?(:each)
-    unless aud.detect { |a| @payload['aud'] == a }
+    unless aud.include?(@payload['aud'])
       logger.info "Token audience mismatch. Expected one of: #{aud.to_a.join(', ')}, got: #{@payload['aud']}"
       raise TokenError, 'Invalid audience'
     end
