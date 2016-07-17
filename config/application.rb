@@ -35,7 +35,7 @@ module Ledger
     config.assets.paths << Rails.root.join('vendor', 'assets', 'bootstrap', 'fonts')
     config.assets.precompile += %w(*.eot *.svg *.ttf *.woff *.woff2)
 
-    config.authentication = Struct.new(:jwt_accepted_aud).new(nil)
+    config.authentication = Struct.new(:jwt_aud_whitelist).new(nil)
 
     initializer :initialize_log4r, before: :initialize_logger do
       LogFactory.configure(config)
