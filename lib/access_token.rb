@@ -20,11 +20,13 @@ class AccessToken
   class << self
     def extract(raw_jwt_token, certificates)
       decoded_token = nil
-      certificates.each do |cert|
+      last_index = certificates.length - 1
+      certificates.each_with_index do |cert, index|
         begin
           decoded_token = JWT.decode raw_jwt_token, cert.public_key
+          break
         rescue JWT::VerificationError
-          raise TokenError, 'Failed to decode token with provided certificates' if certificates.last == cert
+          raise TokenError, 'Failed to decode token with provided certificates' if index >= last_index
         end
       end
       new decoded_token[0]

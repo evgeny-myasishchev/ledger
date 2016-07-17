@@ -47,7 +47,7 @@ describe AccessToken do
       expect(access_token.payload).to eql(payload)
     end
 
-    it 'should support multiple certificates when decoding', focus: true do
+    it 'should support multiple certificates when decoding' do
       access_token = described_class.extract raw_jwt_token, [invalid_cert, valid_cert, invalid_cert]
       expect(access_token.payload).to eql(payload)
     end
