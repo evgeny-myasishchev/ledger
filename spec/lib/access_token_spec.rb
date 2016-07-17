@@ -1,7 +1,8 @@
 require 'rails_helper'
 
 describe AccessToken do
-  let(:rsa_private) { OpenSSL::PKey::RSA.generate 2048 }
+  KEY_SIZE = 512 # Using smaller keys as they work faster
+  let(:rsa_private) { OpenSSL::PKey::RSA.generate KEY_SIZE }
   let(:rsa_public) { rsa_private.public_key }
   let(:subject) { described_class.new payload }
 
@@ -37,7 +38,7 @@ describe AccessToken do
 
     let(:invalid_cert) do
       cert = OpenSSL::X509::Certificate.new
-      cert.public_key = OpenSSL::PKey::RSA.generate(2048).public_key
+      cert.public_key = OpenSSL::PKey::RSA.generate(KEY_SIZE).public_key
       cert
     end
 
@@ -46,8 +47,8 @@ describe AccessToken do
       expect(access_token.payload).to eql(payload)
     end
 
-    it 'should support multiple certificates when decoding' do
-      access_token = described_class.extract raw_jwt_token, [invalid_cert, valid_cert]
+    it 'should support multiple certificates when decoding', focus: true do
+      access_token = described_class.extract raw_jwt_token, [invalid_cert, valid_cert, invalid_cert]
       expect(access_token.payload).to eql(payload)
     end
 
@@ -64,7 +65,7 @@ describe AccessToken do
       cert.subject = cert.issuer = OpenSSL::X509::Name.parse(subject)
       cert.not_before = Time.now
       cert.not_after = Time.now + 1000
-      cert.public_key = OpenSSL::PKey::RSA.generate(2048).public_key
+      cert.public_key = OpenSSL::PKey::RSA.generate(KEY_SIZE).public_key
       cert.sign rsa_private, OpenSSL::Digest::SHA1.new
       cert
     end
