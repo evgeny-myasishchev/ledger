@@ -34,7 +34,7 @@ class Api::SessionsController < ApplicationController
         logger.info "Authentication failed. User #{token.email} not found."
       end
     rescue AccessToken::TokenError => e
-      logger.warn "Failed to extract the google_id_token: #{e.inspect}"
+      logger.error "Failed to extract the google_id_token: #{e.inspect}"
     rescue JWT::ExpiredSignature => e
       logger.info %(The signature of the token has expired: #{e.inspect})
       result[:error_code] = 'token-expired'
