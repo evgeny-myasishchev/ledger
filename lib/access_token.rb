@@ -40,6 +40,7 @@ class AccessToken
     end
 
     def google_certificates
+      # TODO: They should be expiring. Needs to be investigated
       # This should be converted to providers some day
       @google_certificates ||= begin
         uri = URI(GOOGLE_CERTS_URI)
