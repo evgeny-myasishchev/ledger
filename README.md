@@ -2,11 +2,36 @@
 
 Personal accounting book
 
+## Deployment Dependencies
+
+Ledger expects following environment variables to be initialized. It will automatically load .env file if present.
+
+```
+DATABASE_URL=postgres://ledger:password@pg-prod/ledger
+GOAUTH_CLIENT_ID=TODO: Google Client ID of the web application
+GOAUTH_CLIENT_SECRET=TODO: Client Secret
+JWT_AUD_WHITELIST=OPTIONAL: Coma separated list of accepted jwt aud values
+DEVISE_SECRET_KEY=TODO: Use to generate random tokens by devise
+SECRET_KEY_BASE=TODO: Used by rails
+SMTP_HOST=TODO: host of the SMTP server
+SMTP_PORT=TODO: port of the SMTP server
+SMTP_DOMAIN=OPTIONAL: domain if required by SMTP server
+SMTP_USER_NAME=OPTIONAL: SMTP user name (if required)
+SMTP_PASSWORD=OPTIONAL: SMTP password (if required)
+BEANSTALKD_URL=beanstalk://beanstalkd-prod
+BACKBURNER_TUBE_NS=prod.my-ledger.com
+FULL_HOST=https://my-ledger.com.com
+```
+
+**Note:**
+
+* **JWT_AUD_WHITELIST** - GOAUTH_CLIENT_ID will be added automatically to this list.
+
 ## Docker Environment Setup
 
 This section contains some hints to setup production|staging environment.
 
-For each container a restart policy like ```--restart=on-failure:10``` may need to be added.
+For each container a restart policy like ```--restart=unless-stopped``` may need to be added.
 
 To simplify service discovery a user defined bridge network can be used:
 ```docker network create -d=bridge ledger-prod```
@@ -26,21 +51,7 @@ Create ledger database
 
 ### Ledger Containers
 
-Prepare env file with contents like below:
-```
-DATABASE_URL=postgres://ledger:password@pg-prod/ledger
-GOAUTH_CLIENT_ID=TODO
-GOAUTH_CLIENT_SECRET=TODO
-DEVISE_SECRET_KEY=TODO
-SECRET_KEY_BASE=TODO
-SMTP_HOST=TODO
-SMTP_PORT=TODO
-SMTP_DOMAIN=OPTIONAL
-SMTP_USER_NAME=OPTIONAL
-SMTP_PASSWORD=OPTIONAL
-BEANSTALKD_URL=beanstalk://beanstalkd-prod
-BACKBURNER_TUBE_NS=prod.my-ledger.com
-```
+Prepare env file with contents explained in a Deployment Dependencies.
 
 Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
 

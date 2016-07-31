@@ -4,7 +4,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#  
+#
 # http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
@@ -29,8 +29,7 @@ require 'net/http'
 
 module GoogleIDToken
   class Validator
-
-    GOOGLE_CERTS_URI = 'https://www.googleapis.com/oauth2/v1/certs'
+    GOOGLE_CERTS_URI = 'https://www.googleapis.com/oauth2/v1/certs'.freeze
 
     # @!attribute [r] problem
     #   Reason for failure, if #check returns nil
@@ -39,7 +38,7 @@ module GoogleIDToken
     def initialize(keyopts = {})
       if keyopts[:x509_cert]
         @certs_mode = :literal
-        @certs = { :_ => keyopts[:x509_cert] }
+        @certs = { _: keyopts[:x509_cert] }
       # elsif keyopts[:jwk_uri]  # TODO
       #   @certs_mode = :jwk
       #   @certs = {}
@@ -47,7 +46,6 @@ module GoogleIDToken
         @certs_mode = :old_skool
         @certs = {}
       end
-        
     end
 
     ##
@@ -89,7 +87,7 @@ module GoogleIDToken
         end
       end
     end
-    
+
     private
 
     # tries to validate the token against each cached cert.
@@ -99,12 +97,12 @@ module GoogleIDToken
       @problem = @token = nil
 
       # find first public key that validates this token
-      @certs.detect do |key, cert|
+      @certs.detect do |_key, cert|
         begin
           public_key = cert.public_key
           @token = JWT.decode(token, public_key, !!public_key)
-          @token = @token.first if @token.kind_of?(Array)
-          
+          @token = @token.first if @token.is_a?(Array)
+
           # in Feb 2013, the 'cid' claim became the 'azp' claim per changes
           #  in the OIDC draft. At some future point we can go all-azp, but
           #  this should keep everything running for a while
@@ -117,16 +115,14 @@ module GoogleIDToken
           nil # go on, try the next cert
         end
       end
-      
+
       if @token
-        if !(@token.has_key?('aud') && (@token['aud'] == aud))
+        if !(@token.key?('aud') && (@token['aud'] == aud))
           @problem = 'Token audience mismatch'
-        elsif cid && !(@token.has_key?('cid') && (@token['cid'] == cid))
+        elsif cid && !(@token.key?('cid') && (@token['cid'] == cid))
           @problem = 'Token client-id mismatch'
         end
         @problem ? :problem : :valid
-      else
-        nil
       end
     end
 
@@ -137,8 +133,8 @@ module GoogleIDToken
         return # no-op
       when :old_skool
         old_skool_refresh_certs
-      # when :jwk          # TODO
-      #  jwk_refresh_certs
+        # when :jwk          # TODO
+        #  jwk_refresh_certs
       end
     end
 
@@ -149,7 +145,7 @@ module GoogleIDToken
       http.use_ssl = true
       res = http.request(get)
 
-      if res.kind_of?(Net::HTTPSuccess)
+      if res.is_a?(Net::HTTPSuccess)
         new_certs = Hash[MultiJson.load(res.body).map do |key, cert|
                            [key, OpenSSL::X509::Certificate.new(cert)]
                          end]

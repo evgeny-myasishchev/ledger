@@ -26,19 +26,21 @@ module Ledger
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
-    
+
     config.autoload_paths += %W(#{config.root}/lib)
-    
+
     config.log_config_path = ENV['LOG_CONFIG'] || File.join(config.root, 'config', 'log-dev.xml') unless config.respond_to?(:log_config_path)
-    
-    config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap")
-    config.assets.paths << Rails.root.join("vendor", "assets", "bootstrap", "fonts")
-    config.assets.precompile += %w( *.eot *.svg *.ttf *.woff *.woff2 )
-    
-    initializer :initialize_log4r, {:before => :initialize_logger} do
+
+    config.assets.paths << Rails.root.join('vendor', 'assets', 'bootstrap')
+    config.assets.paths << Rails.root.join('vendor', 'assets', 'bootstrap', 'fonts')
+    config.assets.precompile += %w(*.eot *.svg *.ttf *.woff *.woff2)
+
+    config.authentication = Struct.new(:jwt_aud_whitelist).new(nil)
+
+    initializer :initialize_log4r, before: :initialize_logger do
       LogFactory.configure(config)
     end
-    
+
     attr_accessor :currencies_store
     config.before_initialize { |app| app.currencies_store = {} }
 

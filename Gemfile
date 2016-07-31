@@ -15,7 +15,7 @@ gem 'jquery-rails'
 gem 'angularjs-rails'
 
 gem 'angular-rails-templates'
-gem 'sprockets', '< 3' #For angular rails templates it should be not more than 2
+gem 'sprockets', '< 3' # For angular rails templates it should be not more than 2
 
 gem 'momentjs-rails', '~> 2.5.0'
 gem 'bootstrap3-datetimepicker-rails', '~> 3.0.0'
@@ -46,9 +46,11 @@ gem 'log4r', github: 'colbygk/log4r'
 # Use backburner (beanstalkd) to run active jobs on production
 gem 'backburner'
 
-gem 'dotenv-rails' #Store ENV in .env
+gem 'dotenv-rails' # Store ENV in .env
 
-group :development do
+gem 'jwt'
+
+group :development, :test do
   # Use Capistrano for deployment
   gem 'capistrano'
   gem 'capistrano-rails'
@@ -56,12 +58,10 @@ group :development do
 
   gem 'web-console', '~> 2.0'
   gem 'responders', '~> 2.0'
-  
+
   # Using foreman to run app processes in dev
   gem 'foreman'
-end
 
-group :development, :test do
   gem 'rspec-core', '>= 3.0'
   gem 'rspec-rails', '>= 3.0'
   gem 'puma'
@@ -69,11 +69,15 @@ group :development, :test do
   gem 'spring-commands-rspec'
   gem 'jasmine-rails'
   gem 'rest-client'
-end
 
-group :test do
   gem 'factory_girl_rails'
   gem 'ffaker'
+
+  gem 'rubocop', require: false
+
+  gem 'webmock'
+
+  gem 'guard-rspec', require: false
 end
 
 group :production do
