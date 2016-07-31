@@ -2,7 +2,7 @@
 
 Personal accounting book
 
-## Deployment Dependencies
+# Deployment Dependencies
 
 Ledger expects following environment variables to be initialized. It will automatically load .env file if present.
 
@@ -20,14 +20,14 @@ SMTP_USER_NAME=OPTIONAL: SMTP user name (if required)
 SMTP_PASSWORD=OPTIONAL: SMTP password (if required)
 BEANSTALKD_URL=beanstalk://beanstalkd-prod
 BACKBURNER_TUBE_NS=prod.my-ledger.com
-FULL_HOST=https://my-ledger.com.com
+FULL_HOST=https://my-ledger.com
 ```
 
 **Note:**
 
 * **JWT_AUD_WHITELIST** - GOAUTH_CLIENT_ID will be added automatically to this list.
 
-## Docker Environment Setup
+# Docker Environment Setup
 
 This section contains some hints to setup production|staging environment.
 
@@ -36,20 +36,20 @@ For each container a restart policy like ```--restart=unless-stopped``` may need
 To simplify service discovery a user defined bridge network can be used:
 ```docker network create -d=bridge ledger-prod```
 
-### Beanstalk container
+## Beanstalk container
 
 Build image: ```docker build -t beanstalkd -f docker/Dockerfile.beanstalkd .```
 
 Create container: ```docker run --net ledger-prod --name beanstalkd-prod -d beanstalkd```
 
-### Postgres container
+## Postgres container
 ```docker run --net ledger-prod --name pg-prod -e POSTGRES_PASSWORD=password -d postgres:9.5```
 
 Create ledger database
 * role - ```docker exec -it pg-prod psql -d postgres -U postgres -c "CREATE ROLE ledger LOGIN PASSWORD 'password'"```
 * database - ```docker exec -it pg-prod psql -d postgres -U postgres -c "CREATE DATABASE ledger OWNER ledger"```
 
-### Ledger Containers
+## Ledger Containers
 
 Prepare env file with contents explained in a Deployment Dependencies.
 
@@ -58,3 +58,11 @@ Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --
 Create and start web container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
 
 Create and start worker container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
+
+# Automated Deployment
+
+Deploy new version. Makes sense when new image is available or due to environment changes.
+
+```
+cap staging|production deploy
+```
