@@ -39,9 +39,11 @@ class AccessToken::Certificates
         # TODO: Multithreading may be an issue here. Investigation is required
         logger.debug "Certificate for kid: #{kid} not found. Refreshing from google api..."
         certs_before = cache.length
-        cache.merge! fetch_certificates
+        fetched_certs = fetch_certificates
+        cache.merge! fetched_certs
         fetched_count = cache.length - certs_before
-        logger.debug "Fetched #{fetched_count} new certificates"
+        logger.debug "Fetched #{fetched_certs.length} certificates. #{fetched_count} of them are new."
+        log_fetched_certs fetched_certs
         remove_expired_certificates_from_cache cache
       end
 
@@ -76,6 +78,12 @@ class AccessToken::Certificates
           logger.debug "Removing expired certificate from cache. Kid=#{kid}, subject: #{cert.subject}, not_after: #{cert.not_after}"
           true
         end
+      end
+    end
+
+    def log_fetched_certs(fetched_certs)
+      fetched_certs.each do |new_kid, new_cert|
+        logger.debug "- kid: #{new_kid}, subject: #{new_cert.subject}, not_after: #{new_cert.not_after.iso8601}"
       end
     end
   end
