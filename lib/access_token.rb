@@ -25,7 +25,7 @@ class AccessToken
   class << self
     def extract(raw_jwt_token)
       body, header = JWT.decode raw_jwt_token, nil, false
-      cert = Certificates.get_certificate body, header
+      cert = AccessToken::Certificates.get_certificate body, header
       begin
         decoded_token = JWT.decode raw_jwt_token, cert.public_key
       rescue JWT::VerificationError => e
