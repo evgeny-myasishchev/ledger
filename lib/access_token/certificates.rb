@@ -10,7 +10,7 @@ class AccessToken::Certificates
       end
     end
 
-    def get_certificate(jwt_header, jwt_body)
+    def get_certificate(jwt_body, jwt_header)
       providers[jwt_body['iss']].get_certificate jwt_header
     end
   end

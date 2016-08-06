@@ -23,15 +23,15 @@ describe AccessToken::Certificates do
       cert2 = create_x509_cert
       expect(provider1).to receive(:get_certificate).with(jwt_header1) { cert1 }
       expect(provider2).to receive(:get_certificate).with(jwt_header2) { cert2 }
-      expect(subject.get_certificate(jwt_header1, jwt_body1)).to eql cert1
-      expect(subject.get_certificate(jwt_header2, jwt_body2)).to eql cert2
+      expect(subject.get_certificate(jwt_body1, jwt_header1)).to eql cert1
+      expect(subject.get_certificate(jwt_body2, jwt_header2)).to eql cert2
     end
 
     it 'should raise TokenError for unknown issuer' do
       unknown_iss = random_string('unknown-iss')
       jwt_header = { 'kid' => random_string('kid1') }
       jwt_body = { 'iss' => unknown_iss }
-      expect { subject.get_certificate(jwt_header, jwt_body) }
+      expect { subject.get_certificate(jwt_body, jwt_header) }
         .to raise_error(AccessToken::TokenError, "Unknown issuer: #{unknown_iss}")
     end
   end
