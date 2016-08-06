@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe AccessToken do
   KEY_SIZE = 512 # Using smaller keys as they work faster
-  let(:rsa_private) { OpenSSL::PKey::RSA.generate KEY_SIZE }
+  let(:rsa_private) { generate_rsa_private }
   let(:rsa_public) { rsa_private.public_key }
   let(:subject) { described_class.new payload }
 
@@ -42,15 +42,11 @@ describe AccessToken do
     let(:raw_jwt_token) { JWT.encode payload, rsa_private, 'RS256' }
 
     let(:valid_cert) do
-      cert = OpenSSL::X509::Certificate.new
-      cert.public_key = rsa_public
-      cert
+      create_x509_cert public_key: rsa_public
     end
 
     let(:invalid_cert) do
-      cert = OpenSSL::X509::Certificate.new
-      cert.public_key = OpenSSL::PKey::RSA.generate(KEY_SIZE).public_key
-      cert
+      create_x509_cert
     end
 
     it 'should decode provided raw JWT data and create new instance' do
@@ -71,22 +67,12 @@ describe AccessToken do
   end
 
   describe 'google_certificates' do
-    def create_cert(subject)
-      cert = OpenSSL::X509::Certificate.new
-      cert.subject = cert.issuer = OpenSSL::X509::Name.parse(subject)
-      cert.not_before = Time.now
-      cert.not_after = Time.now + 1000
-      cert.public_key = OpenSSL::PKey::RSA.generate(KEY_SIZE).public_key
-      cert.sign rsa_private, OpenSSL::Digest::SHA1.new
-      cert
-    end
-
     let(:cert1) do
-      create_cert '/C=BE/O=Test/OU=Test/CN=Test1'
+      create_x509_cert
     end
 
     let(:cert2) do
-      create_cert '/C=BE/O=Test/OU=Test/CN=Test2'
+      create_x509_cert
     end
 
     before(:each) do
