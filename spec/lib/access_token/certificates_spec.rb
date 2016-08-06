@@ -1,6 +1,41 @@
 require 'rails_helper'
 
 describe AccessToken::Certificates do
+  describe 'get_certificate' do
+    let(:subject) { described_class }
+
+    it 'should get certificate for given jwt header from known issuer' do
+      known_iss1 = random_string('iss1')
+      known_iss2 = random_string('iss2')
+      provider1 = instance_double(described_class::BaseProvider)
+      provider2 = instance_double(described_class::BaseProvider)
+
+      allow(subject).to receive(:providers) {
+                          {
+                            known_iss1 => provider1,
+                            known_iss2 => provider2
+                          } }
+      jwt_header1 = { 'kid' => random_string('kid1') }
+      jwt_body1 = { 'iss' => known_iss1 }
+      jwt_header2 = { 'kid' => random_string('kid2') }
+      jwt_body2 = { 'iss' => known_iss2 }
+      cert1 = create_x509_cert
+      cert2 = create_x509_cert
+      expect(provider1).to receive(:get_certificate).with(jwt_header1) { cert1 }
+      expect(provider2).to receive(:get_certificate).with(jwt_header2) { cert2 }
+      expect(subject.get_certificate(jwt_header1, jwt_body1)).to eql cert1
+      expect(subject.get_certificate(jwt_header2, jwt_body2)).to eql cert2
+    end
+
+    it 'should raise TokenError for unknown issuer' do
+      unknown_iss = random_string('unknown-iss')
+      jwt_header = { 'kid' => random_string('kid1') }
+      jwt_body = { 'iss' => unknown_iss }
+      expect { subject.get_certificate(jwt_header, jwt_body) }
+        .to raise_error(AccessToken::TokenError, "Unknown issuer: #{unknown_iss}")
+    end
+  end
+
   describe AccessToken::Certificates::GoogleProvider do
     describe 'get_certificate' do
       let(:kid1) { random_string('kid1') }

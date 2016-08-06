@@ -1,16 +1,27 @@
 class AccessToken::Certificates
   class << self
     def providers
-      {
-        'https://accounts.google.com' => GoogleProvider.new
-      }.freeze
+      @providers || begin
+        providers = Hash.new do |_hash, key|
+          raise AccessToken::TokenError, "Unknown issuer: #{key}"
+        end
+        providers['https://accounts.google.com'] = GoogleProvider.new
+        providers.freeze
+      end
     end
 
-    def self.get_certificate(_jwt_header, _jwt_body)
+    def get_certificate(jwt_header, jwt_body)
+      providers[jwt_body['iss']].get_certificate jwt_header
     end
   end
 
-  class GoogleProvider
+  class BaseProvider
+    def get_certificate(_jwt_header)
+      raise 'Not implemented'
+    end
+  end
+
+  class GoogleProvider < BaseProvider
     include Loggable
     GOOGLE_CERTS_URI = 'https://www.googleapis.com/oauth2/v1/certs'.freeze
 
