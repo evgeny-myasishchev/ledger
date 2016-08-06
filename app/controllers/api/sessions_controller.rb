@@ -1,5 +1,3 @@
-require 'google_id_token_extractor'
-
 class Api::SessionsController < ApplicationController
   skip_filter :authenticate_user!
   protect_from_forgery except: :create
