@@ -23,7 +23,7 @@ class Api::SessionsController < ApplicationController
     result = { http_status: :unauthorized, error_code: 'invalid-token' }
     begin
       token = AccessToken
-              .extract(raw_token, AccessToken.google_certificates)
+              .extract(raw_token)
               .validate_audience!(Rails.application.config.authentication.jwt_aud_whitelist)
       user = User.find_by email: token.email
       if user

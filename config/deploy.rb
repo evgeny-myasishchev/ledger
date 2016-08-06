@@ -87,7 +87,7 @@ namespace :deploy do
           'docker run -d --restart=unless-stopped',
           '--env-file', File.join(fetch(:config_root), 'app.env'),
           '--net', fetch(:docker_network),
-          '--name', fetch(:worker_container), fetch(:docker_repo)
+          '--name', fetch(:worker_container), fetch(:docker_repo), 'backburner'
         ].join(' ')
       end
     end
@@ -108,14 +108,14 @@ namespace :deploy do
       end
     end
 
-    desc 'Remove worker container'
+    desc 'Remove web container'
     task :remove_container do
       on roles(:app) do
         execute 'docker', 'rm', fetch(:web_container)
       end
     end
 
-    desc 'Create worker container'
+    desc 'Create web container'
     task :create_container do
       on roles(:app) do
         execute [

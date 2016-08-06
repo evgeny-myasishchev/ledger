@@ -14,10 +14,8 @@ RSpec.describe Api::SessionsController, type: :controller do
     let(:aud_whitelist) { Set.new(['aud-1', valid_aud, 'aud-2']) }
     let(:token_data) { { 'email' => dummy_user.email, 'aud' => valid_aud } }
     let(:token) { AccessToken.new token_data }
-    let(:dummy_certificates) { [:cert1, :cert2, :cert3] }
     before(:each) do
-      allow(AccessToken).to receive(:google_certificates) { dummy_certificates }
-      allow(AccessToken).to receive(:extract).with(raw_google_id_token, dummy_certificates) { token }
+      allow(AccessToken).to receive(:extract).with(raw_google_id_token) { token }
       allow(Rails.application.config.authentication).to receive(:jwt_aud_whitelist) { aud_whitelist }
     end
 
@@ -45,7 +43,7 @@ RSpec.describe Api::SessionsController, type: :controller do
       post :create, format: :json, google_id_token: raw_google_id_token
       expect(response).to have_http_status(:success)
       expect(controller.current_user).to be dummy_user
-      expect(AccessToken).to have_received(:extract).with(raw_google_id_token, dummy_certificates)
+      expect(AccessToken).to have_received(:extract).with(raw_google_id_token)
     end
 
     it 'should return 401 and token-expired error code if the token has expired' do
