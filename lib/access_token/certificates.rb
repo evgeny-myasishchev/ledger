@@ -5,7 +5,9 @@ class AccessToken::Certificates
         providers = Hash.new do |_hash, key|
           raise AccessToken::TokenError, "Unknown issuer: #{key}"
         end
-        providers['https://accounts.google.com'] = GoogleProvider.new
+        google_provider = GoogleProvider.new
+        providers['https://accounts.google.com'] = google_provider
+        providers['accounts.google.com'] = google_provider
         providers.freeze
       end
     end
