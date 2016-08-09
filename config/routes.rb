@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   root 'home#index'
-  
+
   resources :ledgers, only: [] do
     get 'currency-rates'
     resources :accounts, only: [:new, :create, :destroy], param: :account_id do
@@ -8,7 +8,7 @@ Rails.application.routes.draw do
       post 'reopen', on: :member
       put 'set-category', on: :member
     end
-    
+
     resources :tags, only: [:create, :update, :destroy], param: :tag_id
     resources :categories, only: [:create, :update, :destroy], param: :category_id
   end
@@ -23,7 +23,7 @@ Rails.application.routes.draw do
       post ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
     end
   end
-  
+
   resources :transactions, only: [:index] do
     get ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
     post ':from-:to' => 'transactions#search', on: :collection, constraints: { from: /[0-9]+/, to: /[0-9]+/ }
@@ -31,17 +31,18 @@ Rails.application.routes.draw do
     post 'move-to/:target_account_id' => 'transactions#move_to'
     delete '/' => 'transactions#destroy'
   end
-  
+
   resources :pending_transactions, only: [:index, :destroy], path: 'pending-transactions' do
     post '/' => 'pending_transactions#report', on: :collection
     put '/' => 'pending_transactions#adjust', on: :member
     post 'approve' => 'pending_transactions#approve', on: :member
+    post 'restore' => 'pending_transactions#restore', on: :member
     post 'adjust-and-approve' => 'pending_transactions#adjust_and_approve', on: :member
     post 'adjust-and-approve-transfer' => 'pending_transactions#adjust_and_approve_transfer', on: :member
   end
-  
-  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }
-  
+
+  devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }
+
   namespace :api do
     resources :sessions, only: [:create]
     resources :devices, only: [:index, :destroy] do
@@ -49,7 +50,7 @@ Rails.application.routes.draw do
     end
     post 'devices/register' => 'devices#register'
   end
-  
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
@@ -104,6 +105,6 @@ Rails.application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
-  
+
   mount JasmineRails::Engine => '/specs' if defined?(JasmineRails)
 end

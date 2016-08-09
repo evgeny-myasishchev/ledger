@@ -1,18 +1,23 @@
 require 'rails_helper'
 
-
 module Projections::PendingTransactionSpec
   include Domain::Events
 
-  RSpec.describe Projections::PendingTransaction, :type => :model do
+  RSpec.describe Projections::PendingTransaction, type: :model do
     subject { described_class.create_projection }
 
     let(:account) { create(:projections_account) }
 
-    def new_reported_event(user_id: 33222, transaction_id: 't-101', amount: '1003.32',
+    def new_reported_event(user_id: 33_222, transaction_id: 't-101', amount: '1003.32',
                            date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101',
                            account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenseTypeId)
       PendingTransactionReported.new transaction_id, user_id, amount, date, tag_ids, comment, account_id, type_id
+    end
+
+    def new_restored_event(user_id: 33_222, transaction_id: 't-101', amount: '1003.32',
+                           date: DateTime.now, tag_ids: ['t-1', 't-2'], comment: 'Transaction 101',
+                           account_id: account.aggregate_id, type_id: Domain::Transaction::ExpenseTypeId)
+      PendingTransactionRestored.new transaction_id, user_id, amount, date, tag_ids, comment, account_id, type_id
     end
 
     def new_adjusted_event(transaction_id: 't-101', amount: '1003.32',
@@ -22,8 +27,8 @@ module Projections::PendingTransactionSpec
     end
 
     describe 'read methods' do
-      let(:user_1) { User.new id: 33222 }
-      let(:user_2) { User.new id: 33223 }
+      let(:user_1) { User.new id: 33_222 }
+      let(:user_2) { User.new id: 33_223 }
 
       before do
         subject.handle_message new_reported_event user_id: user_1.id, transaction_id: 't-101'
@@ -56,9 +61,9 @@ module Projections::PendingTransactionSpec
       end
     end
 
-    describe 'on PendingTransactionReported' do
+    shared_examples_for 'report/restore' do
       it 'should insert new pending transaction' do
-        event = new_reported_event
+        event = create_event
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.user_id).to eql event.user_id
@@ -71,42 +76,56 @@ module Projections::PendingTransactionSpec
       end
 
       it 'should handle nil tag_ids' do
-        event = new_reported_event tag_ids: nil
+        event = create_event tag_ids: nil
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.tag_ids).to be_nil
       end
 
       it 'should handle nil account_id' do
-        event = new_reported_event account_id: nil
+        event = create_event account_id: nil
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.account_id).to be_nil
       end
 
       it 'should handle empty tag_ids' do
-        event = new_reported_event tag_ids: ""
+        event = create_event tag_ids: ''
         subject.handle_message event
         t = described_class.find_by_transaction_id 't-101'
         expect(t.tag_ids).to be_nil
       end
 
       it 'should be idepmptent' do
-        event = new_reported_event
+        event = create_event
         subject.handle_message event
-        expect {
+        expect do
           subject.handle_message event
-        }.not_to change { described_class.count }
+        end.not_to change { described_class.count }
       end
 
       it 'should notify account projection that pending transaction reported if account present' do
         account = create(:projections_account)
-        evt = new_reported_event(account_id: account.aggregate_id, amount: '100.10', type_id: Domain::Transaction::IncomeTypeId)
+        event = create_event(account_id: account.aggregate_id, amount: '100.10', type_id: Domain::Transaction::IncomeTypeId)
         expect(Projections::Account).to receive(:find_by).with(aggregate_id: account.aggregate_id) { account }
-        expect(account).to receive(:on_pending_transaction_reported).with(evt.amount, evt.type_id)
+        expect(account).to receive(:on_pending_transaction_reported).with(event.amount, event.type_id)
         expect(account).to receive(:save!)
-        subject.handle_message evt
+        subject.handle_message event
       end
+    end
+
+    describe 'on PendingTransactionReported' do
+      def create_event(*params)
+        new_reported_event(*params)
+      end
+      it_behaves_like 'report/restore'
+    end
+
+    describe 'on PendingTransactionRestored' do
+      def create_event(*params)
+        new_restored_event(*params)
+      end
+      it_behaves_like 'report/restore'
     end
 
     describe 'on PendingTransactionAdjusted' do
@@ -154,7 +173,8 @@ module Projections::PendingTransactionSpec
         old_account = create(:projections_account)
         new_account = create(:projections_account)
         transaction.update_attributes account_id: old_account.aggregate_id
-        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id, amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
+        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id,
+                                   amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
 
         expect(Projections::Account).to receive(:find_by).with(aggregate_id: old_account.aggregate_id) { old_account }
         expect(Projections::Account).to receive(:find_by).with(aggregate_id: new_account.aggregate_id) { new_account }
@@ -184,7 +204,8 @@ module Projections::PendingTransactionSpec
       it 'should notify just new account if the account has been assigned' do
         new_account = create(:projections_account)
         transaction.update_attributes account_id: nil
-        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id, amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
+        event = new_adjusted_event account_id: new_account.aggregate_id, transaction_id: transaction.transaction_id,
+                                   amount: '223.43', type_id: Domain::Transaction::IncomeTypeId
 
         expect(Projections::Account).to receive(:find_by).with(aggregate_id: new_account.aggregate_id) { new_account }
 

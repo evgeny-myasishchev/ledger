@@ -5,27 +5,27 @@ class Projections::PendingTransaction < ActiveRecord::Base
 
   belongs_to :user
 
-  def self.get_pending_transactions user
+  def self.get_pending_transactions(user)
     where(user_id: user.id).select(:id, :transaction_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id).all
   end
 
-  def self.get_pending_transactions_count user
+  def self.get_pending_transactions_count(user)
     where(user_id: user.id).count
   end
 
   projection do
     include Loggable
 
-    on PendingTransactionReported do |event|
+    on_any PendingTransactionReported, PendingTransactionRestored do |event|
       transaction = PendingTransaction.find_or_initialize_by transaction_id: event.aggregate_id
       transaction.assign_attributes(
-          user_id: event.user_id,
-          amount: event.amount,
-          date: event.date,
-          tag_ids: build_tags_string(event.tag_ids),
-          comment: event.comment,
-          account_id: event.account_id,
-          type_id: event.type_id
+        user_id: event.user_id,
+        amount: event.amount,
+        date: event.date,
+        tag_ids: build_tags_string(event.tag_ids),
+        comment: event.comment,
+        account_id: event.account_id,
+        type_id: event.type_id
       )
       PendingTransaction.transaction do
         notify_account_projection :on_pending_transaction_reported,
@@ -39,12 +39,12 @@ class Projections::PendingTransaction < ActiveRecord::Base
     on PendingTransactionAdjusted do |event|
       transaction = PendingTransaction.find_by transaction_id: event.aggregate_id
       transaction.assign_attributes(
-          amount: event.amount,
-          date: event.date,
-          tag_ids: build_tags_string(event.tag_ids),
-          comment: event.comment,
-          account_id: event.account_id,
-          type_id: event.type_id
+        amount: event.amount,
+        date: event.date,
+        tag_ids: build_tags_string(event.tag_ids),
+        comment: event.comment,
+        account_id: event.account_id,
+        type_id: event.type_id
       )
       PendingTransaction.transaction do
         if transaction.account_id_changed?
@@ -103,7 +103,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
     end
 
     def notify_account_projection(action, account_id, *args)
-      raise ArgumentError, "account_id can not be null" if account_id.nil?
+      raise ArgumentError, 'account_id can not be null' if account_id.nil?
       logger.debug "Notifying account: '#{account_id}'. Action: #{action}"
       account = Projections::Account.find_by! aggregate_id: account_id
       account.send(action, *args)

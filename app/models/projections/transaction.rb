@@ -13,34 +13,32 @@ class Projections::Transaction < ActiveRecord::Base
     return self.class.find_by transaction_id: sending_transaction_id unless transaction_id == sending_transaction_id
 
     # This one is sending. Finding receiving
-    return self.class.find_by 'sending_transaction_id = ? AND receiving_transaction_id = transaction_id', sending_transaction_id
+    self.class.find_by 'sending_transaction_id = ? AND receiving_transaction_id = transaction_id', sending_transaction_id
   end
 
   def add_tag(the_id)
     wrapped_tag_id = "{#{the_id}}"
-    if !self.tag_ids.nil? && self.tag_ids.include?(wrapped_tag_id)
-      return
-    end
+    return if !tag_ids.nil? && tag_ids.include?(wrapped_tag_id)
     self.tag_ids ||= ''
     self.tag_ids << ',' unless self.tag_ids.blank?
     self.tag_ids << wrapped_tag_id
-    self.tag_ids_will_change!
+    tag_ids_will_change!
   end
 
   def remove_tag(tag_id)
     wrapped = "{#{tag_id}}"
     index = self.tag_ids.index(wrapped)
     replacement = (index && index > 0 && (index + wrapped.length < self.tag_ids.length)) ? ',' : ''
-    self.tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
+    tag_ids_will_change! if self.tag_ids.gsub! /,?\{#{tag_id}\},?/, replacement
   end
 
   def self.get_root_data(user, account_id, limit: 25)
     account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
     transactions = build_search_query user, account
     root_data = {
-        transactions_total: transactions.count(:id),
-        transactions_limit: limit,
-        transactions: transactions.take(limit)
+      transactions_total: transactions.count(:id),
+      transactions_limit: limit,
+      transactions: transactions.take(limit)
     }
     if account
       root_data[:account_balance] = account.balance
@@ -53,7 +51,7 @@ class Projections::Transaction < ActiveRecord::Base
     account = account_id.nil? ? nil : Account.ensure_authorized!(account_id, user)
     query = build_search_query(user, account, criteria: criteria)
     result = {
-        transactions: query.offset(offset).take(limit)
+      transactions: query.offset(offset).take(limit)
     }
     result[:transactions_total] = query.count(:id) if with_total
     result
@@ -67,7 +65,7 @@ class Projections::Transaction < ActiveRecord::Base
   # * to - date to
   def self.build_search_query(user, account, criteria: {})
     raise 'User or Account should be provided.' if user.nil? && account.nil?
-    criteria = criteria || {}
+    criteria ||= {}
     query = account.nil? ? Transaction.joins(:account).where('projections_accounts.authorized_user_ids LIKE ?', "%{#{user.id}}%")
     : Transaction.where(account_id: account.aggregate_id)
     query = query.select(:id, :transaction_id, :account_id, :type_id, :amount, :tag_ids, :comment, :date,
@@ -76,10 +74,10 @@ class Projections::Transaction < ActiveRecord::Base
     query = query.order(date: :desc)
     if criteria[:tag_ids]
       tag_ids_search_query = ''
-      criteria[:tag_ids].each { |_|
+      criteria[:tag_ids].each do |_|
         tag_ids_search_query << ' or ' unless tag_ids_search_query.empty?
         tag_ids_search_query << 'tag_ids like ?'
-      }
+      end
       query = query.where [tag_ids_search_query] + criteria[:tag_ids].map { |tag_id| "%{#{tag_id}}%" }
     end
     query = query.where Transaction.arel_table[:comment].matches("%#{criteria[:comment]}%") if criteria[:comment]
@@ -94,7 +92,7 @@ class Projections::Transaction < ActiveRecord::Base
       Transaction.where(account_id: event.aggregate_id).delete_all
     end
 
-    on PendingTransactionReported do |event, headers|
+    on_any PendingTransactionReported, PendingTransactionRestored do |event, headers|
       unless Transaction.exists?(transaction_id: event.aggregate_id) || event.account_id.nil?
         transaction = build_pending_transaction(event, headers) { |t| t.amount = parse_amount(event) }
         transaction.is_pending = true
@@ -138,7 +136,7 @@ class Projections::Transaction < ActiveRecord::Base
 
     on TransferSent do |event, headers|
       transaction = Transaction.find_by transaction_id: event.transaction_id
-      return if !transaction.nil? && !transaction.is_pending #Adjusting pending transactions only
+      return if !transaction.nil? && !transaction.is_pending # Adjusting pending transactions only
       transaction = build_transaction(event, headers) if transaction.nil?
       transaction.is_transfer = true
       transaction.is_pending = false
@@ -222,10 +220,10 @@ class Projections::Transaction < ActiveRecord::Base
 
     def build_transaction_attributes(event, headers)
       attrs = {
-          account_id: event.aggregate_id,
-          amount: event.amount,
-          comment: event.comment,
-          date: event.date
+        account_id: event.aggregate_id,
+        amount: event.amount,
+        comment: event.comment,
+        date: event.date
       }
       attrs[:transaction_id] = event.transaction_id if event.respond_to?(:transaction_id)
       attrs[:type_id] = event.type_id if event.respond_to?(:type_id)
