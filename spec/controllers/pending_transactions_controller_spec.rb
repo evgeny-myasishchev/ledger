@@ -37,6 +37,10 @@ module PendingTransactionsControllerSpec
       it 'routes DELETE to destroy' do
         expect(delete: 'pending-transactions/t-110').to route_to controller: 'pending_transactions', action: 'destroy', id: 't-110'
       end
+
+      it "routes POST 'restore'" do
+        expect(post: 'pending-transactions/t-110/restore').to route_to controller: 'pending_transactions', action: 'restore', id: 't-110'
+      end
     end
 
     describe 'GET index' do
@@ -115,6 +119,17 @@ module PendingTransactionsControllerSpec
           expect(command.id).to eql 't-100'
         end
         put :approve, id: 't-100'
+        expect(response.status).to eql 200
+      end
+    end
+
+    describe 'POST restore' do
+      it 'should dispatch restore command' do
+        expect(controller).to receive(:dispatch_command) do |command|
+          expect(command).to be_an_instance_of RestorePendingTransaction
+          expect(command.id).to eql 't-100'
+        end
+        post :restore, id: 't-100'
         expect(response.status).to eql 200
       end
     end

@@ -1,7 +1,7 @@
 module Application::Commands
   include Application::CommandsExtensions
   include CommonDomain::Command::DSL
-  
+
   commands_group :LedgerCommands do
     command :CreateNewAccount, :ledger_id, :account_id, :name, :initial_balance, :currency_code, :unit do
       include ActiveModel::Validations
@@ -27,7 +27,7 @@ module Application::Commands
       include ActiveModel::Validations
       validates_presence_of :ledger_id, :tag_id, :name
     end
-    
+
     command :RemoveTag, :ledger_id, :tag_id do
       include ActiveModel::Validations
       validates_presence_of :ledger_id, :tag_id
@@ -49,7 +49,7 @@ module Application::Commands
       validates_presence_of :ledger_id, :account_id, :category_id
     end
   end
-  
+
   commands_group :AccountCommands do
     command :RenameAccount, :id, :name do
       include ActiveModel::Validations
@@ -68,7 +68,8 @@ module Application::Commands
     command :ReportRefund, :account_id, :transaction_id, :amount, :date, :tag_ids, :comment do
       include ReportRegularTransactionCommand
     end
-    command :ReportTransfer, :account_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id, :amount_sent, :amount_received, :date, :tag_ids, :comment do
+    command :ReportTransfer, :account_id, :sending_transaction_id, :receiving_transaction_id, :receiving_account_id,
+            :amount_sent, :amount_received, :date, :tag_ids, :comment do
       include ReportTransferTransactionCommand
     end
     command :AdjustAmount, :transaction_id, :amount do
@@ -99,7 +100,7 @@ module Application::Commands
       validates :target_account_id, presence: true
     end
   end
-  
+
   commands_group :PendingTransactionCommands do
     command :ReportPendingTransaction, :id, :user, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
@@ -113,12 +114,16 @@ module Application::Commands
     command :AdjustAndApprovePendingTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id do
       include PendingTransactionCommand
     end
-    command :AdjustAndApprovePendingTransferTransaction, :id, :amount, :date, :tag_ids, :comment, :account_id, :type_id, :receiving_account_id, :amount_received do
+    command :AdjustAndApprovePendingTransferTransaction, :id, :amount, :date, :tag_ids,
+            :comment, :account_id, :type_id, :receiving_account_id, :amount_received do
       include PendingTransactionCommand
       validates :receiving_account_id, presence: true
       validates :amount_received, presence: true
     end
     command :RejectPendingTransaction, :id do
+      include PendingTransactionCommand
+    end
+    command :RestorePendingTransaction, :id do
       include PendingTransactionCommand
     end
   end

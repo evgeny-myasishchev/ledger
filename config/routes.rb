@@ -36,6 +36,7 @@ Rails.application.routes.draw do
     post '/' => 'pending_transactions#report', on: :collection
     put '/' => 'pending_transactions#adjust', on: :member
     post 'approve' => 'pending_transactions#approve', on: :member
+    post 'restore' => 'pending_transactions#restore', on: :member
     post 'adjust-and-approve' => 'pending_transactions#adjust_and_approve', on: :member
     post 'adjust-and-approve-transfer' => 'pending_transactions#adjust_and_approve_transfer', on: :member
   end
