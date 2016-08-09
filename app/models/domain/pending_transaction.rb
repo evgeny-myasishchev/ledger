@@ -6,12 +6,13 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   attr_reader :user_id, :amount, :date, :tag_ids, :comment, :account_id, :type_id
   attr_reader :is_approved, :is_rejected
 
-  def report(user, transaction_id, amount, date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil)
+  def report(user, transaction_id, amount,
+             date: DateTime.now, tag_ids: nil, comment: nil, account_id: nil, type_id: nil)
     type_id = type_id.blank? ? Domain::Transaction::ExpenseTypeId : type_id
     logger.debug "Reporting new pending transaction id=#{transaction_id} by user: #{user.id}"
-    raise ArgumentError.new 'transaction_id can not be empty.' if transaction_id.blank?
-    raise ArgumentError.new 'amount can not be empty.' if amount.blank?
-    raise ArgumentError.new 'date can not be empty.' if date.blank?
+    raise ArgumentError, 'transaction_id can not be empty.' if transaction_id.blank?
+    raise ArgumentError, 'amount can not be empty.' if amount.blank?
+    raise ArgumentError, 'date can not be empty.' if date.blank?
     raise_event PendingTransactionReported.new(transaction_id, user.id, amount, date, tag_ids, comment, account_id, type_id)
   end
 
@@ -27,12 +28,12 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
                                            account_id || self.account_id,
                                            type_id || self.type_id)
 
-    raise_event(event) unless (self.amount == event.amount &&
-        self.date == event.date &&
-        self.tag_ids == event.tag_ids &&
-        self.comment == event.comment &&
-        self.account_id == event.account_id &&
-        self.type_id == event.type_id)
+    raise_event(event) unless self.amount == event.amount &&
+                              self.date == event.date &&
+                              self.tag_ids == event.tag_ids &&
+                              self.comment == event.comment &&
+                              self.account_id == event.account_id &&
+                              self.type_id == event.type_id
   end
 
   def approve(account)
@@ -81,6 +82,10 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     raise_event PendingTransactionRejected.new(aggregate_id)
   end
 
+  def restore
+    raise 'Not implemented'
+  end
+
   on PendingTransactionReported do |event|
     @is_approved = false
     @aggregate_id = event.aggregate_id
@@ -101,8 +106,8 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     @is_rejected = true
   end
 
-  private 
-  
+  private
+
   def update_attributes(event)
     @amount = event.amount
     @date = event.date
@@ -111,19 +116,20 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
     @account_id = event.account_id
     @type_id = event.type_id
   end
-  
-  def validate_account_id_presence! account_id
+
+  def validate_account_id_presence!(account_id)
     raise Errors::DomainError, 'account_id is empty.' if account_id.blank?
   end
-  
-  def ensure_account_is_same! account_id, account
-    raise Errors::DomainError, "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
+
+  def ensure_account_is_same!(account_id, account)
+    raise Errors::DomainError,
+          "account is wrong. Expected account='#{account_id}' but was account='#{account.aggregate_id}'." unless account.aggregate_id == account_id
   end
-  
+
   def ensure_not_approved!
     raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has already been approved." if @is_approved
   end
-  
+
   def ensure_not_rejected!
     raise Errors::DomainError, "pending transaction id=(#{aggregate_id}) has been rejected." if @is_rejected
   end

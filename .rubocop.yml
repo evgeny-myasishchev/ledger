@@ -13,6 +13,10 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Max: 30
 
+Metrics/ClassLength:
+  Max: 200
+
 Metrics/ModuleLength:
+  Max: 200
   Exclude:
     - '**/*_spec.rb'
