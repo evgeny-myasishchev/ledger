@@ -17,7 +17,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
 
   def adjust(amount: nil, date: nil, tag_ids: nil, comment: nil, account_id: nil, type_id: nil)
-    logger.debug "Adjusting transaction id=#{aggregate_id}"
+    logger.debug "Adjusting pending transaction id=#{aggregate_id}"
     ensure_not_approved!
     ensure_not_rejected!
     event = PendingTransactionAdjusted.new(aggregate_id,
@@ -37,7 +37,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
 
   def approve(account)
-    logger.debug "Approving transaction id=#{aggregate_id}"
+    logger.debug "Approving pending transaction id=#{aggregate_id}"
     validate_account_id_presence! account_id
     ensure_account_is_same! account_id, account
     ensure_not_approved!
@@ -55,7 +55,7 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
 
   def approve_transfer(account, receiving_account, amount_received)
-    logger.debug "Approving transfer transaction id=#{aggregate_id}"
+    logger.debug "Approving pending transaction id=#{aggregate_id}"
     validate_account_id_presence! account_id
     raise Errors::DomainError, 'receiving_account is nil.' if receiving_account.blank?
     raise Errors::DomainError, 'amount_received is empty.' if amount_received.blank?
@@ -83,7 +83,13 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
   end
 
   def restore
-    raise 'Not implemented'
+    logger.info "Restoring pending transaction id=#{aggregate_id}"
+    raise Errors::DomainError, 'approved transaction can not be restored' if is_approved
+    unless is_rejected
+      logger.info "Pending transaction id=#{aggregate_id} is not rejected. Ignoring restore request."
+      return
+    end
+    raise_event PendingTransactionRestored.new(aggregate_id, user_id, amount, date, tag_ids, comment, account_id, type_id)
   end
 
   on PendingTransactionReported do |event|
@@ -104,6 +110,10 @@ class Domain::PendingTransaction < CommonDomain::Aggregate
 
   on PendingTransactionRejected do |_|
     @is_rejected = true
+  end
+
+  on PendingTransactionRestored do |_|
+    @is_rejected = false
   end
 
   private

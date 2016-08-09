@@ -271,5 +271,51 @@ module PendingTransactionSpec
         expect(subject.is_rejected).to be_truthy
       end
     end
+
+    describe 'restore', focus: true do
+      let(:account) { Domain::Account.new.make_created 'account-100' }
+
+      before(:each) do
+        make_reported subject, user, transaction_id: 't-101', amount: '1003.32', date: date, tag_ids: ['t-1', 't-2'],
+                                     comment: 'Transaction 101', account_id: account.aggregate_id, type_id: Domain::Transaction::IncomeTypeId
+      end
+
+      it 'should fail if transaction has been already approved' do
+        subject.approve account
+        expect { subject.restore }.to raise_error Errors::DomainError, 'approved transaction can not be restored'
+      end
+
+      it 'should raise no events if not rejected' do
+        subject.restore
+        expect(subject).not_to have_uncommitted_events
+      end
+
+      it 'should raise rejected event' do
+        subject.apply_event PendingTransactionRejected.new(subject.aggregate_id)
+        subject.restore
+        expect(subject).to have_one_uncommitted_event PendingTransactionRestored,
+                                                      aggregate_id: 't-101',
+                                                      user_id: user.id,
+                                                      amount: '1003.32',
+                                                      date: date,
+                                                      tag_ids: ['t-1', 't-2'],
+                                                      comment: 'Transaction 101',
+                                                      account_id: account.aggregate_id,
+                                                      type_id: Domain::Transaction::IncomeTypeId
+      end
+
+      it 'should reset rejected flag on restored' do
+        subject.apply_event PendingTransactionRejected.new(subject.aggregate_id)
+        subject.apply_event PendingTransactionRestored.new(aggregate_id: 't-101',
+                                                           user_id: user.id,
+                                                           amount: '1003.32',
+                                                           date: date,
+                                                           tag_ids: ['t-1', 't-2'],
+                                                           comment: 'Transaction 101',
+                                                           account_id: account.aggregate_id,
+                                                           type_id: Domain::Transaction::IncomeTypeId)
+        expect(subject.is_rejected).to be_falsy
+      end
+    end
   end
 end
