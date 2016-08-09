@@ -20,3 +20,6 @@ Metrics/ModuleLength:
   Max: 200
   Exclude:
     - '**/*_spec.rb'
+
+Metrics/ParameterLists:
+  Max: 15 #I'm sorry but I have some and can not be fixed easily... :(
