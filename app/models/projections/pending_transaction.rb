@@ -16,7 +16,7 @@ class Projections::PendingTransaction < ActiveRecord::Base
   projection do
     include Loggable
 
-    on PendingTransactionReported do |event|
+    on_any PendingTransactionReported, PendingTransactionRestored do |event|
       transaction = PendingTransaction.find_or_initialize_by transaction_id: event.aggregate_id
       transaction.assign_attributes(
         user_id: event.user_id,

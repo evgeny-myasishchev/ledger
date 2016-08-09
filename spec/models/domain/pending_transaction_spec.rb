@@ -272,7 +272,7 @@ module PendingTransactionSpec
       end
     end
 
-    describe 'restore', focus: true do
+    describe 'restore' do
       let(:account) { Domain::Account.new.make_created 'account-100' }
 
       before(:each) do
