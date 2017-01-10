@@ -2,6 +2,19 @@
 
 Personal accounting book
 
+# Development
+
+Make sure you have postgres installed locally
+
+Make sure you have beanstalk installed locally ```apt-get install beanstalkd```
+
+Setup database
+
+```rake db:setup && rake ledger:dummy_seed```
+
+Start processes:
+```foreman start```
+
 # Deployment Dependencies
 
 Ledger expects following environment variables to be initialized. It will automatically load .env file if present.
@@ -59,11 +72,11 @@ Create ledger database
 
 Prepare env file with contents explained in a Deployment Dependencies.
 
-Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
+Setup ledger database: ```docker run --env-file app.env --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
 
-Create and start web container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
+Create and start web container: ```docker run --env-file app.env --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
 
-Create and start worker container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
+Create and start worker container: ```docker run --env-file app.env --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
 
 # Automated Deployment
 
