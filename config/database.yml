@@ -2,7 +2,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: ledger_dev
-  host: db
+  host: localhost
   port: 5432
   username: postgres
   pool: 10
@@ -18,7 +18,7 @@ production:
 test:
   adapter: postgresql
   encoding: unicode
-  host: db
+  host: localhost
   port: 5432
   username: postgres
   pool: 10
