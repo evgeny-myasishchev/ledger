@@ -17,7 +17,7 @@ logger.debug 'Doing existing data clenup...'
 #TODO Purge projections
 # @app.projections.for_each { |projection| projection.cleanup! }
 
-dummy_user_name = ENV['DUMMY_USER_NAME'] || 'dev@domain.com'
+dummy_user_name = ENV['DUMMY_USER_NAME'] || 'dev@my-ledger.com'
 logger.info "Creating user #{dummy_user_name}"
 user = User.create_with(password: 'password').find_or_create_by! email: dummy_user_name
 

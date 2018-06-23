@@ -2,6 +2,9 @@ development:
   adapter: postgresql
   encoding: unicode
   database: ledger_dev
+  host: localhost
+  port: 5432
+  username: postgres
   pool: 10
   timeout: 10000
 
@@ -15,6 +18,8 @@ production:
 test:
   adapter: postgresql
   encoding: unicode
-  database: ledger_test
+  host: localhost
+  port: 5432
+  username: postgres
   pool: 10
   timeout: 10000

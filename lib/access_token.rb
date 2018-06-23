@@ -17,7 +17,7 @@ class AccessToken
     aud = [aud] unless aud.respond_to?(:each)
     unless aud.include?(@payload['aud'])
       logger.info "Token audience mismatch. Expected one of: #{aud.to_a.join(', ')}, got: #{@payload['aud']}"
-      raise TokenError, 'Invalid audience'
+      raise TokenError, "Invalid audience: #{@payload['aud']}"
     end
     self
   end

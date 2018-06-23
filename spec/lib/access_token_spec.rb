@@ -23,8 +23,9 @@ describe AccessToken do
 
   describe 'validate_audience!' do
     it 'should raise error if audience mismatch' do
-      expect(-> { subject.validate_audience!('invlaid audience') })
-        .to raise_error AccessToken::TokenError
+      invalid_aud = random_string('VALID-AUD')
+      expect(-> { subject.validate_audience!(invalid_aud) })
+        .to raise_error AccessToken::TokenError, "Invalid audience: #{payload['aud']}"
     end
 
     it 'validate audience as an array' do
@@ -34,7 +35,7 @@ describe AccessToken do
     it 'validate audience as a set' do
       expect(subject.validate_audience!(Set.new(['invalid aud 1', 'invalid aud 2', payload['aud']]))).to be(subject)
       expect(-> { subject.validate_audience!(Set.new(['invalid aud 1', 'invalid aud 2'])) })
-        .to raise_error AccessToken::TokenError
+        .to raise_error AccessToken::TokenError, "Invalid audience: #{payload['aud']}"
     end
 
     it 'should return self if audience match' do

@@ -2,6 +2,37 @@
 
 Personal accounting book
 
+# Development
+
+Development is done via docker. Follow steps below to have dev env ready:
+
+Get alphavantage api key. This is optional but some features may not work.
+You can get the key here: https://www.alphavantage.co/support/#api-key.
+Then init your env with the api key:
+`export ALPHAVANTAGE_API_KEY=xxx`
+
+`docker-compose build`
+
+`docker-compose up -d db beanstalkd`
+
+Optionally start pgadmin
+
+`docker-compose up -d pgadmin`
+
+## Do initial setup
+
+`docker-compose run --rm app bash -c "rake db:setup && rake ledger:dummy_seed"`
+
+## Start web app
+
+`docker-compose run --rm -p 3000:3000 app bash`
+
+Start worker
+`backburner -d`
+
+Start web app
+`passenger start`
+
 # Deployment Dependencies
 
 Ledger expects following environment variables to be initialized. It will automatically load .env file if present.
@@ -21,6 +52,7 @@ SMTP_PASSWORD=OPTIONAL: SMTP password (if required)
 BEANSTALKD_URL=beanstalk://beanstalkd-prod
 BACKBURNER_TUBE_NS=prod.my-ledger.com
 FULL_HOST=https://my-ledger.com
+ALPHAVANTAGE_API_KEY=xxx
 ```
 
 **Note:**
@@ -59,11 +91,11 @@ Create ledger database
 
 Prepare env file with contents explained in a Deployment Dependencies.
 
-Setup ledger database: ```docker run --env-file .env-docker --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
+Setup ledger database: ```docker run --env-file app.env --net ledger-prod --rm -it evgenymyasishchev/ledger db-setup```
 
-Create and start web container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
+Create and start web container: ```docker run --env-file app.env --net ledger-prod --name ledger-prod-web -p 3000:3000 -d evgenymyasishchev/ledger```
 
-Create and start worker container: ```docker run --env-file .env-docker --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
+Create and start worker container: ```docker run --env-file app.env --net ledger-prod --name ledger-prod-worker -d evgenymyasishchev/ledger backburner```
 
 # Automated Deployment
 
