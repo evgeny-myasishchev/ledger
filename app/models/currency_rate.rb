@@ -37,35 +37,25 @@ class CurrencyRate < ActiveRecord::Base
       rates.values
     end
     
-    YqlServiceUrl = "https://query.yahooapis.com/v1/public/yql"
+    ExchangeServiceUrl = "https://www.alphavantage.co/query"
     private def fetch from: nil, to: nil
       # Sample query to be executed
-      # https://query.yahooapis.com/v1/public/yql?q=select * from yahoo.finance.xchange where pair in ("USDUAH", "EURUAH")&format=json&env=store://datatables.org/alltableswithkeys
-      
-      inComponent = from.map { |from_code| %("#{from_code}#{to}") }.join(',')
-      yqlQuery = "select * from yahoo.finance.xchange where pair in(#{inComponent})"
-      data_uri = URI.parse(YqlServiceUrl)
-      data_uri.query = "q=#{URI.encode(yqlQuery)}&format=json&env=store://datatables.org/alltableswithkeys"
-      logger.debug "Sending YQL query: #{yqlQuery}"
-      response = Net::HTTP.get_response(data_uri)
-      if response.code != "200"
-        raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
-      end
-      result = JSON.parse response.body
-      rates = []
-      rate = result['query']['results']['rate']
-      if from.length > 1
-        result['query']['results']['rate'].each { |rate| process_raw_rate rates, rate, to }
-      else
-        process_raw_rate rates, result['query']['results']['rate'], to
-      end
-      rates
-    end
-    
-    private def process_raw_rate rates, raw_rate, to
-      logger.debug "Raw fetched rate: #{raw_rate}"
-      from = raw_rate['id'].gsub(to, '')
-      rates << {from: from, to: to, rate: raw_rate['Rate']}
+      # curl https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=UAH&apikey=xxx
+      return from.map { |from_code| 
+        data_uri = URI.parse(ExchangeServiceUrl)
+        data_uri.query = "function=CURRENCY_EXCHANGE_RATE&from_currency=#{from_code}&to_currency=#{to}&apikey=#{ENV['ALPHAVANTAGE_API_KEY']}"
+        logger.debug "Fetching rate for: #{from_code} -> #{to}"
+        response = Net::HTTP.get_response(data_uri)
+        if response.code != "200"
+          raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
+        end
+        result = JSON.parse response.body
+        if result.key?('Error Message')
+            raise result['Error Message']
+        end
+        rate = result['Realtime Currency Exchange Rate']['5. Exchange Rate']
+        { from: from_code, to: to, rate: rate.to_f }
+      }
     end
   end
 end

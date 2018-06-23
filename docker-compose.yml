@@ -18,6 +18,7 @@ services:
       - ./:/apps/ledger/app
     environment:
       BEANSTALKD_URL: beanstalk://beanstalkd:11300
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
 
   db:
     image: postgres:9.5

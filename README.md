@@ -6,6 +6,11 @@ Personal accounting book
 
 Development is done via docker. Follow steps below to have dev env ready:
 
+Get alphavantage api key. This is optional but some features may not work.
+You can get the key here: https://www.alphavantage.co/support/#api-key.
+Then init your env with the api key:
+`export ALPHAVANTAGE_API_KEY=xxx`
+
 `docker-compose build`
 
 `docker-compose up -d db beanstalkd`
