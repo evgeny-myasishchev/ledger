@@ -8,7 +8,7 @@ addons:
 services:
   - docker
 cache: bundler
-env: DB_CONFIG=config/database_postgres.yml
+# env: DB_CONFIG=config/database_postgres.yml
 before_script:
   # - psql -c 'create database ledger_dev;' -U postgres
   # - psql -c 'create database ledger_test;' -U postgres
