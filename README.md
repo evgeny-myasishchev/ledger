@@ -52,6 +52,7 @@ SMTP_PASSWORD=OPTIONAL: SMTP password (if required)
 BEANSTALKD_URL=beanstalk://beanstalkd-prod
 BACKBURNER_TUBE_NS=prod.my-ledger.com
 FULL_HOST=https://my-ledger.com
+ALPHAVANTAGE_API_KEY=xxx
 ```
 
 **Note:**
