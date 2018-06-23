@@ -29,6 +29,9 @@ def dispatch command
 end
 
 uah = Currency['UAH']
+usd = Currency['USD']
+xau = Currency['XAU']
+xxx = Currency['XXX']
 
 logger.info 'Creating ledger for the user'
 tag_ids_by_name = {}
@@ -94,6 +97,28 @@ cache_uah_account_id = create_account ledger, 'Cache', uah do |account_id|
   dispatch AccountCommands::ReportRefund.new account_id: account_id, transaction_id: new_id,
     amount: '310.00', date: DateTime.now, tag_ids: tag_ids_by_name['gas'], comment: 'Coworker gave back for gas'
   account_id
+end
+
+create_account ledger, 'Cache USD', usd do |account_id|
+  report_income account_id, '1322.12', date - 100, tag_ids_by_name['passive income'], 'Monthly income'
+  report_expense account_id, '12', date - 100, tag_ids_by_name['entertainment'], 'Ice cream'
+  
+  # Reporting in bulk directly. It just works faster.
+  @persistence_factory.begin_unit_of_work(@headers) do |work|
+    account = work.get_by_id Domain::Account, account_id
+    100.times do
+      data = fake_transactions_data[rand(fake_transactions_data.length)]
+      account.report_expense new_id, data[:amount], date - rand(100), data[:tags], data[:comment]
+    end
+  end
+end
+
+create_account ledger, 'Gold', xau do |account_id|
+  report_income account_id, '100', date - 100, tag_ids_by_name['passive income'], 'Got some present'
+end
+
+create_account ledger, 'Fuel', xxx do |account_id|
+  report_income account_id, '100', date - 100, tag_ids_by_name['passive income'], 'Got some corporate fuel'
 end
 
 pb_credit_account_id = create_account ledger, 'PB Credit Card', uah do |account_id|
