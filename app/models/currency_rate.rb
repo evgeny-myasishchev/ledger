@@ -1,3 +1,6 @@
+require 'net/http'
+require 'json'
+
 class CurrencyRate < ActiveRecord::Base
   include Loggable
   
