@@ -4,7 +4,7 @@ set -e
 if [ "$1" = 'passenger-start' ]; then
   echo 'Making sure the database is up to date...'
   cd /apps/ledger/app
-  gosu ledger bundle exec rake db:migrate
+  bundle exec rake db:migrate
 
   echo 'Starting passenger'
   passenger start --user ledger -p 3000
@@ -16,11 +16,11 @@ if [ "$1" = 'passenger-start' ]; then
   # I've also raised this: https://github.com/phusion/passenger/issues/1915
   
 elif [ "$1" = 'backburner' ]; then
-  gosu ledger backburner
+  backburner
 elif [ "$1" = 'db-setup' ]; then
   echo 'doing db setup...'
   cd /apps/ledger/app
-  gosu ledger bundle exec rake db:setup
+  bundle exec rake db:setup
 else
   exec "$@"
 fi

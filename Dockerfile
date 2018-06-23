@@ -8,35 +8,29 @@
 FROM debian
 FROM ruby:2.2
 RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt-get install postgresql-client -y
-RUN curl -o /usr/local/bin/gosu -SL 'https://github.com/tianon/gosu/releases/download/1.0/gosu' \
-	&& chmod +x /usr/local/bin/gosu
-RUN mkdir /apps
-RUN useradd -d /apps/ledger --create-home -s /bin/bash -U ledger
 
-WORKDIR /apps/ledger
-RUN mkdir -p app shared/bundle
+ARG RAILS_ENV=production
+ARG DISABLE_SPRING=true
 
-# TODO: Should be configurable
-ENV RAILS_ENV=production DISABLE_SPRING=true
+ENV RAILS_ENV=${RAILS_ENV} DISABLE_SPRING=${DISABLE_SPRING}
+
+RUN mkdir -p /apps/ledger/app /apps/ledger/app/shared/bundle
+WORKDIR /apps/ledger/app
 
 # Caching bundle install
-WORKDIR app
-ADD Gemfile Gemfile
-ADD Gemfile.lock Gemfile.lock
-RUN bundle install --gemfile=Gemfile --without development test --deployment --path shared/bundle
+COPY Gemfile Gemfile.lock ./
+RUN if test "$RAILS_ENV" = "production"; \
+	then echo Installing prod bundle && bundle install --without development test --deployment; \
+	else echo Installing dev bundle && bundle install; \
+	fi
 
 # Making sure passenger native support is built
 RUN passenger-config build-native-support
 RUN passenger-config install-standalone-runtime
 
 # Adding app sources
-ADD . .
+COPY . .
 RUN mkdir tmp
-RUN chown -R ledger tmp
-RUN chown -R ledger log
-
-# TODO: This must be only for dev/test env
-RUN chmod o+w db/schema.rb
 
 ENTRYPOINT ["docker/docker-entrypoint.sh"]
 EXPOSE 3000

@@ -4,16 +4,25 @@ Personal accounting book
 
 # Development
 
-Make sure you have postgres installed locally
+Development is done via docker. Follow steps below to have dev env ready:
 
-Make sure you have beanstalk installed locally ```apt-get install beanstalkd```
+`docker-compose build`
 
-Setup database
+`docker-compose up -d db beanstalkd`
 
-```rake db:setup && rake ledger:dummy_seed```
+`docker-compose run --rm -p 3000:3000 app bash`
 
-Start processes:
-```foreman start```
+## Do initial setup
+
+`rake db:setup && rake ledger:dummy_seed`
+
+## Start web app
+
+Start worker
+`backburner -d`
+
+Start web app
+`rails s`
 
 # Deployment Dependencies
 
