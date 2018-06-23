@@ -12,7 +12,7 @@ cache: bundler
 before_script:
   # - psql -c 'create database ledger_dev;' -U postgres
   # - psql -c 'create database ledger_test;' -U postgres
-  - psql -c 'create database ledger_event_store;' -U postgres
+  # - psql -c 'create database ledger_event_store;' -U postgres
   - bundle exec rake db:setup
 script: bundle exec rspec spec
 after_success:
