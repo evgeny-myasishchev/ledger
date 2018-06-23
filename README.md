@@ -10,13 +10,17 @@ Development is done via docker. Follow steps below to have dev env ready:
 
 `docker-compose up -d db beanstalkd`
 
-`docker-compose run --rm -p 3000:3000 app bash`
+Optionally start pgadmin
+
+`docker-compose up -d pgadmin`
 
 ## Do initial setup
 
-`rake db:setup && rake ledger:dummy_seed`
+`docker-compose run --rm app bash -c "rake db:setup && rake ledger:dummy_seed"`
 
 ## Start web app
+
+`docker-compose run --rm -p 3000:3000 app bash`
 
 Start worker
 `backburner -d`

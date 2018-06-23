@@ -18,10 +18,22 @@ services:
       - ./:/apps/ledger/app
     environment:
       BEANSTALKD_URL: beanstalk://beanstalkd:11300
+
   db:
     image: postgres:9.5
     ports:
       - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@my-ledger.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    depends_on:
+      - db
+
   beanstalkd:
     build:
       context: ./docker
