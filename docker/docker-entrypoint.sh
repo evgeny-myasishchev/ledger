@@ -7,7 +7,7 @@ if [ "$1" = 'passenger-start' ]; then
   bundle exec rake db:migrate
 
   echo 'Starting passenger'
-  passenger start --user ledger -p 3000
+  passenger start -p 3000
   
   # Riping out prefix added by passenger can be done like below
   # $ passenger start | sed -e 's/App [0-9]\+ \(stdout\|stderr\): //'

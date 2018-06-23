@@ -20,11 +20,7 @@ services:
       BEANSTALKD_URL: beanstalk://beanstalkd:11300
   db:
     image: postgres:9.5
-    ports:
-      - "5432:5432"
   beanstalkd:
-    ports:
-      - "11300:11300"
     build:
       context: ./docker
       dockerfile: Dockerfile.beanstalkd
