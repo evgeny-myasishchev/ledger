@@ -45,19 +45,24 @@ class CurrencyRate < ActiveRecord::Base
       # Sample query to be executed
       # curl https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=UAH&apikey=xxx
       return from.map { |from_code| 
-        data_uri = URI.parse(ExchangeServiceUrl)
-        data_uri.query = "function=CURRENCY_EXCHANGE_RATE&from_currency=#{from_code}&to_currency=#{to}&apikey=#{ENV['ALPHAVANTAGE_API_KEY']}"
-        logger.debug "Fetching rate for: #{from_code} -> #{to}"
-        response = Net::HTTP.get_response(data_uri)
-        if response.code != "200"
-          raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
+        if from_code == 'XXX'
+          # no currency
+          { from: from_code, to: to, rate: 0 }
+        else
+          data_uri = URI.parse(ExchangeServiceUrl)
+          data_uri.query = "function=CURRENCY_EXCHANGE_RATE&from_currency=#{from_code}&to_currency=#{to}&apikey=#{ENV['ALPHAVANTAGE_API_KEY']}"
+          logger.debug "Fetching rate for: #{from_code} -> #{to}"
+          response = Net::HTTP.get_response(data_uri)
+          if response.code != "200"
+            raise "Failed to download currencies from #{data_uri}. #{response.code} #{response.message}"
+          end
+          result = JSON.parse response.body
+          if result.key?('Error Message')
+              raise result['Error Message']
+          end
+          rate = result['Realtime Currency Exchange Rate']['5. Exchange Rate']
+          { from: from_code, to: to, rate: rate.to_f }
         end
-        result = JSON.parse response.body
-        if result.key?('Error Message')
-            raise result['Error Message']
-        end
-        rate = result['Realtime Currency Exchange Rate']['5. Exchange Rate']
-        { from: from_code, to: to, rate: rate.to_f }
       }
     end
   end
