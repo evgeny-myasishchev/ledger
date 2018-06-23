@@ -22,7 +22,7 @@ Start worker
 `backburner -d`
 
 Start web app
-`rails s`
+`passenger start`
 
 # Deployment Dependencies
 
