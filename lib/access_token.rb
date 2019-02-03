@@ -27,7 +27,7 @@ class AccessToken
       body, header = JWT.decode raw_jwt_token, nil, false
       cert = AccessToken::Certificates.get_certificate body, header
       begin
-        decoded_token = JWT.decode raw_jwt_token, cert.public_key
+        decoded_token = JWT.decode raw_jwt_token, cert.public_key, true, { algorithm: 'RS256' }
       rescue JWT::VerificationError => e
         logger.info "Failed to decode token: #{e.inspect}"
         raise TokenError, 'Failed to decode token'

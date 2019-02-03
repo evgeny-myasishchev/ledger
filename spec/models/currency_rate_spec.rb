@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe CurrencyRate, :type => :model do
   describe 'get' do
     before(:each) do
+      CurrencyRate.delete_all
       @usduah = CurrencyRate.create! from: 'USD', to: 'UAH', rate: 13.6107
       @euruah = CurrencyRate.create! from: 'EUR', to: 'UAH', rate: 17.8889
     end

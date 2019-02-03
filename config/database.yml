@@ -2,7 +2,7 @@ development:
   adapter: postgresql
   encoding: unicode
   database: ledger_dev
-  host: localhost
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost') %>
   port: 5432
   username: postgres
   pool: 10
@@ -16,9 +16,10 @@ production:
   timeout: 10000
 
 test:
+  database: ledger_test
   adapter: postgresql
   encoding: unicode
-  host: localhost
+  host: <%= ENV.fetch('DATABASE_HOST', 'localhost') %>
   port: 5432
   username: postgres
   pool: 10
