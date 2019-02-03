@@ -22,7 +22,7 @@ gem 'bootstrap3-datetimepicker-rails', '~> 3.0.0'
 
 # Handle authentication with devise
 gem 'devise'
-gem 'omniauth-google-oauth2'
+gem 'omniauth-google-oauth2', '~> 0.6.0'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -48,7 +48,7 @@ gem 'backburner'
 
 gem 'dotenv-rails' # Store ENV in .env
 
-gem 'jwt'
+gem 'jwt', '~> 2.0'
 
 group :development, :test do
   # Use Capistrano for deployment
