@@ -59,7 +59,7 @@ echo "Building latest image"
 docker build -t evgenymyasishchev/ledger:latest .
 echo "Building ${IMAGE_TAG} image"
 docker build -t evgenymyasishchev/ledger:"${IMAGE_TAG}" .
-docker login -e="$docker_email" -u="$docker_user" -p="$docker_password"
+docker login -u="$docker_user" -p="$docker_password"
 echo "Pushing latest image"
 docker push evgenymyasishchev/ledger:latest
 echo "Pushing ${IMAGE_TAG} image"
