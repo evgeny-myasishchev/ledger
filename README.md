@@ -99,6 +99,17 @@ Create and start worker container: ```docker run --env-file app.env --net ledger
 
 # Automated Deployment
 
+## Prepare docker image
+
+__Note__: You may skip this section to deploy from a local workstation.
+
+Build docker image (e.g docker-compose build app). Then start shell:
+```
+docker run -v ${PWD}:/apps/ledger/app -v ${HOME}/.ssh:/root/.ssh --rm -it ledger_app bash
+```
+(ssh is required in order to reuse ssh keys to access prod/stage server)
+
+## Do the deploy
 Deploy new version. Makes sense when new image is available or due to environment changes.
 
 ```

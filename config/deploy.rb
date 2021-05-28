@@ -86,6 +86,8 @@ namespace :deploy do
         execute [
           'docker run -d --restart=unless-stopped',
           '--env-file', File.join(fetch(:config_root), 'app.env'),
+          '--log-driver syslog --log-opt syslog-address=udp://hbox:15140 --log-opt syslog-format=rfc5424',
+          "--log-opt tag=\"passenger.json-message.#{fetch(:stage)}.ledger.web\"",
           '--net', fetch(:docker_network),
           '--name', fetch(:worker_container), fetch(:docker_repo), 'backburner'
         ].join(' ')
@@ -121,6 +123,8 @@ namespace :deploy do
         execute [
           'docker run -d --restart=unless-stopped',
           '--env-file', File.join(fetch(:config_root), 'app.env'),
+          '--log-driver syslog --log-opt syslog-address=udp://hbox:15140 --log-opt syslog-format=rfc5424',
+          "--log-opt tag=\"passenger.json-message.#{fetch(:stage)}.ledger.web\"",
           '-p ', "#{fetch(:web_container_port)}:3000",
           '--net', fetch(:docker_network),
           '--name', fetch(:web_container), fetch(:docker_repo)
