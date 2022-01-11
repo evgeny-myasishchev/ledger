@@ -19,7 +19,8 @@ WORKDIR /apps/ledger/app
 
 # Caching bundle install
 COPY Gemfile Gemfile.lock ./
-RUN if test "$RAILS_ENV" = "production"; \
+RUN bundle config --global github.https true; \
+	if test "$RAILS_ENV" = "production"; \
 	then echo Installing prod bundle && bundle install --without development test --deployment; \
 	else echo Installing dev bundle && bundle install; \
 	fi
