@@ -3,6 +3,6 @@
 set -e
 
 kind delete cluster --name ledger
-kind create cluster --config ./resoures/common/ledger-kind-cluster.yaml
-kubectl apply -f ./resoures/common -R
-kubectl apply -f ./resoures/dashboard -R
+kind create cluster --config ./resources/ledger-kind-cluster.yaml
+kubectl apply -f ./resources/common -R
+kubectl apply -f ./resources/dashboard -R
