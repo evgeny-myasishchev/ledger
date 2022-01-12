@@ -27,3 +27,6 @@ app.env
 
 # Ignore rubocop todo
 .rubocop_todo.yml
+
+# Custom
+kind/kubeconfig
