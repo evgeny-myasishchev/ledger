@@ -9,6 +9,15 @@ Use a script that will recreate all the common cluster resources (without applic
 recreate-cluster.sh
 ```
 
+You may want to pause the cluster if not used to avoid constant resources utilisation:
+```
+# to pause
+pause-cluster.sh
+
+# to unpause
+unpause-cluster.sh
+```
+
 Optionally provision every resource separately as below.
 
 ### Provision cluster
