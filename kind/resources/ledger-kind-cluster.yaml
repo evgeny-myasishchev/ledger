@@ -3,12 +3,8 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: ledger
 nodes:
 - role: control-plane
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "ingress-ready=true"
+  labels:
+    ingress-ready: true
   extraPortMappings:
   - containerPort: 80
     hostPort: 50080
@@ -17,23 +13,15 @@ nodes:
     hostPort: 50443
     protocol: TCP
 - role: worker
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "worker-type=api"
+  labels:
+    worker-type: app
 - role: worker
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "worker-type=db"
+  labels:
+    worker-type: db
+  extraPortMappings:
+  - containerPort: 5432
+    hostPort: 55432
+    protocol: TCP
 - role: worker
-  kubeadmConfigPatches:
-  - |
-    kind: InitConfiguration
-    nodeRegistration:
-      kubeletExtraArgs:
-        node-labels: "worker-type=beanstalkd"
+  labels:
+    worker-type: beanstalkd
