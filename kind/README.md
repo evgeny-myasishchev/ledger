@@ -24,7 +24,7 @@ Optionally provision every resource separately as below.
 
 Create cluster
 ```
-kind create cluster --config ./resources/common/ledger-cluster.yaml
+kind create cluster --config ./resources/ledger-kind-cluster.yaml
 ```
 
 Delete cluster if you have to recreate
