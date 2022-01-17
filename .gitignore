@@ -30,3 +30,4 @@ app.env
 
 # Custom
 kind/kubeconfig
+.git-env
