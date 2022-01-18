@@ -7,3 +7,4 @@
 
 docker-image:
 	docker build -t evgenymyasishchev/ledger:latest .
+	docker inspect --format='{{index .Id}}' evgenymyasishchev/ledger:latest > docker-image

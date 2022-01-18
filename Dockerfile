@@ -15,12 +15,13 @@ ARG DISABLE_SPRING=true
 ENV RAILS_ENV=${RAILS_ENV} DISABLE_SPRING=${DISABLE_SPRING}
 
 RUN mkdir -p /apps/ledger/app /apps/ledger/app/shared/bundle
+RUN bundle config --global github.https true;
+
 WORKDIR /apps/ledger/app
 
 # Caching bundle install
 COPY Gemfile Gemfile.lock ./
-RUN bundle config --global github.https true; \
-	if test "$RAILS_ENV" = "production"; \
+RUN if test "$RAILS_ENV" = "production"; \
 	then echo Installing prod bundle && bundle install --without development test --deployment; \
 	else echo Installing dev bundle && bundle install; \
 	fi
