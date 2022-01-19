@@ -41,7 +41,7 @@ kubectl apply -f ./resources/common/00-ingress.yaml
 The template is taken from (here)[https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.5/deploy/static/provider/cloud/deploy.yaml]
 
 
-## Dashboard
+### Dashboard
 
 The `00-recommended.yaml` template is taken from (here)[https://raw.githubusercontent.com/kubernetes/dashboard/v2.4.0/aio/deploy/recommended.yaml]
 ```
@@ -60,4 +60,23 @@ http://localhost:50080/dashboard/#/login
 Get secret
 ```
 kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath="{.secrets[0].name}") -o go-template="{{.data.token | base64decode}}" | pbcopy
+```
+
+## Services provisioning
+
+Postgres
+```
+kubectl apply -R -f ./resources/postgres
+```
+
+Beanstalkd
+```
+kubectl apply -R -f ./resources/beanstalk
+```
+
+## Ledger
+
+Upload docker images into kind cluster:
+```
+kind load docker-image evgenymyasishchev/ledger:latest --name ledger
 ```
