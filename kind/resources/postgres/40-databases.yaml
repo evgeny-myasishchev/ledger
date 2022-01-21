@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup-databases
+  namespace: postgres
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      containers:
+        - name: setup-databases
+          image: postgres:9.5
+          command: ["psql"]
+          args: [
+            "-h", "postgres",
+            "-d", "postgres",
+            "-U", "postgres",
+            "-w",
+            "-c CREATE DATABASE ledger OWNER ledger"
+          ]
+          env:
+            - name: PGPASSWORD
+              value: "password"
+      restartPolicy: Never
+  backoffLimit: 4
