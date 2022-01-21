@@ -34,14 +34,17 @@ kind delete cluster --name ledger
 
 ### Common
 
-Install ingress controller
+Install common infra that includes ingress controller and local registry.
 ```
-kubectl apply -f ./resources/common/00-ingress.yaml
+kubectl apply -R -f ./resources/common
 ```
-The template is taken from (here)[https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.5/deploy/static/provider/cloud/deploy.yaml]
+
+The ingress template is taken from (here)[https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.5/deploy/static/provider/cloud/deploy.yaml]
 
 
-### Dashboard
+## Dashboard
+
+This is optional.
 
 The `00-recommended.yaml` template is taken from (here)[https://raw.githubusercontent.com/kubernetes/dashboard/v2.4.0/aio/deploy/recommended.yaml]
 ```

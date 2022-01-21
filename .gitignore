@@ -32,3 +32,4 @@ app.env
 kind/kubeconfig
 .git-env
 docker-image
+.DS_Store
