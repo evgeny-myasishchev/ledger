@@ -79,7 +79,7 @@ kubectl apply -R -f ./resources/beanstalk
 
 ## Ledger
 
-Upload docker images into kind cluster:
+Build and upload ledger docker image into a local registry:
 ```
-kind load docker-image evgenymyasishchev/ledger:latest --name ledger
+make push-local-image
 ```

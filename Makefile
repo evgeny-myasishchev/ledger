@@ -6,5 +6,7 @@
 	\nGIT_HASH=$${hash}" > .git-env;
 
 docker-image:
-	docker build -t evgenymyasishchev/ledger:latest .
-	docker inspect --format='{{index .Id}}' evgenymyasishchev/ledger:latest > docker-image
+	docker build -t evgenymyasishchev/ledger:latest -t localhost:5000/ledger:latest .
+
+push-local-image: docker-image
+	docker push localhost:5000/ledger:latest
