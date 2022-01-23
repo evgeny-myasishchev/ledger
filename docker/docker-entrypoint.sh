@@ -4,7 +4,6 @@ set -e
 if [ "$1" = 'passenger-start' ]; then
   echo 'Making sure the database is up to date...'
   cd /apps/ledger/app
-  bundle exec rake db:migrate
 
   echo 'Starting passenger'
   passenger start -p 3000
@@ -18,9 +17,15 @@ if [ "$1" = 'passenger-start' ]; then
 elif [ "$1" = 'backburner' ]; then
   backburner
 elif [ "$1" = 'db-setup' ]; then
-  echo 'doing db setup...'
   cd /apps/ledger/app
-  bundle exec rake db:setup
+  echo 'loading db schema...'
+  bundle exec rake db:schema:load
+  echo 'loading seeds...'
+  bundle exec rake db:seed
+elif [ "$1" = 'db-migrate' ]; then
+  cd /apps/ledger/app
+  echo 'migrating database...'
+  bundle exec rake db:migrate
 else
   exec "$@"
 fi
