@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: ledger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: localhost:5000/ledger:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: BEANSTALKD_URL
+              value: "beanstalk://beanstalkd.beanstalk"
+            - name: DATABASE_URL
+              value: "postgres://ledger:password@postgres.postgres/ledger"
+      nodeSelector:
+          worker-type: app
