@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: beanstalkd
+  namespace: beanstalk
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: beanstalkd
+  template:
+    metadata:
+      labels:
+        app: beanstalkd
+    spec:
+      containers:
+        - name: beanstalkd
+          image: localhost:5000/beanstalkd:latest
+          ports:
+            - containerPort: 11300
+      nodeSelector:
+          worker-type: beanstalkd
