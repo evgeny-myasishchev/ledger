@@ -5,7 +5,6 @@
 # docker create -p 3000:3000 --net ledger_dev_br --env-file=.env --name ledger-web ledger
 # docker create --net ledger_dev_br --env-file=.env --name ledger-worker ledger gosu ledger backburner
 
-FROM debian
 FROM ruby:2.2
 RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt-get install postgresql-client -y
 

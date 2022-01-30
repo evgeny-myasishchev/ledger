@@ -8,8 +8,11 @@
 beanstalk-docker-image:
 	docker build -t localhost:5000/beanstalkd:latest -f docker/Dockerfile.beanstalkd .
 
-ledger-docker-image:
-	docker build -t evgenymyasishchev/ledger:latest -t localhost:5000/ledger:latest .
+ledger-local-image:
+	docker build -t localhost:5000/ledger:latest .
+
+ledger-public-image: ledger-local-image
+	docker tag localhost:5000/ledger:latest evgenymyasishchev/ledger:latest
 
 push-local-images: ledger-docker-image beanstalk-docker-image
 	docker push localhost:5000/ledger:latest
