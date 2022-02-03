@@ -45,8 +45,8 @@ class CurrencyRate < ActiveRecord::Base
       # Sample query to be executed
       # curl https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=UAH&apikey=xxx
       return from.map { |from_code| 
-        if from_code == 'XXX'
-          # no currency
+        if from_code == 'XXX' || from_code == 'XAU'  || from_code == 'XAG'
+          # no currency, or not supported currency
           { from: from_code, to: to, rate: 0 }
         else
           data_uri = URI.parse(ExchangeServiceUrl)
