@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt
 ARG RAILS_ENV=production
 ARG DISABLE_SPRING=true
 
-ENV RAILS_ENV=${RAILS_ENV} DISABLE_SPRING=${DISABLE_SPRING}
+ENV DISABLE_SPRING=${DISABLE_SPRING}
 
 RUN mkdir -p /apps/ledger/app /apps/ledger/app/shared/bundle
 RUN bundle config --global github.https true;

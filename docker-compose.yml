@@ -17,7 +17,7 @@ services:
     volumes:
       - ./:/apps/ledger/app
     environment:
-      DATABASE_URL: postgres://postgres:password@db/ledger
+      DATABASE_HOST: db
       BEANSTALKD_URL: beanstalk://beanstalkd:11300
       ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY}
 
