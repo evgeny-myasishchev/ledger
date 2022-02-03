@@ -3,7 +3,7 @@
 version: '3.2'
 services:
   app:
-    build: 
+    build:
       dockerfile: Dockerfile
       context: .
       args:
