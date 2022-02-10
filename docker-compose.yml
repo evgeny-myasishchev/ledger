@@ -1,6 +1,6 @@
 # Compose file is used to setup dev env. Prod env is deployed differently
 
-version: '3.2'
+version: '3.8'
 services:
   app:
     build:
@@ -12,8 +12,10 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - db
-      - beanstalkd
+      db:
+        condition: service_healthy
+      beanstalkd:
+        condition: service_started
     volumes:
       - ./:/apps/ledger/app
     environment:
@@ -27,6 +29,11 @@ services:
       - "5432:5432"
     environment: 
       POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   beanstalkd:
     build:

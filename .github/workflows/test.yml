@@ -26,8 +26,6 @@ jobs:
     - name: Start dependencies
       run: docker-compose up -d db beanstalkd
 
-    - run: docker-compose ps -a
-
     - name: Do db setup
       run: docker-compose run --rm app bash -c "rake db:setup"
 
