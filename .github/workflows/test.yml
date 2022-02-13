@@ -20,6 +20,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-local-registry-
 
+    - name: Debug
+      run: |
+        ls -l
+        ls -l tmp
+        du -d 1 -h tmp/local-registry/
+
     - name: Build service containers
       run: docker-compose build beanstalkd
 
