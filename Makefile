@@ -19,6 +19,7 @@ ledger-local-dev-image: .buildx-builder
 	docker buildx build \
 		--builder ledger \
 		--build-arg BUNDLE_WITHOUT="" \
+		--cache-from=localhost:5000/ledger:latest \
 		--output=type=registry \
 		-t localhost:5000/ledger:latest . \
 
