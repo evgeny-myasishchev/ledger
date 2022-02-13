@@ -8,8 +8,20 @@
 beanstalk-docker-image:
 	docker build -t localhost:5000/beanstalkd:latest -f docker/Dockerfile.beanstalkd .
 
-ledger-local-image:
+.buildx-builder:
+	docker buildx create --name ledger > $@
+
+ledger-local-image: .buildx-builder
 	docker build -t localhost:5000/ledger:latest .
+
+ledger-local-dev-image: .buildx-builder
+	docker buildx build \
+		--builder ledger \
+		--cache-from=type=local,src=${PWD}/tmp/docker-cache \
+		--cache-to=type=local,dest=${PWD}/tmp/docker-cache \
+		--build-arg BUNDLE_WITHOUT="" \
+		--output=type=docker \
+		-t localhost:5000/ledger:latest . \
 
 ledger-public-image: ledger-local-image
 	docker tag localhost:5000/ledger:latest evgenymyasishchev/ledger:latest

@@ -31,5 +31,5 @@ app.env
 # Custom
 kind/kubeconfig
 .git-env
-docker-image
 .DS_Store
+.buildx-builder

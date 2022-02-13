@@ -8,7 +8,7 @@
 FROM ruby:2.2
 RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt-get install postgresql-client -y
 
-ARG RAILS_ENV=production
+ARG BUNDLE_WITHOUT="development:test"
 ARG DISABLE_SPRING=true
 
 ENV DISABLE_SPRING=${DISABLE_SPRING}
@@ -20,10 +20,10 @@ WORKDIR /apps/ledger/app
 
 # Caching bundle install
 COPY Gemfile Gemfile.lock ./
-RUN if test "$RAILS_ENV" = "production"; \
-	then echo Installing prod bundle && bundle install --without development test --deployment; \
-	else echo Installing dev bundle && bundle install; \
-	fi
+RUN bundle install \
+    --retry 3 \
+    --jobs 4 \
+    --binstubs
 
 # Making sure passenger native support is built
 RUN passenger-config build-native-support
