@@ -19,9 +19,10 @@ ledger-local-dev-image: .buildx-builder
 	docker buildx build \
 		--builder ledger \
 		--build-arg BUNDLE_WITHOUT="" \
-		--cache-from=localhost:5000/ledger:latest \
+		--cache-from=localhost:5000/ledger-cache \
+		--cache-to=localhost:5000/ledger-cache \
 		--output=type=registry \
-		-t localhost:5000/ledger:latest . \
+		-t localhost:5000/ledger:latest .
 
 ledger-public-image: ledger-local-image
 	docker tag localhost:5000/ledger:latest evgenymyasishchev/ledger:latest
