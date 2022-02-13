@@ -15,16 +15,19 @@ jobs:
     - name: cache gems
       uses: actions/cache@v2
       with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-gem-bundler-${{ hashFiles('**/Gemfile.lock') }}
+        path: tmp/local-registry
+        key: ${{ runner.os }}-local-registry-${{ hashFiles('**/Gemfile.lock') }}
         restore-keys: |
-          ${{ runner.os }}-gem-bundler-
+          ${{ runner.os }}-local-registry-
 
-    - name: Build containers
-      run: docker-compose build
+    - name: Build service containers
+      run: docker-compose build beanstalkd
 
     - name: Start dependencies
-      run: docker-compose up -d db beanstalkd
+      run: docker-compose up -d db beanstalkd registry
+
+    - name: Build local image
+      run: make ledger-local-dev-image
 
     - name: Do db setup
       run: docker-compose run --rm app bash -c "rake db:setup"
