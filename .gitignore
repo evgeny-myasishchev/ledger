@@ -27,3 +27,9 @@ app.env
 
 # Ignore rubocop todo
 .rubocop_todo.yml
+
+# Custom
+kind/kubeconfig
+.git-env
+.DS_Store
+.buildx-builder

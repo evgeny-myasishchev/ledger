@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup-roles
+  namespace: postgres
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      containers:
+        - name: setup-roles
+          image: postgres:9.5
+          command: ["psql"]
+          args: [
+            "-h", "postgres",
+            "-d", "postgres",
+            "-U", "postgres",
+            "-w",
+            "-c CREATE ROLE ledger LOGIN PASSWORD 'password'"
+          ]
+          env:
+            - name: PGPASSWORD
+              value: "password"
+      restartPolicy: Never
+  backoffLimit: 4

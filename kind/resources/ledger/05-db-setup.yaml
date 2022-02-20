@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-setup
+  namespace: ledger
+spec:
+  # ttlSecondsAfterFinished: 120 # we want to run this just once, so no ttl
+  template:
+    spec:
+      containers:
+        - name: db-setup
+          image: localhost:5000/ledger:latest
+          args: ["db-setup"]
+          env:
+            - name: SKIP_SERVICES
+              value: "true"
+            - name: DATABASE_URL
+              value: "postgres://ledger:password@postgres.postgres/ledger"
+      restartPolicy: Never
+  backoffLimit: 4

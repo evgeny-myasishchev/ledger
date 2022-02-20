@@ -1,19 +1,19 @@
 GIT
-  remote: git://github.com/colbygk/log4r.git
-  revision: 4e041411c289963d997ee1ebd06fd9875eb40de5
+  remote: https://github.com/colbygk/log4r.git
+  revision: d31e585340edd544620fc5b7092ee575db988492
   specs:
     log4r (1.1.11)
 
 GIT
-  remote: git://github.com/evgeny-myasishchev/common-domain.git
+  remote: https://github.com/evgeny-myasishchev/common-domain.git
   revision: 7cd767b43ab0e3169510f5f064352de8f248f08e
   specs:
     common-domain (4.0.1.b2)
       event-store (~> 4)
 
 GIT
-  remote: git://github.com/evgeny-myasishchev/event-store.git
-  revision: 3ba4c0297afdaa30318c02ad6376f3dd0b3c0937
+  remote: https://github.com/evgeny-myasishchev/event-store.git
+  revision: 916e510721ed1b3642bb44cbca2b5a6a8963c875
   specs:
     event-store (4.0.1.b1)
       sequel

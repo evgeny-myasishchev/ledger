@@ -1,0 +1,41 @@
+name: Build And Test
+
+on:
+  push
+
+jobs:
+  build-and-test:
+    name: Build And Test
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Cache Local Registry
+      uses: actions/cache@v2
+      with:
+        path: tmp/local-registry
+        key: ${{ runner.os }}-local-registry-${{ hashFiles('**/Gemfile.lock', 'Dockerfile') }}
+        restore-keys: |
+          ${{ runner.os }}-local-registry-
+
+    - name: Build service containers
+      run: docker-compose build beanstalkd
+
+    - name: Start dependencies
+      run: docker-compose up -d db beanstalkd registry
+
+    - name: Build local image
+      run: make ledger-local-dev-image
+
+    - name: Do db setup
+      run: docker-compose run --rm app bash -c "rake db:setup"
+
+    - name: Run tests
+      run: docker-compose run --rm app bash -c "rspec spec"
+
+    - name: Dump db logs
+      if: failure()
+      run: docker-compose logs db

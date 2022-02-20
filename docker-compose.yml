@@ -1,19 +1,16 @@
 # Compose file is used to setup dev env. Prod env is deployed differently
 
-version: '3.2'
+version: '3.8'
 services:
   app:
-    build: 
-      dockerfile: Dockerfile
-      context: .
-      args:
-        RAILS_ENV: 'development'
-        DISABLE_SPRING: 'false'
+    image: localhost:5000/ledger:latest
     ports:
       - "3000:3000"
     depends_on:
-      - db
-      - beanstalkd
+      db:
+        condition: service_healthy
+      beanstalkd:
+        condition: service_started
     volumes:
       - ./:/apps/ledger/app
     environment:
@@ -26,20 +23,22 @@ services:
     ports:
       - "5432:5432"
     environment: 
-      POSTGRES_HOST_AUTH_METHOD: trust
-
-  pgadmin:
-    image: dpage/pgadmin4
-    ports:
-      - "8080:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: dev@my-ledger.com
-      PGADMIN_DEFAULT_PASSWORD: password
-    depends_on:
-      - db
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   beanstalkd:
     build:
       context: ./docker
       dockerfile: Dockerfile.beanstalkd
+
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./tmp/local-registry:/var/lib/registry
 

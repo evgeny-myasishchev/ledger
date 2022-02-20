@@ -15,10 +15,6 @@ Then init your env with the api key:
 
 `docker-compose up -d db beanstalkd`
 
-Optionally start pgadmin
-
-`docker-compose up -d pgadmin`
-
 ## Do initial setup
 
 `docker-compose run --rm app bash -c "rake db:setup && rake ledger:dummy_seed"`

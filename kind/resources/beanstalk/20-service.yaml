@@ -1,0 +1,10 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: beanstalkd
+  namespace: beanstalk
+spec:
+  ports:
+    - port: 11300
+  selector:
+    app: beanstalkd

@@ -5,24 +5,25 @@
 # docker create -p 3000:3000 --net ledger_dev_br --env-file=.env --name ledger-web ledger
 # docker create --net ledger_dev_br --env-file=.env --name ledger-worker ledger gosu ledger backburner
 
-FROM debian
 FROM ruby:2.2
 RUN apt-get update && apt-get install nodejs -y && apt-get install vim -y && apt-get install postgresql-client -y
 
-ARG RAILS_ENV=production
+ARG BUNDLE_WITHOUT="development:test"
 ARG DISABLE_SPRING=true
 
-ENV RAILS_ENV=${RAILS_ENV} DISABLE_SPRING=${DISABLE_SPRING}
+ENV DISABLE_SPRING=${DISABLE_SPRING}
 
 RUN mkdir -p /apps/ledger/app /apps/ledger/app/shared/bundle
+RUN bundle config --global github.https true;
+
 WORKDIR /apps/ledger/app
 
 # Caching bundle install
 COPY Gemfile Gemfile.lock ./
-RUN if test "$RAILS_ENV" = "production"; \
-	then echo Installing prod bundle && bundle install --without development test --deployment; \
-	else echo Installing dev bundle && bundle install; \
-	fi
+RUN bundle install \
+    --retry 3 \
+    --jobs 4 \
+    --binstubs
 
 # Making sure passenger native support is built
 RUN passenger-config build-native-support
