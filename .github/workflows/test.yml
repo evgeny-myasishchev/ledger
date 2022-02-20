@@ -12,7 +12,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: cache gems
+    - name: Cache Local Registry
       uses: actions/cache@v2
       with:
         path: tmp/local-registry
@@ -20,11 +20,15 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-local-registry-
 
-    - name: Debug
+    - name: Debug Before
       run: |
         ls -l
         ls -l tmp
+        ls -l tmp/local-registry/docker/registry/v2/repositories/
+        ls -l tmp/local-registry/docker/registry/v2/blobs/sha256/
         du -d 1 -h tmp/local-registry/
+        curl -X GET localhost:5000/v2/_catalog
+        curl -X GET localhost:5000/v2/ledger-cache/tags/list
 
     - name: Build service containers
       run: docker-compose build beanstalkd
@@ -34,6 +38,16 @@ jobs:
 
     - name: Build local image
       run: make ledger-local-dev-image
+
+    - name: Debug After
+      run: |
+        ls -l
+        ls -l tmp
+        ls -l tmp/local-registry/docker/registry/v2/repositories/
+        ls -l tmp/local-registry/docker/registry/v2/blobs/sha256/
+        du -d 1 -h tmp/local-registry/
+        curl -X GET localhost:5000/v2/_catalog
+        curl -X GET localhost:5000/v2/ledger-cache/tags/list
 
     - name: Do db setup
       run: docker-compose run --rm app bash -c "rake db:setup"
