@@ -20,6 +20,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-local-registry-
 
+    - name: Build service containers
+      run: docker-compose build beanstalkd
+
+    - name: Start dependencies
+      run: docker-compose up -d db beanstalkd registry
+
     - name: Debug Before
       run: |
         ls -l
@@ -29,12 +35,6 @@ jobs:
         du -d 1 -h tmp/local-registry/
         curl -X GET localhost:5000/v2/_catalog
         curl -X GET localhost:5000/v2/ledger-cache/tags/list
-
-    - name: Build service containers
-      run: docker-compose build beanstalkd
-
-    - name: Start dependencies
-      run: docker-compose up -d db beanstalkd registry
 
     - name: Build local image
       run: make ledger-local-dev-image
