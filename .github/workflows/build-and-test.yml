@@ -4,7 +4,8 @@ on:
   push
 
 jobs:
-  test:
+  build-and-test:
+    name: Build And Test
     timeout-minutes: 10
     runs-on: ubuntu-latest
 
