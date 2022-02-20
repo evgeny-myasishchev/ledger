@@ -16,7 +16,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: tmp/local-registry
-        key: ${{ runner.os }}-local-registry-${{ hashFiles('**/Gemfile.lock') }}
+        key: ${{ runner.os }}-local-registry-${{ hashFiles('**/Gemfile.lock', 'Dockerfile') }}
         restore-keys: |
           ${{ runner.os }}-local-registry-
 
